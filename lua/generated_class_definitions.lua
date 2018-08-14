@@ -1,10 +1,9 @@
-classes = {
-    Character = {
-        code_prepend = "#include \"character.h\"\n, #include \"int_id.h\"\n, #include \"creature.h\"\n, #include \"item.h\"\n, #include \"calendar.h\"\n",
-        parent = "Creature",
-        new = {
-        },
-        attributes = {
+classes["Character"] = {
+        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n",
+    parent = "Creature",
+    new = {
+    },
+    attributes = {
             dex_cur = { type = "int", writable = true },
             dex_max = { type = "int", writable = true },
             int_cur = { type = "int", writable = true },
@@ -18,16 +17,14 @@ classes = {
             str_cur = { type = "int", writable = true },
             str_max = { type = "int", writable = true },
             weapon = { type = "item", writable = true },
-            worn = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "add_traits", rval = nil, args = { } },
             { name = "aim_cap_from_volume", rval = "float", args = { "item" } },
             { name = "aim_per_move", rval = "float", args = { "item", "float" } },
             { name = "aim_speed_dex_modifier", rval = "float", args = { } },
             { name = "aim_speed_encumbrance_modifier", rval = "float", args = { } },
             { name = "aim_speed_skill_modifier", rval = "float", args = { "skill_id" } },
-            { name = "allocated_invlets", rval = "int", args = { } },
             { name = "ammo_count_for", rval = "int", args = { "item" } },
             { name = "body_window", rval = "hp_part", args = { "bool" } },
             { name = "body_window", rval = "hp_part", args = { "string", "bool", "bool", "int", "int", "int", "bool", "bool", "bool", "bool", "bool" } },
@@ -39,8 +36,6 @@ classes = {
             { name = "can_pickWeight", rval = "bool", args = { "item", "bool" } },
             { name = "can_use", rval = "bool", args = { "item" } },
             { name = "can_use", rval = "bool", args = { "item", "item" } },
-            { name = "compare_skill_requirements", rval = "int", args = { "int" } },
-            { name = "compare_skill_requirements", rval = "int", args = { "int", "item" } },
             { name = "drop_inventory_overflow", rval = nil, args = { } },
             { name = "effective_dispersion", rval = "int", args = { "int" } },
             { name = "empty_skills", rval = nil, args = { } },
@@ -48,12 +43,6 @@ classes = {
             { name = "encumb", rval = "int", args = { "body_part" } },
             { name = "enumerate_unmet_requirements", rval = "string", args = { "item" } },
             { name = "enumerate_unmet_requirements", rval = "string", args = { "item", "item" } },
-            { name = "find_ammo", rval = "int", args = { "item" } },
-            { name = "find_ammo", rval = "int", args = { "item", "bool" } },
-            { name = "find_ammo", rval = "int", args = { "item", "bool", "int" } },
-            { name = "get_aim_types", rval = "int", args = { "item" } },
-            { name = "get_ammo", rval = "int", args = { "ammotype" } },
-            { name = "get_base_traits", rval = "int", args = { } },
             { name = "get_dex", rval = "int", args = { } },
             { name = "get_dex_base", rval = "int", args = { } },
             { name = "get_dex_bonus", rval = "int", args = { } },
@@ -66,7 +55,6 @@ classes = {
             { name = "get_int_bonus", rval = "int", args = { } },
             { name = "get_item_position", rval = "int", args = { "item" } },
             { name = "get_most_accurate_sight", rval = "int", args = { "item" } },
-            { name = "get_mutations", rval = "int", args = { } },
             { name = "get_per", rval = "int", args = { } },
             { name = "get_per_base", rval = "int", args = { } },
             { name = "get_per_bonus", rval = "int", args = { } },
@@ -106,8 +94,6 @@ classes = {
             { name = "limb_color", rval = "nc_color", args = { "body_part", "bool", "bool", "bool" } },
             { name = "meets_requirements", rval = "bool", args = { "item" } },
             { name = "meets_requirements", rval = "bool", args = { "item", "item" } },
-            { name = "meets_skill_requirements", rval = "bool", args = { "int" } },
-            { name = "meets_skill_requirements", rval = "bool", args = { "int", "item" } },
             { name = "meets_stat_requirements", rval = "bool", args = { "item" } },
             { name = "mod_dex_bonus", rval = nil, args = { "int" } },
             { name = "mod_fatigue", rval = nil, args = { "int" } },
@@ -175,17 +161,17 @@ classes = {
             { name = "worn_position_to_index", static = true, rval = "int", args = { "int" } },
             { name = "worn_with_flag", rval = "bool", args = { "string" } },
             { name = "worn_with_flag", rval = "bool", args = { "string", "body_part" } },
-        }
+    }
+}
+classes["Creature"] = {
+        code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n",
+    new = {
     },
-    Creature = {
-        code_prepend = "#include \"creature.h\"\n, #include \"calendar.h\"\n",
-        new = {
-        },
-        attributes = {
+    attributes = {
             moves = { type = "int", writable = true },
             underwater = { type = "bool", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool" } },
@@ -217,8 +203,6 @@ classes = {
             { name = "dodge_roll", rval = "float", args = { } },
             { name = "extended_description", rval = "string", args = { } },
             { name = "fall_damage_mod", rval = "float", args = { } },
-            { name = "get_all_body_parts", rval = "int", args = { "bool" } },
-            { name = "get_all_body_parts", rval = "int", args = { } },
             { name = "get_armor_bash", rval = "int", args = { "body_part" } },
             { name = "get_armor_bash_base", rval = "int", args = { "body_part" } },
             { name = "get_armor_bash_bonus", rval = "int", args = { } },
@@ -257,7 +241,6 @@ classes = {
             { name = "get_num_dodges", rval = "int", args = { } },
             { name = "get_num_dodges_bonus", rval = "int", args = { } },
             { name = "get_pain", rval = "int", args = { } },
-            { name = "get_path_avoid", rval = "int", args = { } },
             { name = "get_perceived_pain", rval = "int", args = { } },
             { name = "get_random_body_part", rval = "body_part", args = { "bool" } },
             { name = "get_random_body_part", rval = "body_part", args = { } },
@@ -359,38 +342,36 @@ classes = {
             { name = "symbol_color", rval = "nc_color", args = { } },
             { name = "uncanny_dodge", rval = "bool", args = { } },
             { name = "weight_capacity", rval = "mass", args = { } },
-        }
-    },
-    MonsterGroup = {
+    }
+}
+classes["MonsterGroup"] = {
         code_prepend = "#include \"mongroup.h\"\n",
-        new = {
-        },
-        string_id = "mongroup_id",
-        attributes = {
+    new = {
+    },
+    string_id = "mongroup_id",
+    attributes = {
             defaultMonster = { type = "mtype_id", writable = true },
             freq_total = { type = "int", writable = true },
             is_safe = { type = "bool", writable = true },
             monster_group_time = { type = "time_duration", writable = true },
-            monsters = { type = "int", writable = true },
             name = { type = "mongroup_id", writable = true },
             new_monster_group = { type = "mongroup_id", writable = true },
             replace_monster_group = { type = "bool", writable = true },
-        },
-        functions = {
-            { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
-        }
     },
-    Skill = {
-        code_prepend = "#include \"skill.h\"\n, #include \"string_id.h\"\n",
-        new = {
-            { "skill_id", "string", "string", "int" },
+    functions = {
+            { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
+    }
+}
+classes["Skill"] = {
+        code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
+    new = {
             { },
-        },
-        string_id = "skill_id",
-        has_equal = true,
-        attributes = {
-        },
-        functions = {
+    },
+    string_id = "skill_id",
+    has_equal = true,
+    attributes = {
+    },
+    functions = {
             { name = "description", rval = "string", args = { } },
             { name = "from_legacy_int", static = true, rval = "skill_id", args = { "int" } },
             { name = "ident", rval = "skill_id&", args = { } },
@@ -398,34 +379,34 @@ classes = {
             { name = "is_contextual_skill", rval = "bool", args = { } },
             { name = "name", rval = "string", args = { } },
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
-        }
-    },
-    ammunition_type = {
+    }
+}
+classes["ammunition_type"] = {
         code_prepend = "#include \"ammo.h\"\n",
-        new = {
+    new = {
             { "string" },
             { },
-        },
-        string_id = "ammotype",
-        attributes = {
-        },
-        functions = {
+    },
+    string_id = "ammotype",
+    attributes = {
+    },
+    functions = {
             { name = "default_ammotype", rval = "string", args = { } },
             { name = "name", rval = "string", args = { } },
-        }
-    },
-    calendar = {
+    }
+}
+classes["calendar"] = {
         code_prepend = "#include \"calendar.h\"\n",
-        new = {
+    new = {
             { "calendar" },
             { "int" },
             { "int", "int", "int", "season_type", "int" },
             { },
-        },
-        has_equal = true,
-        attributes = {
-        },
-        functions = {
+    },
+    has_equal = true,
+    attributes = {
+    },
+    functions = {
             { name = "current_daylight_level", rval = "float", args = { } },
             { name = "day_of_year", rval = "int", args = { } },
             { name = "eternal_season", static = true, rval = "bool", args = { } },
@@ -441,18 +422,18 @@ classes = {
             { name = "sunset", rval = "calendar", args = { } },
             { name = "year_length", static = true, rval = "time_duration", args = { } },
             { name = "years", rval = "int", args = { } },
-        }
-    },
-    effect_type = {
+    }
+}
+classes["effect_type"] = {
         code_prepend = "#include \"effect.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "efftype_id",
-        attributes = {
+    },
+    string_id = "efftype_id",
+    attributes = {
             id = { type = "efftype_id", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "get_apply_memorial_log", rval = "string", args = { } },
             { name = "get_apply_message", rval = "string", args = { } },
             { name = "get_main_parts", rval = "bool", args = { } },
@@ -462,53 +443,50 @@ classes = {
             { name = "register_ma_buff_effect", static = true, rval = nil, args = { "effect_type" } },
             { name = "use_desc_ints", rval = "bool", args = { "bool" } },
             { name = "use_name_ints", rval = "bool", args = { } },
-        }
-    },
-    encumbrance_data = {
+    }
+}
+classes["encumbrance_data"] = {
         code_prepend = "#include \"character.h\"\n",
-        new = {
-        },
-        has_equal = true,
-        attributes = {
+    new = {
+    },
+    has_equal = true,
+    attributes = {
             armor_encumbrance = { type = "int", writable = true },
             encumbrance = { type = "int", writable = true },
             layer_penalty = { type = "int", writable = true },
-        },
-        functions = {
-            { name = "reset", rval = nil, args = { } },
-        }
     },
-    field = {
-        code_prepend = "#include \"field.h\"\n, #include \"calendar.h\"\n",
-        new = {
+    functions = {
+            { name = "reset", rval = nil, args = { } },
+    }
+}
+classes["field"] = {
+        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
+    new = {
             { },
-        },
-        attributes = {
-        },
-        functions = {
+    },
+    attributes = {
+    },
+    functions = {
             { name = "addField", rval = "bool", args = { "field_id" } },
             { name = "addField", rval = "bool", args = { "field_id", "int" } },
             { name = "addField", rval = "bool", args = { "field_id", "int", "time_duration" } },
-            { name = "cppbegin", rval = "int", cpp_name = "begin", args = { } },
-            { name = "cppend", rval = "int", cpp_name = "end", args = { } },
             { name = "fieldCount", rval = "int", args = { } },
             { name = "fieldSymbol", rval = "field_id", args = { } },
             { name = "findField", rval = "field_entry&", args = { "field_id" } },
             { name = "findFieldc", rval = "field_entry&", args = { "field_id" } },
             { name = "move_cost", rval = "int", args = { } },
             { name = "removeField", rval = "bool", args = { "field_id" } },
-            { name = "removeField", rval = nil, args = { "int" } },
-        }
-    },
-    field_entry = {
-        code_prepend = "#include \"field.h\"\n, #include \"calendar.h\"\n, #include \"color.h\"\n",
-        new = {
+    }
+}
+classes["field_entry"] = {
+        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
+    new = {
             { "field_id", "int", "time_duration" },
             { },
-        },
-        attributes = {
-        },
-        functions = {
+    },
+    attributes = {
+    },
+    functions = {
             { name = "color", rval = "nc_color", args = { } },
             { name = "decays_on_actualize", rval = "bool", args = { } },
             { name = "getFieldAge", rval = "time_duration", args = { } },
@@ -523,29 +501,30 @@ classes = {
             { name = "setFieldDensity", rval = "int", args = { "int" } },
             { name = "setFieldType", rval = "field_id", args = { "field_id" } },
             { name = "symbol", rval = "int", args = { } },
-        }
-    },
-    furn_t = {
-        code_prepend = "#include \"mapdata.h\"\n, #include \"color.h\"\n",
-        new = {
+    }
+}
+classes["furn_t"] = {
+        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+    new = {
             { },
-        },
-        string_id = "furn_str_id",
-        int_id = "furn_id",
-        attributes = {
+    },
+    string_id = "furn_str_id",
+    int_id = "furn_id",
+    attributes = {
             close = { type = "furn_str_id", writable = true },
             connect_group = { type = "int", writable = true },
             crafting_pseudo_item = { type = "string", writable = true },
             deployed_item = { type = "string", writable = true },
             description = { type = "string", writable = true },
             id = { type = "furn_str_id", writable = true },
+            looks_like = { type = "string", writable = true },
             max_volume = { type = "volume", writable = true },
             move_str_req = { type = "int", writable = true },
             movecost = { type = "int", writable = true },
             open = { type = "furn_str_id", writable = true },
             transparent = { type = "bool", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "check", rval = nil, args = { } },
             { name = "color", rval = "nc_color", args = { } },
             { name = "connects_to", rval = "bool", args = { "int" } },
@@ -553,24 +532,21 @@ classes = {
             { name = "crafting_ammo_item_type", rval = "itype&", args = { } },
             { name = "crafting_pseudo_item_type", rval = "itype&", args = { } },
             { name = "extended_description", rval = "string", args = { } },
-            { name = "get_harvest_names", rval = "int", args = { } },
             { name = "has_flag", rval = "bool", args = { "string" } },
             { name = "name", rval = "string", args = { } },
             { name = "set_connects", rval = nil, args = { "string" } },
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
-        }
-    },
-    game = {
-        code_prepend = "#include \"game.h\"\n, #include \"enums.h\"\n, #include \"cursesdef.h\"\n, #include \"int_id.h\"\n",
-        new = {
+    }
+}
+classes["game"] = {
+        code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include \"item_location.h\"\n#include \"stl_list.h\"\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
+    new = {
             { },
-        },
-        attributes = {
-            coming_to_stairs = { type = "int", writable = true },
+    },
+    attributes = {
             driving_view_offset = { type = "point", writable = true },
             fullscreen = { type = "bool", writable = true },
-            items = { type = "int", writable = true },
             lightning_active = { type = "bool", writable = true },
             monstairz = { type = "int", writable = true },
             narrow_sidebar = { type = "bool", writable = true },
@@ -582,19 +558,17 @@ classes = {
             ter_view_y = { type = "int", writable = true },
             ter_view_z = { type = "int", writable = true },
             was_fullscreen = { type = "bool", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "add_artifact_dreams", rval = nil, args = { } },
-            { name = "add_artifact_messages", rval = nil, args = { "int" } },
             { name = "add_zombie", rval = "bool", args = { "monster" } },
             { name = "add_zombie", rval = "bool", args = { "monster", "bool" } },
-            { name = "allies", rval = "int", args = { } },
             { name = "assign_mission_id", rval = "int", args = { } },
             { name = "assign_npc_id", rval = "int", args = { } },
             { name = "calc_driving_offset", rval = nil, args = { } },
             { name = "cancel_activity", rval = nil, args = { } },
-            { name = "cancel_activity_or_ignore_query", rval = "bool", args = { "int" } },
-            { name = "cancel_activity_query", rval = "bool", args = { "int" } },
+            { name = "cancel_activity_or_ignore_query", rval = "bool", args = { "string" } },
+            { name = "cancel_activity_query", rval = "bool", args = { "string" } },
             { name = "check_safe_mode_allowed", rval = "bool", args = { "bool" } },
             { name = "check_safe_mode_allowed", rval = "bool", args = { } },
             { name = "cleanup_at_end", rval = "bool", args = { } },
@@ -604,15 +578,11 @@ classes = {
             { name = "do_blast", rval = nil, args = { "tripoint", "float", "float", "bool" } },
             { name = "do_turn", rval = "bool", args = { } },
             { name = "draw", rval = nil, args = { } },
-            { name = "draw_bullet", rval = nil, args = { "tripoint", "int", "int", "int" } },
             { name = "draw_critter", rval = nil, args = { "Creature", "tripoint" } },
-            { name = "draw_custom_explosion", rval = nil, args = { "tripoint", "int" } },
             { name = "draw_explosion", rval = nil, args = { "tripoint", "int", "nc_color" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster", "bool" } },
             { name = "draw_hit_player", rval = nil, args = { "player", "int" } },
-            { name = "draw_line", rval = nil, args = { "tripoint", "int" } },
-            { name = "draw_line", rval = nil, args = { "tripoint", "tripoint", "int" } },
             { name = "draw_sct", rval = nil, args = { } },
             { name = "draw_ter", rval = nil, args = { "bool" } },
             { name = "draw_ter", rval = nil, args = { "tripoint" } },
@@ -635,35 +605,34 @@ classes = {
             { name = "fling_creature", rval = nil, args = { "Creature", "int", "float", "bool" } },
             { name = "forced_door_closing", rval = "bool", args = { "tripoint", "ter_id", "int" } },
             { name = "get_cur_om", rval = "overmap&", args = { } },
-            { name = "get_fishable", rval = "int", args = { "int" } },
             { name = "get_levx", rval = "int", args = { } },
             { name = "get_levy", rval = "int", args = { } },
             { name = "get_levz", rval = "int", args = { } },
-            { name = "get_npc_kill", rval = "int", args = { } },
-            { name = "get_player_base_save_path", rval = "int", args = { } },
+            { name = "get_player_base_save_path", rval = "string", args = { } },
             { name = "get_seed", rval = "int", args = { } },
             { name = "get_temperature", rval = "int", args = { "tripoint" } },
             { name = "get_user_action_counter", rval = "int", args = { } },
             { name = "get_veh_dir_indicator_location", rval = "tripoint", args = { "bool" } },
-            { name = "get_world_base_save_path", rval = "int", args = { } },
+            { name = "get_world_base_save_path", rval = "string", args = { } },
             { name = "handle_all_liquid", rval = nil, args = { "item", "int" } },
             { name = "handle_liquid", rval = "bool", args = { "item" } },
             { name = "handle_liquid", rval = "bool", args = { "item", "item" } },
             { name = "handle_liquid", rval = "bool", args = { "item", "item", "int" } },
             { name = "handle_liquid", rval = "bool", args = { "item", "item", "int", "tripoint" } },
-            { name = "handle_liquid_from_container", rval = "bool", args = { "int", "item" } },
-            { name = "handle_liquid_from_container", rval = "bool", args = { "int", "item", "int" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item" } },
             { name = "handle_liquid_from_container", rval = "bool", args = { "item", "int" } },
-            { name = "handle_liquid_from_ground", rval = "bool", args = { "int", "tripoint" } },
-            { name = "handle_liquid_from_ground", rval = "bool", args = { "int", "tripoint", "int" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "item_stack_iterator", "item" } },
+            { name = "handle_liquid_from_container", rval = "bool", args = { "item_stack_iterator", "item", "int" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "item_stack_iterator", "tripoint" } },
+            { name = "handle_liquid_from_ground", rval = "bool", args = { "item_stack_iterator", "tripoint", "int" } },
             { name = "has_gametype", rval = "bool", args = { } },
             { name = "increase_kill_count", rval = nil, args = { "mtype_id" } },
             { name = "init_ui", rval = nil, args = { "bool" } },
             { name = "init_ui", rval = nil, args = { } },
-            { name = "inv_for_all", rval = "int", args = { "int", "int" } },
-            { name = "inv_for_flag", rval = "int", args = { "int", "int" } },
-            { name = "inv_for_id", rval = "int", args = { "int", "int" } },
+            { name = "inv_for_all", rval = "int", args = { "string" } },
+            { name = "inv_for_all", rval = "int", args = { "string", "string" } },
+            { name = "inv_for_flag", rval = "int", args = { "string", "string" } },
+            { name = "inv_for_id", rval = "int", args = { "string", "string" } },
             { name = "inventory_item_menu", rval = "int", args = { "int" } },
             { name = "inventory_item_menu", rval = "int", args = { "int", "int" } },
             { name = "inventory_item_menu", rval = "int", args = { "int", "int", "int" } },
@@ -679,8 +648,7 @@ classes = {
             { name = "kill_count", rval = "int", args = { "species_id" } },
             { name = "knockback", rval = nil, args = { "tripoint", "tripoint", "int", "int", "int" } },
             { name = "light_level", rval = "int", args = { "int" } },
-            { name = "list_active_characters", rval = "int", args = { } },
-            { name = "load", rval = "bool", args = { "int" } },
+            { name = "load", rval = "bool", args = { "string" } },
             { name = "load_map", rval = nil, args = { "tripoint" } },
             { name = "load_npcs", rval = nil, args = { } },
             { name = "load_static_data", rval = nil, args = { } },
@@ -715,8 +683,6 @@ classes = {
             { name = "set_npcs_dirty", rval = nil, args = { } },
             { name = "setup", rval = nil, args = { } },
             { name = "shockwave", rval = nil, args = { "tripoint", "int", "int", "int", "int", "bool" } },
-            { name = "shrapnel", rval = "int", args = { "tripoint", "int", "int", "float" } },
-            { name = "shrapnel", rval = "int", args = { "tripoint", "int", "int", "float", "int" } },
             { name = "spawn_hallucination", rval = "bool", args = { "tripoint" } },
             { name = "spawn_hallucination", rval = "bool", args = { } },
             { name = "start_calendar", rval = nil, args = { } },
@@ -740,32 +706,30 @@ classes = {
             { name = "vertical_move", rval = nil, args = { "int", "bool" } },
             { name = "vertical_notes", rval = nil, args = { "int", "int" } },
             { name = "vertical_shift", rval = nil, args = { "int" } },
-            { name = "write_memorial_file", rval = nil, args = { "int" } },
+            { name = "write_memorial_file", rval = nil, args = { "string" } },
             { name = "zones_manager", rval = nil, args = { } },
             { name = "zoom_in", rval = nil, args = { } },
             { name = "zoom_out", rval = nil, args = { } },
-        }
-    },
-    gun_mode = {
+    }
+}
+classes["gun_mode"] = {
         code_prepend = "#include \"gun_mode.h\"\n",
-        new = {
-            { "string", "item", "int", "int" },
+    new = {
             { },
-        },
-        string_id = "gun_mode_id",
-        attributes = {
-            flags = { type = "int", writable = true },
+    },
+    string_id = "gun_mode_id",
+    attributes = {
             qty = { type = "int", writable = true },
             target = { type = "item", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "melee", rval = "bool", args = { } },
             { name = "name", rval = "string", args = { } },
-        }
-    },
-    item = {
-        code_prepend = "#include \"item.h\"\n, #include \"calendar.h\"\n, #include \"creature.h\"\n, #include \"int_id.h\"\n, #include \"enums.h\"\n",
-        new = {
+    }
+}
+classes["item"] = {
+        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"int_id.h\"\n",
+    new = {
             { "item" },
             { "itype" },
             { "itype", "time_point" },
@@ -774,27 +738,23 @@ classes = {
             { "string", "time_point" },
             { "string", "time_point", "int" },
             { },
-        },
-        attributes = {
+    },
+    attributes = {
             active = { type = "bool", writable = true },
             burnt = { type = "int", writable = true },
             charges = { type = "int", writable = true },
-            components = { type = "int", writable = true },
-            contents = { type = "int", writable = true },
-            faults = { type = "int", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "time_point", writable = true },
             invlet = { type = "int", writable = true },
             irridation = { type = "int", writable = true },
             item_counter = { type = "int", writable = true },
-            item_tags = { type = "int", writable = true },
             mission_id = { type = "int", writable = true },
             note = { type = "int", writable = true },
             player_id = { type = "int", writable = true },
             poison = { type = "int", writable = true },
             type = { type = "itype", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "acid_resist", rval = "int", args = { "bool" } },
             { name = "acid_resist", rval = "int", args = { } },
             { name = "activate", rval = "item&", args = { } },
@@ -810,8 +770,6 @@ classes = {
             { name = "ammo_data", rval = "itype&", args = { } },
             { name = "ammo_default", rval = "string", args = { "bool" } },
             { name = "ammo_default", rval = "string", args = { } },
-            { name = "ammo_effects", rval = "int", args = { "bool" } },
-            { name = "ammo_effects", rval = "int", args = { } },
             { name = "ammo_remaining", rval = "int", args = { } },
             { name = "ammo_required", rval = "int", args = { } },
             { name = "ammo_set", rval = "item&", args = { "string" } },
@@ -826,7 +784,6 @@ classes = {
             { name = "bash_resist", rval = "int", args = { "bool" } },
             { name = "bash_resist", rval = "int", args = { } },
             { name = "birthday", rval = "time_point", args = { } },
-            { name = "brewing_results", rval = "int", args = { } },
             { name = "brewing_time", rval = "time_duration", args = { } },
             { name = "calc_rot", rval = nil, args = { "tripoint" } },
             { name = "can_contain", rval = "bool", args = { "item" } },
@@ -867,7 +824,6 @@ classes = {
             { name = "display_name", rval = "string", args = { } },
             { name = "engine_displacement", rval = "int", args = { } },
             { name = "erase_var", rval = nil, args = { "string" } },
-            { name = "faults_potential", rval = "int", args = { } },
             { name = "fill_with", rval = nil, args = { "item" } },
             { name = "fill_with", rval = nil, args = { "item", "int" } },
             { name = "find_type", static = true, rval = "itype&", args = { "string" } },
@@ -892,6 +848,7 @@ classes = {
             { name = "get_plant_name", rval = "string", args = { } },
             { name = "get_property_long", rval = "int", args = { "string" } },
             { name = "get_property_long", rval = "int", args = { "string", "int" } },
+            { name = "get_property_string", rval = "string", args = { "string" } },
             { name = "get_property_string", rval = "string", args = { "string", "string" } },
             { name = "get_quality", rval = "int", args = { "quality_id" } },
             { name = "get_random_material", rval = "material_type&", args = { } },
@@ -904,7 +861,6 @@ classes = {
             { name = "get_rot", rval = "time_duration", args = { } },
             { name = "get_side", rval = "side", args = { } },
             { name = "get_storage", rval = "volume", args = { } },
-            { name = "get_techniques", rval = "int", args = { } },
             { name = "get_thickness", rval = "int", args = { } },
             { name = "get_usable_item", rval = "item&", args = { "string" } },
             { name = "get_var", rval = "float", args = { "string", "float" } },
@@ -913,7 +869,6 @@ classes = {
             { name = "get_warmth", rval = "int", args = { } },
             { name = "getlight_emit", rval = "int", args = { } },
             { name = "goes_bad", rval = "bool", args = { } },
-            { name = "gun_all_modes", rval = "int", args = { } },
             { name = "gun_current_mode", rval = "gun_mode", args = { } },
             { name = "gun_cycle_mode", rval = nil, args = { } },
             { name = "gun_dispersion", rval = "int", args = { "bool" } },
@@ -929,8 +884,6 @@ classes = {
             { name = "gun_set_mode", rval = "bool", args = { "gun_mode_id" } },
             { name = "gun_skill", rval = "skill_id", args = { } },
             { name = "gunmod_find", rval = "item&", args = { "string" } },
-            { name = "gunmods", rval = "int", args = { } },
-            { name = "has_any_flag", rval = "bool", args = { "int" } },
             { name = "has_flag", rval = "bool", args = { "string" } },
             { name = "has_infinite_charges", rval = "bool", args = { } },
             { name = "has_label", rval = "bool", args = { } },
@@ -1006,17 +959,14 @@ classes = {
             { name = "load_info", rval = nil, args = { "string" } },
             { name = "made_of", rval = "bool", args = { "material_id" } },
             { name = "made_of", rval = "bool", args = { "phase_id" } },
-            { name = "made_of", rval = "int", args = { } },
-            { name = "made_of_any", rval = "bool", args = { "int" } },
-            { name = "made_of_types", rval = "int", args = { } },
-            { name = "magazine_compatible", rval = "int", args = { "bool" } },
-            { name = "magazine_compatible", rval = "int", args = { } },
-            { name = "magazine_convert", rval = "int", args = { } },
             { name = "magazine_current", rval = "item&", args = { } },
             { name = "magazine_default", rval = "string", args = { "bool" } },
             { name = "magazine_default", rval = "string", args = { } },
             { name = "magazine_integral", rval = "bool", args = { } },
+            { name = "make_corpse", static = true, rval = "item", args = { "mtype_id" } },
+            { name = "make_corpse", static = true, rval = "item", args = { "mtype_id", "time_point" } },
             { name = "make_corpse", static = true, rval = "item", args = { "mtype_id", "time_point", "string" } },
+            { name = "make_corpse", static = true, rval = "item", args = { } },
             { name = "mark_as_used_by_player", rval = nil, args = { "player" } },
             { name = "mark_chapter_as_read", rval = nil, args = { "player" } },
             { name = "max_damage", rval = "int", args = { } },
@@ -1037,7 +987,6 @@ classes = {
             { name = "on_wear", rval = nil, args = { "Character" } },
             { name = "on_wield", rval = nil, args = { "player" } },
             { name = "on_wield", rval = nil, args = { "player", "int" } },
-            { name = "only_made_of", rval = "bool", args = { "int" } },
             { name = "precise_damage", rval = "float", args = { } },
             { name = "price", rval = "int", args = { "bool" } },
             { name = "process", rval = "bool", args = { "player", "tripoint", "bool" } },
@@ -1046,7 +995,6 @@ classes = {
             { name = "put_in", rval = nil, args = { "item" } },
             { name = "reach_range", rval = "int", args = { "player" } },
             { name = "ready_to_revive", rval = "bool", args = { "tripoint" } },
-            { name = "repaired_with", rval = "int", args = { } },
             { name = "reset_cable", rval = nil, args = { "player" } },
             { name = "rotten", rval = "bool", args = { } },
             { name = "set_age", rval = nil, args = { "time_duration" } },
@@ -1074,7 +1022,6 @@ classes = {
             { name = "tname", rval = "string", args = { "int" } },
             { name = "tname", rval = "string", args = { "int", "bool" } },
             { name = "tname", rval = "string", args = { } },
-            { name = "toolmods", rval = "int", args = { } },
             { name = "typeId", rval = "string", args = { } },
             { name = "type_is_defined", static = true, rval = "bool", args = { "string" } },
             { name = "type_name", rval = "string", args = { "int" } },
@@ -1091,14 +1038,14 @@ classes = {
             { name = "weight", rval = "mass", args = { } },
             { name = "wheel_area", rval = "int", args = { } },
             { name = "will_explode_in_fire", rval = "bool", args = { } },
-        }
-    },
-    itype = {
+    }
+}
+classes["itype"] = {
         code_prepend = "#include \"itype.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        attributes = {
+    },
+    attributes = {
             color = { type = "nc_color", writable = true },
             countdown_destroy = { type = "bool", writable = true },
             countdown_interval = { type = "int", writable = true },
@@ -1106,38 +1053,28 @@ classes = {
             damage_min = { type = "int", writable = true },
             default_container = { type = "string", writable = true },
             description = { type = "string", writable = true },
-            emits = { type = "int", writable = true },
             explode_in_fire = { type = "bool", writable = true },
             integral_volume = { type = "volume", writable = true },
-            item_tags = { type = "int", writable = true },
             light_emission = { type = "int", writable = true },
+            looks_like = { type = "string", writable = true },
             m_to_hit = { type = "int", writable = true },
-            magazine_default = { type = "int", writable = true },
             magazine_well = { type = "volume", writable = true },
-            magazines = { type = "int", writable = true },
-            materials = { type = "int", writable = true },
             min_dex = { type = "int", writable = true },
             min_int = { type = "int", writable = true },
             min_per = { type = "int", writable = true },
-            min_skills = { type = "int", writable = true },
             min_str = { type = "int", writable = true },
             phase = { type = "phase_id", writable = true },
             price = { type = "int", writable = true },
             price_post = { type = "int", writable = true },
-            properties = { type = "int", writable = true },
-            qualities = { type = "int", writable = true },
-            repair = { type = "int", writable = true },
             rigid = { type = "bool", writable = true },
             snippet_category = { type = "string", writable = true },
             stack_size = { type = "int", writable = true },
             stackable = { type = "bool", writable = true },
             sym = { type = "string", writable = true },
-            techniques = { type = "int", writable = true },
-            use_methods = { type = "int", writable = true },
             volume = { type = "volume", writable = true },
             weight = { type = "mass", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "can_use", rval = "bool", args = { "string" } },
             { name = "charges_default", rval = "int", args = { } },
             { name = "charges_to_use", rval = "int", args = { } },
@@ -1150,15 +1087,15 @@ classes = {
             { name = "maximum_charges", rval = "int", args = { } },
             { name = "nname", rval = "string", args = { "int" } },
             { name = "tick", rval = "int", args = { "player", "item", "tripoint" } },
-        }
-    },
-    ma_buff = {
-        code_prepend = "#include \"martialarts.h\"\n, #include \"string_id.h\"\n",
-        new = {
+    }
+}
+classes["ma_buff"] = {
+        code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
+    new = {
             { },
-        },
-        string_id = "mabuff_id",
-        attributes = {
+    },
+    string_id = "mabuff_id",
+    attributes = {
             blocks_bonus = { type = "int", writable = true },
             buff_duration = { type = "time_duration", writable = true },
             description = { type = "string", writable = true },
@@ -1170,8 +1107,8 @@ classes = {
             quiet = { type = "bool", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
             throw_immune = { type = "bool", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "apply_buff", rval = nil, args = { "player" } },
             { name = "apply_player", rval = nil, args = { "player" } },
             { name = "armor_bonus", rval = "int", args = { "player", "damage_type" } },
@@ -1186,15 +1123,15 @@ classes = {
             { name = "is_throw_immune", rval = "bool", args = { } },
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "speed_bonus", rval = "int", args = { "player" } },
-        }
-    },
-    ma_technique = {
+    }
+}
+classes["ma_technique"] = {
         code_prepend = "#include \"martialarts.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "matec_id",
-        attributes = {
+    },
+    string_id = "matec_id",
+    attributes = {
             aoe = { type = "string", writable = true },
             block_counter = { type = "bool", writable = true },
             crit_tec = { type = "bool", writable = true },
@@ -1204,7 +1141,6 @@ classes = {
             dodge_counter = { type = "bool", writable = true },
             down_dur = { type = "int", writable = true },
             dummy = { type = "bool", writable = true },
-            flags = { type = "int", writable = true },
             goal = { type = "string", writable = true },
             grab_break = { type = "bool", writable = true },
             id = { type = "matec_id", writable = true },
@@ -1216,28 +1152,27 @@ classes = {
             player_message = { type = "string", writable = true },
             stun_dur = { type = "int", writable = true },
             weighting = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "armor_penetration", rval = "float", args = { "player", "damage_type" } },
             { name = "damage_bonus", rval = "float", args = { "player", "damage_type" } },
             { name = "damage_multiplier", rval = "float", args = { "player", "damage_type" } },
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "move_cost_multiplier", rval = "float", args = { "player" } },
             { name = "move_cost_penalty", rval = "float", args = { "player" } },
-        }
-    },
-    map = {
-        code_prepend = "#include \"map.h\"\n, #include \"string_id.h\"\n, #include \"enums.h\"\n, #include \"calendar.h\"\n, #include \"item_stack.h\"\n",
-        new = {
+    }
+}
+classes["map"] = {
+        code_prepend = "#include \"map.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include \"stl_list.h\"\n#include \"item_stack.h\"\n#include \"stl_vector.h\"\n",
+    new = {
             { "bool" },
             { "int" },
             { "int", "bool" },
             { },
-        },
-        attributes = {
-            dirty_vehicle_list = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    attributes = {
+    },
+    functions = {
             { name = "accessible_items", rval = "bool", args = { "tripoint" } },
             { name = "add_camp", rval = nil, args = { "tripoint", "string" } },
             { name = "add_corpse", rval = nil, args = { "tripoint" } },
@@ -1245,11 +1180,15 @@ classes = {
             { name = "add_field", rval = "bool", args = { "tripoint", "field_id", "int", "time_duration" } },
             { name = "add_item", rval = "item&", args = { "tripoint", "item" } },
             { name = "add_item", rval = nil, args = { "int", "int", "item" } },
-            { name = "add_item_at", rval = "item&", args = { "tripoint", "int", "item" } },
+            { name = "add_item_at", rval = "item&", args = { "tripoint", "item_stack_iterator", "item" } },
             { name = "add_item_or_charges", rval = "item&", args = { "int", "int", "item" } },
             { name = "add_item_or_charges", rval = "item&", args = { "int", "int", "item", "bool" } },
             { name = "add_item_or_charges", rval = "item&", args = { "tripoint", "item" } },
             { name = "add_item_or_charges", rval = "item&", args = { "tripoint", "item", "bool" } },
+            { name = "add_spawn", rval = nil, args = { "mtype_id", "int", "int", "int" } },
+            { name = "add_spawn", rval = nil, args = { "mtype_id", "int", "int", "int", "bool" } },
+            { name = "add_spawn", rval = nil, args = { "mtype_id", "int", "int", "int", "bool", "int" } },
+            { name = "add_spawn", rval = nil, args = { "mtype_id", "int", "int", "int", "bool", "int", "int" } },
             { name = "add_spawn", rval = nil, args = { "mtype_id", "int", "int", "int", "bool", "int", "int", "string" } },
             { name = "add_splash", rval = nil, args = { "field_id", "tripoint", "int", "int" } },
             { name = "add_splatter", rval = nil, args = { "field_id", "tripoint" } },
@@ -1329,7 +1268,6 @@ classes = {
             { name = "features", rval = "string", args = { "int", "int" } },
             { name = "features", rval = "string", args = { "tripoint" } },
             { name = "field_at", rval = "field&", args = { "tripoint" } },
-            { name = "find_clear_path", rval = "int", args = { "tripoint", "tripoint" } },
             { name = "flammable_items_at", rval = "bool", args = { "tripoint" } },
             { name = "flammable_items_at", rval = "bool", args = { "tripoint", "int" } },
             { name = "free_volume", rval = "volume", args = { "tripoint" } },
@@ -1341,21 +1279,12 @@ classes = {
             { name = "furnname", rval = "string", args = { "tripoint" } },
             { name = "generate", rval = nil, args = { "int", "int", "int", "time_point" } },
             { name = "get_abs_sub", rval = "tripoint", args = { } },
-            { name = "get_active_items_in_radius", rval = "int", args = { "tripoint", "int" } },
-            { name = "get_dir_circle", rval = "int", args = { "tripoint", "tripoint" } },
             { name = "get_field", rval = "field_entry&", args = { "tripoint", "field_id" } },
             { name = "get_field_age", rval = "time_duration", args = { "tripoint", "field_id" } },
             { name = "get_field_strength", rval = "int", args = { "tripoint", "field_id" } },
-            { name = "get_harvest_names", rval = "int", args = { "tripoint" } },
             { name = "get_radiation", rval = "int", args = { "tripoint" } },
-            { name = "get_rc_items", rval = "int", args = { "int" } },
-            { name = "get_rc_items", rval = "int", args = { "int", "int" } },
-            { name = "get_rc_items", rval = "int", args = { "int", "int", "int" } },
-            { name = "get_rc_items", rval = "int", args = { } },
             { name = "get_signage", rval = "string", args = { "tripoint" } },
             { name = "get_ter_transforms_into", rval = "ter_id", args = { "tripoint" } },
-            { name = "get_vehicles", rval = "int", args = { "tripoint", "tripoint" } },
-            { name = "get_vehicles", rval = "int", args = { } },
             { name = "getabs", rval = "point", args = { "int", "int" } },
             { name = "getabs", rval = "point", args = { "point" } },
             { name = "getabs", rval = "tripoint", args = { "tripoint" } },
@@ -1389,8 +1318,9 @@ classes = {
             { name = "i_clear", rval = nil, args = { "int", "int" } },
             { name = "i_clear", rval = nil, args = { "tripoint" } },
             { name = "i_rem", rval = "int", args = { "int", "int", "int" } },
-            { name = "i_rem", rval = "int", args = { "point", "int" } },
             { name = "i_rem", rval = "int", args = { "tripoint", "int" } },
+            { name = "i_rem", rval = "item_stack_iterator", args = { "point", "item_stack_iterator" } },
+            { name = "i_rem", rval = "item_stack_iterator", args = { "tripoint", "item_stack_iterator" } },
             { name = "i_rem", rval = nil, args = { "int", "int", "item" } },
             { name = "i_rem", rval = nil, args = { "tripoint", "item" } },
             { name = "impassable", rval = "bool", args = { "int", "int" } },
@@ -1443,12 +1373,6 @@ classes = {
             { name = "pl_sees", rval = "bool", args = { "tripoint", "int" } },
             { name = "place_gas_pump", rval = nil, args = { "int", "int", "int" } },
             { name = "place_gas_pump", rval = nil, args = { "int", "int", "int", "string" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "int", "int", "int", "int", "bool", "time_point" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "int", "int", "int", "int", "bool", "time_point", "int" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "int", "int", "int", "int", "bool", "time_point", "int", "int" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "tripoint", "tripoint", "bool", "time_point" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "tripoint", "tripoint", "bool", "time_point", "int" } },
-            { name = "place_items", rval = "int", args = { "string", "int", "tripoint", "tripoint", "bool", "time_point", "int", "int" } },
             { name = "place_spawns", rval = nil, args = { "mongroup_id", "int", "int", "int", "int", "int", "float" } },
             { name = "place_toilet", rval = nil, args = { "int", "int" } },
             { name = "place_toilet", rval = nil, args = { "int", "int", "int" } },
@@ -1459,8 +1383,8 @@ classes = {
             { name = "process_fields", rval = "bool", args = { } },
             { name = "propagate_field", rval = nil, args = { "tripoint", "field_id", "int" } },
             { name = "propagate_field", rval = nil, args = { "tripoint", "field_id", "int", "int" } },
-            { name = "put_items_from_loc", rval = "int", args = { "string", "tripoint" } },
-            { name = "put_items_from_loc", rval = "int", args = { "string", "tripoint", "time_point" } },
+            { name = "put_items_from_loc", rval = nil, args = { "string", "tripoint" } },
+            { name = "put_items_from_loc", rval = nil, args = { "string", "tripoint", "time_point" } },
             { name = "random_outdoor_tile", rval = "point", args = { } },
             { name = "ranged_target_size", rval = "float", args = { "tripoint" } },
             { name = "remove_field", rval = nil, args = { "tripoint", "field_id" } },
@@ -1501,8 +1425,6 @@ classes = {
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int" } },
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int", "time_point" } },
             { name = "spawn_item", rval = nil, args = { "tripoint", "string", "int", "int", "time_point", "int" } },
-            { name = "spawn_items", rval = "int", args = { "tripoint", "int" } },
-            { name = "spawn_items", rval = nil, args = { "int", "int", "int" } },
             { name = "spawn_monsters", rval = nil, args = { "bool" } },
             { name = "stored_volume", rval = "volume", args = { "tripoint" } },
             { name = "supports_above", rval = "bool", args = { "tripoint" } },
@@ -1516,7 +1438,6 @@ classes = {
             { name = "trans", rval = "bool", args = { "tripoint" } },
             { name = "translate", rval = nil, args = { "ter_id", "ter_id" } },
             { name = "translate_radius", rval = nil, args = { "ter_id", "ter_id", "float", "tripoint" } },
-            { name = "trap_locations", rval = "int", args = { "trap_id" } },
             { name = "trap_set", rval = nil, args = { "tripoint", "trap_id" } },
             { name = "trigger_rc_items", rval = nil, args = { "string" } },
             { name = "unboard_vehicle", rval = nil, args = { "tripoint" } },
@@ -1529,40 +1450,38 @@ classes = {
             { name = "vehproceed", rval = "bool", args = { } },
             { name = "vertical_shift", rval = nil, args = { "int" } },
             { name = "water_from", rval = "item", args = { "tripoint" } },
-        }
+    }
+}
+classes["map_stack"] = {
+        code_prepend = "#include \"map.h\"\n#include \"stl_list.h\"\n#include \"item_stack.h\"\n",
+    new = {
     },
-    map_stack = {
-        code_prepend = "#include \"map.h\"\n, #include \"item_stack.h\"\n",
-        new = {
-        },
-        attributes = {
-        },
-        functions = {
+    attributes = {
+    },
+    functions = {
             { name = "amount_can_fit", rval = "int", args = { "item" } },
             { name = "count_limit", rval = "int", args = { } },
-            { name = "cppbegin", rval = "int", cpp_name = "begin", args = { } },
-            { name = "cppend", rval = "int", cpp_name = "end", args = { } },
+            { name = "cppbegin", rval = "item_stack_iterator", cpp_name = "begin", args = { } },
+            { name = "cppend", rval = "item_stack_iterator", cpp_name = "end", args = { } },
             { name = "empty", rval = "bool", args = { } },
-            { name = "erase", rval = "int", args = { "int" } },
+            { name = "erase", rval = "item_stack_iterator", args = { "item_stack_iterator" } },
             { name = "free_volume", rval = "volume", args = { } },
             { name = "front", rval = "item&", args = { } },
-            { name = "insert_at", rval = nil, args = { "int", "item" } },
+            { name = "insert_at", rval = nil, args = { "item_stack_iterator", "item" } },
             { name = "max_volume", rval = "volume", args = { } },
             { name = "push_back", rval = nil, args = { "item" } },
-            { name = "rbegin", rval = "int", args = { } },
-            { name = "rend", rval = "int", args = { } },
             { name = "size", rval = "int", args = { } },
             { name = "stacks_with", rval = "item&", args = { "item" } },
             { name = "stored_volume", rval = "volume", args = { } },
-        }
-    },
-    martialart = {
+    }
+}
+classes["martialart"] = {
         code_prepend = "#include \"martialarts.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "matype_id",
-        attributes = {
+    },
+    string_id = "matype_id",
+    attributes = {
             arm_block = { type = "int", writable = true },
             arm_block_with_bio_armor_arms = { type = "bool", writable = true },
             description = { type = "string", writable = true },
@@ -1571,18 +1490,9 @@ classes = {
             leg_block = { type = "int", writable = true },
             leg_block_with_bio_armor_legs = { type = "bool", writable = true },
             name = { type = "string", writable = true },
-            onattack_buffs = { type = "int", writable = true },
-            onblock_buffs = { type = "int", writable = true },
-            ondodge_buffs = { type = "int", writable = true },
-            ongethit_buffs = { type = "int", writable = true },
-            onhit_buffs = { type = "int", writable = true },
-            onmove_buffs = { type = "int", writable = true },
-            static_buffs = { type = "int", writable = true },
             strictly_unarmed = { type = "bool", writable = true },
-            techniques = { type = "int", writable = true },
-            weapons = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "apply_onattack_buffs", rval = nil, args = { "player" } },
             { name = "apply_onblock_buffs", rval = nil, args = { "player" } },
             { name = "apply_ondodge_buffs", rval = nil, args = { "player" } },
@@ -1593,22 +1503,21 @@ classes = {
             { name = "has_technique", rval = "bool", args = { "player", "matec_id" } },
             { name = "has_weapon", rval = "bool", args = { "string" } },
             { name = "weapon_valid", rval = "bool", args = { "item" } },
-        }
-    },
-    material_type = {
-        code_prepend = "#include \"material.h\"\n, #include \"string_id.h\"\n",
-        new = {
+    }
+}
+classes["material_type"] = {
+        code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
+    new = {
             { },
-        },
-        string_id = "material_id",
-        attributes = {
+    },
+    string_id = "material_id",
+    attributes = {
             id = { type = "material_id", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "acid_resist", rval = "int", args = { } },
             { name = "bash_dmg_verb", rval = "string", args = { } },
             { name = "bash_resist", rval = "int", args = { } },
-            { name = "burn_products", rval = "int", args = { } },
             { name = "check", rval = nil, args = { } },
             { name = "chip_resist", rval = "int", args = { } },
             { name = "cut_dmg_verb", rval = "string", args = { } },
@@ -1624,29 +1533,28 @@ classes = {
             { name = "repaired_with", rval = "string", args = { } },
             { name = "salvaged_into", rval = "string", args = { } },
             { name = "soft", rval = "bool", args = { } },
-        }
-    },
-    mongroup = {
-        code_prepend = "#include \"mongroup.h\"\n, #include \"enums.h\"\n",
-        new = {
+    }
+}
+classes["mongroup"] = {
+        code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
+    new = {
             { "mongroup_id", "int", "int", "int", "int", "int" },
             { "string", "tripoint", "int", "int", "tripoint", "int", "bool", "bool", "bool" },
             { },
-        },
-        attributes = {
+    },
+    attributes = {
             diffuse = { type = "bool", writable = true },
             dying = { type = "bool", writable = true },
             horde = { type = "bool", writable = true },
             horde_behaviour = { type = "string", writable = true },
             interest = { type = "int", writable = true },
-            monsters = { type = "int", writable = true },
             population = { type = "int", writable = true },
             pos = { type = "tripoint", writable = true },
             radius = { type = "int", writable = true },
             target = { type = "tripoint", writable = true },
             type = { type = "mongroup_id", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "clear", rval = nil, args = { } },
             { name = "dec_interest", rval = nil, args = { "int" } },
             { name = "empty", rval = "bool", args = { } },
@@ -1655,25 +1563,23 @@ classes = {
             { name = "set_interest", rval = nil, args = { "int" } },
             { name = "set_target", rval = nil, args = { "int", "int" } },
             { name = "wander", rval = nil, args = { "overmap" } },
-        }
-    },
-    monster = {
-        code_prepend = "#include \"monster.h\"\n, #include \"creature.h\"\n, #include \"enums.h\"\n",
-        parent = "Creature",
-        new = {
+    }
+}
+classes["monster"] = {
+        code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
+    parent = "Creature",
+    new = {
             { "monster" },
             { "mtype_id" },
             { "mtype_id", "tripoint" },
             { },
-        },
-        attributes = {
-            ammo = { type = "int", writable = true },
+    },
+    attributes = {
             anger = { type = "int", writable = true },
             death_drops = { type = "bool", writable = true },
             friendly = { type = "int", writable = true },
             hallucination = { type = "bool", writable = true },
             ignoring = { type = "int", writable = true },
-            inv = { type = "int", writable = true },
             last_baby = { type = "int", writable = true },
             last_biosig = { type = "int", writable = true },
             last_updated = { type = "time_point", writable = true },
@@ -1687,8 +1593,8 @@ classes = {
             unique_name = { type = "string", writable = true },
             wander_pos = { type = "tripoint", writable = true },
             wandf = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "add_item", rval = nil, args = { "item" } },
             { name = "attack_at", rval = "bool", args = { "tripoint" } },
             { name = "attack_target", rval = "Creature&", args = { } },
@@ -1724,6 +1630,7 @@ classes = {
             { name = "make_friendly", rval = nil, args = { } },
             { name = "make_fungus", rval = "bool", args = { } },
             { name = "melee_attack", rval = nil, args = { "Creature" } },
+            { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "float" } },
             { name = "move", rval = nil, args = { } },
             { name = "move_target", rval = "tripoint", args = { } },
@@ -1735,7 +1642,6 @@ classes = {
             { name = "name_with_armor", rval = "string", args = { } },
             { name = "on_load", rval = nil, args = { } },
             { name = "on_unload", rval = nil, args = { } },
-            { name = "plan", rval = nil, args = { "int" } },
             { name = "poly", rval = nil, args = { "mtype_id" } },
             { name = "process_triggers", rval = nil, args = { } },
             { name = "push_to", rval = "bool", args = { "tripoint", "int", "int" } },
@@ -1751,7 +1657,6 @@ classes = {
             { name = "spawn", rval = nil, args = { "tripoint" } },
             { name = "stumble", rval = nil, args = { } },
             { name = "to_item", rval = "item", args = { } },
-            { name = "trigger_sum", rval = "int", args = { "int" } },
             { name = "try_biosignature", rval = nil, args = { } },
             { name = "try_reproduce", rval = nil, args = { } },
             { name = "try_upgrade", rval = nil, args = { "bool" } },
@@ -1761,133 +1666,105 @@ classes = {
             { name = "wander_to", rval = nil, args = { "tripoint", "int" } },
             { name = "will_join_horde", rval = "bool", args = { "int" } },
             { name = "will_reach", rval = "bool", args = { "int", "int" } },
-        }
-    },
-    mtype = {
+    }
+}
+classes["mtype"] = {
         code_prepend = "#include \"mtype.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "mtype_id",
-        attributes = {
+    },
+    string_id = "mtype_id",
+    attributes = {
             age_grow = { type = "int", writable = true },
             agro = { type = "int", writable = true },
-            anger = { type = "int", writable = true },
             armor_acid = { type = "int", writable = true },
             armor_bash = { type = "int", writable = true },
             armor_cut = { type = "int", writable = true },
             armor_fire = { type = "int", writable = true },
             armor_stab = { type = "int", writable = true },
-            atk_effs = { type = "int", writable = true },
             attack_cost = { type = "int", writable = true },
             baby_count = { type = "int", writable = true },
-            baby_egg = { type = "int", writable = true },
-            baby_flags = { type = "int", writable = true },
+            baby_egg = { type = "string", writable = true },
             baby_monster = { type = "mtype_id", writable = true },
             baby_timer = { type = "int", writable = true },
             bash_skill = { type = "int", writable = true },
-            biosig_item = { type = "int", writable = true },
+            biosig_item = { type = "string", writable = true },
             biosig_timer = { type = "int", writable = true },
             biosignatures = { type = "bool", writable = true },
             burn_into = { type = "mtype_id", writable = true },
-            categories = { type = "int", writable = true },
             color = { type = "nc_color", writable = true },
-            death_drops = { type = "int", writable = true },
+            death_drops = { type = "string", writable = true },
             def_chance = { type = "int", writable = true },
-            dies = { type = "int", writable = true },
             difficulty = { type = "int", writable = true },
-            emit_fields = { type = "int", writable = true },
-            fear = { type = "int", writable = true },
-            flags = { type = "int", writable = true },
             half_life = { type = "int", writable = true },
             hp = { type = "int", writable = true },
             id = { type = "mtype_id", writable = true },
+            looks_like = { type = "string", writable = true },
             luminance = { type = "float", writable = true },
-            mat = { type = "int", writable = true },
             melee_dice = { type = "int", writable = true },
             melee_sides = { type = "int", writable = true },
             melee_skill = { type = "int", writable = true },
             morale = { type = "int", writable = true },
             phase = { type = "phase_id", writable = true },
-            placate = { type = "int", writable = true },
             reproduces = { type = "bool", writable = true },
-            revert_to_itype = { type = "int", writable = true },
+            revert_to_itype = { type = "string", writable = true },
             size = { type = "m_size", writable = true },
             sk_dodge = { type = "int", writable = true },
-            special_attacks = { type = "int", writable = true },
-            special_attacks_names = { type = "int", writable = true },
-            species = { type = "int", writable = true },
             speed = { type = "int", writable = true },
-            starting_ammo = { type = "int", writable = true },
-            sym = { type = "int", writable = true },
+            sym = { type = "string", writable = true },
             upgrade_group = { type = "mongroup_id", writable = true },
             upgrade_into = { type = "mtype_id", writable = true },
             upgrades = { type = "bool", writable = true },
             vision_day = { type = "int", writable = true },
             vision_night = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "bloodType", rval = "field_id", args = { } },
-            { name = "get_description", rval = "int", args = { } },
+            { name = "get_description", rval = "string", args = { } },
             { name = "get_meat_chunks_count", rval = "int", args = { } },
-            { name = "get_meat_itype", rval = "int", args = { } },
+            { name = "get_meat_itype", rval = "string", args = { } },
             { name = "gibType", rval = "field_id", args = { } },
-            { name = "has_flag", rval = "bool", args = { "int" } },
-            { name = "has_special_attack", rval = "bool", args = { "int" } },
-            { name = "in_category", rval = "bool", args = { "int" } },
+            { name = "has_flag", rval = "bool", args = { "string" } },
+            { name = "has_special_attack", rval = "bool", args = { "string" } },
+            { name = "in_category", rval = "bool", args = { "string" } },
             { name = "in_species", rval = "bool", args = { "species_id" } },
             { name = "in_species", rval = "bool", args = { "species_type" } },
             { name = "made_of", rval = "bool", args = { "material_id" } },
-            { name = "nname", rval = "int", args = { "int" } },
-            { name = "nname", rval = "int", args = { } },
+            { name = "nname", rval = "string", args = { "int" } },
+            { name = "nname", rval = "string", args = { } },
             { name = "same_species", rval = "bool", args = { "mtype" } },
-            { name = "set_flag", rval = nil, args = { "int", "bool" } },
-        }
+            { name = "set_flag", rval = nil, args = { "string", "bool" } },
+    }
+}
+classes["mutation_branch"] = {
+        code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
+    new = {
     },
-    mutation_branch = {
-        code_prepend = "#include \"mutation.h\"\n, #include \"creature.h\"\n",
-        new = {
-        },
-        string_id = "trait_id",
-        attributes = {
+    string_id = "trait_id",
+    attributes = {
             activated = { type = "bool", writable = true },
-            additions = { type = "int", writable = true },
             allow_soft_gear = { type = "bool", writable = true },
-            armor = { type = "int", writable = true },
-            attacks_granted = { type = "int", writable = true },
             bodytemp_max = { type = "int", writable = true },
             bodytemp_min = { type = "int", writable = true },
             bodytemp_sleep = { type = "int", writable = true },
-            cancels = { type = "int", writable = true },
-            category = { type = "int", writable = true },
             cooldown = { type = "int", writable = true },
             cost = { type = "int", writable = true },
             destroys_gear = { type = "bool", writable = true },
-            encumbrance_always = { type = "int", writable = true },
-            encumbrance_covered = { type = "int", writable = true },
             fatigue = { type = "bool", writable = true },
             fatigue_modifier = { type = "float", writable = true },
             fatigue_regen_modifier = { type = "float", writable = true },
-            flags = { type = "int", writable = true },
             healing_awake = { type = "float", writable = true },
             healing_resting = { type = "float", writable = true },
             hp_adjustment = { type = "float", writable = true },
             hp_modifier = { type = "float", writable = true },
             hp_modifier_secondary = { type = "float", writable = true },
             hunger = { type = "bool", writable = true },
-            initial_ma_styles = { type = "int", writable = true },
             metabolism_modifier = { type = "float", writable = true },
             mixed_effect = { type = "bool", writable = true },
-            mods = { type = "int", writable = true },
             name = { type = "string", writable = true },
             points = { type = "int", writable = true },
-            prereqs = { type = "int", writable = true },
-            prereqs2 = { type = "int", writable = true },
             profession = { type = "bool", writable = true },
-            protection = { type = "int", writable = true },
             purifiable = { type = "bool", writable = true },
-            replacements = { type = "int", writable = true },
-            restricts_gear = { type = "int", writable = true },
             spawn_item = { type = "string", writable = true },
             spawn_item_message = { type = "string", writable = true },
             stamina_regen_modifier = { type = "float", writable = true },
@@ -1896,31 +1773,27 @@ classes = {
             thirst = { type = "bool", writable = true },
             thirst_modifier = { type = "float", writable = true },
             threshold = { type = "bool", writable = true },
-            threshreq = { type = "int", writable = true },
             ugliness = { type = "int", writable = true },
             valid = { type = "bool", writable = true },
             visibility = { type = "int", writable = true },
-            vitamin_rates = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "conflicts_with_item", rval = "bool", args = { "item" } },
             { name = "finalize_trait_blacklist", static = true, rval = nil, args = { } },
-            { name = "get_all", static = true, rval = "int", args = { } },
-            { name = "get_all_group_names", static = true, rval = "int", args = { } },
             { name = "get_display_color", rval = "nc_color", args = { } },
             { name = "get_name", static = true, rval = "string", args = { "trait_id" } },
             { name = "reset_all", static = true, rval = nil, args = { } },
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
-        }
-    },
-    nc_color = {
+    }
+}
+classes["nc_color"] = {
         code_prepend = "#include \"color.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        attributes = {
-        },
-        functions = {
+    },
+    attributes = {
+    },
+    functions = {
             { name = "blink", rval = "nc_color", args = { } },
             { name = "bold", rval = "nc_color", args = { } },
             { name = "from_color_pair_index", static = true, rval = "nc_color", args = { "int" } },
@@ -1931,40 +1804,32 @@ classes = {
             { name = "italic", rval = "nc_color", args = { } },
             { name = "to_color_pair_index", rval = "int", args = { } },
             { name = "underline", rval = "nc_color", args = { } },
-        }
-    },
-    npc_template = {
+    }
+}
+classes["npc_template"] = {
         code_prepend = "#include \"npc.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        attributes = {
-        },
-        functions = {
-        }
     },
-    overmap = {
-        code_prepend = "#include \"overmap.h\"\n, #include \"enums.h\"\n",
-        new = {
+    attributes = {
+    },
+    functions = {
+    }
+}
+classes["overmap"] = {
+        code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n",
+    new = {
             { "int", "int" },
             { "overmap" },
             { },
-        },
-        attributes = {
-            cities = { type = "int", writable = true },
-            monster_map = { type = "int", writable = true },
-            radios = { type = "int", writable = true },
-            roads_out = { type = "int", writable = true },
-            vehicles = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    attributes = {
+    },
+    functions = {
             { name = "add_note", rval = nil, args = { "int", "int", "int", "string" } },
             { name = "clear_mon_groups", rval = nil, args = { } },
             { name = "delete_note", rval = nil, args = { "int", "int", "int" } },
-            { name = "find_notes", rval = "int", args = { "int", "string" } },
             { name = "find_random_omt", rval = "tripoint", args = { "string" } },
-            { name = "find_terrain", rval = "int", args = { "string", "int" } },
-            { name = "get_npcs", rval = "int", args = { } },
             { name = "global_base_point", rval = "point", args = { } },
             { name = "has_note", rval = "bool", args = { "int", "int", "int" } },
             { name = "inbounds", static = true, rval = "bool", args = { "int", "int", "int" } },
@@ -1977,18 +1842,16 @@ classes = {
             { name = "populate", rval = nil, args = { } },
             { name = "pos", rval = "point&", args = { } },
             { name = "save", rval = nil, args = { } },
-        }
-    },
-    player = {
-        code_prepend = "#include \"player.h\"\n, #include \"creature.h\"\n, #include \"int_id.h\"\n, #include \"enums.h\"\n, #include \"item.h\"\n",
-        parent = "Character",
-        new = {
+    }
+}
+classes["player"] = {
+        code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include \"enums.h\"\n#include \"item.h\"\n",
+    parent = "Character",
+    new = {
             { "player" },
             { },
-        },
-        attributes = {
-            addictions = { type = "int", writable = true },
-            backlog = { type = "int", writable = true },
+    },
+    attributes = {
             blocks_left = { type = "int", writable = true },
             cash = { type = "int", writable = true },
             controlling_vehicle = { type = "bool", writable = true },
@@ -2003,12 +1866,9 @@ classes = {
             lastconsumed = { type = "string", writable = true },
             lastrecipe = { type = "recipe_id", writable = true },
             lifetime_stats = { type = "stats", writable = true },
-            ma_styles = { type = "int", writable = true },
             max_power_level = { type = "int", writable = true },
-            memorial_log = { type = "int", writable = true },
             move_mode = { type = "string", writable = true },
             movecounter = { type = "int", writable = true },
-            mutation_category_level = { type = "int", writable = true },
             next_climate_control_check = { type = "time_point", writable = true },
             oxygen = { type = "int", writable = true },
             power_level = { type = "int", writable = true },
@@ -2024,8 +1884,8 @@ classes = {
             tank_plut = { type = "int", writable = true },
             view_offset = { type = "tripoint", writable = true },
             volume = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "action_taken", rval = nil, args = { } },
             { name = "activate_bionic", rval = "bool", args = { "int" } },
             { name = "activate_bionic", rval = "bool", args = { "int", "bool" } },
@@ -2038,7 +1898,6 @@ classes = {
             { name = "addiction_level", rval = "int", args = { "add_type" } },
             { name = "adjacent_tile", rval = "tripoint", args = { } },
             { name = "adjust_for_focus", rval = "int", args = { "int" } },
-            { name = "all_items_with_flag", rval = "int", args = { "string" } },
             { name = "amount_worn", rval = "int", args = { "string" } },
             { name = "apply_persistent_morale", rval = nil, args = { } },
             { name = "apply_wetness_morale", rval = nil, args = { "int" } },
@@ -2047,10 +1906,15 @@ classes = {
             { name = "base_time_to_craft", rval = "int", args = { "recipe", "int" } },
             { name = "best_shield", rval = "item&", args = { } },
             { name = "bionic_armor_bonus", rval = "float", args = { "body_part", "damage_type" } },
+            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id", "bool" } },
+            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id", "bool", "int" } },
+            { name = "bionics_install_failure", rval = nil, args = { "player", "int", "int", "float" } },
+            { name = "bionics_uninstall_failure", rval = nil, args = { "player" } },
             { name = "blossoms", rval = nil, args = { } },
             { name = "bodytemp_color", rval = "nc_color", args = { "int" } },
             { name = "bonus_damage", rval = "float", args = { "bool" } },
             { name = "bonus_item_warmth", rval = "int", args = { "body_part" } },
+            { name = "book_fun_for", rval = "int", args = { "item" } },
             { name = "burn_move_stamina", rval = nil, args = { "int" } },
             { name = "calc_focus_equilibrium", rval = "int", args = { } },
             { name = "can_arm_block", rval = "bool", args = { } },
@@ -2085,15 +1949,8 @@ classes = {
             { name = "complete_disassemble", rval = nil, args = { } },
             { name = "consume", rval = "bool", args = { "int" } },
             { name = "consume_charges", rval = "bool", args = { "item", "int" } },
-            { name = "consume_components_for_craft", rval = "int", args = { "recipe", "int" } },
-            { name = "consume_components_for_craft", rval = "int", args = { "recipe", "int", "bool" } },
             { name = "consume_effects", rval = nil, args = { "item" } },
             { name = "consume_item", rval = "bool", args = { "item" } },
-            { name = "consume_items", rval = "int", args = { "int" } },
-            { name = "consume_items", rval = "int", args = { "int", "int" } },
-            { name = "consume_tools", rval = nil, args = { "int" } },
-            { name = "consume_tools", rval = nil, args = { "int", "int" } },
-            { name = "consume_tools", rval = nil, args = { "int", "int", "string" } },
             { name = "cough", rval = nil, args = { "bool" } },
             { name = "cough", rval = nil, args = { "bool", "int" } },
             { name = "cough", rval = nil, args = { } },
@@ -2117,7 +1974,6 @@ classes = {
             { name = "drink_from_hands", rval = "int", args = { "item" } },
             { name = "drop", rval = nil, args = { "int" } },
             { name = "drop", rval = nil, args = { "int", "tripoint" } },
-            { name = "drop", rval = nil, args = { "int", "tripoint", "bool" } },
             { name = "dump_memorial", rval = "string", args = { } },
             { name = "eat", rval = "bool", args = { "item" } },
             { name = "eat", rval = "bool", args = { "item", "bool" } },
@@ -2135,34 +1991,21 @@ classes = {
             { name = "getID", rval = "int", args = { } },
             { name = "get_acquirable_energy", rval = "int", args = { "item" } },
             { name = "get_active_mission_target", rval = "tripoint", args = { } },
-            { name = "get_active_missions", rval = "int", args = { } },
-            { name = "get_all_techniques", rval = "int", args = { "item" } },
             { name = "get_armor_acid", rval = "int", args = { "body_part" } },
             { name = "get_armor_fire", rval = "int", args = { "body_part" } },
-            { name = "get_artifact_items", rval = "int", args = { } },
             { name = "get_category_dream", rval = "string", args = { "string", "int" } },
             { name = "get_combat_style", rval = "martialart&", args = { } },
             { name = "get_comestible_from", rval = "item&", args = { "item" } },
-            { name = "get_completed_missions", rval = "int", args = { } },
-            { name = "get_crafting_helpers", rval = "int", args = { } },
-            { name = "get_dependent_worn_items", rval = "int", args = { "item" } },
-            { name = "get_eligible_containers_for_crafting", rval = "int", args = { } },
-            { name = "get_failed_missions", rval = "int", args = { } },
             { name = "get_free_bionics_slots", rval = "int", args = { "body_part" } },
             { name = "get_highest_category", rval = "string", args = { } },
             { name = "get_hit_weapon", rval = "float", args = { "item" } },
-            { name = "get_hostile_creatures", rval = "int", args = { "int" } },
             { name = "get_miss_reason", rval = "string", args = { } },
             { name = "get_morale_level", rval = "int", args = { } },
-            { name = "get_overlay_ids", rval = "int", args = { } },
             { name = "get_painkiller", rval = "int", args = { } },
-            { name = "get_radio_items", rval = "int", args = { } },
             { name = "get_sick", rval = nil, args = { } },
             { name = "get_stamina_max", rval = "int", args = { } },
-            { name = "get_targetable_creatures", rval = "int", args = { "int" } },
             { name = "get_total_bionics_slots", rval = "int", args = { "body_part" } },
             { name = "get_used_bionics_slots", rval = "int", args = { "body_part" } },
-            { name = "get_visible_creatures", rval = "int", args = { "int" } },
             { name = "get_wind_resistance", rval = "int", args = { "body_part" } },
             { name = "global_omt_location", rval = "tripoint", args = { } },
             { name = "global_sm_location", rval = "tripoint", args = { } },
@@ -2212,12 +2055,11 @@ classes = {
             { name = "hurtall", rval = nil, args = { "int", "Creature" } },
             { name = "hurtall", rval = nil, args = { "int", "Creature", "bool" } },
             { name = "in_climate_control", rval = "bool", args = { } },
-            { name = "install_bionics", rval = "bool", args = { "itype" } },
-            { name = "install_bionics", rval = "bool", args = { "itype", "int" } },
-            { name = "install_bionics", rval = "bool", args = { "itype", "int", "bool" } },
+            { name = "install_bionics", rval = "bool", args = { "itype", "player" } },
+            { name = "install_bionics", rval = "bool", args = { "itype", "player", "bool" } },
+            { name = "install_bionics", rval = "bool", args = { "itype", "player", "bool", "int" } },
             { name = "intimidation", rval = "int", args = { } },
-            { name = "introduce_into_anesthesia", rval = nil, args = { "time_duration", "bool" } },
-            { name = "inv_dump", rval = "int", args = { } },
+            { name = "introduce_into_anesthesia", rval = nil, args = { "time_duration", "player", "bool" } },
             { name = "invalidate_crafting_inventory", rval = nil, args = { } },
             { name = "invlet_to_position", rval = "int", args = { "int" } },
             { name = "invoke_item", rval = "bool", args = { "item" } },
@@ -2285,7 +2127,6 @@ classes = {
             { name = "mutate", rval = nil, args = { } },
             { name = "mutate_category", rval = nil, args = { "string" } },
             { name = "mutate_towards", rval = "bool", args = { "trait_id" } },
-            { name = "mutation_attacks", rval = "int", args = { "Creature" } },
             { name = "mutation_ok", rval = "bool", args = { "trait_id", "bool", "bool" } },
             { name = "natural_attack_restricted_on", rval = "bool", args = { "body_part" } },
             { name = "num_bionics", rval = "int", args = { } },
@@ -2337,7 +2178,6 @@ classes = {
             { name = "search_surroundings", rval = nil, args = { } },
             { name = "sees_with_infrared", rval = "bool", args = { "Creature" } },
             { name = "setID", rval = nil, args = { "int" } },
-            { name = "set_destination", rval = nil, args = { "int" } },
             { name = "set_highest_cat_level", rval = nil, args = { } },
             { name = "set_painkiller", rval = nil, args = { "int" } },
             { name = "set_underwater", rval = nil, args = { "bool" } },
@@ -2347,6 +2187,7 @@ classes = {
             { name = "shift_destination", rval = nil, args = { "int", "int" } },
             { name = "shoe_type_count", rval = "int", args = { "string" } },
             { name = "shout", rval = nil, args = { "string" } },
+            { name = "shout", rval = nil, args = { } },
             { name = "sight_impaired", rval = "bool", args = { } },
             { name = "sleep_spot", rval = "int", args = { "tripoint" } },
             { name = "sort_armor", rval = nil, args = { } },
@@ -2381,15 +2222,11 @@ classes = {
             { name = "update_needs", rval = nil, args = { "int" } },
             { name = "update_stamina", rval = nil, args = { "int" } },
             { name = "use", rval = nil, args = { "int" } },
-            { name = "use_amount", rval = "int", args = { "string", "int" } },
-            { name = "use_charges", rval = "int", args = { "string", "int" } },
             { name = "use_charges_if_avail", rval = "bool", args = { "string", "int" } },
             { name = "use_wielded", rval = nil, args = { } },
             { name = "visibility", rval = "int", args = { "bool" } },
             { name = "visibility", rval = "int", args = { "bool", "int" } },
             { name = "visibility", rval = "int", args = { } },
-            { name = "vitamins_from", rval = "int", args = { "item" } },
-            { name = "vitamins_from", rval = "int", args = { "string" } },
             { name = "vomit", rval = nil, args = { } },
             { name = "vomit_mod", rval = "float", args = { } },
             { name = "wake_up", rval = nil, args = { } },
@@ -2409,61 +2246,51 @@ classes = {
             { name = "wield_contents", rval = "bool", args = { "item", "int" } },
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool" } },
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool", "int" } },
-        }
-    },
-    point = {
+    }
+}
+classes["point"] = {
         code_prepend = "#include \"enums.h\"\n",
-        new = {
+    new = {
             { "int", "int" },
             { },
-        },
-        attributes = {
+    },
+    attributes = {
             x = { type = "int", writable = true },
             y = { type = "int", writable = true },
-        },
-        functions = {
-        }
     },
-    quality = {
+    functions = {
+    }
+}
+classes["quality"] = {
         code_prepend = "#include \"requirements.h\"\n",
-        new = {
-        },
-        string_id = "quality_id",
-        attributes = {
+    new = {
+    },
+    string_id = "quality_id",
+    attributes = {
             id = { type = "quality_id", writable = true },
             name = { type = "string", writable = true },
-            usages = { type = "int", writable = true },
-        },
-        functions = {
-        }
     },
-    recipe = {
+    functions = {
+    }
+}
+classes["recipe"] = {
         code_prepend = "#include \"recipe.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "recipe_id",
-        attributes = {
-            autolearn_requirements = { type = "int", writable = true },
-            booksets = { type = "int", writable = true },
-            byproducts = { type = "int", writable = true },
+    },
+    string_id = "recipe_id",
+    attributes = {
             category = { type = "string", writable = true },
             description = { type = "string", writable = true },
             difficulty = { type = "int", writable = true },
-            learn_by_disassembly = { type = "int", writable = true },
             never_learn = { type = "bool", writable = true },
-            required_skills = { type = "int", writable = true },
             skill_used = { type = "skill_id", writable = true },
             subcategory = { type = "string", writable = true },
             time = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "batch_time", rval = "int", args = { "int", "float", "int" } },
-            { name = "create_byproducts", rval = "int", args = { "int" } },
-            { name = "create_byproducts", rval = "int", args = { } },
             { name = "create_result", rval = "item", args = { } },
-            { name = "create_results", rval = "int", args = { "int" } },
-            { name = "create_results", rval = "int", args = { } },
             { name = "finalize", rval = nil, args = { } },
             { name = "get_consistency_error", rval = "string", args = { } },
             { name = "has_byproducts", rval = "bool", args = { } },
@@ -2473,72 +2300,67 @@ classes = {
             { name = "required_skills_string", rval = "string", args = { } },
             { name = "result", rval = "string", args = { } },
             { name = "result_name", rval = "string", args = { } },
-        }
-    },
-    species_type = {
+    }
+}
+classes["species_type"] = {
         code_prepend = "#include \"monstergenerator.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "species_id",
-        attributes = {
-            anger_trig = { type = "int", writable = true },
-            fear_trig = { type = "int", writable = true },
-            flags = { type = "int", writable = true },
-            id = { type = "species_id", writable = true },
-            placate_trig = { type = "int", writable = true },
-        },
-        functions = {
-        }
     },
-    start_location = {
+    string_id = "species_id",
+    attributes = {
+            id = { type = "species_id", writable = true },
+    },
+    functions = {
+    }
+}
+classes["start_location"] = {
         code_prepend = "#include \"start_location.h\"\n",
-        new = {
+    new = {
             { },
-        },
-        string_id = "start_location_id",
-        attributes = {
-        },
-        functions = {
+    },
+    string_id = "start_location_id",
+    attributes = {
+    },
+    functions = {
             { name = "add_map_special", rval = nil, args = { "tripoint", "string" } },
             { name = "burn", rval = nil, args = { "tripoint", "int", "int" } },
             { name = "find_player_initial_location", rval = "tripoint", args = { } },
-            { name = "flags", rval = "int", args = { } },
-            { name = "get_all", static = true, rval = "int", args = { } },
             { name = "handle_heli_crash", rval = nil, args = { "player" } },
-            { name = "ident", rval = "start_location_id", args = { } },
+            { name = "ident", rval = "string_id<start_location>&", args = { } },
             { name = "name", rval = "string", args = { } },
             { name = "place_player", rval = nil, args = { "player" } },
             { name = "prepare_map", rval = nil, args = { "tripoint" } },
             { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
             { name = "target", rval = "string", args = { } },
-        }
-    },
-    stats = {
+    }
+}
+classes["stats"] = {
         code_prepend = "#include \"player.h\"\n",
-        new = {
-        },
-        attributes = {
+    new = {
+    },
+    attributes = {
             damage_healed = { type = "int", writable = true },
             damage_taken = { type = "int", writable = true },
             headshots = { type = "int", writable = true },
             squares_walked = { type = "int", writable = true },
-        },
-        functions = {
-        }
     },
-    ter_t = {
-        code_prepend = "#include \"mapdata.h\"\n, #include \"color.h\"\n",
-        new = {
+    functions = {
+    }
+}
+classes["ter_t"] = {
+        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+    new = {
             { },
-        },
-        string_id = "ter_str_id",
-        int_id = "ter_id",
-        attributes = {
+    },
+    string_id = "ter_str_id",
+    int_id = "ter_id",
+    attributes = {
             close = { type = "ter_str_id", writable = true },
             connect_group = { type = "int", writable = true },
             description = { type = "string", writable = true },
             id = { type = "ter_str_id", writable = true },
+            looks_like = { type = "string", writable = true },
             max_volume = { type = "volume", writable = true },
             movecost = { type = "int", writable = true },
             open = { type = "ter_str_id", writable = true },
@@ -2547,63 +2369,61 @@ classes = {
             transparent = { type = "bool", writable = true },
             trap = { type = "trap_id", writable = true },
             trap_id_str = { type = "string", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "check", rval = nil, args = { } },
             { name = "color", rval = "nc_color", args = { } },
             { name = "connects_to", rval = "bool", args = { "int" } },
             { name = "count", static = true, rval = "int", args = { } },
             { name = "extended_description", rval = "string", args = { } },
-            { name = "get_harvest_names", rval = "int", args = { } },
             { name = "has_flag", rval = "bool", args = { "string" } },
             { name = "name", rval = "string", args = { } },
             { name = "set_connects", rval = nil, args = { "string" } },
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
-        }
-    },
-    time_duration = {
+    }
+}
+classes["time_duration"] = {
         code_prepend = "#include \"calendar.h\"\n",
-        new = {
-        },
-        has_equal = true,
-        attributes = {
-        },
-        functions = {
-        }
+    new = {
     },
-    time_point = {
+    has_equal = true,
+    attributes = {
+    },
+    functions = {
+    }
+}
+classes["time_point"] = {
         code_prepend = "#include \"calendar.h\"\n",
-        new = {
+    new = {
             { "calendar" },
             { "int" },
-        },
-        attributes = {
-        },
-        functions = {
-            { name = "from_turn", static = true, rval = "time_point", args = { "int" } },
-        }
     },
-    trap = {
+    attributes = {
+    },
+    functions = {
+            { name = "from_turn", static = true, rval = "time_point", args = { "int" } },
+    }
+}
+classes["trap"] = {
         code_prepend = "#include \"trap.h\"\n",
-        new = {
-        },
-        string_id = "trap_str_id",
-        int_id = "trap_id",
-        attributes = {
+    new = {
+    },
+    string_id = "trap_str_id",
+    int_id = "trap_id",
+    attributes = {
             color = { type = "nc_color", writable = true },
             id = { type = "trap_str_id", writable = true },
             loadid = { type = "trap_id", writable = true },
             sym = { type = "int", writable = true },
-        },
-        functions = {
+    },
+    functions = {
             { name = "can_see", rval = "bool", args = { "tripoint", "player" } },
             { name = "count", static = true, rval = "int", args = { } },
             { name = "detect_trap", rval = "bool", args = { "tripoint", "player" } },
             { name = "funnel_turns_per_charge", rval = "float", args = { "float" } },
             { name = "get_avoidance", rval = "int", args = { } },
             { name = "get_difficulty", rval = "int", args = { } },
-            { name = "get_funnels", static = true, rval = "int", args = { } },
             { name = "get_visibility", rval = "int", args = { } },
             { name = "is_3x3_trap", rval = "bool", args = { } },
             { name = "is_benign", rval = "bool", args = { } },
@@ -2613,41 +2433,37 @@ classes = {
             { name = "on_disarmed", rval = nil, args = { "map", "tripoint" } },
             { name = "trigger", rval = nil, args = { "tripoint", "Creature" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
-        }
-    },
-    tripoint = {
+    }
+}
+classes["tripoint"] = {
         code_prepend = "#include \"enums.h\"\n",
-        new = {
+    new = {
             { "int", "int", "int" },
             { "point", "int" },
             { },
-        },
-        attributes = {
+    },
+    attributes = {
             x = { type = "int", writable = true },
             y = { type = "int", writable = true },
             z = { type = "int", writable = true },
-        },
-        functions = {
-        }
     },
-    uimenu = {
+    functions = {
+    }
+}
+classes["uimenu"] = {
         code_prepend = "#include \"ui.h\"\n",
-        new = {
-            { "bool", "int", "int", "int", "int", "int" },
-            { "int" },
-            { "int", "int", "int", "int", "int" },
-        },
-        attributes = {
-            additional_actions = { type = "int", writable = true },
+    new = {
+            { "string" },
+            { },
+    },
+    attributes = {
             border = { type = "bool", writable = true },
             border_color = { type = "nc_color", writable = true },
             centered_scroll = { type = "bool", writable = true },
             desc_enabled = { type = "bool", writable = true },
             desc_lines = { type = "int", writable = true },
             disabled_color = { type = "nc_color", writable = true },
-            entries = { type = "int", writable = true },
-            fentries = { type = "int", writable = true },
-            filter = { type = "int", writable = true },
+            filter = { type = "string", writable = true },
             filtering = { type = "bool", writable = true },
             filtering_nocase = { type = "bool", writable = true },
             fselected = { type = "int", writable = true },
@@ -2655,8 +2471,7 @@ classes = {
             hilight_disabled = { type = "bool", writable = true },
             hilight_full = { type = "bool", writable = true },
             hotkey_color = { type = "nc_color", writable = true },
-            input_category = { type = "int", writable = true },
-            keymap = { type = "int", writable = true },
+            input_category = { type = "string", writable = true },
             keypress = { type = "int", writable = true },
             max_desc_len = { type = "int", writable = true },
             max_entry_len = { type = "int", writable = true },
@@ -2670,12 +2485,11 @@ classes = {
             scrollbar_side = { type = "int", writable = true },
             selected = { type = "int", writable = true },
             shift_retval = { type = "int", writable = true },
-            text = { type = "int", writable = true },
+            text = { type = "string", writable = true },
             text_color = { type = "nc_color", writable = true },
             textalign = { type = "int", writable = true },
-            textformatted = { type = "int", writable = true },
             textwidth = { type = "int", writable = true },
-            title = { type = "int", writable = true },
+            title = { type = "string", writable = true },
             title_color = { type = "nc_color", writable = true },
             vmax = { type = "int", writable = true },
             vshift = { type = "int", writable = true },
@@ -2683,16 +2497,16 @@ classes = {
             w_width = { type = "int", writable = true },
             w_x = { type = "int", writable = true },
             w_y = { type = "int", writable = true },
-        },
-        functions = {
-            { name = "addentry", rval = nil, args = { "int" } },
-            { name = "addentry", rval = nil, args = { "int", "bool", "int", "int" } },
-            { name = "addentry_desc", rval = nil, args = { "int", "bool", "int", "int", "int" } },
-            { name = "addentry_desc", rval = nil, args = { "int", "int" } },
+    },
+    functions = {
+            { name = "addentry", rval = nil, args = { "int", "bool", "int", "string" } },
+            { name = "addentry", rval = nil, args = { "string" } },
+            { name = "addentry_desc", rval = nil, args = { "int", "bool", "int", "string", "string" } },
+            { name = "addentry_desc", rval = nil, args = { "string", "string" } },
             { name = "apply_scrollbar", rval = nil, args = { } },
             { name = "filterlist", rval = nil, args = { } },
             { name = "init", rval = nil, args = { } },
-            { name = "inputfilter", rval = "int", args = { } },
+            { name = "inputfilter", rval = "string", args = { } },
             { name = "query", rval = nil, args = { "bool" } },
             { name = "query", rval = nil, args = { } },
             { name = "redraw", rval = nil, args = { "bool" } },
@@ -2700,167 +2514,156 @@ classes = {
             { name = "refresh", rval = nil, args = { "bool" } },
             { name = "refresh", rval = nil, args = { } },
             { name = "reset", rval = nil, args = { } },
-            { name = "scroll_amount_from_action", rval = "int", args = { "int" } },
+            { name = "scroll_amount_from_action", rval = "int", args = { "string" } },
             { name = "scroll_amount_from_key", rval = "int", args = { "int" } },
             { name = "scrollby", rval = "bool", args = { "int" } },
-            { name = "settext", rval = nil, args = { "int" } },
+            { name = "settext", rval = nil, args = { "string" } },
             { name = "setup", rval = nil, args = { } },
             { name = "show", rval = nil, args = { } },
-        }
-    },
-    w_point = {
+    }
+}
+classes["w_point"] = {
         code_prepend = "#include \"weather_gen.h\"\n",
-        new = {
-        },
-        attributes = {
+    new = {
+    },
+    attributes = {
             acidic = { type = "bool", writable = true },
             humidity = { type = "float", writable = true },
             pressure = { type = "float", writable = true },
             temperature = { type = "float", writable = true },
             windpower = { type = "float", writable = true },
-        },
-        functions = {
-        }
     },
+    functions = {
+    }
 }
 
-enums = {
-    add_type = {
-        values = {
-        "ADD_NULL",
-        "ADD_CAFFEINE",
-        "ADD_ALCOHOL",
-        "ADD_SLEEP",
-        "ADD_PKILLER",
-        "ADD_SPEED",
-        "ADD_CIG",
-        "ADD_COKE",
-        "ADD_CRACK",
-        "ADD_MUTAGEN",
-        "ADD_DIAZEPAM",
-        "ADD_MARLOSS_R",
-        "ADD_MARLOSS_B",
-        "ADD_MARLOSS_Y",
-        }    },
-    body_part = {
-        values = {
-        "bp_torso",
-        "bp_head",
-        "bp_eyes",
-        "bp_mouth",
-        "bp_arm_l",
-        "bp_arm_r",
-        "bp_hand_l",
-        "bp_hand_r",
-        "bp_leg_l",
-        "bp_leg_r",
-        "bp_foot_l",
-        "bp_foot_r",
-        "num_bp",
-        }    },
-    damage_type = {
-        values = {
-        "DT_NULL",
-        "DT_TRUE",
-        "DT_BIOLOGICAL",
-        "DT_BASH",
-        "DT_CUT",
-        "DT_ACID",
-        "DT_STAB",
-        "DT_HEAT",
-        "DT_COLD",
-        "DT_ELECTRIC",
-        "NUM_DT",
-        }    },
-    field_id = {
-        values = {
-        "fd_null",
-        "fd_blood",
-        "fd_bile",
-        "fd_gibs_flesh",
-        "fd_gibs_veggy",
-        "fd_web",
-        "fd_slime",
-        "fd_acid",
-        "fd_sap",
-        "fd_sludge",
-        "fd_fire",
-        "fd_rubble",
-        "fd_smoke",
-        "fd_toxic_gas",
-        "fd_tear_gas",
-        "fd_nuke_gas",
-        "fd_gas_vent",
-        "fd_fire_vent",
-        "fd_flame_burst",
-        "fd_electricity",
-        "fd_fatigue",
-        "fd_push_items",
-        "fd_shock_vent",
-        "fd_acid_vent",
-        "fd_plasma",
-        "fd_laser",
-        "fd_spotlight",
-        "fd_dazzling",
-        "fd_blood_veggy",
-        "fd_blood_insect",
-        "fd_blood_invertebrate",
-        "fd_gibs_insect",
-        "fd_gibs_invertebrate",
-        "fd_cigsmoke",
-        "fd_weedsmoke",
-        "fd_cracksmoke",
-        "fd_methsmoke",
-        "fd_bees",
-        "fd_incendiary",
-        "fd_relax_gas",
-        "fd_fungal_haze",
-        "fd_hot_air1",
-        "fd_hot_air2",
-        "fd_hot_air3",
-        "fd_hot_air4",
-        "fd_fungicidal_gas",
-        "num_fields",
-        }    },
-    hp_part = {
-        values = {
-        "hp_head",
-        "hp_torso",
-        "hp_arm_l",
-        "hp_arm_r",
-        "hp_leg_l",
-        "hp_leg_r",
-        "num_hp_parts",
-        }    },
-    m_size = {
-        values = {
-        "MS_TINY",
-        "MS_SMALL",
-        "MS_MEDIUM",
-        "MS_LARGE",
-        "MS_HUGE",
-        }    },
-    phase_id = {
-        values = {
-        "PNULL",
-        "SOLID",
-        "LIQUID",
-        "GAS",
-        "PLASMA",
-        }    },
-    season_type = {
-        values = {
-        "SPRING",
-        "SUMMER",
-        "AUTUMN",
-        "WINTER",
-        }    },
-    side = {
-        values = {
-        "BOTH",
-        "LEFT",
-        "RIGHT",
-        }    },
+enums["add_type"] = {
+    "ADD_NULL",
+    "ADD_CAFFEINE",
+    "ADD_ALCOHOL",
+    "ADD_SLEEP",
+    "ADD_PKILLER",
+    "ADD_SPEED",
+    "ADD_CIG",
+    "ADD_COKE",
+    "ADD_CRACK",
+    "ADD_MUTAGEN",
+    "ADD_DIAZEPAM",
+    "ADD_MARLOSS_R",
+    "ADD_MARLOSS_B",
+    "ADD_MARLOSS_Y",
+}
+enums["body_part"] = {
+    "bp_torso",
+    "bp_head",
+    "bp_eyes",
+    "bp_mouth",
+    "bp_arm_l",
+    "bp_arm_r",
+    "bp_hand_l",
+    "bp_hand_r",
+    "bp_leg_l",
+    "bp_leg_r",
+    "bp_foot_l",
+    "bp_foot_r",
+    "num_bp",
+}
+enums["damage_type"] = {
+    "DT_NULL",
+    "DT_TRUE",
+    "DT_BIOLOGICAL",
+    "DT_BASH",
+    "DT_CUT",
+    "DT_ACID",
+    "DT_STAB",
+    "DT_HEAT",
+    "DT_COLD",
+    "DT_ELECTRIC",
+    "NUM_DT",
+}
+enums["field_id"] = {
+    "fd_null",
+    "fd_blood",
+    "fd_bile",
+    "fd_gibs_flesh",
+    "fd_gibs_veggy",
+    "fd_web",
+    "fd_slime",
+    "fd_acid",
+    "fd_sap",
+    "fd_sludge",
+    "fd_fire",
+    "fd_rubble",
+    "fd_smoke",
+    "fd_toxic_gas",
+    "fd_tear_gas",
+    "fd_nuke_gas",
+    "fd_gas_vent",
+    "fd_fire_vent",
+    "fd_flame_burst",
+    "fd_electricity",
+    "fd_fatigue",
+    "fd_push_items",
+    "fd_shock_vent",
+    "fd_acid_vent",
+    "fd_plasma",
+    "fd_laser",
+    "fd_spotlight",
+    "fd_dazzling",
+    "fd_blood_veggy",
+    "fd_blood_insect",
+    "fd_blood_invertebrate",
+    "fd_gibs_insect",
+    "fd_gibs_invertebrate",
+    "fd_cigsmoke",
+    "fd_weedsmoke",
+    "fd_cracksmoke",
+    "fd_methsmoke",
+    "fd_bees",
+    "fd_incendiary",
+    "fd_relax_gas",
+    "fd_fungal_haze",
+    "fd_hot_air1",
+    "fd_hot_air2",
+    "fd_hot_air3",
+    "fd_hot_air4",
+    "fd_fungicidal_gas",
+    "fd_smoke_vent",
+    "num_fields",
+}
+enums["hp_part"] = {
+    "hp_head",
+    "hp_torso",
+    "hp_arm_l",
+    "hp_arm_r",
+    "hp_leg_l",
+    "hp_leg_r",
+    "num_hp_parts",
+}
+enums["m_size"] = {
+    "MS_TINY",
+    "MS_SMALL",
+    "MS_MEDIUM",
+    "MS_LARGE",
+    "MS_HUGE",
+}
+enums["phase_id"] = {
+    "PNULL",
+    "SOLID",
+    "LIQUID",
+    "GAS",
+    "PLASMA",
+}
+enums["season_type"] = {
+    "SPRING",
+    "SUMMER",
+    "AUTUMN",
+    "WINTER",
+}
+enums["side"] = {
+    "BOTH",
+    "LEFT",
+    "RIGHT",
 }
 
 global_functions = {
@@ -2884,9 +2687,7 @@ accuracy_grazing = { type = "float" },
 accuracy_headshot = { type = "float" },
 accuracy_standard = { type = "float" },
 bits = { cpp_name = "om_direction::bits", type = "int" },
-bp_aiOther = { type = "int" },
 size = { cpp_name = "om_direction::size", type = "int" },
 tripoint_min = { type = "tripoint" },
 tripoint_zero = { type = "tripoint" },
 }
-
