@@ -315,9 +315,6 @@ std::shared_ptr<mapgen_function>
             } else {
                 debugmsg( "oter_t[%s]: Invalid mapgen function (missing \"script\" or \"file\" value).", id_base.c_str() );
             }
-#ifndef LUA
-            dbg( D_ERROR ) << "oter_t " << id_base << ": mapgen entry requires a build with LUA=1.";
-#endif
         } else if( mgtype == "json" ) {
             if( jio.has_object( "object" ) ) {
                 JsonObject jo = jio.get_object( "object" );

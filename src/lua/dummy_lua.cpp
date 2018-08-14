@@ -32,6 +32,11 @@ void lua_engine::run_console()
     popup( _( "This build does not support Lua." ) );
 }
 
+bool lua_engine::enabled() const
+{
+    return false;
+}
+
 void catalua::stack::push_value( const lua_engine &/*engine*/, const char */*value*/ )
 {
 }
