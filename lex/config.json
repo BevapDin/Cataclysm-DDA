@@ -17,7 +17,6 @@
         "game",
         "species_type",
         "encumbrance_data",
-        { "lua_name": "item_stack_iterator", "cpp_name": "std::list<item>::iterator" },
         "stats",
         "player",
         "item",
