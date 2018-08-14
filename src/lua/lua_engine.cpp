@@ -111,7 +111,7 @@ class lua_iuse_wrapper : public iuse_actor
             const int cnt = catalua::stack::push_all( *g->lua_engine_ptr, it, a, pos );
             catalua::stack::call_non_void_function( *g->lua_engine_ptr, cnt );
 
-            const int result = catalua::stack::pop_value<int>( *g->lua_engine_ptr, -1 );
+            const int result = catalua::stack::get_value<int>( *g->lua_engine_ptr, -1 );
             return result;
         }
         iuse_actor *clone() const override {
