@@ -5,6 +5,7 @@
 #include "translations.h"
 #include "string_formatter.h"
 #include "dependency_tree.h"
+#include "lua/lua_engine.h"
 
 #include <algorithm>
 
@@ -55,11 +56,11 @@ std::string mod_ui::get_information( const MOD_INFORMATION *mod )
     }
 
     if( mod->need_lua() ) {
-#ifdef LUA
-        info << _( "This mod requires <color_green>Lua support</color>" ) << "\n";
-#else
-        info << _( "This mod requires <color_red>Lua support</color>" ) << "\n";
-#endif
+        if( g->lua_engine_ptr->enabled() ) {
+            info << _( "This mod requires <color_green>Lua support</color>" ) << "\n";
+        } else {
+            info << _( "This mod requires <color_red>Lua support</color>" ) << "\n";
+        }
     }
 
     std::string note = !mm_tree.is_available( mod->ident ) ? mm_tree.get_node(
