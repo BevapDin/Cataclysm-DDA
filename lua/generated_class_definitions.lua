@@ -2657,6 +2657,7 @@ classes["w_point"] = {
 }
 
 enums["add_type"] = {
+    forward_declaration = "enum add_type : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
         "ADD_NULL",
@@ -2675,6 +2676,7 @@ enums["add_type"] = {
         "ADD_MARLOSS_Y",
     }}
 enums["body_part"] = {
+    forward_declaration = "enum body_part : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
         "bp_torso",
@@ -2692,6 +2694,7 @@ enums["body_part"] = {
         "num_bp",
     }}
 enums["damage_type"] = {
+    forward_declaration = "enum damage_type : int;\n",
     code_prepend = "#include \"damage.h\"",
     values = {
         "DT_NULL",
@@ -2707,6 +2710,7 @@ enums["damage_type"] = {
         "NUM_DT",
     }}
 enums["field_id"] = {
+    forward_declaration = "enum field_id : int;\n",
     code_prepend = "#include \"field.h\"",
     values = {
         "fd_null",
@@ -2759,6 +2763,7 @@ enums["field_id"] = {
         "num_fields",
     }}
 enums["hp_part"] = {
+    forward_declaration = "enum hp_part : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
         "hp_head",
@@ -2770,6 +2775,7 @@ enums["hp_part"] = {
         "num_hp_parts",
     }}
 enums["m_size"] = {
+    forward_declaration = "enum m_size : int;\n",
     code_prepend = "#include \"creature.h\"",
     values = {
         "MS_TINY",
@@ -2779,6 +2785,7 @@ enums["m_size"] = {
         "MS_HUGE",
     }}
 enums["phase_id"] = {
+    forward_declaration = "enum phase_id : int;\n",
     code_prepend = "#include \"enums.h\"",
     values = {
         "PNULL",
@@ -2788,6 +2795,7 @@ enums["phase_id"] = {
         "PLASMA",
     }}
 enums["season_type"] = {
+    forward_declaration = "enum season_type;\n",
     code_prepend = "#include \"calendar.h\"",
     values = {
         "SPRING",
@@ -2796,6 +2804,7 @@ enums["season_type"] = {
         "WINTER",
     }}
 enums["side"] = {
+    forward_declaration = "enum class side : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
         "BOTH",
