@@ -288,13 +288,6 @@ std::string CppClass::export_( Exporter &p ) const
 
     r = r + print_set( printed_constructors, tab + "new = {\n", tab + "},\n" );
 
-    if( const auto sid = p.get_string_id_for( full_name() ) ) {
-        r = r + tab + "string_id = \"" + *sid + "\",\n";
-    }
-    if( const auto iid = p.get_int_id_for( full_name() ) ) {
-        r = r + tab + "int_id = \"" + *iid + "\",\n";
-    }
-
     if( has_equal() ) {
         r = r + tab + "has_equal = true,\n";
     }
@@ -303,6 +296,16 @@ std::string CppClass::export_( Exporter &p ) const
     r = r + print_set( printed_functions, tab + "functions = {\n", tab + "}\n" );
 
     r = r + "}";
+
+    const auto sid = p.get_string_id_for( full_name() );
+    const auto iid = p.get_int_id_for( full_name() );
+    if( sid && iid ) {
+        r = r + "\nmake_id_classes(\"" + lua_name + "\", \"" + *iid + "\", \"" + *sid + "\")\n";
+    } else if( sid ) {
+        r = r + "\nmake_id_classes(\"" + lua_name + "\", nil, \"" + *sid + "\")\n";
+    } else if( iid ) {
+        r = r + "\nmake_id_classes(\"" + lua_name + "\", \"" + *iid + "\", nil)\n";
+    }
 
     return r;
 }

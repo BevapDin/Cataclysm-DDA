@@ -354,7 +354,6 @@ classes["MonsterGroup"] = {
         code_prepend = "#include \"mongroup.h\"\n",
     new = {
     },
-    string_id = "mongroup_id",
     attributes = {
             defaultMonster = { type = "mtype_id", writable = true },
             freq_total = { type = "int", writable = true },
@@ -368,12 +367,13 @@ classes["MonsterGroup"] = {
             { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
     }
 }
+make_id_classes("MonsterGroup", nil, "mongroup_id")
+
 classes["Skill"] = {
         code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
-    string_id = "skill_id",
     has_equal = true,
     attributes = {
     },
@@ -387,13 +387,14 @@ classes["Skill"] = {
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
     }
 }
+make_id_classes("Skill", nil, "skill_id")
+
 classes["ammunition_type"] = {
         code_prepend = "#include \"ammo.h\"\n",
     new = {
             { "string" },
             { },
     },
-    string_id = "ammotype",
     attributes = {
     },
     functions = {
@@ -401,6 +402,8 @@ classes["ammunition_type"] = {
             { name = "name", rval = "string", args = { } },
     }
 }
+make_id_classes("ammunition_type", nil, "ammotype")
+
 classes["calendar"] = {
         code_prepend = "#include \"calendar.h\"\n",
     new = {
@@ -435,7 +438,6 @@ classes["effect_type"] = {
     new = {
             { },
     },
-    string_id = "efftype_id",
     attributes = {
             id = { type = "efftype_id", writable = true },
     },
@@ -451,6 +453,8 @@ classes["effect_type"] = {
             { name = "use_name_ints", rval = "bool", args = { } },
     }
 }
+make_id_classes("effect_type", nil, "efftype_id")
+
 classes["encumbrance_data"] = {
         code_prepend = "#include \"character.h\"\n",
     new = {
@@ -514,8 +518,6 @@ classes["furn_t"] = {
     new = {
             { },
     },
-    string_id = "furn_str_id",
-    int_id = "furn_id",
     attributes = {
             close = { type = "furn_str_id", writable = true },
             connect_group = { type = "int", writable = true },
@@ -545,6 +547,8 @@ classes["furn_t"] = {
             { name = "symbol", rval = "int", args = { } },
     }
 }
+make_id_classes("furn_t", "furn_id", "furn_str_id")
+
 classes["game"] = {
         code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
@@ -730,7 +734,6 @@ classes["gun_mode"] = {
     new = {
             { },
     },
-    string_id = "gun_mode_id",
     attributes = {
             qty = { type = "int", writable = true },
             target = { type = "item", writable = true },
@@ -740,6 +743,8 @@ classes["gun_mode"] = {
             { name = "name", rval = "string", args = { } },
     }
 }
+make_id_classes("gun_mode", nil, "gun_mode_id")
+
 classes["item"] = {
         code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
@@ -1117,7 +1122,6 @@ classes["ma_buff"] = {
     new = {
             { },
     },
-    string_id = "mabuff_id",
     attributes = {
             blocks_bonus = { type = "int", writable = true },
             buff_duration = { type = "time_duration", writable = true },
@@ -1148,12 +1152,13 @@ classes["ma_buff"] = {
             { name = "speed_bonus", rval = "int", args = { "player" } },
     }
 }
+make_id_classes("ma_buff", nil, "mabuff_id")
+
 classes["ma_technique"] = {
         code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
     },
-    string_id = "matec_id",
     attributes = {
             aoe = { type = "string", writable = true },
             block_counter = { type = "bool", writable = true },
@@ -1185,6 +1190,8 @@ classes["ma_technique"] = {
             { name = "move_cost_penalty", rval = "float", args = { "player" } },
     }
 }
+make_id_classes("ma_technique", nil, "matec_id")
+
 classes["map"] = {
         code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
@@ -1507,7 +1514,6 @@ classes["martialart"] = {
     new = {
             { },
     },
-    string_id = "matype_id",
     attributes = {
             arm_block = { type = "int", writable = true },
             arm_block_with_bio_armor_arms = { type = "bool", writable = true },
@@ -1540,12 +1546,13 @@ classes["martialart"] = {
             { name = "weapon_valid", rval = "bool", args = { "item" } },
     }
 }
+make_id_classes("martialart", nil, "matype_id")
+
 classes["material_type"] = {
         code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
-    string_id = "material_id",
     attributes = {
             id = { type = "material_id", writable = true },
     },
@@ -1570,6 +1577,8 @@ classes["material_type"] = {
             { name = "soft", rval = "bool", args = { } },
     }
 }
+make_id_classes("material_type", nil, "material_id")
+
 classes["mongroup"] = {
         code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
     new = {
@@ -1709,7 +1718,6 @@ classes["mtype"] = {
     new = {
             { },
     },
-    string_id = "mtype_id",
     attributes = {
             age_grow = { type = "int", writable = true },
             agro = { type = "int", writable = true },
@@ -1774,11 +1782,12 @@ classes["mtype"] = {
             { name = "set_flag", rval = nil, args = { "string", "bool" } },
     }
 }
+make_id_classes("mtype", nil, "mtype_id")
+
 classes["mutation_branch"] = {
         code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
     new = {
     },
-    string_id = "trait_id",
     attributes = {
             activated = { type = "bool", writable = true },
             additions = { type = "std::vector<trait_id>", writable = true },
@@ -1832,6 +1841,8 @@ classes["mutation_branch"] = {
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
     }
 }
+make_id_classes("mutation_branch", nil, "trait_id")
+
 classes["nc_color"] = {
         code_prepend = "#include \"color.h\"\n",
     new = {
@@ -2322,7 +2333,6 @@ classes["quality"] = {
         code_prepend = "#include \"requirements.h\"\n",
     new = {
     },
-    string_id = "quality_id",
     attributes = {
             id = { type = "quality_id", writable = true },
             name = { type = "string", writable = true },
@@ -2330,12 +2340,13 @@ classes["quality"] = {
     functions = {
     }
 }
+make_id_classes("quality", nil, "quality_id")
+
 classes["recipe"] = {
         code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
             { },
     },
-    string_id = "recipe_id",
     attributes = {
             category = { type = "string", writable = true },
             description = { type = "string", writable = true },
@@ -2363,24 +2374,26 @@ classes["recipe"] = {
             { name = "result_name", rval = "string", args = { } },
     }
 }
+make_id_classes("recipe", nil, "recipe_id")
+
 classes["species_type"] = {
         code_prepend = "#include \"monstergenerator.h\"\n",
     new = {
             { },
     },
-    string_id = "species_id",
     attributes = {
             id = { type = "species_id", writable = true },
     },
     functions = {
     }
 }
+make_id_classes("species_type", nil, "species_id")
+
 classes["start_location"] = {
         code_prepend = "#include \"start_location.h\"\n",
     new = {
             { },
     },
-    string_id = "start_location_id",
     attributes = {
     },
     functions = {
@@ -2397,6 +2410,8 @@ classes["start_location"] = {
             { name = "target", rval = "string", args = { } },
     }
 }
+make_id_classes("start_location", nil, "start_location_id")
+
 classes["stats"] = {
         code_prepend = "#include \"player.h\"\n",
     new = {
@@ -2415,8 +2430,6 @@ classes["ter_t"] = {
     new = {
             { },
     },
-    string_id = "ter_str_id",
-    int_id = "ter_id",
     attributes = {
             close = { type = "ter_str_id", writable = true },
             connect_group = { type = "int", writable = true },
@@ -2445,6 +2458,8 @@ classes["ter_t"] = {
             { name = "symbol", rval = "int", args = { } },
     }
 }
+make_id_classes("ter_t", "ter_id", "ter_str_id")
+
 classes["time_duration"] = {
         code_prepend = "#include \"calendar.h\"\n",
     new = {
@@ -2471,8 +2486,6 @@ classes["trap"] = {
         code_prepend = "#include \"trap.h\"\n",
     new = {
     },
-    string_id = "trap_str_id",
-    int_id = "trap_id",
     attributes = {
             color = { type = "nc_color", writable = true },
             id = { type = "trap_str_id", writable = true },
@@ -2497,6 +2510,8 @@ classes["trap"] = {
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
     }
 }
+make_id_classes("trap", "trap_id", "trap_str_id")
+
 classes["tripoint"] = {
         code_prepend = "#include \"enums.h\"\n",
     new = {

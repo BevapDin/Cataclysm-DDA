@@ -109,6 +109,24 @@ function container_code_prepend(t)
     return ""
 end
 
+function container_cpp_name(t)
+    if classes[t] then
+        if classes[t].cpp_name then
+            return classes[t].cpp_name
+        end
+    end
+    return t
+end
+
+function container_forward_declaration(t)
+    if classes[t] then
+        if classes[t].forward_declaration then
+            return classes[t].forward_declaration
+        end
+    end
+    return ""
+end
+
 -- Adds the declaration for an C++ iterator class to the exported classes.
 -- @param container_type The C++ type id of the container class.
 -- @param element_type The C++ type of the container elements. This type must be exported
@@ -224,6 +242,62 @@ function make_std_set_class(element_type)
     return container_type
 end
 
+-- This adds the int_id wrappers from the class definition as real classes.
+-- All int_id<T>s have the same interface, so we only need to add some mark to T, that this class
+-- T has an int_id of some name.
+-- In the class definition: add "int_id" = "XXX" (XXX is the typedef id that is used by C++).
+function make_id_classes(class_name, int_id_name, string_id_name)
+    if int_id_name and not classes[int_id_name] then
+        -- This is the common int_id<T> interface:
+        local t = {
+            forward_declaration = container_forward_declaration(class_name) .. "using " .. int_id_name .. " = int_id<" .. container_cpp_name(class_name) .. ">;",
+            code_prepend = container_code_prepend(class_name) .. "\n#include \"int_id.h\"",
+            output_path = container_output_path(class_name),
+            has_equal = true,
+            cpp_name = "int_id<" .. container_cpp_name(class_name) .. ">",
+            -- IDs *could* be constructed from int, but where does the Lua script get the int from?
+            -- The int is only exposed as int_id<T>, so Lua should never know about it.
+            attributes = { },
+            -- Copy and default constructor
+            new = { { int_id_name }, { } },
+            functions = {
+                -- Use with care, only for displaying the value for debugging purpose!
+                { name = "to_i", rval = "int", args = { } },
+                { name = "obj", rval = class_name .. "&", args = { } },
+            }
+        }
+        if string_id_name then
+            -- Allow conversion from int_id to string_id
+            t[#t.functions] = { name = "id", rval = string_id_name, args = { } }
+            -- And creation of an int_id from a string_id
+            t.new = { { string_id_name }, { } }
+        end
+        classes[int_id_name] = t
+    end
+    -- Very similar to make_int_id above
+    if string_id_name and not classes[string_id_name] then
+        local t = {
+            forward_declaration = container_forward_declaration(class_name) .. "using " .. string_id_name .. " = string_id<" .. container_cpp_name(class_name) .. ">;",
+            code_prepend = container_code_prepend(class_name) .. "\n#include \"string_id.h\"",
+            output_path = container_output_path(class_name),
+            has_equal = true,
+            cpp_name = "string_id<" .. container_cpp_name(class_name) .. ">",
+            -- Copy and default constructor and construct from plain string.
+            new = { { string_id_name }, { }, { "string" } },
+            attributes = { },
+            functions = {
+                { name = "str", rval = "string", args = { } },
+                { name = "is_valid", rval = "bool", args = { } },
+                { name = "obj", rval = class_name .. "&", args = { } },
+            }
+        }
+        if int_id_name then
+            t.functions[#t.functions] = { name = "id", rval = int_id_name, args = { } }
+        end
+        classes[string_id_name] = t
+    end
+end
+
 function dofile_if_exists(f)
     local o = io.open(f, "r")
     if o ~= nil then
@@ -282,6 +356,8 @@ classes["mass"] = {
 
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
+
+classes["recipe"].code_prepend = classes["recipe"].code_prepend .. "\n#include \"item.h\""
 
 -- Headers that are required in order to compile the global functions wrapper
 global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
@@ -414,65 +490,3 @@ for enum_name, value in pairs(enums) do
         value.output_path = output_path_for_id(enum_name)
     end
 end
-
-
--- This adds the int_id wrappers from the class definition as real classes.
--- All int_id<T>s have the same interface, so we only need to add some mark to T, that this class
--- T has an int_id of some name.
--- In the class definition: add "int_id" = "XXX" (XXX is the typedef id that is used by C++).
-new_classes = {}
-for name, value in pairs(classes) do
-    if value.int_id then
-        -- This is the common int_id<T> interface:
-        local t = {
-            forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
-            code_prepend = value.code_prepend .. "\n#include \"string_id.h\"",
-            output_path = value.output_path,
-            has_equal = true,
-            cpp_name = "int_id<" .. value.cpp_name .. ">",
-            -- IDs *could* be constructed from int, but where does the Lua script get the int from?
-            -- The int is only exposed as int_id<T>, so Lua should never know about it.
-            attributes = { },
-            -- Copy and default constructor
-            new = { { value.int_id }, { } },
-            functions = {
-                -- Use with care, only for displaying the value for debugging purpose!
-                { name = "to_i", rval = "int", args = { } },
-                { name = "obj", rval = name .. "&", args = { } },
-            }
-        }
-        if value.string_id then
-            -- Allow conversion from int_id to string_id
-            t[#t.functions] = { name = "id", rval = value.string_id, args = { } }
-            -- And creation of an int_id from a string_id
-            t.new = { { value.string_id }, { } }
-        end
-        new_classes[value.int_id] = t
-    end
-    -- Very similar to int_id above
-    if value.string_id then
-        local t = {
-            forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
-            code_prepend = value.code_prepend .. "\n#include \"string_id.h\"",
-            output_path = value.output_path,
-            has_equal = true,
-            cpp_name = "string_id<" .. value.cpp_name .. ">",
-            -- Copy and default constructor and construct from plain string.
-            new = { { value.string_id }, { }, { "string" } },
-            attributes = { },
-            functions = {
-                { name = "str", rval = "string", args = { } },
-                { name = "is_valid", rval = "bool", args = { } },
-                { name = "obj", rval = name .. "&", args = { } },
-            }
-        }
-        if value.int_id then
-            t.functions[#t.functions] = { name = "id", rval = value.int_id, args = { } }
-        end
-        new_classes[value.string_id] = t
-    end
-end
-for name, value in pairs(new_classes) do
-    classes[name] = value
-end
-new_classes = nil
