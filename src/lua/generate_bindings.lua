@@ -34,6 +34,10 @@ function sorted_keys(t, condition)
     return res;
 end
 
+function id_to_simple_string(id)
+    return id:gsub("[^a-z0-9A-Z_]", "_")
+end
+
 -- Generic helpers to generate C++ source code chunks for use in our lua binding.
 ---------------------------------------------------------------------------------
 
@@ -328,7 +332,7 @@ end
 -- C++ instance by calling the method on the corresponding lua wrapper, e.g.
 -- monster:name() in lua translates to monster.name() in C++
 function generate_class_function_wrapper(class_name, function_name, func)
-    local text = "static int func_" .. class_name .. "_" .. function_name .. "(lua_State *L) {"..br
+    local text = "static int func_" .. id_to_simple_string(class_name) .. "_" .. function_name .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, data)
         local tab = string.rep("    ", indentation)
@@ -384,7 +388,7 @@ end
 
 function generate_constructor(class_name, args)
     local cpp_name = classes[class_name].cpp_name
-    local text = "static int new_" .. class_name .. "(lua_State *L) {"..br
+    local text = "static int new_" .. id_to_simple_string(class_name) .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, data)
         local tab = string.rep("    ", indentation)
@@ -433,7 +437,7 @@ end
 
 function generate_operator(class_name, operator_id, cppname)
     local cpp_class_name = classes[class_name].cpp_name
-    local text = "static int op_" .. class_name .. "_" .. operator_id .. "(lua_State *L) {"..br
+    local text = "static int op_" .. id_to_simple_string(class_name) .. "_" .. operator_id .. "(lua_State *L) {"..br
 
     text = text .. tab .. "const " .. cpp_class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
     text = text .. tab .. "const " .. cpp_class_name .. " &rhs = " .. retrieve_lua_value(class_name, 2) .. ";"..br
@@ -551,14 +555,14 @@ function generate_functions_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const luaL_Reg " .. cpp_type .. "::FUNCTIONS[] = {" .. br
     if class.new then
-        cpp_output = cpp_output .. luaL_Reg("new_" .. class_name, "__call")
+        cpp_output = cpp_output .. luaL_Reg("new_" .. id_to_simple_string(class_name), "__call")
     end
     if class.has_equal then
-        cpp_output = cpp_output .. luaL_Reg("op_" .. class_name .. "_eq", "__eq")
+        cpp_output = cpp_output .. luaL_Reg("op_" .. id_to_simple_string(class_name) .. "_eq", "__eq")
     end
     while class do
         for _, name in ipairs(sorted_keys(class.functions)) do
-            cpp_output = cpp_output .. luaL_Reg("func_" .. class_name .. "_" .. name, name)
+            cpp_output = cpp_output .. luaL_Reg("func_" .. id_to_simple_string(class_name) .. "_" .. name, name)
         end
         class = classes[class.parent]
     end
