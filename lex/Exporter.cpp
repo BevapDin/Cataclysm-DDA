@@ -197,25 +197,21 @@ void Exporter::export_( const Parser &parser, const std::string &lua_file )
 {
     std::set<FullyQualifiedId> handled_types;
     std::ofstream f( lua_file.c_str() );
-    f << "classes = {\n";
     for( const auto &e : types_to_export ) {
         const FullyQualifiedId &t = e.first;
         if( const CppClass *const obj = parser.get_class( t ) ) {
-            f << obj->export_( *this ) << ",\n";
+            f << obj->export_( *this ) << "\n";
             handled_types.insert( t );
         }
     }
-    f << "}\n";
 
     f << "\n";
-    f << "enums = {\n";
     for( const auto &e : types_to_export ) {
         if( const CppEnum *const obj = parser.get_enum( e.first ) ) {
-            f << obj->export_( *this ) << ",\n";
+            f << obj->export_( *this ) << "\n";
             handled_types.insert( e.first );
         }
     }
-    f << "}\n";
 
     f << "\n";
     f << "global_functions = {\n";
