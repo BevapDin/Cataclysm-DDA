@@ -1,5 +1,5 @@
 classes["Character"] = {
-        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
+    code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
     new = {
     },
@@ -167,7 +167,7 @@ classes["Character"] = {
     }
 }
 classes["Creature"] = {
-        code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
+    code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
     new = {
     },
     attributes = {
@@ -351,7 +351,7 @@ classes["Creature"] = {
     }
 }
 classes["MonsterGroup"] = {
-        code_prepend = "#include \"mongroup.h\"\n",
+    code_prepend = "#include \"mongroup.h\"\n",
     new = {
     },
     string_id = "mongroup_id",
@@ -369,7 +369,7 @@ classes["MonsterGroup"] = {
     }
 }
 classes["Skill"] = {
-        code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
+    code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -388,7 +388,7 @@ classes["Skill"] = {
     }
 }
 classes["ammunition_type"] = {
-        code_prepend = "#include \"ammo.h\"\n",
+    code_prepend = "#include \"ammo.h\"\n",
     new = {
             { "string" },
             { },
@@ -402,7 +402,7 @@ classes["ammunition_type"] = {
     }
 }
 classes["calendar"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
             { "int" },
@@ -431,7 +431,7 @@ classes["calendar"] = {
     }
 }
 classes["effect_type"] = {
-        code_prepend = "#include \"effect.h\"\n",
+    code_prepend = "#include \"effect.h\"\n",
     new = {
             { },
     },
@@ -452,7 +452,7 @@ classes["effect_type"] = {
     }
 }
 classes["encumbrance_data"] = {
-        code_prepend = "#include \"character.h\"\n",
+    code_prepend = "#include \"character.h\"\n",
     new = {
     },
     has_equal = true,
@@ -466,7 +466,7 @@ classes["encumbrance_data"] = {
     }
 }
 classes["field"] = {
-        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
+    code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
     new = {
             { },
     },
@@ -485,7 +485,7 @@ classes["field"] = {
     }
 }
 classes["field_entry"] = {
-        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
+    code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
     new = {
             { "field_id", "int", "time_duration" },
             { },
@@ -510,7 +510,7 @@ classes["field_entry"] = {
     }
 }
 classes["furn_t"] = {
-        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+    code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
     },
@@ -546,7 +546,7 @@ classes["furn_t"] = {
     }
 }
 classes["game"] = {
-        code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
+    code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
             { },
     },
@@ -726,7 +726,7 @@ classes["game"] = {
     }
 }
 classes["gun_mode"] = {
-        code_prepend = "#include \"gun_mode.h\"\n",
+    code_prepend = "#include \"gun_mode.h\"\n",
     new = {
             { },
     },
@@ -741,7 +741,7 @@ classes["gun_mode"] = {
     }
 }
 classes["item"] = {
-        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
+    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
             { "itype" },
@@ -1062,7 +1062,7 @@ classes["item"] = {
     }
 }
 classes["itype"] = {
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
     new = {
             { },
     },
@@ -1113,7 +1113,7 @@ classes["itype"] = {
     }
 }
 classes["ma_buff"] = {
-        code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
+    code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -1149,7 +1149,7 @@ classes["ma_buff"] = {
     }
 }
 classes["ma_technique"] = {
-        code_prepend = "#include \"martialarts.h\"\n",
+    code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
     },
@@ -1186,7 +1186,7 @@ classes["ma_technique"] = {
     }
 }
 classes["map"] = {
-        code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
+    code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
             { "bool" },
             { "int" },
@@ -1480,7 +1480,7 @@ classes["map"] = {
     }
 }
 classes["map_stack"] = {
-        code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
+    code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
     },
     attributes = {
@@ -1503,7 +1503,7 @@ classes["map_stack"] = {
     }
 }
 classes["martialart"] = {
-        code_prepend = "#include \"martialarts.h\"\n",
+    code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
     },
@@ -1541,7 +1541,7 @@ classes["martialart"] = {
     }
 }
 classes["material_type"] = {
-        code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
+    code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -1571,7 +1571,7 @@ classes["material_type"] = {
     }
 }
 classes["mongroup"] = {
-        code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
+    code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
     new = {
             { "mongroup_id", "int", "int", "int", "int", "int" },
             { "string", "tripoint", "int", "int", "tripoint", "int", "bool", "bool", "bool" },
@@ -1602,7 +1602,7 @@ classes["mongroup"] = {
     }
 }
 classes["monster"] = {
-        code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
+    code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
     parent = "Creature",
     new = {
             { "monster" },
@@ -1705,7 +1705,7 @@ classes["monster"] = {
     }
 }
 classes["mtype"] = {
-        code_prepend = "#include \"mtype.h\"\n",
+    code_prepend = "#include \"mtype.h\"\n",
     new = {
             { },
     },
@@ -1775,7 +1775,7 @@ classes["mtype"] = {
     }
 }
 classes["mutation_branch"] = {
-        code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
+    code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
     new = {
     },
     string_id = "trait_id",
@@ -1833,7 +1833,7 @@ classes["mutation_branch"] = {
     }
 }
 classes["nc_color"] = {
-        code_prepend = "#include \"color.h\"\n",
+    code_prepend = "#include \"color.h\"\n",
     new = {
             { },
     },
@@ -1853,7 +1853,7 @@ classes["nc_color"] = {
     }
 }
 classes["npc_template"] = {
-        code_prepend = "#include \"npc.h\"\n",
+    code_prepend = "#include \"npc.h\"\n",
     new = {
             { },
     },
@@ -1863,7 +1863,7 @@ classes["npc_template"] = {
     }
 }
 classes["overmap"] = {
-        code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
+    code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
     new = {
             { "int", "int" },
             { "overmap" },
@@ -1893,7 +1893,7 @@ classes["overmap"] = {
     }
 }
 classes["player"] = {
-        code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
+    code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
     new = {
             { "player" },
@@ -2306,7 +2306,7 @@ classes["player"] = {
     }
 }
 classes["point"] = {
-        code_prepend = "#include \"enums.h\"\n",
+    code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int" },
             { },
@@ -2319,7 +2319,7 @@ classes["point"] = {
     }
 }
 classes["quality"] = {
-        code_prepend = "#include \"requirements.h\"\n",
+    code_prepend = "#include \"requirements.h\"\n",
     new = {
     },
     string_id = "quality_id",
@@ -2331,7 +2331,7 @@ classes["quality"] = {
     }
 }
 classes["recipe"] = {
-        code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
+    code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
             { },
     },
@@ -2364,7 +2364,7 @@ classes["recipe"] = {
     }
 }
 classes["species_type"] = {
-        code_prepend = "#include \"monstergenerator.h\"\n",
+    code_prepend = "#include \"monstergenerator.h\"\n",
     new = {
             { },
     },
@@ -2376,7 +2376,7 @@ classes["species_type"] = {
     }
 }
 classes["start_location"] = {
-        code_prepend = "#include \"start_location.h\"\n",
+    code_prepend = "#include \"start_location.h\"\n",
     new = {
             { },
     },
@@ -2398,7 +2398,7 @@ classes["start_location"] = {
     }
 }
 classes["stats"] = {
-        code_prepend = "#include \"player.h\"\n",
+    code_prepend = "#include \"player.h\"\n",
     new = {
     },
     attributes = {
@@ -2411,7 +2411,7 @@ classes["stats"] = {
     }
 }
 classes["ter_t"] = {
-        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+    code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
     },
@@ -2446,7 +2446,7 @@ classes["ter_t"] = {
     }
 }
 classes["time_duration"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
     },
     has_equal = true,
@@ -2456,7 +2456,7 @@ classes["time_duration"] = {
     }
 }
 classes["time_point"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
             { "int" },
@@ -2468,7 +2468,7 @@ classes["time_point"] = {
     }
 }
 classes["trap"] = {
-        code_prepend = "#include \"trap.h\"\n",
+    code_prepend = "#include \"trap.h\"\n",
     new = {
     },
     string_id = "trap_str_id",
@@ -2498,7 +2498,7 @@ classes["trap"] = {
     }
 }
 classes["tripoint"] = {
-        code_prepend = "#include \"enums.h\"\n",
+    code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int", "int" },
             { "point", "int" },
@@ -2513,7 +2513,7 @@ classes["tripoint"] = {
     }
 }
 classes["uimenu"] = {
-        code_prepend = "#include \"ui.h\"\n",
+    code_prepend = "#include \"ui.h\"\n",
     new = {
             { "string" },
             { },
@@ -2585,7 +2585,7 @@ classes["uimenu"] = {
     }
 }
 classes["w_point"] = {
-        code_prepend = "#include \"weather_gen.h\"\n",
+    code_prepend = "#include \"weather_gen.h\"\n",
     new = {
     },
     attributes = {
@@ -2600,6 +2600,7 @@ classes["w_point"] = {
 }
 
 enums["add_type"] = {
+    code_prepend = "#include \"pldata.h\"",
     values = {
         "ADD_NULL",
         "ADD_CAFFEINE",
@@ -2617,6 +2618,7 @@ enums["add_type"] = {
         "ADD_MARLOSS_Y",
     }}
 enums["body_part"] = {
+    code_prepend = "#include \"bodypart.h\"",
     values = {
         "bp_torso",
         "bp_head",
@@ -2633,6 +2635,7 @@ enums["body_part"] = {
         "num_bp",
     }}
 enums["damage_type"] = {
+    code_prepend = "#include \"damage.h\"",
     values = {
         "DT_NULL",
         "DT_TRUE",
@@ -2647,6 +2650,7 @@ enums["damage_type"] = {
         "NUM_DT",
     }}
 enums["field_id"] = {
+    code_prepend = "#include \"field.h\"",
     values = {
         "fd_null",
         "fd_blood",
@@ -2698,6 +2702,7 @@ enums["field_id"] = {
         "num_fields",
     }}
 enums["hp_part"] = {
+    code_prepend = "#include \"pldata.h\"",
     values = {
         "hp_head",
         "hp_torso",
@@ -2708,6 +2713,7 @@ enums["hp_part"] = {
         "num_hp_parts",
     }}
 enums["m_size"] = {
+    code_prepend = "#include \"creature.h\"",
     values = {
         "MS_TINY",
         "MS_SMALL",
@@ -2716,6 +2722,7 @@ enums["m_size"] = {
         "MS_HUGE",
     }}
 enums["phase_id"] = {
+    code_prepend = "#include \"enums.h\"",
     values = {
         "PNULL",
         "SOLID",
@@ -2724,6 +2731,7 @@ enums["phase_id"] = {
         "PLASMA",
     }}
 enums["season_type"] = {
+    code_prepend = "#include \"calendar.h\"",
     values = {
         "SPRING",
         "SUMMER",
@@ -2731,6 +2739,7 @@ enums["season_type"] = {
         "WINTER",
     }}
 enums["side"] = {
+    code_prepend = "#include \"bodypart.h\"",
     values = {
         "BOTH",
         "LEFT",

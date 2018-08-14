@@ -25,7 +25,7 @@ std::string CppEnum::export_( Exporter &p ) const
     if( lua_name != full_name().as_string() ) {
         r = r + tab + "cpp_name = \"" + Exporter::escape_to_lua_string( full_name().as_string() ) + "\",\n";
     }
-    r = r + tab + "    code_prepend = \"" + Exporter::escape_to_lua_string( "#include \"" + cursor_.location_file() + "\"" ) + "\",\n";
+    r = r + tab + "code_prepend = \"" + Exporter::escape_to_lua_string( "#include \"" + cursor_.location_file() + "\"" ) + "\",\n";
     r = r + tab + "values = {\n";
     for( const std::string &a : values ) {
         r = r + tab + "    \"" + a + "\",\n";
