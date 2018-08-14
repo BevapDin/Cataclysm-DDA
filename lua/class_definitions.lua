@@ -90,10 +90,23 @@ end
 
 function container_output_path(t)
     if classes[t] then
-        return classes[t].output_path
+        if classes[t].output_path then
+            return classes[t].output_path
+        else
+            return output_path_for_id(t)
+        end
     else
         return nil
     end
+end
+
+function container_code_prepend(t)
+    if classes[t] then
+        if classes[t].code_prepend then
+            return classes[t].code_prepend
+        end
+    end
+    return ""
 end
 
 -- Adds the declaration for an C++ iterator class to the exported classes.
@@ -130,6 +143,7 @@ function make_std_list_class(element_type)
         classes[container_type] = {
             -- @todo check what other members are needed
             output_path = container_output_path(element_type),
+            code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
             new = {
                 { },
                 { container_type },
@@ -158,6 +172,7 @@ function make_std_vector_class(element_type)
         classes[container_type] = {
             -- @todo check what other members are needed
             output_path = container_output_path(element_type),
+            code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
             new = {
                 { },
                 { container_type },
@@ -187,6 +202,7 @@ function make_std_set_class(element_type)
         classes[container_type] = {
             -- @todo check what other members are needed
             output_path = container_output_path(element_type),
+            code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
             new = {
                 { },
                 { container_type },
