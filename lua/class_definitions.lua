@@ -426,7 +426,7 @@ for name, value in pairs(classes) do
         -- This is the common int_id<T> interface:
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.int_id .. " = int_id<" .. name .. ">;",
-            code_prepend = value.code_prepend,
+            code_prepend = value.code_prepend .. "\n#include \"string_id.h\"",
             output_path = value.output_path,
             has_equal = true,
             cpp_name = "int_id<" .. value.cpp_name .. ">",
@@ -453,7 +453,7 @@ for name, value in pairs(classes) do
     if value.string_id then
         local t = {
             forward_declaration = value.forward_declaration .. "using " .. value.string_id .. " = string_id<" .. name .. ">;",
-            code_prepend = value.code_prepend,
+            code_prepend = value.code_prepend .. "\n#include \"string_id.h\"",
             output_path = value.output_path,
             has_equal = true,
             cpp_name = "string_id<" .. value.cpp_name .. ">",
