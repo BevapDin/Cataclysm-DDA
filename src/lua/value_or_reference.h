@@ -20,26 +20,20 @@ template<typename T>
 class LuaValueOrReference
 {
     public:
-        /** A proxy object that allows to convert the reference to a pointer on-demand. The proxy object can
-         * be used as argument to functions that expect either a pointer and to functions expecting a
-         * reference. */
-        struct proxy {
-            T *ref;
-            operator T *() {
-                return ref;
-            }
-            operator T &() {
-                return *ref;
-            }
-            T *operator &() {
-                return ref;
-            }
-        };
-        static proxy get( lua_State *const L, int const stack_index ) {
+        static T *get_pointer( lua_State *const L, int const stack_index ) {
             if( LuaValue<T>::has( L, stack_index ) ) {
-                return proxy{ &LuaValue<T>::get( L, stack_index ) };
+                return &LuaValue<T>::get( L, stack_index );
             }
-            return proxy{ &LuaValue<T*>::get( L, stack_index ) };
+            if( LuaValue<T*>::has( L, stack_index ) ) {
+                return &LuaValue<T*>::get( L, stack_index );
+            }
+            return nullptr;
+        }
+        static T &get( lua_State *const L, int const stack_index ) {
+            if( LuaValue<T*>::has( L, stack_index ) ) {
+                return LuaValue<T*>::get( L, stack_index );
+            }
+            return LuaValue<T>::get( L, stack_index );
         }
         static bool has( lua_State *const L, int const stack_index ) {
             return LuaValue<T>::has( L, stack_index ) || LuaValue<T *>::has( L, stack_index );
