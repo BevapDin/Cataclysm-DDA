@@ -6,6 +6,7 @@
 #include "string_formatter.h"
 #include "dependency_tree.h"
 #include "lua/lua_engine.h"
+#include "game.h"
 
 #include <algorithm>
 

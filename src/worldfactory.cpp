@@ -16,6 +16,7 @@
 #include "cata_utility.h"
 #include "calendar.h"
 #include "lua/lua_engine.h"
+#include "game.h"
 #include "name.h"
 #include "json.h"
 
