@@ -360,6 +360,11 @@ classes["mass"] = {
     },
 }
 
+-- Copy constructability is not detected up by the extractor
+table.insert(classes["tripoint"].new, { "tripoint" })
+table.insert(classes["point"].new, { "point" })
+table.insert(classes["time_point"].new, { "time_point" })
+
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
 
@@ -389,6 +394,14 @@ classes["start_location"].code_prepend = classes["start_location"].code_prepend 
 classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"monster.h\""
 classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"color.h\""
 classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"item.h\""
+
+for k,v in ipairs(classes["gun_mode_id"].functions) do
+    if v.name == "obj" then
+        classes["gun_mode_id"].functions[k] = nil
+    elseif v.name == "is_valid" then
+        classes["gun_mode_id"].functions[k] = nil
+    end
+end
 
 -- Headers that are required in order to compile the global functions wrapper
 global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
