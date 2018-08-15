@@ -396,6 +396,7 @@ classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"mon
 classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"color.h\""
 classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"item.h\""
 
+-- Those functions are actually not implemented in C++
 for k,v in ipairs(classes["gun_mode_id"].functions) do
     if v.name == "obj" then
         classes["gun_mode_id"].functions[k] = nil
