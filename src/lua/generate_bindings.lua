@@ -145,7 +145,7 @@ function Class:push_lua_value(in_variable)
     return "LuaValue<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
 end
 function Class:push_ref_lua_value(in_variable)
-    return "LuaValue<" .. self:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+    return "LuaPointer<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
 end
 function Enum:push_lua_value(in_variable)
     return "LuaEnum<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
@@ -155,10 +155,10 @@ function BuildInTypeBase:push_lua_value(in_variable)
 end
 function push_lua_value(in_variable, value_type)
     if value_type:sub(-2) == "*&" then
-        return "LuaValue<" .. get_type(value_type:sub(1, -3)):get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+        return "LuaPointer<" .. get_type(value_type:sub(1, -3)):get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
     end
     if value_type:sub(-1) == "*" then
-        return "LuaValue<" .. get_type(value_type:sub(1, -2)):get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+        return "LuaPointer<" .. get_type(value_type:sub(1, -2)):get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
     end
 
     if value_type:sub(-1) == "&" then
@@ -486,11 +486,6 @@ function Class:generate_destructor()
     cpp_output = cpp_output .. tab .. "using T = " .. cpp_class_name .. ";" .. br
     cpp_output = cpp_output .. tab .. "object.~T();" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. "*>::call_destructor( " .. cpp_class_name .. " *&object ) {" .. br
-    -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
-    cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
-    cpp_output = cpp_output .. "}" .. br
     return cpp_output
 end
 
@@ -720,6 +715,17 @@ function Class:generate_constants()
     cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
     cpp_output = cpp_output .. tab .. "return nullptr;" .. br
     cpp_output = cpp_output .. "}" .. br
+    cpp_output = cpp_output .. "template<>" .. br
+    cpp_output = cpp_output .. cpp_class_name.."* LuaPointer<"..cpp_class_name..">::get_subclass( lua_State* const S, int const i) {"..br
+    for _, class in ipairs(self:get_children()) do
+        local cpp_child_name = "LuaPointer<" .. class:get_cpp_name() .. ">";
+        cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
+        cpp_output = cpp_output .. tab .. tab .. "return "..cpp_child_name.."::get( S, i );" .. br
+        cpp_output = cpp_output .. tab .. "}" .. br
+    end
+    cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
+    cpp_output = cpp_output .. tab .. "return nullptr;" .. br
+    cpp_output = cpp_output .. "}" .. br
     cpp_output = cpp_output .. self:generate_functions_static(cpp_name)
     return cpp_output
 end
@@ -803,10 +809,10 @@ function Class:generate_code()
 
     -- Allow pushing references to const and to non-const values alike (Lua doesn't have the concept of "const").
     cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. cpp_class_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. cpp_class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "    LuaPointer<" .. cpp_class_name .. ">::push( get_lua_state( engine ), &val.get() );" .. br
     cpp_output = cpp_output .. "}" .. br
     cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. cpp_class_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. cpp_class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "    LuaPointer<" .. cpp_class_name .. ">::push( get_lua_state( engine ), &val.get() );" .. br
     cpp_output = cpp_output .. "}" .. br
 
     -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
