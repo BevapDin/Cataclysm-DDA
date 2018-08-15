@@ -109,10 +109,10 @@ end
 -- of it onto the stack.
 function push_lua_value(in_variable, value_type)
     if value_type:sub(-2) == "*&" then
-        return "LuaValue<" .. classes[value_type:sub(1, -3)].cpp_name .. ">::push_ref( L, " .. in_variable .. " );"
+        return "LuaPointer<" .. classes[value_type:sub(1, -3)].cpp_name .. ">::push( L, " .. in_variable .. " );"
     end
     if value_type:sub(-1) == "*" then
-        return "LuaValue<" .. classes[value_type:sub(1, -2)].cpp_name .. ">::push_ref( L, " .. in_variable .. " );"
+        return "LuaPointer<" .. classes[value_type:sub(1, -2)].cpp_name .. ">::push( L, " .. in_variable .. " );"
     end
 
     if value_type:sub(-1) == "&" then
@@ -120,7 +120,7 @@ function push_lua_value(in_variable, value_type)
         -- be a reference to a global game object).
         local t = value_type:sub(1, -2)
         if classes[t] then
-            return "LuaValue<" .. classes[t].cpp_name .. ">::push_ref( L, " .. in_variable .. " );"
+            return "LuaPointer<" .. classes[t].cpp_name .. ">::push( L, " .. in_variable .. " );"
         end
         value_type = t
     end
@@ -438,11 +438,6 @@ function generate_destructor(class_name, class)
     cpp_output = cpp_output .. tab .. "using T = " .. cpp_class_name .. ";" .. br
     cpp_output = cpp_output .. tab .. "object.~T();" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. "*>::call_destructor( " .. cpp_class_name .. " *&object ) {" .. br
-    -- Don't need an actual deconstructor call here because it's only a pointer, its deconstruction won't do anything.
-    cpp_output = cpp_output .. tab .. "static_cast<void>( object );" .. br
-    cpp_output = cpp_output .. "}" .. br
     return cpp_output
 end
 
@@ -611,15 +606,14 @@ end
 function generate_LuaValue_constants(class_name, class)
     local cpp_output = ""
     local cpp_class_name = class.cpp_name
-    local cpp_name = "LuaValue<" .. cpp_class_name .. ">"
     local metatable_name = class_name .. "_metatable"
     cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
+    cpp_output = cpp_output .. "const char * const LuaValue<" .. cpp_class_name .. ">::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
+    cpp_output = cpp_output .. cpp_class_name.."* LuaValue<" .. cpp_class_name .. ">::get_subclass( lua_State* const S, int const i) {"..br
     for _, child in ipairs(sorted_keys(classes)) do
         local class = classes[child]
-        local cpp_child_name = member_type_to_cpp_type(child);
+        local cpp_child_name = "LuaValue<" .. child .. ">";
         if class.parent == class_name then
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
             cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
@@ -629,7 +623,21 @@ function generate_LuaValue_constants(class_name, class)
     cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
     cpp_output = cpp_output .. tab .. "return nullptr;" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. generate_functions_static(cpp_name, class, class_name)
+    cpp_output = cpp_output .. "template<>" .. br
+    cpp_output = cpp_output .. cpp_class_name.."* LuaPointer<"..cpp_class_name..">::get_subclass( lua_State* const S, int const i) {"..br
+    for _, child in ipairs(sorted_keys(classes)) do
+        local class = classes[child]
+        local cpp_child_name = "LuaPointer<" .. child .. ">";
+        if class.parent == class_name then
+            cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
+            cpp_output = cpp_output .. tab .. tab .. "return "..cpp_child_name.."::get( S, i );" .. br
+            cpp_output = cpp_output .. tab .. "}" .. br
+        end
+    end
+    cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
+    cpp_output = cpp_output .. tab .. "return nullptr;" .. br
+    cpp_output = cpp_output .. "}" .. br
+    cpp_output = cpp_output .. generate_functions_static("LuaValue<" .. cpp_class_name .. ">", class, class_name)
     return cpp_output
 end
 
@@ -712,10 +720,10 @@ function generate_code_for(class_name, class)
 
     -- Allow pushing references to const and to non-const values alike (Lua doesn't have the concept of "const").
     cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. cpp_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. cpp_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "    LuaPointer<" .. cpp_name .. ">::push( get_lua_state( engine ), &val.get() );" .. br
     cpp_output = cpp_output .. "}" .. br
     cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. cpp_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. cpp_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "    LuaPointer<" .. cpp_name .. ">::push( get_lua_state( engine ), &val.get() );" .. br
     cpp_output = cpp_output .. "}" .. br
 
     -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
