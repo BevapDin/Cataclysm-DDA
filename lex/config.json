@@ -17,6 +17,7 @@
         "game",
         "species_type",
         "encumbrance_data",
+        "damage_instance",
         "stats",
         "player",
         "item",

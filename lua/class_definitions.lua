@@ -370,7 +370,7 @@ register_class("mass", {
 } )
 
 -- Copy constructability is not detected up by the extractor
-for _, name in ipairs( { "tripoint", "point", "time_point" } ) do
+for _, name in ipairs( { "tripoint", "point", "time_point", "damage_instance" } ) do
     get_type(name):enable_copy_operator()
 end
 
