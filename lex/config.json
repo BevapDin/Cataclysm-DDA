@@ -18,6 +18,7 @@
         "species_type",
         "encumbrance_data",
         "std::list<item>::iterator",
+        "damage_instance",
         "stats",
         "player",
         "item",
