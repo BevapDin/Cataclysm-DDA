@@ -364,6 +364,7 @@ classes["mass"] = {
 table.insert(classes["tripoint"].new, { "tripoint" })
 table.insert(classes["point"].new, { "point" })
 table.insert(classes["time_point"].new, { "time_point" })
+table.insert(classes["damage_instance"].new, { "damage_instance" })
 
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
