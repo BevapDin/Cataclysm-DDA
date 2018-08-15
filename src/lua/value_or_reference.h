@@ -21,29 +21,29 @@ class LuaValueOrReference
 {
     public:
         static T *get_pointer( lua_State *const L, int const stack_index ) {
-            if( lua_isnil( L, stack_index ) ) {
-                return nullptr;
-            }
             if( LuaValue<T>::has( L, stack_index ) ) {
                 return &LuaValue<T>::get( L, stack_index );
             }
-            return &LuaValue<T*>::get( L, stack_index );
+            return LuaPointer<T>::get( L, stack_index );
         }
         static bool has_pointer( lua_State *const L, int const stack_index ) {
             if( lua_isnil( L, stack_index ) ) {
                 // If you don't want this, use `has` below, not `has_pointer`
                 return true;
             }
-            return LuaValue<T>::has( L, stack_index ) || LuaValue<T*>::has( L, stack_index );
+            return LuaValue<T>::has( L, stack_index ) || LuaPointer<T>::has( L, stack_index );
         }
         static T &get( lua_State *const L, int const stack_index ) {
-            if( LuaValue<T*>::has( L, stack_index ) ) {
-                return LuaValue<T*>::get( L, stack_index );
+            if( LuaValue<T>::has( L, stack_index ) ) {
+                return LuaValue<T>::get( L, stack_index );
             }
-            return LuaValue<T>::get( L, stack_index );
+            if( T *const ptr = LuaPointer<T>::get( L, stack_index ) ) {
+                return *ptr;
+            }
+            throw std::runtime_error( "wrong value type on stack" );
         }
         static bool has( lua_State *const L, int const stack_index ) {
-            return LuaValue<T>::has( L, stack_index ) || LuaValue<T *>::has( L, stack_index );
+            return LuaValue<T>::has( L, stack_index ) || LuaPointer<T>::has( L, stack_index );
         }
 };
 

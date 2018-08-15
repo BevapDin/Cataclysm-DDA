@@ -219,7 +219,7 @@ static int game_items_at( lua_State *L )
         // lua_rawset then does t[k] = v and pops v and k from the stack
 
         lua_pushnumber( L, i++ + 1 );
-        LuaValue<item>::push_ref( L, an_item );
+        LuaPointer<item>::push( L, an_item );
         lua_rawset( L, -3 );
     }
 
@@ -422,13 +422,13 @@ void lua_engine::init()
     // override default print to our version
     lua_register( state, "print", game_myPrint );
 
-    LuaValue<player>::push_ref( state, g->u );
+    LuaPointer<player>::push( state, g->u );
     lua_setglobal( state, "player" );
 
-    LuaValue<map>::push_ref( state, g->m );
+    LuaPointer<map>::push( state, g->m );
     lua_setglobal( state, "map" );
 
-    LuaValue<game>::push_ref( state, g );
+    LuaPointer<game>::push( state, g );
     lua_setglobal( state, "g" );
 
     // Load lua-side metatables etc.
