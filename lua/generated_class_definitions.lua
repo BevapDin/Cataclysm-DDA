@@ -177,6 +177,7 @@ classes["Creature"] = {
             underwater = { type = "bool", writable = true },
     },
     functions = {
+            { name = "absorb_hit", rval = nil, args = { "body_part", "damage_instance" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part" } },
             { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool" } },
@@ -197,6 +198,7 @@ classes["Creature"] = {
             { name = "avoid_trap", rval = "bool", args = { "tripoint", "trap" } },
             { name = "basic_symbol_color", rval = "nc_color", args = { } },
             { name = "bleed", rval = nil, args = { } },
+            { name = "block_hit", rval = "bool", args = { "Creature*", "body_part", "damage_instance" } },
             { name = "bloodType", rval = "field_id", args = { } },
             { name = "check_dead_state", rval = nil, args = { } },
             { name = "clear_effects", rval = nil, args = { } },
@@ -437,6 +439,35 @@ classes["calendar"] = {
             { name = "sunset", rval = "calendar", args = { } },
             { name = "year_length", static = true, rval = "time_duration", args = { } },
             { name = "years", rval = "int", args = { } },
+    }
+}
+classes["damage_instance"] = {
+    forward_declaration = "struct damage_instance;\n",
+        code_prepend = "#include \"damage.h\"\n",
+    new = {
+            { "damage_type", "float" },
+            { "damage_type", "float", "float" },
+            { "damage_type", "float", "float", "float" },
+            { "damage_type", "float", "float", "float", "float" },
+            { },
+    },
+    has_equal = true,
+    attributes = {
+    },
+    functions = {
+            { name = "add", rval = nil, args = { "damage_instance" } },
+            { name = "add_damage", rval = nil, args = { "damage_type", "float" } },
+            { name = "add_damage", rval = nil, args = { "damage_type", "float", "float" } },
+            { name = "add_damage", rval = nil, args = { "damage_type", "float", "float", "float" } },
+            { name = "add_damage", rval = nil, args = { "damage_type", "float", "float", "float", "float" } },
+            { name = "clear", rval = nil, args = { } },
+            { name = "empty", rval = "bool", args = { } },
+            { name = "mult_damage", rval = nil, args = { "float" } },
+            { name = "mult_damage", rval = nil, args = { "float", "bool" } },
+            { name = "physical", static = true, rval = "damage_instance", args = { "float", "float", "float" } },
+            { name = "physical", static = true, rval = "damage_instance", args = { "float", "float", "float", "float" } },
+            { name = "total_damage", rval = "float", args = { } },
+            { name = "type_damage", rval = "float", args = { "damage_type" } },
     }
 }
 classes["effect_type"] = {
@@ -760,7 +791,7 @@ make_id_classes("gun_mode", nil, "gun_mode_id")
 
 classes["item"] = {
     forward_declaration = "class item;\n",
-        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
+        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
             { "itype*" },
@@ -814,6 +845,8 @@ classes["item"] = {
             { name = "ammo_type", rval = "ammotype", args = { } },
             { name = "ammo_unset", rval = "item&", args = { } },
             { name = "attack_time", rval = "int", args = { } },
+            { name = "base_damage_melee", rval = "damage_instance", args = { } },
+            { name = "base_damage_thrown", rval = "damage_instance", args = { } },
             { name = "base_volume", rval = "volume", args = { } },
             { name = "bash_resist", rval = "int", args = { "bool" } },
             { name = "bash_resist", rval = "int", args = { } },
@@ -907,6 +940,8 @@ classes["item"] = {
             { name = "goes_bad", rval = "bool", args = { } },
             { name = "gun_current_mode", rval = "gun_mode", args = { } },
             { name = "gun_cycle_mode", rval = nil, args = { } },
+            { name = "gun_damage", rval = "damage_instance", args = { "bool" } },
+            { name = "gun_damage", rval = "damage_instance", args = { } },
             { name = "gun_dispersion", rval = "int", args = { "bool" } },
             { name = "gun_dispersion", rval = "int", args = { "bool", "bool" } },
             { name = "gun_dispersion", rval = "int", args = { } },
@@ -1114,6 +1149,7 @@ classes["itype"] = {
             stackable = { type = "bool", writable = true },
             sym = { type = "string", writable = true },
             techniques = { type = "std::set<matec_id>", writable = true },
+            thrown_damage = { type = "damage_instance", writable = true },
             volume = { type = "volume", writable = true },
             weight = { type = "mass", writable = true },
     },
@@ -1770,6 +1806,7 @@ classes["mtype"] = {
             looks_like = { type = "string", writable = true },
             luminance = { type = "float", writable = true },
             mat = { type = "std::vector<material_id>", writable = true },
+            melee_damage = { type = "damage_instance", writable = true },
             melee_dice = { type = "int", writable = true },
             melee_sides = { type = "int", writable = true },
             melee_skill = { type = "int", writable = true },
@@ -2211,6 +2248,7 @@ classes["player"] = {
             { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "bool", "matec_id" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "bool", "matec_id", "bool" } },
+            { name = "melee_special_effects", rval = "string", args = { "Creature", "damage_instance", "item" } },
             { name = "melee_value", rval = "float", args = { "item" } },
             { name = "mend", rval = nil, args = { "int" } },
             { name = "metabolic_rate", rval = "float", args = { } },
@@ -2260,6 +2298,10 @@ classes["player"] = {
             { name = "remove_child_flag", rval = nil, args = { "trait_id" } },
             { name = "remove_mutation", rval = nil, args = { "trait_id" } },
             { name = "remove_random_bionic", rval = "bool", args = { } },
+            { name = "roll_all_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" } },
+            { name = "roll_bash_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" } },
+            { name = "roll_cut_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" } },
+            { name = "roll_stab_damage", rval = nil, args = { "bool", "damage_instance", "bool", "item" } },
             { name = "rooted", rval = nil, args = { } },
             { name = "rooted_message", rval = nil, args = { } },
             { name = "run_cost", rval = "int", args = { "int" } },
