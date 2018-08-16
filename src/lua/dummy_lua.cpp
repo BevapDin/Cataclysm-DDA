@@ -67,7 +67,7 @@ bool catalua::stack::get_bool( const lua_engine &/*engine*/, int /*index*/ )
     throw std::runtime_error( "Tried to get a value from Lua, but Lua is not build into this executable" );
 }
 
-long long int catalua::stack::get_integer( const lua_engine &/*engine*/, cint /*index*/ )
+long long int catalua::stack::get_integer( const lua_engine &/*engine*/, int /*index*/ )
 {
     throw std::runtime_error( "Tried to get a value from Lua, but Lua is not build into this executable" );
 }
