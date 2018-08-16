@@ -168,7 +168,6 @@ ODIRTILES = $(BUILD_PREFIX)obj/tiles
 W32ODIR = $(BUILD_PREFIX)objwin
 W32ODIRTILES = $(W32ODIR)/tiles
 CATALUA_ODIR = $(ODIR)/lua
-CATALUA_LIB = $(ODIR)/libcatalua.a
 
 ifdef AUTO_BUILD_PREFIX
   BUILD_PREFIX = $(if $(RELEASE),release-)$(if $(TILES),tiles-)$(if $(SOUND),sound-)$(if $(LOCALIZE),local-)$(if $(BACKTRACE),back-)$(if $(MAPSIZE),map-$(MAPSIZE)-)$(if $(LUA),lua-)$(if $(USE_XDG_DIR),xdg-)$(if $(USE_HOME_DIR),home-)$(if $(DYNAMIC_LINKING),dynamic-)$(if $(MSYS2),msys2-)
@@ -701,17 +700,25 @@ ifeq ($(TARGETSYSTEM),WINDOWS)
 endif
 OBJS = $(sort $(patsubst %,$(ODIR)/%,$(_OBJS)))
 
+ifneq ($(LUA),)
+  $(shell cd src/lua && lua generate_bindings.lua)
+endif
+
 # This file contains dummy implementation that are used in non-Lua builds.
 # Lua builds contain all other cpp files in the Lua source directory.
 DUMMY_CATALUA_SOURCES = $(CATALUA_SRC_DIR)/dummy_lua.cpp
-ifdef LUA
-  $(shell cd src/lua && lua generate_bindings.lua)
-  CATALUA_SOURCES = $(filter-out $(DUMMY_CATALUA_SOURCES),$(wildcard $(CATALUA_SRC_DIR)/*.cpp))
+DUMMY_CATALUA_OBJS = $(patsubst %,$(CATALUA_ODIR)/%,$(DUMMY_CATALUA_SOURCES:$(CATALUA_SRC_DIR)/%.cpp=%.o))
+DUMMY_CATALUA_LIB = $(ODIR)/libdummy_catalua.a
+
+CATALUA_SOURCES = $(filter-out $(DUMMY_CATALUA_SOURCES),$(wildcard $(CATALUA_SRC_DIR)/*.cpp))
+CATALUA_OBJS = $(patsubst %,$(CATALUA_ODIR)/%,$(CATALUA_SOURCES:$(CATALUA_SRC_DIR)/%.cpp=%.o))
+CATALUA_LIB = $(ODIR)/libcatalua.a
+
+ifeq ($(LUA),)
+  CHOSEN_CATALUA_LIB = $(DUMMY_CATALUA_LIB)
 else
-  CATALUA_SOURCES = $(DUMMY_CATALUA_SOURCES)
+  CHOSEN_CATALUA_LIB = $(CATALUA_LIB)
 endif
-_CATALUA_OBJS = $(CATALUA_SOURCES:$(CATALUA_SRC_DIR)/%.cpp=%.o)
-CATALUA_OBJS = $(patsubst %,$(CATALUA_ODIR)/%,$(_CATALUA_OBJS))
 
 ifdef LANGUAGES
   L10N = localization
@@ -770,8 +777,8 @@ endif
 all: version $(CHECKS) $(TARGET) $(L10N) $(TESTS)
 	@
 
-$(TARGET): $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CATALUA_LIB)
-	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(CATALUA_LIB) $(LDFLAGS)
+$(TARGET): $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CHOSEN_CATALUA_LIB)
+	+$(LD) $(W32FLAGS) -o $(TARGET) $(OBJS) $(CHOSEN_CATALUA_LIB) $(LDFLAGS)
 ifdef RELEASE
   ifndef DEBUG_SYMBOLS
 	$(STRIP) $(TARGET)
@@ -781,8 +788,11 @@ endif
 $(CATALUA_LIB): $(CATALUA_OBJS)
 	$(AR) rcs $(CATALUA_LIB) $(CATALUA_OBJS)
 
-$(BUILD_PREFIX)$(TARGET_NAME).a: $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CATALUA_OBJS)
-	$(AR) rcs $(BUILD_PREFIX)$(TARGET_NAME).a $(filter-out $(ODIR)/main.o $(ODIR)/messages.o,$(OBJS)) $(CATALUA_OBJS)
+$(DUMMY_CATALUA_LIB): $(DUMMY_CATALUA_OBJS)
+	$(AR) rcs $(DUMMY_CATALUA_LIB) $(DUMMY_CATALUA_OBJS)
+
+$(BUILD_PREFIX)$(TARGET_NAME).a: $(ODIR) $(CATALUA_ODIR) $(OBJS) $(CHOSEN_CATALUA_LIB)
+	$(AR) rcs $(BUILD_PREFIX)$(TARGET_NAME).a $(filter-out $(ODIR)/main.o $(ODIR)/messages.o,$(OBJS)) $(CHOSEN_CATALUA_LIB)
 
 .PHONY: version json-verify
 version:
@@ -1089,3 +1099,4 @@ clean-tests:
 -include $(SOURCES:$(SRC_DIR)/%.cpp=$(DEPDIR)/%.P)
 -include ${OBJS:.o=.d}
 -include ${CATALUA_OBJS:.o=.d}
+-include ${DUMMY_CATALUA_OBJS:.o=.d}
