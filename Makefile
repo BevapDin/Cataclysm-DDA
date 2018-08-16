@@ -712,12 +712,31 @@ DUMMY_CATALUA_LIB = $(ODIR)/libdummy_catalua.a
 
 CATALUA_SOURCES = $(filter-out $(DUMMY_CATALUA_SOURCES),$(wildcard $(CATALUA_SRC_DIR)/*.cpp))
 CATALUA_OBJS = $(patsubst %,$(CATALUA_ODIR)/%,$(CATALUA_SOURCES:$(CATALUA_SRC_DIR)/%.cpp=%.o))
-CATALUA_LIB = $(ODIR)/libcatalua.a
+CATALUA_STATIC_LIB = $(ODIR)/libcatalua.a
+CATALUA_SHARED_LIB = $(ODIR)/libcatalua.so
 
 ifeq ($(LUA),)
+  # default for no value given
   CHOSEN_CATALUA_LIB = $(DUMMY_CATALUA_LIB)
 else
-  CHOSEN_CATALUA_LIB = $(CATALUA_LIB)
+  ifneq ($(filter $(LUA),false no 0),)
+    CHOSEN_CATALUA_LIB = $(DUMMY_CATALUA_LIB)
+  else
+    ifneq ($(filter $(LUA),true yes 1),)
+      # static is the default for now
+      CHOSEN_CATALUA_LIB = $(CATALUA_STATIC_LIB)
+    else
+      ifeq ($(LUA),static)
+        CHOSEN_CATALUA_LIB = $(CATALUA_STATIC_LIB)
+      else
+        ifeq ($(LUA),shared)
+          CHOSEN_CATALUA_LIB = $(CATALUA_SHARED_LIB)
+        else
+          $(error "unknown value for LUA= option: " $(LUA))
+        endif
+      endif
+    endif
+  endif
 endif
 
 ifdef LANGUAGES
@@ -785,8 +804,11 @@ ifdef RELEASE
   endif
 endif
 
-$(CATALUA_LIB): $(CATALUA_OBJS)
-	$(AR) rcs $(CATALUA_LIB) $(CATALUA_OBJS)
+$(CATALUA_STATIC_LIB): $(CATALUA_OBJS)
+	$(AR) rcs $(CATALUA_STATIC_LIB) $(CATALUA_OBJS)
+
+$(CATALUA_SHARED_LIB): $(CATALUA_OBJS)
+	$(CXX) -shared -o $(CATALUA_SHARED_LIB) $(CATALUA_OBJS)
 
 $(DUMMY_CATALUA_LIB): $(DUMMY_CATALUA_OBJS)
 	$(AR) rcs $(DUMMY_CATALUA_LIB) $(DUMMY_CATALUA_OBJS)
