@@ -90,6 +90,9 @@ function register_class(name, data)
     if not data.output_path then
         data.output_path = name:gsub("[^%w_.]", "") .. ".gen.cpp"
     end
+    if not data.cpp_name then
+        data.cpp_name = name
+    end
     data.name = name
     classes[name] = data
 end
@@ -102,6 +105,20 @@ function output_path_of(name)
             return enums[name].output_path
         else
             return output_path_for_id(name)
+        end
+    else
+        error(name .. " is not a class/enum name")
+    end
+end
+-- Yields the `cpp_name` of the entity (class/enum) of the given name.
+function cpp_name_of(name)
+    if classes[name] then
+        return classes[name].cpp_name
+    elseif enums[name] then
+        if enums[name].cpp_name then
+            return enums[name].cpp_name
+        else
+            return name
         end
     else
         error(name .. " is not a class/enum name")
@@ -132,20 +149,6 @@ function container_code_prepend(t)
         end
     end
     return ""
-end
-
-function container_cpp_name(t)
-    if classes[t] then
-        if classes[t].cpp_name then
-            return classes[t].cpp_name
-        end
-    end
-    if enums[t] then
-        if enums[t].cpp_name then
-            return enums[t].cpp_name
-        end
-    end
-    return t
 end
 
 function container_forward_declaration(t)
@@ -268,11 +271,11 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     if int_id_name and not classes[int_id_name] then
         -- This is the common int_id<T> interface:
         local t = {
-            forward_declaration = container_forward_declaration(class_name) .. "using " .. int_id_name .. " = int_id<" .. container_cpp_name(class_name) .. ">;",
+            forward_declaration = container_forward_declaration(class_name) .. "using " .. int_id_name .. " = int_id<" .. cpp_name_of(class_name) .. ">;",
             code_prepend = container_code_prepend(class_name) .. "\n#include \"int_id.h\"",
             output_path = output_path_of(class_name),
             has_equal = true,
-            cpp_name = "int_id<" .. container_cpp_name(class_name) .. ">",
+            cpp_name = "int_id<" .. cpp_name_of(class_name) .. ">",
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
             -- The int is only exposed as int_id<T>, so Lua should never know about it.
             attributes = { },
@@ -295,11 +298,11 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     -- Very similar to make_int_id above
     if string_id_name and not classes[string_id_name] then
         local t = {
-            forward_declaration = container_forward_declaration(class_name) .. "using " .. string_id_name .. " = string_id<" .. container_cpp_name(class_name) .. ">;",
+            forward_declaration = container_forward_declaration(class_name) .. "using " .. string_id_name .. " = string_id<" .. cpp_name_of(class_name) .. ">;",
             code_prepend = container_code_prepend(class_name) .. "\n#include \"string_id.h\"",
             output_path = output_path_of(class_name),
             has_equal = true,
-            cpp_name = "string_id<" .. container_cpp_name(class_name) .. ">",
+            cpp_name = "string_id<" .. cpp_name_of(class_name) .. ">",
             -- Copy and default constructor and construct from plain string.
             new = { { string_id_name }, { }, { "string" } },
             attributes = { },
@@ -505,9 +508,6 @@ global_functions = {
 for class_name, value in pairs(classes) do
     if not value.code_prepend then
         value.code_prepend = ""
-    end
-    if not value.cpp_name then
-        value.cpp_name = class_name
     end
 end
 -- same for enumerations
