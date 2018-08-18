@@ -83,6 +83,9 @@ Class = {
         end
         table.insert(self.new, { self.name })
     end,
+    add_code_prepend = function(self, line)
+        self.code_prepend = self.code_prepend .. "\n" .. line
+    end,
 }
 Class.__index = Class
 function register_class(name, data)
@@ -382,32 +385,32 @@ end
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
 
-classes["recipe"].code_prepend = classes["recipe"].code_prepend .. "\n#include \"item.h\""
-classes["map_stack"].code_prepend = classes["map_stack"].code_prepend .. "\n#include \"units.h\""
-classes["overmap"].code_prepend = classes["overmap"].code_prepend .. "\n#include \"mongroup.h\""
-classes["mutation_branch"].code_prepend = classes["mutation_branch"].code_prepend .. "\n#include \"color.h\""
-classes["map"].code_prepend = classes["map"].code_prepend .. "\n#include \"item.h\""
-classes["map"].code_prepend = classes["map"].code_prepend .. "\n#include \"units.h\""
-classes["Creature"].code_prepend = classes["Creature"].code_prepend .. "\n#include \"color.h\""
-classes["Creature"].code_prepend = classes["Creature"].code_prepend .. "\n#include \"units.h\""
-classes["Creature"].code_prepend = classes["Creature"].code_prepend .. "\n#include \"character.h\""
-classes["Creature"].code_prepend = classes["Creature"].code_prepend .. "\n#include \"monster.h\""
-classes["monster"].code_prepend = classes["monster"].code_prepend .. "\n#include \"calendar.h\""
-classes["monster"].code_prepend = classes["monster"].code_prepend .. "\n#include \"item.h\""
-classes["monster"].code_prepend = classes["monster"].code_prepend .. "\n#include \"units.h\""
-classes["monster"].code_prepend = classes["monster"].code_prepend .. "\n#include \"color.h\""
-classes["player"].code_prepend = classes["player"].code_prepend .. "\n#include \"units.h\""
-classes["player"].code_prepend = classes["player"].code_prepend .. "\n#include \"color.h\""
-classes["Character"].code_prepend = classes["Character"].code_prepend .. "\n#include \"units.h\""
-classes["Character"].code_prepend = classes["Character"].code_prepend .. "\n#include \"color.h\""
-classes["Character"].code_prepend = classes["Character"].code_prepend .. "\n#include \"player.h\""
-classes["item"].code_prepend = classes["item"].code_prepend .. "\n#include \"units.h\""
-classes["item"].code_prepend = classes["item"].code_prepend .. "\n#include \"gun_mode.h\""
-classes["item"].code_prepend = classes["item"].code_prepend .. "\n#include \"color.h\""
-classes["start_location"].code_prepend = classes["start_location"].code_prepend .. "\n#include \"enums.h\""
-classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"monster.h\""
-classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"color.h\""
-classes["game"].code_prepend = classes["game"].code_prepend .. "\n#include \"item.h\""
+classes["recipe"]:add_code_prepend("#include \"item.h\"")
+classes["map_stack"]:add_code_prepend("#include \"units.h\"")
+classes["overmap"]:add_code_prepend("#include \"mongroup.h\"")
+classes["mutation_branch"]:add_code_prepend("#include \"color.h\"")
+classes["map"]:add_code_prepend("#include \"item.h\"")
+classes["map"]:add_code_prepend("#include \"units.h\"")
+classes["Creature"]:add_code_prepend("#include \"color.h\"")
+classes["Creature"]:add_code_prepend("#include \"units.h\"")
+classes["Creature"]:add_code_prepend("#include \"character.h\"")
+classes["Creature"]:add_code_prepend("#include \"monster.h\"")
+classes["monster"]:add_code_prepend("#include \"calendar.h\"")
+classes["monster"]:add_code_prepend("#include \"item.h\"")
+classes["monster"]:add_code_prepend("#include \"units.h\"")
+classes["monster"]:add_code_prepend("#include \"color.h\"")
+classes["player"]:add_code_prepend("#include \"units.h\"")
+classes["player"]:add_code_prepend("#include \"color.h\"")
+classes["Character"]:add_code_prepend("#include \"units.h\"")
+classes["Character"]:add_code_prepend("#include \"color.h\"")
+classes["Character"]:add_code_prepend("#include \"player.h\"")
+classes["item"]:add_code_prepend("#include \"units.h\"")
+classes["item"]:add_code_prepend("#include \"gun_mode.h\"")
+classes["item"]:add_code_prepend("#include \"color.h\"")
+classes["start_location"]:add_code_prepend("#include \"enums.h\"")
+classes["game"]:add_code_prepend("#include \"monster.h\"")
+classes["game"]:add_code_prepend("#include \"color.h\"")
+classes["game"]:add_code_prepend("#include \"item.h\"")
 
 -- Those functions are actually not implemented in C++
 for k,v in ipairs(classes["gun_mode_id"].functions) do
@@ -515,3 +518,14 @@ global_functions = {
         rval = "overmap_direction"
     }
 }
+
+types = { }
+for name, value in pairs(enums) do
+    types[name] = value
+end
+for name, value in pairs(classes) do
+    types[name] = value
+end
+
+types["field_id"].output_path = output_path_of("field")
+types["field_entry"].output_path = output_path_of("field")
