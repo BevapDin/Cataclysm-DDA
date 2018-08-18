@@ -370,13 +370,18 @@ register_class("mass", {
 } )
 
 -- Copy constructability is not detected up by the extractor
-table.insert(get_type("tripoint").new, { "tripoint" })
-table.insert(get_type("point").new, { "point" })
-table.insert(get_type("time_point").new, { "time_point" })
+for _, name in ipairs( { "tripoint", "point", "time_point" } ) do
+    get_type(name):enable_copy_operator()
+end
 
+-- Are defined in the same header, so keep them together in the wrapper as well.
 get_type("ter_t").output_path = "mapdata.gen.cpp"
 get_type("furn_t").output_path = "mapdata.gen.cpp"
+-- Ditto.
+get_type("field_id").output_path = get_type("field"):get_output_path()
+get_type("field_entry").output_path = get_type("field"):get_output_path()
 
+-- Additional includes not picked up by the extractor.
 get_type("recipe").code_prepend = get_type("recipe"):get_code_prepend() .. "\n#include \"item.h\""
 get_type("map_stack").code_prepend = get_type("map_stack"):get_code_prepend() .. "\n#include \"units.h\""
 get_type("overmap").code_prepend = get_type("overmap"):get_code_prepend() .. "\n#include \"mongroup.h\""
