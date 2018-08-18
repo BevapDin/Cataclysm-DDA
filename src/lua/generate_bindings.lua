@@ -604,6 +604,14 @@ function Class:generate_constants()
     local cpp_class_name = self:get_cpp_name()
     local cpp_name = "LuaValue<" .. cpp_class_name .. ">"
     local metatable_name = self.name .. "_metatable"
+    -- The children must be complete types, so include their header.
+    -- @todo only include that child specific header
+    for _, child in ipairs(sorted_keys(types)) do
+        local class = get_type(child)
+        if class.parent == self.name then
+            cpp_output = cpp_output .. class:get_code_prepend() .. br
+        end
+    end
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
