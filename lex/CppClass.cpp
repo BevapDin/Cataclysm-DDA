@@ -307,7 +307,9 @@ std::string CppClass::export_( Exporter &p ) const
         }
     }
 
-    r = r + print_set( printed_constructors, tab + "new = {\n", tab + "},\n" );
+    if( !printed_constructors.empty() ) {
+        r = r + print_set( printed_constructors, tab + "new = {\n", tab + "},\n" );
+    }
 
     if( has_equal() ) {
         r = r + tab + "has_equal = true,\n";

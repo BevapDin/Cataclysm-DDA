@@ -1,9 +1,7 @@
 register_class("Character", {
     forward_declaration = "class Character;\n",
-        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
+    code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
-    new = {
-    },
     attributes = {
             dex_cur = { type = "int", writable = true },
             dex_max = { type = "int", writable = true },
@@ -170,8 +168,6 @@ register_class("Character", {
 register_class("Creature", {
     forward_declaration = "class Creature;\n",
         code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
-    new = {
-    },
     attributes = {
             moves = { type = "int", writable = true },
             underwater = { type = "bool", writable = true },
@@ -357,8 +353,6 @@ register_class("Creature", {
 register_class("MonsterGroup", {
     forward_declaration = "struct MonsterGroup;\n",
         code_prepend = "#include \"mongroup.h\"\n",
-    new = {
-    },
     attributes = {
             defaultMonster = { type = "mtype_id", writable = true },
             freq_total = { type = "int", writable = true },
@@ -496,8 +490,6 @@ make_id_classes("effect_type", nil, "efftype_id")
 register_class("encumbrance_data", {
     forward_declaration = "struct encumbrance_data;\n",
         code_prepend = "#include \"character.h\"\n",
-    new = {
-    },
     has_equal = true,
     attributes = {
             armor_encumbrance = { type = "int", writable = true },
@@ -1847,8 +1839,6 @@ make_id_classes("mtype", nil, "mtype_id")
 register_class("mutation_branch", {
     forward_declaration = "struct mutation_branch;\n",
         code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
-    new = {
-    },
     attributes = {
             activated = { type = "bool", writable = true },
             additions = { type = "std::vector<trait_id>", writable = true },
@@ -2402,8 +2392,6 @@ register_class("point", {
 register_class("quality", {
     forward_declaration = "struct quality;\n",
         code_prepend = "#include \"requirements.h\"\n",
-    new = {
-    },
     attributes = {
             id = { type = "quality_id", writable = true },
             name = { type = "string", writable = true },
@@ -2489,8 +2477,6 @@ make_id_classes("start_location", nil, "start_location_id")
 register_class("stats", {
     forward_declaration = "struct stats;\n",
         code_prepend = "#include \"player.h\"\n",
-    new = {
-    },
     attributes = {
             damage_healed = { type = "int", writable = true },
             damage_taken = { type = "int", writable = true },
@@ -2563,8 +2549,6 @@ register_class("time_point", {
 register_class("trap", {
     forward_declaration = "struct trap;\n",
         code_prepend = "#include \"trap.h\"\n",
-    new = {
-    },
     attributes = {
             color = { type = "nc_color", writable = true },
             id = { type = "trap_str_id", writable = true },
@@ -2683,8 +2667,6 @@ register_class("uimenu", {
 register_class("w_point", {
     forward_declaration = "struct w_point;\n",
         code_prepend = "#include \"weather_gen.h\"\n",
-    new = {
-    },
     attributes = {
             acidic = { type = "bool", writable = true },
             humidity = { type = "float", writable = true },

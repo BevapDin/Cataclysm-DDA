@@ -11,7 +11,7 @@ Each class requires at least the attributes and the functions table (they can be
 Optional values are:
 - has_equal (boolean, default: false): If true, generate the __eq entry in the metatable which
   will map to the C++ using the operator==.
-- new (an array of parameter lists): defines the constructor of the object. The entry should be an array,
+- new (optional, an array of parameter lists): defines the constructor of the object. The entry should be an array,
   each element of it represents one overload of the constructor. Each element should be a list of
   parameters to those overloads (same as the list of arguments to member functions).
 - int_id (optional, a string): if the class has an associated int_id (e.g. ter_t has int_id<ter_t>,
@@ -77,6 +77,12 @@ no connection at all to the monster.
 --]]
 
 Class = {
+    enable_copy_operator = function(self)
+        if not self.new then
+            self.new = { }
+        end
+        table.insert(self.new, { self.name })
+    end,
 }
 Class.__index = Class
 function register_class(name, data)
@@ -353,10 +359,9 @@ register_class("mass", {
 } )
 
 -- Copy constructability is not detected up by the extractor
-table.insert(classes["tripoint"].new, { "tripoint" })
-table.insert(classes["point"].new, { "point" })
-table.insert(classes["time_point"].new, { "time_point" })
-table.insert(classes["damage_instance"].new, { "damage_instance" })
+for _, name in ipairs( { "tripoint", "point", "time_point", "damage_instance" } ) do
+    classes[name]:enable_copy_operator()
+end
 
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
