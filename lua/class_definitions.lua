@@ -93,6 +93,9 @@ function register_class(name, data)
     if not data.cpp_name then
         data.cpp_name = name
     end
+    if not data.code_prepend then
+        data.code_prepend = ""
+    end
     data.name = name
     classes[name] = data
 end
@@ -124,6 +127,20 @@ function cpp_name_of(name)
         error(name .. " is not a class/enum name")
     end
 end
+-- Yields the `code_prepend` of the entity (class/enum) of the given name.
+function code_prepend_of(name)
+    if classes[name] then
+        return classes[name].code_prepend
+    elseif enums[name] then
+        if enums[name].code_prepend then
+            return enums[name].code_prepend
+        else
+            return ""
+        end
+    else
+        error(name .. " is not a class/enum name")
+    end
+end
 
 function ref_or_val(t)
     if classes[t] then
@@ -135,20 +152,6 @@ end
 
 function output_path_for_id(id)
     return id:gsub("[^%w_.]", "") .. ".gen.cpp"
-end
-
-function container_code_prepend(t)
-    if classes[t] then
-        if classes[t].code_prepend then
-            return classes[t].code_prepend
-        end
-    end
-    if enums[t] then
-        if enums[t].code_prepend then
-            return enums[t].code_prepend
-        end
-    end
-    return ""
 end
 
 function container_forward_declaration(t)
@@ -191,7 +194,7 @@ function make_std_list_class(element_type)
         -- @todo check what other members are needed
         forward_declaration = container_forward_declaration(element_type) .. "\n#include <list>",
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <list>",
         new = {
             { },
             { container_type },
@@ -217,7 +220,7 @@ function make_std_vector_class(element_type)
         -- @todo check what other members are needed
         forward_declaration = container_forward_declaration(element_type) .. "\n#include <vector>",
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <vector>",
         new = {
             { },
             { container_type },
@@ -244,7 +247,7 @@ function make_std_set_class(element_type)
         -- @todo check what other members are needed
         forward_declaration = container_forward_declaration(element_type) .. "\n#include <set>",
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <set>",
         new = {
             { },
             { container_type },
@@ -272,7 +275,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
         -- This is the common int_id<T> interface:
         local t = {
             forward_declaration = container_forward_declaration(class_name) .. "using " .. int_id_name .. " = int_id<" .. cpp_name_of(class_name) .. ">;",
-            code_prepend = container_code_prepend(class_name) .. "\n#include \"int_id.h\"",
+            code_prepend = code_prepend_of(class_name) .. "\n#include \"int_id.h\"",
             output_path = output_path_of(class_name),
             has_equal = true,
             cpp_name = "int_id<" .. cpp_name_of(class_name) .. ">",
@@ -299,7 +302,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     if string_id_name and not classes[string_id_name] then
         local t = {
             forward_declaration = container_forward_declaration(class_name) .. "using " .. string_id_name .. " = string_id<" .. cpp_name_of(class_name) .. ">;",
-            code_prepend = container_code_prepend(class_name) .. "\n#include \"string_id.h\"",
+            code_prepend = code_prepend_of(class_name) .. "\n#include \"string_id.h\"",
             output_path = output_path_of(class_name),
             has_equal = true,
             cpp_name = "string_id<" .. cpp_name_of(class_name) .. ">",
@@ -505,12 +508,6 @@ global_functions = {
 
 -- Add missing, but optional members, so the scripts using this data
 -- can just assume it's there and don't need to handle missing entries.
-for class_name, value in pairs(classes) do
-    if not value.code_prepend then
-        value.code_prepend = ""
-    end
-end
--- same for enumerations
 for enum_name, value in pairs(enums) do
     if not value.code_prepend then
         value.code_prepend = ""
