@@ -616,6 +616,11 @@ end
 function Class:generate_constants()
     local children = self:get_children()
     local cpp_output = ""
+    -- The children must be complete types, so include their header.
+    -- @todo only include that child specific header
+    for _, child in ipairs(children) do
+        cpp_output = cpp_output .. child.code_prepend .. br
+    end
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const LuaValue<" .. self.cpp_name .. ">::METATABLE_NAME = \"" .. self.name .. "_metatable" .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
