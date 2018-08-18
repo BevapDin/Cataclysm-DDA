@@ -1,4 +1,4 @@
-classes["Character"] = {
+register_class("Character", {
     forward_declaration = "class Character;\n",
         code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
@@ -166,8 +166,8 @@ classes["Character"] = {
             { name = "worn_with_flag", rval = "bool", args = { "string" } },
             { name = "worn_with_flag", rval = "bool", args = { "string", "body_part" } },
     }
-}
-classes["Creature"] = {
+} )
+register_class("Creature", {
     forward_declaration = "class Creature;\n",
         code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
     new = {
@@ -353,8 +353,8 @@ classes["Creature"] = {
             { name = "uncanny_dodge", rval = "bool", args = { } },
             { name = "weight_capacity", rval = "mass", args = { } },
     }
-}
-classes["MonsterGroup"] = {
+} )
+register_class("MonsterGroup", {
     forward_declaration = "struct MonsterGroup;\n",
         code_prepend = "#include \"mongroup.h\"\n",
     new = {
@@ -371,10 +371,10 @@ classes["MonsterGroup"] = {
     functions = {
             { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
     }
-}
+} )
 make_id_classes("MonsterGroup", nil, "mongroup_id")
 
-classes["Skill"] = {
+register_class("Skill", {
     forward_declaration = "class Skill;\n",
         code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
     new = {
@@ -392,10 +392,10 @@ classes["Skill"] = {
             { name = "name", rval = "string", args = { } },
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
     }
-}
+} )
 make_id_classes("Skill", nil, "skill_id")
 
-classes["ammunition_type"] = {
+register_class("ammunition_type", {
     forward_declaration = "class ammunition_type;\n",
         code_prepend = "#include \"ammo.h\"\n",
     new = {
@@ -408,10 +408,10 @@ classes["ammunition_type"] = {
             { name = "default_ammotype", rval = "string", args = { } },
             { name = "name", rval = "string", args = { } },
     }
-}
+} )
 make_id_classes("ammunition_type", nil, "ammotype")
 
-classes["calendar"] = {
+register_class("calendar", {
     forward_declaration = "class calendar;\n",
         code_prepend = "#include \"calendar.h\"\n",
     new = {
@@ -440,8 +440,8 @@ classes["calendar"] = {
             { name = "year_length", static = true, rval = "time_duration", args = { } },
             { name = "years", rval = "int", args = { } },
     }
-}
-classes["damage_instance"] = {
+} )
+register_class("damage_instance", {
     forward_declaration = "struct damage_instance;\n",
         code_prepend = "#include \"damage.h\"\n",
     new = {
@@ -469,8 +469,8 @@ classes["damage_instance"] = {
             { name = "total_damage", rval = "float", args = { } },
             { name = "type_damage", rval = "float", args = { "damage_type" } },
     }
-}
-classes["effect_type"] = {
+} )
+register_class("effect_type", {
     forward_declaration = "class effect_type;\n",
         code_prepend = "#include \"effect.h\"\n",
     new = {
@@ -490,10 +490,10 @@ classes["effect_type"] = {
             { name = "use_desc_ints", rval = "bool", args = { "bool" } },
             { name = "use_name_ints", rval = "bool", args = { } },
     }
-}
+} )
 make_id_classes("effect_type", nil, "efftype_id")
 
-classes["encumbrance_data"] = {
+register_class("encumbrance_data", {
     forward_declaration = "struct encumbrance_data;\n",
         code_prepend = "#include \"character.h\"\n",
     new = {
@@ -507,8 +507,8 @@ classes["encumbrance_data"] = {
     functions = {
             { name = "reset", rval = nil, args = { } },
     }
-}
-classes["field"] = {
+} )
+register_class("field", {
     forward_declaration = "class field;\n",
         code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
     new = {
@@ -527,8 +527,8 @@ classes["field"] = {
             { name = "move_cost", rval = "int", args = { } },
             { name = "removeField", rval = "bool", args = { "field_id" } },
     }
-}
-classes["field_entry"] = {
+} )
+register_class("field_entry", {
     forward_declaration = "class field_entry;\n",
         code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
     new = {
@@ -553,8 +553,8 @@ classes["field_entry"] = {
             { name = "setFieldType", rval = "field_id", args = { "field_id" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
-classes["furn_t"] = {
+} )
+register_class("furn_t", {
     forward_declaration = "struct furn_t;\n",
         code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
@@ -588,10 +588,10 @@ classes["furn_t"] = {
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
+} )
 make_id_classes("furn_t", "furn_id", "furn_str_id")
 
-classes["game"] = {
+register_class("game", {
     forward_declaration = "class game;\n",
         code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
@@ -771,8 +771,8 @@ classes["game"] = {
             { name = "zoom_in", rval = nil, args = { } },
             { name = "zoom_out", rval = nil, args = { } },
     }
-}
-classes["gun_mode"] = {
+} )
+register_class("gun_mode", {
     forward_declaration = "class gun_mode;\n",
         code_prepend = "#include \"gun_mode.h\"\n",
     new = {
@@ -786,10 +786,10 @@ classes["gun_mode"] = {
             { name = "melee", rval = "bool", args = { } },
             { name = "name", rval = "string", args = { } },
     }
-}
+} )
 make_id_classes("gun_mode", nil, "gun_mode_id")
 
-classes["item"] = {
+register_class("item", {
     forward_declaration = "class item;\n",
         code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
@@ -1113,8 +1113,8 @@ classes["item"] = {
             { name = "wheel_area", rval = "int", args = { } },
             { name = "will_explode_in_fire", rval = "bool", args = { } },
     }
-}
-classes["itype"] = {
+} )
+register_class("itype", {
     forward_declaration = "struct itype;\n",
         code_prepend = "#include \"itype.h\"\n",
     new = {
@@ -1166,8 +1166,8 @@ classes["itype"] = {
             { name = "nname", rval = "string", args = { "int" } },
             { name = "tick", rval = "int", args = { "player", "item", "tripoint" } },
     }
-}
-classes["ma_buff"] = {
+} )
+register_class("ma_buff", {
     forward_declaration = "class ma_buff;\n",
         code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
     new = {
@@ -1202,10 +1202,10 @@ classes["ma_buff"] = {
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "speed_bonus", rval = "int", args = { "player" } },
     }
-}
+} )
 make_id_classes("ma_buff", nil, "mabuff_id")
 
-classes["ma_technique"] = {
+register_class("ma_technique", {
     forward_declaration = "class ma_technique;\n",
         code_prepend = "#include \"martialarts.h\"\n",
     new = {
@@ -1241,10 +1241,10 @@ classes["ma_technique"] = {
             { name = "move_cost_multiplier", rval = "float", args = { "player" } },
             { name = "move_cost_penalty", rval = "float", args = { "player" } },
     }
-}
+} )
 make_id_classes("ma_technique", nil, "matec_id")
 
-classes["map"] = {
+register_class("map", {
     forward_declaration = "class map;\n",
         code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
@@ -1538,8 +1538,8 @@ classes["map"] = {
             { name = "vertical_shift", rval = nil, args = { "int" } },
             { name = "water_from", rval = "item", args = { "tripoint" } },
     }
-}
-classes["map_stack"] = {
+} )
+register_class("map_stack", {
     forward_declaration = "class map_stack;\n",
         code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
@@ -1562,8 +1562,8 @@ classes["map_stack"] = {
             { name = "stacks_with", rval = "item&", args = { "item" } },
             { name = "stored_volume", rval = "volume", args = { } },
     }
-}
-classes["martialart"] = {
+} )
+register_class("martialart", {
     forward_declaration = "class martialart;\n",
         code_prepend = "#include \"martialarts.h\"\n",
     new = {
@@ -1600,10 +1600,10 @@ classes["martialart"] = {
             { name = "has_weapon", rval = "bool", args = { "string" } },
             { name = "weapon_valid", rval = "bool", args = { "item" } },
     }
-}
+} )
 make_id_classes("martialart", nil, "matype_id")
 
-classes["material_type"] = {
+register_class("material_type", {
     forward_declaration = "class material_type;\n",
         code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
     new = {
@@ -1632,10 +1632,10 @@ classes["material_type"] = {
             { name = "salvaged_into", rval = "string", args = { } },
             { name = "soft", rval = "bool", args = { } },
     }
-}
+} )
 make_id_classes("material_type", nil, "material_id")
 
-classes["mongroup"] = {
+register_class("mongroup", {
     forward_declaration = "struct mongroup;\n",
         code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
     new = {
@@ -1666,8 +1666,8 @@ classes["mongroup"] = {
             { name = "set_target", rval = nil, args = { "int", "int" } },
             { name = "wander", rval = nil, args = { "overmap" } },
     }
-}
-classes["monster"] = {
+} )
+register_class("monster", {
     forward_declaration = "class monster;\n",
         code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
     parent = "Creature",
@@ -1770,8 +1770,8 @@ classes["monster"] = {
             { name = "will_join_horde", rval = "bool", args = { "int" } },
             { name = "will_reach", rval = "bool", args = { "int", "int" } },
     }
-}
-classes["mtype"] = {
+} )
+register_class("mtype", {
     forward_declaration = "struct mtype;\n",
         code_prepend = "#include \"mtype.h\"\n",
     new = {
@@ -1841,10 +1841,10 @@ classes["mtype"] = {
             { name = "same_species", rval = "bool", args = { "mtype" } },
             { name = "set_flag", rval = nil, args = { "string", "bool" } },
     }
-}
+} )
 make_id_classes("mtype", nil, "mtype_id")
 
-classes["mutation_branch"] = {
+register_class("mutation_branch", {
     forward_declaration = "struct mutation_branch;\n",
         code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
     new = {
@@ -1901,10 +1901,10 @@ classes["mutation_branch"] = {
             { name = "reset_all", static = true, rval = nil, args = { } },
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
     }
-}
+} )
 make_id_classes("mutation_branch", nil, "trait_id")
 
-classes["nc_color"] = {
+register_class("nc_color", {
     forward_declaration = "class nc_color;\n",
         code_prepend = "#include \"color.h\"\n",
     new = {
@@ -1924,8 +1924,8 @@ classes["nc_color"] = {
             { name = "to_color_pair_index", rval = "int", args = { } },
             { name = "underline", rval = "nc_color", args = { } },
     }
-}
-classes["npc_template"] = {
+} )
+register_class("npc_template", {
     forward_declaration = "class npc_template;\n",
         code_prepend = "#include \"npc.h\"\n",
     new = {
@@ -1935,8 +1935,8 @@ classes["npc_template"] = {
     },
     functions = {
     }
-}
-classes["overmap"] = {
+} )
+register_class("overmap", {
     forward_declaration = "class overmap;\n",
         code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
     new = {
@@ -1965,8 +1965,8 @@ classes["overmap"] = {
             { name = "pos", rval = "point&", args = { } },
             { name = "save", rval = nil, args = { } },
     }
-}
-classes["player"] = {
+} )
+register_class("player", {
     forward_declaration = "class player;\n",
         code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
@@ -2384,8 +2384,8 @@ classes["player"] = {
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool" } },
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool", "int" } },
     }
-}
-classes["point"] = {
+} )
+register_class("point", {
     forward_declaration = "struct point;\n",
         code_prepend = "#include \"enums.h\"\n",
     new = {
@@ -2398,8 +2398,8 @@ classes["point"] = {
     },
     functions = {
     }
-}
-classes["quality"] = {
+} )
+register_class("quality", {
     forward_declaration = "struct quality;\n",
         code_prepend = "#include \"requirements.h\"\n",
     new = {
@@ -2410,10 +2410,10 @@ classes["quality"] = {
     },
     functions = {
     }
-}
+} )
 make_id_classes("quality", nil, "quality_id")
 
-classes["recipe"] = {
+register_class("recipe", {
     forward_declaration = "class recipe;\n",
         code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
@@ -2445,10 +2445,10 @@ classes["recipe"] = {
             { name = "result", rval = "string", args = { } },
             { name = "result_name", rval = "string", args = { } },
     }
-}
+} )
 make_id_classes("recipe", nil, "recipe_id")
 
-classes["species_type"] = {
+register_class("species_type", {
     forward_declaration = "struct species_type;\n",
         code_prepend = "#include \"monstergenerator.h\"\n",
     new = {
@@ -2459,10 +2459,10 @@ classes["species_type"] = {
     },
     functions = {
     }
-}
+} )
 make_id_classes("species_type", nil, "species_id")
 
-classes["start_location"] = {
+register_class("start_location", {
     forward_declaration = "class start_location;\n",
         code_prepend = "#include \"start_location.h\"\n",
     new = {
@@ -2483,10 +2483,10 @@ classes["start_location"] = {
             { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
             { name = "target", rval = "string", args = { } },
     }
-}
+} )
 make_id_classes("start_location", nil, "start_location_id")
 
-classes["stats"] = {
+register_class("stats", {
     forward_declaration = "struct stats;\n",
         code_prepend = "#include \"player.h\"\n",
     new = {
@@ -2499,8 +2499,8 @@ classes["stats"] = {
     },
     functions = {
     }
-}
-classes["ter_t"] = {
+} )
+register_class("ter_t", {
     forward_declaration = "struct ter_t;\n",
         code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
@@ -2533,10 +2533,10 @@ classes["ter_t"] = {
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
+} )
 make_id_classes("ter_t", "ter_id", "ter_str_id")
 
-classes["time_duration"] = {
+register_class("time_duration", {
     forward_declaration = "class time_duration;\n",
         code_prepend = "#include \"calendar.h\"\n",
     new = {
@@ -2546,8 +2546,8 @@ classes["time_duration"] = {
     },
     functions = {
     }
-}
-classes["time_point"] = {
+} )
+register_class("time_point", {
     forward_declaration = "class time_point;\n",
         code_prepend = "#include \"calendar.h\"\n",
     new = {
@@ -2559,8 +2559,8 @@ classes["time_point"] = {
     functions = {
             { name = "from_turn", static = true, rval = "time_point", args = { "int" } },
     }
-}
-classes["trap"] = {
+} )
+register_class("trap", {
     forward_declaration = "struct trap;\n",
         code_prepend = "#include \"trap.h\"\n",
     new = {
@@ -2588,10 +2588,10 @@ classes["trap"] = {
             { name = "trigger", rval = nil, args = { "tripoint", "Creature*" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
     }
-}
+} )
 make_id_classes("trap", "trap_id", "trap_str_id")
 
-classes["tripoint"] = {
+register_class("tripoint", {
     forward_declaration = "struct tripoint;\n",
         code_prepend = "#include \"enums.h\"\n",
     new = {
@@ -2606,8 +2606,8 @@ classes["tripoint"] = {
     },
     functions = {
     }
-}
-classes["uimenu"] = {
+} )
+register_class("uimenu", {
     forward_declaration = "class uimenu;\n",
         code_prepend = "#include \"ui.h\"\n",
     new = {
@@ -2679,8 +2679,8 @@ classes["uimenu"] = {
             { name = "setup", rval = nil, args = { } },
             { name = "show", rval = nil, args = { } },
     }
-}
-classes["w_point"] = {
+} )
+register_class("w_point", {
     forward_declaration = "struct w_point;\n",
         code_prepend = "#include \"weather_gen.h\"\n",
     new = {
@@ -2694,7 +2694,7 @@ classes["w_point"] = {
     },
     functions = {
     }
-}
+} )
 
 enums["add_type"] = {
     forward_declaration = "enum add_type : int;\n",
