@@ -99,16 +99,31 @@ function register_class(name, data)
     data.name = name
     classes[name] = data
 end
+
+Enum = {
+}
+Enum.__index = Enum
+function register_enum(name, data)
+    setmetatable(data, Enum)
+    if not data.output_path then
+        data.output_path = name:gsub("[^%w_.]", "") .. ".gen.cpp"
+    end
+    if not data.cpp_name then
+        data.cpp_name = name
+    end
+    if not data.code_prepend then
+        data.code_prepend = ""
+    end
+    data.name = name
+    enums[name] = data
+end
+
 -- Yields the `output_path` of the entity (class/enum) of the given name.
 function output_path_of(name)
     if classes[name] then
         return classes[name].output_path
     elseif enums[name] then
-        if enums[name].output_path then
-            return enums[name].output_path
-        else
-            return output_path_for_id(name)
-        end
+        return enums[name].output_path
     else
         error(name .. " is not a class/enum name")
     end
@@ -118,11 +133,7 @@ function cpp_name_of(name)
     if classes[name] then
         return classes[name].cpp_name
     elseif enums[name] then
-        if enums[name].cpp_name then
-            return enums[name].cpp_name
-        else
-            return name
-        end
+        return enums[name].cpp_name
     else
         error(name .. " is not a class/enum name")
     end
@@ -132,11 +143,7 @@ function code_prepend_of(name)
     if classes[name] then
         return classes[name].code_prepend
     elseif enums[name] then
-        if enums[name].code_prepend then
-            return enums[name].code_prepend
-        else
-            return ""
-        end
+        return enums[name].code_prepend
     else
         error(name .. " is not a class/enum name")
     end
@@ -505,17 +512,3 @@ global_functions = {
         rval = "overmap_direction"
     }
 }
-
--- Add missing, but optional members, so the scripts using this data
--- can just assume it's there and don't need to handle missing entries.
-for enum_name, value in pairs(enums) do
-    if not value.code_prepend then
-        value.code_prepend = ""
-    end
-    if not value.cpp_name then
-        value.cpp_name = enum_name
-    end
-    if not value.output_path then
-        value.output_path = output_path_for_id(enum_name)
-    end
-end

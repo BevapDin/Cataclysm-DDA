@@ -2678,7 +2678,7 @@ register_class("w_point", {
     }
 } )
 
-enums["add_type"] = {
+register_enum("add_type", {
     forward_declaration = "enum add_type : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
@@ -2696,8 +2696,9 @@ enums["add_type"] = {
         "ADD_MARLOSS_R",
         "ADD_MARLOSS_B",
         "ADD_MARLOSS_Y",
-    }}
-enums["body_part"] = {
+    }
+} )
+register_enum("body_part", {
     forward_declaration = "enum body_part : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
@@ -2714,8 +2715,9 @@ enums["body_part"] = {
         "bp_foot_l",
         "bp_foot_r",
         "num_bp",
-    }}
-enums["damage_type"] = {
+    }
+} )
+register_enum("damage_type", {
     forward_declaration = "enum damage_type : int;\n",
     code_prepend = "#include \"damage.h\"",
     values = {
@@ -2730,8 +2732,9 @@ enums["damage_type"] = {
         "DT_COLD",
         "DT_ELECTRIC",
         "NUM_DT",
-    }}
-enums["field_id"] = {
+    }
+} )
+register_enum("field_id", {
     forward_declaration = "enum field_id : int;\n",
     code_prepend = "#include \"field.h\"",
     values = {
@@ -2783,8 +2786,9 @@ enums["field_id"] = {
         "fd_fungicidal_gas",
         "fd_smoke_vent",
         "num_fields",
-    }}
-enums["hp_part"] = {
+    }
+} )
+register_enum("hp_part", {
     forward_declaration = "enum hp_part : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
@@ -2795,8 +2799,9 @@ enums["hp_part"] = {
         "hp_leg_l",
         "hp_leg_r",
         "num_hp_parts",
-    }}
-enums["m_size"] = {
+    }
+} )
+register_enum("m_size", {
     forward_declaration = "enum m_size : int;\n",
     code_prepend = "#include \"creature.h\"",
     values = {
@@ -2805,8 +2810,9 @@ enums["m_size"] = {
         "MS_MEDIUM",
         "MS_LARGE",
         "MS_HUGE",
-    }}
-enums["phase_id"] = {
+    }
+} )
+register_enum("phase_id", {
     forward_declaration = "enum phase_id : int;\n",
     code_prepend = "#include \"enums.h\"",
     values = {
@@ -2815,8 +2821,9 @@ enums["phase_id"] = {
         "LIQUID",
         "GAS",
         "PLASMA",
-    }}
-enums["season_type"] = {
+    }
+} )
+register_enum("season_type", {
     forward_declaration = "enum season_type;\n",
     code_prepend = "#include \"calendar.h\"",
     values = {
@@ -2824,15 +2831,17 @@ enums["season_type"] = {
         "SUMMER",
         "AUTUMN",
         "WINTER",
-    }}
-enums["side"] = {
+    }
+} )
+register_enum("side", {
     forward_declaration = "enum class side : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
         "BOTH",
         "LEFT",
         "RIGHT",
-    }}
+    }
+} )
 
 global_functions = {
 { name = "DAYS", rval = "int", args = { "int" } },
