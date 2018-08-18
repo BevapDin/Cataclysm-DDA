@@ -167,11 +167,11 @@ end
 function container_forward_declaration(t)
     if classes[t] then
         return classes[t].forward_declaration
-    end
-    if enums[t] then
+    elseif enums[t] then
         return enums[t].forward_declaration
+    else
+        error(name .. " is not a class/enum name")
     end
-    return nil
 end
 
 -- Adds the declaration for an C++ iterator class to the exported classes.
