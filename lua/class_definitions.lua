@@ -76,6 +76,41 @@ variable can be used long after `some_monster` has been killed and removed from 
 no connection at all to the monster.
 --]]
 
+Class = {
+}
+Class.__index = Class
+function register_class(name, data)
+    setmetatable(data, Class)
+    data.name = name
+    classes[name] = data
+end
+-- Yields the `output_path` of the entity (class/enum) of the given name.
+function output_path_of(name)
+    if classes[name] then
+        if classes[name].output_path then
+            return classes[name].output_path
+        else
+            return output_path_for_id(name)
+        end
+    end
+    if enums[name] then
+        if enums[name].output_path then
+            return enums[name].output_path
+        else
+            return output_path_for_id(name)
+        end
+    end
+    for k,v in pairs(classes) do
+        if v.string_id == name then
+            return output_path_of(k)
+        end
+        if v.in_id == name then
+            return output_path_of(k)
+        end
+    end
+    error(name .. " is not a class/enum name")
+end
+
 function ref_or_val(t)
     if classes[t] then
         return t .. '&'
@@ -86,20 +121,6 @@ end
 
 function output_path_for_id(id)
     return id:gsub("[^%w_.]", "") .. ".gen.cpp"
-end
-
-function container_output_path(t)
-    if classes[t] then
-        if classes[t].output_path then
-            return classes[t].output_path
-        end
-    end
-    if enums[t] then
-        if enums[t].output_path then
-            return enums[t].output_path
-        end
-    end
-    return output_path_for_id(t)
 end
 
 function container_code_prepend(t)
@@ -122,23 +143,20 @@ end
 -- as well. Dereferencing the iterator will give a reference to that type.
 function make_std_iterator_class(container_type, element_type)
     local iterator_type = container_type .. '::iterator'
-    if not classes[iterator_type] then
-        classes[iterator_type] = {
-            has_equal = true,
-            -- @todo check what other members are needed
-            output_path = container_output_path(element_type),
-            new = {
-                { iterator_type },
-            },
-            attributes = {
-            },
-            functions = {
-                { name = "elem", rval = ref_or_val(element_type), cpp_name = "operator*", args = { } },
-                { name = "inc", rval = nil, cpp_name = "operator++", args = { } },
-            },
-        }
-    end
-    local t = classes[iterator_type]
+    register_class(iterator_type, {
+        has_equal = true,
+        -- @todo check what other members are needed
+        output_path = output_path_of(element_type),
+        new = {
+            { iterator_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "elem", rval = ref_or_val(element_type), cpp_name = "operator*", args = { } },
+            { name = "inc", rval = nil, cpp_name = "operator++", args = { } },
+        },
+    } )
     -- @todo maybe add more data to this?
     return iterator_type
 end
@@ -146,28 +164,25 @@ end
 function make_std_list_class(element_type)
     local container_type = "std::list<" .. element_type .. ">"
     local iterator_type = make_std_iterator_class(container_type, element_type)
-    if not classes[container_type] then
-        classes[container_type] = {
-            -- @todo check what other members are needed
-            output_path = container_output_path(element_type),
-            code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
-            new = {
-                { },
-                { container_type },
-            },
-            attributes = {
-            },
-            functions = {
-                { name = "size", rval = "int", args = { } },
-                { name = "erase", rval = iterator_type, args = { iterator_type } },
-                { name = "push_back", rval = nil, args = { element_type } },
-                { name = "insert", rval = nil, args = { iterator_type, element_type } },
-                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
-                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
-            },
-        }
-    end
-    local t = classes[container_type]
+    register_class(container_type, {
+        -- @todo check what other members are needed
+        output_path = output_path_of(element_type),
+        code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
+        new = {
+            { },
+            { container_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "size", rval = "int", args = { } },
+            { name = "erase", rval = iterator_type, args = { iterator_type } },
+            { name = "push_back", rval = nil, args = { element_type } },
+            { name = "insert", rval = nil, args = { iterator_type, element_type } },
+            { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+            { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+        },
+    } )
     -- @todo maybe add more data to this?
     return container_type
 end
@@ -175,29 +190,26 @@ end
 function make_std_vector_class(element_type)
     local container_type = "std::vector<" .. element_type .. ">"
     local iterator_type = make_std_iterator_class(container_type, element_type)
-    if not classes[container_type] then
-        classes[container_type] = {
-            -- @todo check what other members are needed
-            output_path = container_output_path(element_type),
-            code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
-            new = {
-                { },
-                { container_type },
-            },
-            attributes = {
-            },
-            functions = {
-                { name = "at", rval = element_type, args = { "int" } },
-                { name = "size", rval = "int", args = { } },
-                { name = "erase", rval = iterator_type, args = { iterator_type } },
-                { name = "push_back", rval = nil, args = { element_type } },
-                { name = "insert", rval = nil, args = { iterator_type, element_type } },
-                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
-                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
-            },
-        }
-    end
-    local t = classes[container_type]
+    register_class(container_type, {
+        -- @todo check what other members are needed
+        output_path = output_path_of(element_type),
+        code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
+        new = {
+            { },
+            { container_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "at", rval = element_type, args = { "int" } },
+            { name = "size", rval = "int", args = { } },
+            { name = "erase", rval = iterator_type, args = { iterator_type } },
+            { name = "push_back", rval = nil, args = { element_type } },
+            { name = "insert", rval = nil, args = { iterator_type, element_type } },
+            { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+            { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+        },
+    } )
     -- @todo maybe add more data to this?
     return container_type
 end
@@ -205,28 +217,25 @@ end
 function make_std_set_class(element_type)
     local container_type = "std::set<" .. element_type .. ">"
     local iterator_type = make_std_iterator_class(container_type, element_type)
-    if not classes[container_type] then
-        classes[container_type] = {
-            -- @todo check what other members are needed
-            output_path = container_output_path(element_type),
-            code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
-            new = {
-                { },
-                { container_type },
-            },
-            attributes = {
-            },
-            functions = {
-                { name = "size", rval = "int", args = { } },
-                { name = "erase", rval = iterator_type, args = { iterator_type } },
-                { name = "insert", rval = nil, args = { element_type } },
-                { name = "count", rval = "int", args = { element_type } },
-                { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
-                { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
-            },
-        }
-    end
-    local t = classes[container_type]
+    register_class(container_type, {
+        -- @todo check what other members are needed
+        output_path = output_path_of(element_type),
+        code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
+        new = {
+            { },
+            { container_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "size", rval = "int", args = { } },
+            { name = "erase", rval = iterator_type, args = { iterator_type } },
+            { name = "insert", rval = nil, args = { element_type } },
+            { name = "count", rval = "int", args = { element_type } },
+            { name = "cppbegin", rval = iterator_type, cpp_name = "begin", args = { } },
+            { name = "cppend", rval = iterator_type, cpp_name = "end", args = { } },
+        },
+    } )
     -- @todo maybe add more data to this?
     return container_type
 end
@@ -247,7 +256,7 @@ enums = {}
 dofile_if_exists("lua/generated_class_definitions.lua")
 dofile_if_exists("../../lua/generated_class_definitions.lua")
 
-classes["item_stack_iterator"] = {
+register_class("item_stack_iterator", {
     has_equal = true,
     cpp_name = "std::list<item>::iterator",
     code_prepend = "#include \"item.h\"\n#include <list>",
@@ -260,9 +269,9 @@ classes["item_stack_iterator"] = {
         { name = "inc", cpp_name = "operator++", rval = nil, args = { } },
         { name = "elem", cpp_name = "operator*", rval = "item&", args = { } },
     },
-}
+} )
 
-classes["volume"] = {
+register_class("volume", {
     cpp_name = "units::volume",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
@@ -271,9 +280,9 @@ classes["volume"] = {
     functions = {
         { name = "value", rval = "int", args = { } },
     },
-}
+} )
 
-classes["mass"] = {
+register_class("mass", {
     cpp_name = "units::mass",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
@@ -282,7 +291,7 @@ classes["mass"] = {
     functions = {
         { name = "value", rval = "int", args = { } },
     },
-}
+} )
 
 classes["ter_t"].output_path = "mapdata.gen.cpp"
 classes["furn_t"].output_path = "mapdata.gen.cpp"
@@ -504,7 +513,7 @@ for name, value in pairs(classes) do
             -- And creation of an int_id from a string_id
             t.new = { { value.string_id }, { } }
         end
-        new_classes[value.int_id] = t
+        register_class( value.int_id, t )
     end
     -- Very similar to int_id above
     if value.string_id then
@@ -526,7 +535,7 @@ for name, value in pairs(classes) do
         if value.int_id then
             t.functions[#t.functions] = { name = "id", rval = value.int_id, args = { } }
         end
-        new_classes[value.string_id] = t
+        register_class( value.string_id, t )
     end
 end
 for name, value in pairs(new_classes) do

@@ -266,7 +266,7 @@ std::string CppClass::export_( Exporter &p ) const
 
     std::string r;
     const std::string lua_name = p.lua_name( full_name() );
-    r = r + "classes[\"" + lua_name + "\"] = {\n";
+    r = r + "register_class(\"" + lua_name + "\", {\n";
     if( lua_name != full_name().as_string() ) {
         r = r + tab + "cpp_name = \"" + full_name() + "\",\n";
     }
@@ -274,7 +274,7 @@ std::string CppClass::export_( Exporter &p ) const
     const auto printed_constructors = print_objects<CppConstructor>( p, constructors, headers );
     const auto printed_functions = print_objects<CppFunction>( p, functions, headers );
 
-    r = r + "        code_prepend = \"" + Exporter::escape_to_lua_string( enumerate( "",
+    r = r + tab + "code_prepend = \"" + Exporter::escape_to_lua_string( enumerate( "",
     headers, []( const std::string & h ) {
         return h + "\n";
     }, "", "" ) ) + "\",\n";
@@ -302,7 +302,7 @@ std::string CppClass::export_( Exporter &p ) const
     r = r + print_set( print_objects( p, attributes ), tab + "attributes = {\n", tab + "},\n" );
     r = r + print_set( printed_functions, tab + "functions = {\n", tab + "}\n" );
 
-    r = r + "}";
+    r = r + "} )\n";
 
     return r;
 }

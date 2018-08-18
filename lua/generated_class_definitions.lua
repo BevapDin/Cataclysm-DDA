@@ -1,5 +1,5 @@
-classes["Character"] = {
-        code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
+register_class("Character", {
+    code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
     new = {
     },
@@ -165,9 +165,10 @@ classes["Character"] = {
             { name = "worn_with_flag", rval = "bool", args = { "string" } },
             { name = "worn_with_flag", rval = "bool", args = { "string", "body_part" } },
     }
-}
-classes["Creature"] = {
-        code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
+} )
+
+register_class("Creature", {
+    code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
     new = {
     },
     attributes = {
@@ -349,9 +350,10 @@ classes["Creature"] = {
             { name = "uncanny_dodge", rval = "bool", args = { } },
             { name = "weight_capacity", rval = "mass", args = { } },
     }
-}
-classes["MonsterGroup"] = {
-        code_prepend = "#include \"mongroup.h\"\n",
+} )
+
+register_class("MonsterGroup", {
+    code_prepend = "#include \"mongroup.h\"\n",
     new = {
     },
     string_id = "mongroup_id",
@@ -367,9 +369,10 @@ classes["MonsterGroup"] = {
     functions = {
             { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
     }
-}
-classes["Skill"] = {
-        code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
+} )
+
+register_class("Skill", {
+    code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -386,9 +389,10 @@ classes["Skill"] = {
             { name = "name", rval = "string", args = { } },
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
     }
-}
-classes["ammunition_type"] = {
-        code_prepend = "#include \"ammo.h\"\n",
+} )
+
+register_class("ammunition_type", {
+    code_prepend = "#include \"ammo.h\"\n",
     new = {
             { "string" },
             { },
@@ -400,9 +404,10 @@ classes["ammunition_type"] = {
             { name = "default_ammotype", rval = "string", args = { } },
             { name = "name", rval = "string", args = { } },
     }
-}
-classes["calendar"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+} )
+
+register_class("calendar", {
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
             { "int" },
@@ -429,9 +434,10 @@ classes["calendar"] = {
             { name = "year_length", static = true, rval = "time_duration", args = { } },
             { name = "years", rval = "int", args = { } },
     }
-}
-classes["effect_type"] = {
-        code_prepend = "#include \"effect.h\"\n",
+} )
+
+register_class("effect_type", {
+    code_prepend = "#include \"effect.h\"\n",
     new = {
             { },
     },
@@ -450,9 +456,10 @@ classes["effect_type"] = {
             { name = "use_desc_ints", rval = "bool", args = { "bool" } },
             { name = "use_name_ints", rval = "bool", args = { } },
     }
-}
-classes["encumbrance_data"] = {
-        code_prepend = "#include \"character.h\"\n",
+} )
+
+register_class("encumbrance_data", {
+    code_prepend = "#include \"character.h\"\n",
     new = {
     },
     has_equal = true,
@@ -464,9 +471,10 @@ classes["encumbrance_data"] = {
     functions = {
             { name = "reset", rval = nil, args = { } },
     }
-}
-classes["field"] = {
-        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
+} )
+
+register_class("field", {
+    code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
     new = {
             { },
     },
@@ -483,9 +491,10 @@ classes["field"] = {
             { name = "move_cost", rval = "int", args = { } },
             { name = "removeField", rval = "bool", args = { "field_id" } },
     }
-}
-classes["field_entry"] = {
-        code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
+} )
+
+register_class("field_entry", {
+    code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
     new = {
             { "field_id", "int", "time_duration" },
             { },
@@ -508,9 +517,10 @@ classes["field_entry"] = {
             { name = "setFieldType", rval = "field_id", args = { "field_id" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
-classes["furn_t"] = {
-        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+} )
+
+register_class("furn_t", {
+    code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
     },
@@ -544,9 +554,10 @@ classes["furn_t"] = {
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
-classes["game"] = {
-        code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
+} )
+
+register_class("game", {
+    code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
             { },
     },
@@ -724,9 +735,10 @@ classes["game"] = {
             { name = "zoom_in", rval = nil, args = { } },
             { name = "zoom_out", rval = nil, args = { } },
     }
-}
-classes["gun_mode"] = {
-        code_prepend = "#include \"gun_mode.h\"\n",
+} )
+
+register_class("gun_mode", {
+    code_prepend = "#include \"gun_mode.h\"\n",
     new = {
             { },
     },
@@ -739,9 +751,10 @@ classes["gun_mode"] = {
             { name = "melee", rval = "bool", args = { } },
             { name = "name", rval = "string", args = { } },
     }
-}
-classes["item"] = {
-        code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
+} )
+
+register_class("item", {
+    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
             { "itype" },
@@ -1060,9 +1073,10 @@ classes["item"] = {
             { name = "wheel_area", rval = "int", args = { } },
             { name = "will_explode_in_fire", rval = "bool", args = { } },
     }
-}
-classes["itype"] = {
-        code_prepend = "#include \"itype.h\"\n",
+} )
+
+register_class("itype", {
+    code_prepend = "#include \"itype.h\"\n",
     new = {
             { },
     },
@@ -1111,9 +1125,10 @@ classes["itype"] = {
             { name = "nname", rval = "string", args = { "int" } },
             { name = "tick", rval = "int", args = { "player", "item", "tripoint" } },
     }
-}
-classes["ma_buff"] = {
-        code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
+} )
+
+register_class("ma_buff", {
+    code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -1147,9 +1162,10 @@ classes["ma_buff"] = {
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "speed_bonus", rval = "int", args = { "player" } },
     }
-}
-classes["ma_technique"] = {
-        code_prepend = "#include \"martialarts.h\"\n",
+} )
+
+register_class("ma_technique", {
+    code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
     },
@@ -1184,9 +1200,10 @@ classes["ma_technique"] = {
             { name = "move_cost_multiplier", rval = "float", args = { "player" } },
             { name = "move_cost_penalty", rval = "float", args = { "player" } },
     }
-}
-classes["map"] = {
-        code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
+} )
+
+register_class("map", {
+    code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
             { "bool" },
             { "int" },
@@ -1478,9 +1495,10 @@ classes["map"] = {
             { name = "vertical_shift", rval = nil, args = { "int" } },
             { name = "water_from", rval = "item", args = { "tripoint" } },
     }
-}
-classes["map_stack"] = {
-        code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
+} )
+
+register_class("map_stack", {
+    code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
     },
     attributes = {
@@ -1501,9 +1519,10 @@ classes["map_stack"] = {
             { name = "stacks_with", rval = "item&", args = { "item" } },
             { name = "stored_volume", rval = "volume", args = { } },
     }
-}
-classes["martialart"] = {
-        code_prepend = "#include \"martialarts.h\"\n",
+} )
+
+register_class("martialart", {
+    code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
     },
@@ -1539,9 +1558,10 @@ classes["martialart"] = {
             { name = "has_weapon", rval = "bool", args = { "string" } },
             { name = "weapon_valid", rval = "bool", args = { "item" } },
     }
-}
-classes["material_type"] = {
-        code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
+} )
+
+register_class("material_type", {
+    code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
     },
@@ -1569,9 +1589,10 @@ classes["material_type"] = {
             { name = "salvaged_into", rval = "string", args = { } },
             { name = "soft", rval = "bool", args = { } },
     }
-}
-classes["mongroup"] = {
-        code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
+} )
+
+register_class("mongroup", {
+    code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
     new = {
             { "mongroup_id", "int", "int", "int", "int", "int" },
             { "string", "tripoint", "int", "int", "tripoint", "int", "bool", "bool", "bool" },
@@ -1600,9 +1621,10 @@ classes["mongroup"] = {
             { name = "set_target", rval = nil, args = { "int", "int" } },
             { name = "wander", rval = nil, args = { "overmap" } },
     }
-}
-classes["monster"] = {
-        code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
+} )
+
+register_class("monster", {
+    code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
     parent = "Creature",
     new = {
             { "monster" },
@@ -1703,9 +1725,10 @@ classes["monster"] = {
             { name = "will_join_horde", rval = "bool", args = { "int" } },
             { name = "will_reach", rval = "bool", args = { "int", "int" } },
     }
-}
-classes["mtype"] = {
-        code_prepend = "#include \"mtype.h\"\n",
+} )
+
+register_class("mtype", {
+    code_prepend = "#include \"mtype.h\"\n",
     new = {
             { },
     },
@@ -1773,9 +1796,10 @@ classes["mtype"] = {
             { name = "same_species", rval = "bool", args = { "mtype" } },
             { name = "set_flag", rval = nil, args = { "string", "bool" } },
     }
-}
-classes["mutation_branch"] = {
-        code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
+} )
+
+register_class("mutation_branch", {
+    code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
     new = {
     },
     string_id = "trait_id",
@@ -1831,9 +1855,10 @@ classes["mutation_branch"] = {
             { name = "reset_all", static = true, rval = nil, args = { } },
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
     }
-}
-classes["nc_color"] = {
-        code_prepend = "#include \"color.h\"\n",
+} )
+
+register_class("nc_color", {
+    code_prepend = "#include \"color.h\"\n",
     new = {
             { },
     },
@@ -1851,9 +1876,10 @@ classes["nc_color"] = {
             { name = "to_color_pair_index", rval = "int", args = { } },
             { name = "underline", rval = "nc_color", args = { } },
     }
-}
-classes["npc_template"] = {
-        code_prepend = "#include \"npc.h\"\n",
+} )
+
+register_class("npc_template", {
+    code_prepend = "#include \"npc.h\"\n",
     new = {
             { },
     },
@@ -1861,9 +1887,10 @@ classes["npc_template"] = {
     },
     functions = {
     }
-}
-classes["overmap"] = {
-        code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
+} )
+
+register_class("overmap", {
+    code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
     new = {
             { "int", "int" },
             { "overmap" },
@@ -1891,9 +1918,10 @@ classes["overmap"] = {
             { name = "pos", rval = "point&", args = { } },
             { name = "save", rval = nil, args = { } },
     }
-}
-classes["player"] = {
-        code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
+} )
+
+register_class("player", {
+    code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
     new = {
             { "player" },
@@ -2304,9 +2332,10 @@ classes["player"] = {
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool" } },
             { name = "wield_contents", rval = "bool", args = { "item", "int", "bool", "int" } },
     }
-}
-classes["point"] = {
-        code_prepend = "#include \"enums.h\"\n",
+} )
+
+register_class("point", {
+    code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int" },
             { },
@@ -2317,9 +2346,10 @@ classes["point"] = {
     },
     functions = {
     }
-}
-classes["quality"] = {
-        code_prepend = "#include \"requirements.h\"\n",
+} )
+
+register_class("quality", {
+    code_prepend = "#include \"requirements.h\"\n",
     new = {
     },
     string_id = "quality_id",
@@ -2329,9 +2359,10 @@ classes["quality"] = {
     },
     functions = {
     }
-}
-classes["recipe"] = {
-        code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
+} )
+
+register_class("recipe", {
+    code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
             { },
     },
@@ -2362,9 +2393,10 @@ classes["recipe"] = {
             { name = "result", rval = "string", args = { } },
             { name = "result_name", rval = "string", args = { } },
     }
-}
-classes["species_type"] = {
-        code_prepend = "#include \"monstergenerator.h\"\n",
+} )
+
+register_class("species_type", {
+    code_prepend = "#include \"monstergenerator.h\"\n",
     new = {
             { },
     },
@@ -2374,9 +2406,10 @@ classes["species_type"] = {
     },
     functions = {
     }
-}
-classes["start_location"] = {
-        code_prepend = "#include \"start_location.h\"\n",
+} )
+
+register_class("start_location", {
+    code_prepend = "#include \"start_location.h\"\n",
     new = {
             { },
     },
@@ -2396,9 +2429,10 @@ classes["start_location"] = {
             { name = "surround_with_monsters", rval = nil, args = { "tripoint", "mongroup_id", "float" } },
             { name = "target", rval = "string", args = { } },
     }
-}
-classes["stats"] = {
-        code_prepend = "#include \"player.h\"\n",
+} )
+
+register_class("stats", {
+    code_prepend = "#include \"player.h\"\n",
     new = {
     },
     attributes = {
@@ -2409,9 +2443,10 @@ classes["stats"] = {
     },
     functions = {
     }
-}
-classes["ter_t"] = {
-        code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
+} )
+
+register_class("ter_t", {
+    code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
     },
@@ -2444,9 +2479,10 @@ classes["ter_t"] = {
             { name = "set_flag", rval = nil, args = { "string" } },
             { name = "symbol", rval = "int", args = { } },
     }
-}
-classes["time_duration"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+} )
+
+register_class("time_duration", {
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
     },
     has_equal = true,
@@ -2454,9 +2490,10 @@ classes["time_duration"] = {
     },
     functions = {
     }
-}
-classes["time_point"] = {
-        code_prepend = "#include \"calendar.h\"\n",
+} )
+
+register_class("time_point", {
+    code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
             { "int" },
@@ -2466,9 +2503,10 @@ classes["time_point"] = {
     functions = {
             { name = "from_turn", static = true, rval = "time_point", args = { "int" } },
     }
-}
-classes["trap"] = {
-        code_prepend = "#include \"trap.h\"\n",
+} )
+
+register_class("trap", {
+    code_prepend = "#include \"trap.h\"\n",
     new = {
     },
     string_id = "trap_str_id",
@@ -2496,9 +2534,10 @@ classes["trap"] = {
             { name = "trigger", rval = nil, args = { "tripoint", "Creature" } },
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
     }
-}
-classes["tripoint"] = {
-        code_prepend = "#include \"enums.h\"\n",
+} )
+
+register_class("tripoint", {
+    code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int", "int" },
             { "point", "int" },
@@ -2511,9 +2550,10 @@ classes["tripoint"] = {
     },
     functions = {
     }
-}
-classes["uimenu"] = {
-        code_prepend = "#include \"ui.h\"\n",
+} )
+
+register_class("uimenu", {
+    code_prepend = "#include \"ui.h\"\n",
     new = {
             { "string" },
             { },
@@ -2583,9 +2623,10 @@ classes["uimenu"] = {
             { name = "setup", rval = nil, args = { } },
             { name = "show", rval = nil, args = { } },
     }
-}
-classes["w_point"] = {
-        code_prepend = "#include \"weather_gen.h\"\n",
+} )
+
+register_class("w_point", {
+    code_prepend = "#include \"weather_gen.h\"\n",
     new = {
     },
     attributes = {
@@ -2597,7 +2638,7 @@ classes["w_point"] = {
     },
     functions = {
     }
-}
+} )
 
 enums["add_type"] = {
     values = {
