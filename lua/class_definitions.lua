@@ -96,6 +96,9 @@ function register_class(name, data)
     if not data.code_prepend then
         data.code_prepend = ""
     end
+    if not data.forward_declaration then
+        error("Class " .. name .. ": missing \"forward_declaration\" value")
+    end
     data.name = name
     classes[name] = data
 end
