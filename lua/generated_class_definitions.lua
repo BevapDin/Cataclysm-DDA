@@ -781,6 +781,258 @@ register_class("gun_mode", {
 } )
 make_id_classes("gun_mode", nil, "gun_mode_id")
 
+register_class("islot_ammo", {
+    forward_declaration = "struct islot_ammo;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            casing = { type = "string", writable = true },
+            cookoff = { type = "bool", writable = true },
+            damage = { type = "damage_instance", writable = true },
+            def_charges = { type = "int", writable = true },
+            dispersion = { type = "int", writable = true },
+            drop = { type = "string", writable = true },
+            drop_active = { type = "bool", writable = true },
+            drop_chance = { type = "float", writable = true },
+            legacy_damage = { type = "int", writable = true },
+            legacy_pierce = { type = "int", writable = true },
+            loudness = { type = "int", writable = true },
+            range = { type = "int", writable = true },
+            recoil = { type = "int", writable = true },
+            special_cookoff = { type = "bool", writable = true },
+            type = { type = "std::set<ammotype>", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_armor", {
+    forward_declaration = "struct islot_armor;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            coverage = { type = "int", writable = true },
+            encumber = { type = "int", writable = true },
+            env_resist = { type = "int", writable = true },
+            env_resist_w_filter = { type = "int", writable = true },
+            power_armor = { type = "bool", writable = true },
+            sided = { type = "bool", writable = true },
+            storage = { type = "volume", writable = true },
+            thickness = { type = "int", writable = true },
+            warmth = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_artifact", {
+    forward_declaration = "struct islot_artifact;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            dream_freq_met = { type = "int", writable = true },
+            dream_freq_unmet = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_bionic", {
+    forward_declaration = "struct islot_bionic;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            difficulty = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_book", {
+    forward_declaration = "struct islot_book;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            chapters = { type = "int", writable = true },
+            fun = { type = "int", writable = true },
+            intel = { type = "int", writable = true },
+            level = { type = "int", writable = true },
+            req = { type = "int", writable = true },
+            skill = { type = "skill_id", writable = true },
+            time = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_brewable", {
+    forward_declaration = "struct islot_brewable;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            time = { type = "time_duration", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_comestible", {
+    forward_declaration = "struct islot_comestible;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            add = { type = "add_type", writable = true },
+            addict = { type = "int", writable = true },
+            comesttype = { type = "string", writable = true },
+            def_charges = { type = "int", writable = true },
+            fun = { type = "int", writable = true },
+            healthy = { type = "int", writable = true },
+            nutr = { type = "int", writable = true },
+            parasites = { type = "int", writable = true },
+            quench = { type = "int", writable = true },
+            rot_spawn = { type = "mongroup_id", writable = true },
+            rot_spawn_chance = { type = "int", writable = true },
+            spoils = { type = "time_duration", writable = true },
+            stim = { type = "int", writable = true },
+            tool = { type = "string", writable = true },
+    },
+    functions = {
+            { name = "get_calories", rval = "int", args = { } },
+    }
+} )
+register_class("islot_container", {
+    forward_declaration = "struct islot_container;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            contains = { type = "volume", writable = true },
+            preserves = { type = "bool", writable = true },
+            seals = { type = "bool", writable = true },
+            unseals_into = { type = "string", writable = true },
+            watertight = { type = "bool", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_engine", {
+    forward_declaration = "struct islot_engine;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            displacement = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_fuel", {
+    forward_declaration = "struct islot_fuel;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            energy = { type = "float", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_gun", {
+    forward_declaration = "struct islot_gun;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            ammo = { type = "ammotype", writable = true },
+            barrel_length = { type = "volume", writable = true },
+            burst = { type = "int", writable = true },
+            clip = { type = "int", writable = true },
+            damage = { type = "damage_instance", writable = true },
+            dispersion = { type = "int", writable = true },
+            durability = { type = "int", writable = true },
+            handling = { type = "int", writable = true },
+            legacy_damage = { type = "int", writable = true },
+            legacy_pierce = { type = "int", writable = true },
+            loudness = { type = "int", writable = true },
+            range = { type = "int", writable = true },
+            recoil = { type = "int", writable = true },
+            reload_noise = { type = "string", writable = true },
+            reload_noise_volume = { type = "int", writable = true },
+            reload_time = { type = "int", writable = true },
+            sight_dispersion = { type = "int", writable = true },
+            skill_used = { type = "skill_id", writable = true },
+            ups_charges = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_gunmod", {
+    forward_declaration = "struct islot_gunmod;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            aim_speed = { type = "int", writable = true },
+            damage = { type = "damage_instance", writable = true },
+            dispersion = { type = "int", writable = true },
+            handling = { type = "int", writable = true },
+            install_time = { type = "int", writable = true },
+            legacy_damage = { type = "int", writable = true },
+            legacy_pierce = { type = "int", writable = true },
+            loudness = { type = "int", writable = true },
+            range = { type = "int", writable = true },
+            sight_dispersion = { type = "int", writable = true },
+            ups_charges = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_magazine", {
+    forward_declaration = "struct islot_magazine;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            capacity = { type = "int", writable = true },
+            count = { type = "int", writable = true },
+            default_ammo = { type = "string", writable = true },
+            linkage = { type = "string", writable = true },
+            protects_contents = { type = "bool", writable = true },
+            reliability = { type = "int", writable = true },
+            reload_time = { type = "int", writable = true },
+            type = { type = "ammotype", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_mod", {
+    forward_declaration = "struct islot_mod;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            acceptable_ammo = { type = "std::set<ammotype>", writable = true },
+            ammo_modifier = { type = "ammotype", writable = true },
+            capacity_multiplier = { type = "float", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_seed", {
+    forward_declaration = "struct islot_seed;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    new = {
+            { },
+    },
+    attributes = {
+            fruit_div = { type = "int", writable = true },
+            fruit_id = { type = "string", writable = true },
+            grow = { type = "time_duration", writable = true },
+            plant_name = { type = "string", writable = true },
+            spawn_seeds = { type = "bool", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_tool", {
+    forward_declaration = "struct islot_tool;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            ammo_id = { type = "ammotype", writable = true },
+            charges_per_use = { type = "int", writable = true },
+            def_charges = { type = "int", writable = true },
+            max_charges = { type = "int", writable = true },
+            revert_msg = { type = "string", writable = true },
+            revert_to = { type = "string", writable = true },
+            subtype = { type = "string", writable = true },
+            turns_per_charge = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
+register_class("islot_wheel", {
+    forward_declaration = "struct islot_wheel;\n",
+        code_prepend = "#include \"itype.h\"\n",
+    attributes = {
+            diameter = { type = "int", writable = true },
+            width = { type = "int", writable = true },
+    },
+    functions = {
+    }
+} )
 register_class("item", {
     forward_declaration = "class item;\n",
         code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
@@ -886,6 +1138,7 @@ register_class("item", {
             { name = "erase_var", rval = nil, args = { "string" } },
             { name = "fill_with", rval = nil, args = { "item" } },
             { name = "fill_with", rval = nil, args = { "item", "int" } },
+            { name = "find_armor_data", rval = "islot_armor&", args = { } },
             { name = "find_type", static = true, rval = "itype&", args = { "string" } },
             { name = "fire_resist", rval = "int", args = { "bool" } },
             { name = "fire_resist", rval = "int", args = { } },
@@ -1113,36 +1366,53 @@ register_class("itype", {
             { },
     },
     attributes = {
+            ammo = { type = "cata::optional<islot_ammo>", writable = true },
+            armor = { type = "cata::optional<islot_armor>", writable = true },
+            artifact = { type = "cata::optional<islot_artifact>", writable = true },
+            bionic = { type = "cata::optional<islot_bionic>", writable = true },
+            book = { type = "cata::optional<islot_book>", writable = true },
+            brewable = { type = "cata::optional<islot_brewable>", writable = true },
             color = { type = "nc_color", writable = true },
+            comestible = { type = "cata::optional<islot_comestible>", writable = true },
+            container = { type = "cata::optional<islot_container>", writable = true },
             countdown_destroy = { type = "bool", writable = true },
             countdown_interval = { type = "int", writable = true },
             damage_max = { type = "int", writable = true },
             damage_min = { type = "int", writable = true },
             default_container = { type = "string", writable = true },
             description = { type = "string", writable = true },
+            engine = { type = "cata::optional<islot_engine>", writable = true },
             explode_in_fire = { type = "bool", writable = true },
+            fuel = { type = "cata::optional<islot_fuel>", writable = true },
+            gun = { type = "cata::optional<islot_gun>", writable = true },
+            gunmod = { type = "cata::optional<islot_gunmod>", writable = true },
             integral_volume = { type = "volume", writable = true },
             light_emission = { type = "int", writable = true },
             looks_like = { type = "string", writable = true },
             m_to_hit = { type = "int", writable = true },
+            magazine = { type = "cata::optional<islot_magazine>", writable = true },
             magazine_well = { type = "volume", writable = true },
             materials = { type = "std::vector<material_id>", writable = true },
             min_dex = { type = "int", writable = true },
             min_int = { type = "int", writable = true },
             min_per = { type = "int", writable = true },
             min_str = { type = "int", writable = true },
+            mod = { type = "cata::optional<islot_mod>", writable = true },
             phase = { type = "phase_id", writable = true },
             price = { type = "int", writable = true },
             price_post = { type = "int", writable = true },
             rigid = { type = "bool", writable = true },
+            seed = { type = "cata::optional<islot_seed>", writable = true },
             snippet_category = { type = "string", writable = true },
             stack_size = { type = "int", writable = true },
             stackable = { type = "bool", writable = true },
             sym = { type = "string", writable = true },
             techniques = { type = "std::set<matec_id>", writable = true },
             thrown_damage = { type = "damage_instance", writable = true },
+            tool = { type = "cata::optional<islot_tool>", writable = true },
             volume = { type = "volume", writable = true },
             weight = { type = "mass", writable = true },
+            wheel = { type = "cata::optional<islot_wheel>", writable = true },
     },
     functions = {
             { name = "can_use", rval = "bool", args = { "string" } },
@@ -2869,7 +3139,25 @@ tripoint_min = { type = "tripoint" },
 tripoint_zero = { type = "tripoint" },
 }
 
+make_cata_optional_class("islot_ammo")
+make_cata_optional_class("islot_armor")
+make_cata_optional_class("islot_artifact")
+make_cata_optional_class("islot_bionic")
+make_cata_optional_class("islot_book")
+make_cata_optional_class("islot_brewable")
+make_cata_optional_class("islot_comestible")
+make_cata_optional_class("islot_container")
+make_cata_optional_class("islot_engine")
+make_cata_optional_class("islot_fuel")
+make_cata_optional_class("islot_gun")
+make_cata_optional_class("islot_gunmod")
+make_cata_optional_class("islot_magazine")
+make_cata_optional_class("islot_mod")
+make_cata_optional_class("islot_seed")
+make_cata_optional_class("islot_tool")
+make_cata_optional_class("islot_wheel")
 make_std_list_class("item")
+make_std_set_class("ammotype")
 make_std_set_class("body_part")
 make_std_set_class("matec_id")
 make_std_set_class("material_id")

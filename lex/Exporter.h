@@ -134,6 +134,7 @@ class Exporter
         cata::optional<std::string> build_in_lua_type( const Type &t ) const;
         ///@}
 
+        cata::optional<std::string> register_cata_optional( const Type &t );
         cata::optional<std::string> register_std_container( const std::string name, const Type &t );
         cata::optional<std::string> register_std_iterator( const std::string &name, const Type &t );
         cata::optional<std::string> register_generic( const Type &t );

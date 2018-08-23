@@ -177,6 +177,31 @@ function container_forward_declaration(t)
     end
 end
 
+function make_cata_optional_class(element_type)
+    local t = 'cata::optional<' .. element_type .. '>'
+    if not classes[t] then
+        classes[t] = {
+            has_equal = true,
+            -- @todo check what other members are needed
+            forward_declaration = container_forward_declaration(element_type),
+            output_path = container_output_path(element_type),
+            new = {
+                { },
+                { t },
+                { element_type },
+            },
+            attributes = {
+            },
+            functions = {
+                { name = "value", rval = ref_or_val(element_type), args = { } },
+                { name = "has_value", rval = "bool", args = { } },
+                { name = "reset", rval = nil, args = { } },
+                { name = "emplace", rval = nil, args = { element_type } },
+            },
+        }
+    end
+end
+
 -- Adds the declaration for an C++ iterator class to the exported classes.
 -- @param container_type The C++ type id of the container class.
 -- @param element_type The C++ type of the container elements. This type must be exported
