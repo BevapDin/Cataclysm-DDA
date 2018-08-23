@@ -147,10 +147,11 @@ void Parser::parse( const std::vector<std::string> &headers )
         text += "#include \"" + header + "\"\n";
     }
     std::vector<const char *> args = { {
-            "-x", "c++",
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
+            "-stdlib=libc++",
+            "-x", "c++",
         }
     };
     for( const std::string &arg : additional_args ) {
@@ -184,10 +185,11 @@ void Parser::parse( const std::string &header )
         return;
     }
     std::vector<const char *> args = { {
-            "-x", "c++",
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
+            "-stdlib=libc++",
+            "-x", "c++",
         }
     };
     for( const std::string &arg : additional_args ) {
