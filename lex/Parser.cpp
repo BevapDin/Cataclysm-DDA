@@ -203,10 +203,10 @@ void Parser::parse( const std::string &header )
 
     const auto diagnostics = tus.back().get_diagnostics();
     for( const std::string &msg : diagnostics ) {
-        info_message( msg );
+        info_message( header + ": " + msg );
     }
     if( !diagnostics.empty() ) {
-        throw std::runtime_error("Errors / warnings while parsing header" );
+        throw std::runtime_error("Errors / warnings while parsing header \"" + header + "\"" );
     }
 
     for( const std::string &file : tus.back().get_includes() ) {
