@@ -471,6 +471,32 @@ cata::optional<std::string> Exporter::register_std_container( const std::string 
     return "\"std::" + name + "<" + element_type + ">\"";
 }
 
+cata::optional<std::string> Exporter::register_cata_optional( const Type &t )
+{
+    const std::string sp = remove_const( t.spelling() );
+    std::string element_type = extract_templates( "cata::optional", sp );
+    if( element_type.empty() ) {
+        if( t.kind() == CXType_Typedef ) {
+            return register_cata_optional( t.get_declaration().get_underlying_type() );
+        }
+        return {};
+    }
+
+    if( build_in_lua_type( element_type ).value_or( "" ) == "std::string" ) {
+        element_type = "std::string";
+    } else if( export_enabled( FullyQualifiedId( element_type ) ) ) {
+        // pass
+    } else {
+        debug_message( sp + " is a cata::optional based on " + element_type +
+                       ", but is not exported" );
+        return {};
+    }
+
+    debug_message( sp + " is a cata::optional based on " + element_type );
+    generic_types[sp] = "make_cata_optional_class(\"" + element_type + "\")";
+    return "\"cata::optional<" + element_type + ">\"";
+}
+
 cata::optional<std::string> Exporter::register_generic( const Type &t )
 {
     if( const auto res = register_std_container( "list", t ) ) {
@@ -480,6 +506,9 @@ cata::optional<std::string> Exporter::register_generic( const Type &t )
         return res;
     }
     if( const auto res = register_std_container( "set", t ) ) {
+        return res;
+    }
+    if( const auto res = register_cata_optional( t ) ) {
         return res;
     }
     // @todo add more
@@ -628,6 +657,9 @@ cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) c
     }
     if( t.spelling().compare( 0, 9, "std::set<" ) == 0 ) {
         return std::string( "#include <set>" );
+    }
+    if( t.spelling().compare( 0, 15, "cata::optional<" ) == 0 ) {
+        return std::string( "#include \"../optional.h\"" );
     }
     const std::string header = t.get_declaration().location_file();
     if( !header.empty() ) {

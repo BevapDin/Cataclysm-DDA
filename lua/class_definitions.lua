@@ -170,6 +170,29 @@ function output_path_for_id(id)
     return id:gsub("[^%w_.]", "") .. ".gen.cpp"
 end
 
+function make_cata_optional_class(element_type)
+    local t = 'cata::optional<' .. element_type .. '>'
+    register_class(t, {
+        -- @todo check what other members are needed
+        forward_declaration = get_type(element_type):get_forward_declaration(),
+        output_path = get_type(element_type):get_output_path(),
+        code_prepend = get_type(element_type):get_code_prepend() .. "\n#include \"optional.h\"\n",
+        new = {
+            { },
+            { t },
+            { element_type },
+        },
+        attributes = {
+        },
+        functions = {
+            { name = "value", rval = ref_or_val(element_type), args = { } },
+            { name = "has_value", rval = "bool", args = { } },
+            { name = "reset", rval = nil, args = { } },
+            { name = "emplace", rval = nil, args = { element_type } },
+        },
+    } )
+end
+
 -- Adds the declaration for an C++ iterator class to the exported classes.
 -- @param container_type The C++ type id of the container class.
 -- @param element_type The C++ type of the container elements. This type must be exported
