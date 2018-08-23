@@ -184,7 +184,7 @@ function make_cata_optional_class(element_type)
             has_equal = true,
             -- @todo check what other members are needed
             forward_declaration = container_forward_declaration(element_type),
-            output_path = container_output_path(element_type),
+            output_path = output_path_of(element_type),
             new = {
                 { },
                 { t },
