@@ -377,6 +377,10 @@ std::string PATH_INFO::data_sound()
 {
     return datadir_value + "sound";
 }
+std::string PATH_INFO::macrodir()
+{
+    return user_dir_value + "macros/";
+}
 
 std::string PATH_INFO::credits()
 {
