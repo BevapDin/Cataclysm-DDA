@@ -3,6 +3,7 @@
 #include "coordinate_conversions.h"
 #include "output.h"
 #include "debug.h"
+#include "input.h"
 #include "translations.h"
 #include "filesystem.h"
 #include "overmapbuffer.h"

@@ -375,7 +375,7 @@ typedef enum {
 } PopupFlags;
 
 template<typename ...Args>
-inline long popup_getkey( const char *const mes, Args &&... args )
+inline input_event popup_getkey( const char *const mes, Args &&... args )
 {
     return popup( string_format( mes, std::forward<Args>( args )... ), PF_GET_KEY );
 }
@@ -400,7 +400,7 @@ inline void popup( const char *mes, Args &&... args )
 {
     popup( string_format( mes, std::forward<Args>( args )... ), PF_NONE );
 }
-long popup( const std::string &text, PopupFlags flags );
+input_event popup( const std::string &text, PopupFlags flags );
 template<typename ...Args>
 inline void full_screen_popup( const char *mes, Args &&... args )
 {

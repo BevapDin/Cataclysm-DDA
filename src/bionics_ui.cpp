@@ -510,7 +510,7 @@ void player::power_bionics()
             }
             redraw = true;
             const long newch = popup_getkey( _( "%s; enter new letter. Space to clear. Esc to cancel." ),
-                                             tmp->id->name.c_str() );
+                                             tmp->id->name.c_str() ).get_first_input();
             wrefresh( wBio );
             if( newch == ch || newch == KEY_ESCAPE ) {
                 continue;

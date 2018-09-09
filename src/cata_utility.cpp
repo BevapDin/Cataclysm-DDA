@@ -6,6 +6,7 @@
 #include "creature.h"
 #include "translations.h"
 #include "debug.h"
+#include "input.h"
 #include "mapsharing.h"
 #include "output.h"
 #include "json.h"

@@ -1786,10 +1786,10 @@ bool game::cancel_activity_or_ignore_query( const distraction_type type, const s
     do {
 #ifdef __ANDROID__
         // Don't use popup() as this creates its own input context which will override the one above
-        ch = popup( stop_message, PF_NO_WAIT );
+        popup( stop_message, PF_NO_WAIT );
         ch = inp_mngr.get_input_event().get_first_input();
 #else
-        ch = popup( stop_message, PF_GET_KEY );
+        ch = popup( stop_message, PF_GET_KEY ).get_first_input();
 #endif
     } while( ch != '\n' && ch != ' ' && ch != KEY_ESCAPE &&
              ch != 'Y' && ch != 'N' && ch != 'I' &&
