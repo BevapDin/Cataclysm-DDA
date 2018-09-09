@@ -882,7 +882,7 @@ const std::string &input_context::handle_input( const int timeout )
     next_action.type = CATA_INPUT_ERROR;
     const std::string *result = &CATA_ERROR;
     while( true ) {
-        next_action = inp_mngr.get_input_event();
+        next_action = inp_mngr.get_input_event( category );
         if( next_action.type == CATA_INPUT_TIMEOUT ) {
             result = &TIMEOUT;
             break;
@@ -1316,7 +1316,7 @@ void input_manager::wait_for_any_key()
     input_context ctxt( "WAIT_FOR_ANY_KEY" );
 #endif
     while( true ) {
-        const input_event evt = inp_mngr.get_input_event();
+        const input_event evt = inp_mngr.get_input_event( "WAIT_FOR_ANY_KEY" );
         switch( evt.type ) {
             case CATA_INPUT_KEYBOARD:
                 if( !evt.sequence.empty() ) {
@@ -1333,6 +1333,11 @@ void input_manager::wait_for_any_key()
 }
 
 input_event input_manager::get_input_event()
+{
+    return get_input_event( "NONE" );
+}
+
+input_event input_manager::get_input_event( const std::string &/*category*/ )
 {
     return get_input_event_impl();
 }
