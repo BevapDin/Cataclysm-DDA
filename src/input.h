@@ -257,6 +257,7 @@ class input_manager
         /**
          * curses getch() replacement.
          */
+        input_event get_input_event( const std::string &category );
         input_event get_input_event();
 
         /**
