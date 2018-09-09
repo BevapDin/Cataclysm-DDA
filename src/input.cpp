@@ -14,6 +14,7 @@
 #include "options.h"
 #include "string_input_popup.h"
 #include "cursesdef.h"
+#include "ui.h"
 
 #include <fstream>
 #include <sstream>
@@ -1213,6 +1214,18 @@ class macro_controller
             public:
                 input_event event;
                 std::string category;
+                void serialize( JsonOut &jsout ) const {
+                    jsout.start_object();
+                    jsout.member("event", event);
+                    jsout.member("category", category);
+                    jsout.end_object();
+                }
+                void deserialize( JsonIn &jsin ) {
+                    JsonObject job = jsin.get_object();
+                    JsonObject iob = job.get_object("event");
+                    event = input_event( iob);
+                    category = job.get_string("category");
+                }
         };
         class macro : public std::vector<macro_element>
         {
@@ -1222,6 +1235,7 @@ class macro_controller
             NONE,
             RECORDING,
             PLAYING,
+            DISABLED,
         };
 
         macro recording;
@@ -1243,6 +1257,8 @@ class macro_controller
                 case state_type::PLAYING:
                     // ignore recording-request during playback
                     break;
+                case state_type::DISABLED:
+                    break;
             }
         }
         void toogle_playing() {
@@ -1257,6 +1273,8 @@ class macro_controller
                 case state_type::PLAYING:
                     // ignore playing request during playing
                     break;
+                case state_type::DISABLED:
+                    break;
             }
         }
         bool is_toogle_record( const input_event &event ) const {
@@ -1265,12 +1283,85 @@ class macro_controller
         bool is_toogle_play( const input_event &event ) const {
             return event.type == CATA_INPUT_KEYBOARD && event.get_first_input() == KEY_F( 2 );
         }
+        bool is_save( const input_event &event ) const {
+            return event.type == CATA_INPUT_KEYBOARD && event.get_first_input() == KEY_F( 3 );
+        }
+        bool is_load( const input_event &event ) const {
+            return event.type == CATA_INPUT_KEYBOARD && event.get_first_input() == KEY_F( 4 );
+        }
+        void save() {
+            if( state != state_type::NONE ) {
+                return;
+            }
+            state = state_type::DISABLED;
+            try {
+                save_impl();
+            } catch( ... ) {
+                state = state_type::NONE;
+                throw;
+            }
+            state = state_type::NONE;
+        }
+        void save_impl() {
+            const std::string name = string_input_popup().title(_("Enter name for macro")).query_string();
+            if(name.empty()) {
+                return;
+            }
+            assure_dir_exist(FILENAMES["macrodir"]);
+            const std::string path = FILENAMES["macrodir"] + name + ".json";
+            if(file_exist(path)) {
+                popup(_("A macro with that name already exists!"));
+                return;
+            }
+            std::ofstream buffer;
+            JsonOut jsout( buffer, true );
+            jsout.write( current );
+        }
+        void load() {
+            if( state != state_type::NONE ) {
+                return;
+            }
+            state = state_type::DISABLED;
+            try {
+                load_impl();
+            } catch( ... ) {
+                state = state_type::NONE;
+                throw;
+            }
+            state = state_type::NONE;
+        }
+        void load_impl() {
+            uimenu menu;
+            menu.text = _( "Select macro to load" );
+            for( std::string path : get_files_from_path( ".json", FILENAMES["macrodir"], false, true ) ) {
+                path = native_to_utf8( path );
+                path.erase( path.find( ".json" ), std::string::npos );
+                path.erase( 0, path.find_last_of( "\\//" ) + 1 );
+                menu.addentry( path );
+            }
+            menu.query();
+            if( static_cast<size_t>(menu.ret) >= menu.entries.size() ) {
+                return;
+            }
+            const std::string path = FILENAMES["macrodir"] + menu.entries[menu.ret].txt + ".json";
+            std::ifstream buffer;
+            JsonIn jsin( buffer );
+            jsin.read(current);
+        }
         bool on_input( const std::string &category, const input_event &event ) {
-            if( is_toogle_record( event ) ) {
+            if( state == state_type::DISABLED) {
+                return false;
+            } else if( is_toogle_record( event ) ) {
                 toogle_record();
                 return false;
             } else if( is_toogle_play( event ) ) {
                 toogle_playing();
+                return false;
+            } else if( is_save( event ) ) {
+                save();
+                return false;
+            } else if( is_load( event ) ) {
+                load();
                 return false;
             } else {
                 if( state == state_type::RECORDING ) {
