@@ -15,6 +15,7 @@
 #include "string_formatter.h"
 #include "path_info.h"
 #include "monstergenerator.h"
+#include "input.h"
 #include "messages.h"
 #include "debug.h"
 #include "translations.h"
