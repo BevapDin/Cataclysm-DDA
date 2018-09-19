@@ -1023,15 +1023,17 @@ void Item_factory::check_definitions() const
         }
 
         if( type->container ) {
-            if( type->container->seals && type->container->unseals_into != "null" ) {
+            if( type->container->seals && type->container->unseals_into ) {
                 msg << string_format( "Resealable container unseals_into %s",
-                                      type->container->unseals_into.c_str() ) << "\n";
+                                      type->container->unseals_into->c_str() ) << "\n";
             }
             if( type->container->contains <= 0 ) {
                 msg << string_format( "\"contains\" (%d) must be >0", type->container->contains.value() ) << "\n";
             }
-            if( !has_template( type->container->unseals_into ) ) {
-                msg << string_format( "unseals_into invalid id %s", type->container->unseals_into.c_str() ) << "\n";
+            if( type->container->unseals_into && ( !has_template( *type->container->unseals_into ) ||
+                                                   *type->container->unseals_into == "null" ) ) {
+                msg << string_format( "unseals_into invalid id %s",
+                                      type->container->unseals_into->c_str() ) << "\n";
             }
         }
 

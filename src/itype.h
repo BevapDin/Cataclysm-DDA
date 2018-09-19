@@ -207,10 +207,10 @@ struct islot_container {
      */
     bool preserves = false;
     /**
-     * If this is set to anything but "null", changing this container's contents in any way
+     * If this is set to anything, changing this container's contents in any way
      * will turn this item into that type.
      */
-    itype_id unseals_into = "null";
+    cata::optional<itype_id> unseals_into;
 };
 
 struct islot_armor {

@@ -2604,7 +2604,7 @@ void item::on_pickup( Character &p )
 void item::on_contents_changed()
 {
     if( is_non_resealable_container() ) {
-        convert( type->container->unseals_into );
+        convert( *type->container->unseals_into );
     }
 }
 
@@ -4304,7 +4304,7 @@ bool item::is_watertight_container() const
 
 bool item::is_non_resealable_container() const
 {
-    return type->container && !type->container->seals && type->container->unseals_into != "null";
+    return type->container && !type->container->seals && type->container->unseals_into;
 }
 
 bool item::is_bucket() const
@@ -4315,7 +4315,7 @@ bool item::is_bucket() const
     return type->container &&
            type->container->watertight &&
            !type->container->seals &&
-           type->container->unseals_into == "null";
+           !type->container->unseals_into;
 }
 
 bool item::is_bucket_nonempty() const

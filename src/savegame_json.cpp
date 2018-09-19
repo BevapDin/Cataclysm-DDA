@@ -1808,7 +1808,7 @@ void item::io( Archive &archive )
 
     // Sealed item migration: items with "unseals_into" set should always have contents
     if( contents.empty() && is_non_resealable_container() ) {
-        convert( type->container->unseals_into );
+        convert( *type->container->unseals_into );
     }
 
     // Migrate legacy toolmod flags
