@@ -657,8 +657,8 @@ void place_monster_iuse::load( JsonObject &obj )
     obj.read( "difficulty", difficulty );
     obj.read( "moves", moves );
     obj.read( "place_randomly", place_randomly );
-    skill1 = skill_id( obj.get_string( "skill1", skill1.str() ) );
-    skill2 = skill_id( obj.get_string( "skill2", skill2.str() ) );
+    assign( obj, "skill1", skill1 );
+    assign( obj, "skill2", skill2 );
 }
 
 long place_monster_iuse::use( player &p, item &it, bool, const tripoint &/*pos*/ ) const
@@ -715,10 +715,10 @@ long place_monster_iuse::use( player &p, item &it, bool, const tripoint &/*pos*/
     newmon.init_from_item( it );
     int skill_offset = 0;
     if( skill1 ) {
-        skill_offset += p.get_skill_level( skill1 ) / 2;
+        skill_offset += p.get_skill_level( *skill1 ) / 2;
     }
     if( skill2 ) {
-        skill_offset += p.get_skill_level( skill2 );
+        skill_offset += p.get_skill_level( *skill2 );
     }
     /** @EFFECT_INT increases chance of a placed turret being friendly */
     if( rng( 0, p.int_cur / 2 ) + skill_offset < rng( 0, difficulty ) ) {
