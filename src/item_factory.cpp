@@ -832,6 +832,14 @@ void Item_factory::check_definitions() const
                 }
             }
         }
+
+        if( type->spoilable ) {
+            const auto &opt_rot_spawn = type->spoilable->rot_spawn;
+            if( opt_rot_spawn && !opt_rot_spawn->group.is_valid() ) {
+                msg << string_format( "invalid rot_spawn property %s",
+                                      opt_rot_spawn->group.c_str() ) << "\n";
+            }
+        }
         if( type->brewable ) {
             if( type->brewable->time < 1_turns ) {
                 msg << "brewable time is less than 1 turn\n";
@@ -1581,7 +1589,11 @@ void Item_factory::load( islot_spoilable &slot, JsonObject &jo, const std::strin
             slot.rot_spawn.emplace();
         }
         assign( jo, "rot_spawn", slot.rot_spawn->group, strict );
-        assign( jo, "rot_spawn_chance", slot.rot_spawn->chance, strict, 0 );
+        if( slot.rot_spawn->group == mongroup_id::NULL_ID() ) {
+            slot.rot_spawn.reset();
+        } else {
+            assign( jo, "rot_spawn_chance", slot.rot_spawn->chance, strict, 0 );
+        }
     }
 }
 
