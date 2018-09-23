@@ -73,6 +73,8 @@ inline int modulo( int v, int m );
 // Point dxs for the adjacent cardinal tiles.
 point vehicles::cardinal_d[5] = { point( -1, 0 ), point( 1, 0 ), point( 0, -1 ), point( 0, 1 ), point( 0, 0 ) };
 
+static const std::array<tripoint, 6> six_direct_neighbours{ { { +1, 0, 0 }, { -1, 0, 0 }, { 0, +1, 0 }, { 0, -1, 0 }, { 0, 0, +1 }, { 0, 0, -1 } } };
+
 // Vehicle stack methods.
 std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
 {
@@ -1131,8 +1133,8 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
 bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
                             vehicle_part const &excluded_part ) const
 {
-    const point target = to.mount_2d();
-    const point excluded = excluded_part.mount_2d();
+    const tripoint target = to.mount();
+    const tripoint excluded = excluded_part.mount();
 
     //Breadth-first-search components
     std::list<vehicle_part> discovered;
@@ -1145,10 +1147,10 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
     while( !discovered.empty() ) {
         current_part = discovered.front();
         discovered.pop_front();
-        point current = current_part.mount_2d();
+        tripoint current = current_part.mount();
 
-        for( int i = 0; i < 4; i++ ) {
-            point next = current + vehicles::cardinal_d[i];
+        for( const tripoint &offset : six_direct_neighbours ) {
+            const tripoint next = current + offset;
 
             if( next == target ) {
                 //Success!
@@ -1159,7 +1161,7 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
             }
 
             //@todo change this function to take tripoint
-            std::vector<int> parts_there = parts_at_relative( tripoint( next.x, next.y, 0 ) );
+            std::vector<int> parts_there = parts_at_relative( next );
 
             if( !parts_there.empty() && !parts[ parts_there[ 0 ] ].removed &&
                 part_info( parts_there[ 0 ] ).location == "structure" &&
@@ -1167,14 +1169,14 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
                 //Only add the part if we haven't been here before
                 bool found = false;
                 for( auto &elem : discovered ) {
-                    if( elem.mount_2d() == next ) {
+                    if( elem.mount() == next ) {
                         found = true;
                         break;
                     }
                 }
                 if( !found ) {
                     for( auto &elem : searched ) {
-                        if( elem.mount_2d() == next ) {
+                        if( elem.mount() == next ) {
                             found = true;
                             break;
                         }
