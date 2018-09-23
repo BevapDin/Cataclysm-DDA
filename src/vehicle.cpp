@@ -1137,17 +1137,15 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
     const tripoint excluded = excluded_part.mount();
 
     //Breadth-first-search components
-    std::list<vehicle_part> discovered;
-    vehicle_part current_part;
-    std::list<vehicle_part> searched;
+    std::list<tripoint> discovered;
+    std::list<tripoint> searched;
 
     //We begin with just the start point
-    discovered.push_back( from );
+    discovered.push_back( from.mount() );
 
     while( !discovered.empty() ) {
-        current_part = discovered.front();
+        const tripoint current = discovered.front();
         discovered.pop_front();
-        tripoint current = current_part.mount();
 
         for( const tripoint &offset : six_direct_neighbours ) {
             const tripoint next = current + offset;
@@ -1169,27 +1167,27 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
                 //Only add the part if we haven't been here before
                 bool found = false;
                 for( auto &elem : discovered ) {
-                    if( elem.mount() == next ) {
+                    if( elem == next ) {
                         found = true;
                         break;
                     }
                 }
                 if( !found ) {
                     for( auto &elem : searched ) {
-                        if( elem.mount() == next ) {
+                        if( elem == next ) {
                             found = true;
                             break;
                         }
                     }
                 }
                 if( !found ) {
-                    vehicle_part next_part = parts[parts_there[0]];
+                    const tripoint next_part = parts[parts_there[0]].mount();
                     discovered.push_back( next_part );
                 }
             }
         }
         //Now that that's done, we've finished exploring here
-        searched.push_back( current_part );
+        searched.push_back( current );
     }
     //If we completely exhaust the discovered list, there's no path
     return false;
