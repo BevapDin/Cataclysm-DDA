@@ -1067,15 +1067,14 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
              * still connected. */
 
             //First, find all the squares connected to the one we're removing
-            std::vector<vehicle_part> connected_parts;
+            std::vector<tripoint> connected_parts;
 
             for( const tripoint &offset : six_direct_neighbours ) {
                 const tripoint next = parts[p].mount() + offset;
-                std::vector<int> parts_over_there = parts_at_relative( next, false );
                 //Ignore empty squares
-                if( !parts_over_there.empty() ) {
+                if( !parts_at_relative( next, false ).empty() ) {
                     //Just need one part from the square to track the x/y
-                    connected_parts.push_back( parts[parts_over_there[0]] );
+                    connected_parts.push_back( next );
                 }
             }
 
@@ -1089,7 +1088,7 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
                  * the part about to be removed) to the target part, in order
                  * for the part to be legally removable. */
                 for( auto const &next_part : connected_parts ) {
-                    if( !is_connected( connected_parts[0].mount(), next_part.mount(), parts[p].mount() ) ) {
+                    if( !is_connected( connected_parts[0], next_part, parts[p].mount() ) ) {
                         //Removing that part would break the vehicle in two
                         reason = _( "Removing this part would split the vehicle." );
                         return false;
