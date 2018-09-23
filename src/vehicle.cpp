@@ -773,12 +773,11 @@ bool vehicle::is_structural_part_removed() const
 /**
  * Returns whether or not the vehicle part with the given id can be mounted in
  * the specified square.
- * @param dx The local x-coordinate to mount in.
- * @param dy The local y-coordinate to mount in.
+ * @param d The local coordinate to mount in.
  * @param id The id of the part to install.
  * @return true if the part can be mounted, false if not.
  */
-bool vehicle::can_mount( int const dx, int const dy, const vpart_id &id ) const
+bool vehicle::can_mount( const tripoint &d, const vpart_id &id ) const
 {
     //The part has to actually exist.
     if( !id.is_valid() ) {
@@ -792,7 +791,7 @@ bool vehicle::can_mount( int const dx, int const dy, const vpart_id &id ) const
     }
 
     //@todo change this function to take tripoint
-    const std::vector<int> parts_in_square = parts_at_relative( tripoint( dx, dy, 0 ), false );
+    const std::vector<int> parts_in_square = parts_at_relative( d, false );
 
     //First part in an empty square MUST be a structural part
     if( parts_in_square.empty() && part.location != part_location_structure ) {
@@ -825,11 +824,8 @@ bool vehicle::can_mount( int const dx, int const dy, const vpart_id &id ) const
     // the exception is when a single tile only structural object is being repaired
     if( !parts.empty() ) {
         if( !is_structural_part_removed() &&
-            !has_structural_part( dx, dy ) &&
-            !has_structural_part( dx + 1, dy ) &&
-            !has_structural_part( dx, dy + 1 ) &&
-            !has_structural_part( dx - 1, dy ) &&
-            !has_structural_part( dx, dy - 1 ) ) {
+            !has_structural_part( d.x, d.y ) &&
+            std::find_if( six_direct_neighbours.begin(), six_direct_neighbours.end(), [&]( const tripoint &off ) { return has_structural_part( d.x + off.x, d.y + off.y ); } ) == six_direct_neighbours.end() ) {
             return false;
         }
     }
@@ -1160,8 +1156,7 @@ bool vehicle::is_connected( const tripoint &target, const tripoint &from, const 
  */
 int vehicle::install_part( const tripoint &d, const vpart_id &id, bool force )
 {
-    // @todo change can_mount to take tripoint
-    if( !( force || can_mount( d.x, d.y, id ) ) ) {
+    if( !( force || can_mount( d, id ) ) ) {
         return -1;
     }
     return install_part( d, vehicle_part( id, d.x, d.y, item( id.obj().item ) ) );
@@ -1169,7 +1164,7 @@ int vehicle::install_part( const tripoint &d, const vpart_id &id, bool force )
 
 int vehicle::install_part( const tripoint &d, const vpart_id &id, item &&obj, bool force )
 {
-    if( !( force || can_mount( d.x, d.y, id ) ) ) {
+    if( !( force || can_mount( d, id ) ) ) {
         return -1;
     }
     return install_part( d, vehicle_part( id, d.x, d.y, std::move( obj ) ) );
