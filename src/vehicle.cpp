@@ -1105,7 +1105,7 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
                  * the part about to be removed) to the target part, in order
                  * for the part to be legally removable. */
                 for( auto const &next_part : connected_parts ) {
-                    if( !is_connected( connected_parts[0], next_part, parts[p] ) ) {
+                    if( !is_connected( connected_parts[0].mount(), next_part.mount(), parts[p].mount() ) ) {
                         //Removing that part would break the vehicle in two
                         reason = _( "Removing this part would split the vehicle." );
                         return false;
@@ -1130,18 +1130,14 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
  *        be included in the path.
  * @return true if a path exists without the excluded part, false otherwise.
  */
-bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
-                            vehicle_part const &excluded_part ) const
+bool vehicle::is_connected( const tripoint &target, const tripoint &from, const tripoint &excluded ) const
 {
-    const tripoint target = to.mount();
-    const tripoint excluded = excluded_part.mount();
-
     //Breadth-first-search components
     std::list<tripoint> discovered;
     std::list<tripoint> searched;
 
     //We begin with just the start point
-    discovered.push_back( from.mount() );
+    discovered.push_back( from );
 
     while( !discovered.empty() ) {
         const tripoint current = discovered.front();
@@ -4291,8 +4287,7 @@ int vehicle::break_off( int p, int dmg )
             if( at_risk_part.empty() ) {
                 continue;
             }
-            if( !is_connected( parts[ vehicle_origin[ 0 ] ], parts[ at_risk_part[ 0 ] ],
-                               parts[ p ] ) ) {
+            if( !is_connected( parts[ vehicle_origin[ 0 ] ].mount(), parts[ at_risk_part[ 0 ] ].mount(), parts[ p ].mount() ) ) {
                 // Ludicrous damage level to ensure it happens.
                 break_off( at_risk_part[ 0 ], 1000000 );
             }
