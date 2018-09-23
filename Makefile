@@ -223,6 +223,7 @@ else
 endif
 
 STRIP = $(CROSS)strip
+STRIP = true
 RC  = $(CROSS)windres
 AR  = $(CROSS)ar
 
