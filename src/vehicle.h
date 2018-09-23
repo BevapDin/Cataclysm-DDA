@@ -552,7 +552,7 @@ struct label {
 class vehicle
 {
     private:
-        bool has_structural_part( int dx, int dy ) const;
+        bool has_structural_part( const tripoint &d ) const;
         bool is_structural_part_removed() const;
         void open_or_close( int part_index, bool opening );
         bool is_connected( const tripoint &to, const tripoint &from, const tripoint &excluded ) const;
