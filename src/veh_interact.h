@@ -64,6 +64,7 @@ class veh_interact
 
         const vpart_info *sel_vpart_info = nullptr;
         char sel_cmd = ' '; //Command currently being run by the player
+        bool remove_all_ = false;
         int middle_display_scroll = 0;
 
         const vehicle_part *sel_vehicle_part = nullptr;
@@ -129,6 +130,7 @@ class veh_interact
         bool do_mend( std::string &msg );
         bool do_refill( std::string &msg );
         bool do_remove( std::string &msg );
+        bool do_remove_all( std::string &msg );
         bool do_rename( std::string &msg );
         bool do_siphon( std::string &msg );
         bool do_unload( std::string &msg );

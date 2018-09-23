@@ -112,6 +112,7 @@ player_activity veh_interact::serialize_activity()
     res.values.push_back( -ddx );   // values[4]
     res.values.push_back( -ddy );   // values[5]
     res.values.push_back( veh->index_of_part( pt ) ); // values[6]
+    res.values.push_back( remove_all_ ? 1 : 0 ); // values[7]
     res.str_values.push_back( vp->get_id().str() );
     res.targets.emplace_back( std::move( target ) );
 
@@ -176,6 +177,7 @@ veh_interact::veh_interact( vehicle &veh, int x, int y )
     main_context.register_action( "MEND" );
     main_context.register_action( "REFILL" );
     main_context.register_action( "REMOVE" );
+    main_context.register_action( "REMOVE_ALL" );
     main_context.register_action( "RENAME" );
     main_context.register_action( "SIPHON" );
     main_context.register_action( "UNLOAD" );
@@ -331,6 +333,8 @@ void veh_interact::do_main_loop()
             redraw = do_refill( msg );
         } else if( action == "REMOVE" ) {
             redraw = do_remove( msg );
+        } else if( action == "REMOVE_ALL" ) {
+            redraw = do_remove_all( msg );
         } else if( action == "RENAME" ) {
             redraw = do_rename( msg );
         } else if( action == "SIPHON" ) {
@@ -1452,6 +1456,25 @@ bool veh_interact::can_remove_part( int idx ) {
     return ok || g->u.has_trait( trait_DEBUG_HS );
 }
 
+bool veh_interact::do_remove_all( std::string &msg )
+{
+    for( size_t i = 0; i < veh->parts.size(); ++i ) {
+        cpart = i;
+        move_cursor( veh->parts[i].mount.y + ddy, -( veh->parts[i].mount.x + ddx ) );
+        if( !can_remove_part( i ) ) {
+            continue;
+        }
+        if( cant_do( 'o' ) != CAN_DO ) {
+            do_remove( msg );
+            continue;
+        }
+        sel_cmd = 'o';
+        remove_all_ = true;
+        break;
+    }
+    return false;
+}
+
 bool veh_interact::do_remove( std::string &msg )
 {
     switch( cant_do( 'o' ) ) {
@@ -2526,6 +2549,7 @@ void veh_interact::complete_vehicle()
     int dy = g->u.activity.values[5];
     int vehicle_part = g->u.activity.values[6];
     const vpart_id part_id( g->u.activity.str_values[0] );
+    const bool remove_all_ = g->u.activity.values.size() >= 8 && g->u.activity.values[7] == 1;
 
     const vpart_info &vpinfo = part_id.obj();
 
@@ -2729,6 +2753,16 @@ void veh_interact::complete_vehicle()
             }
             veh->remove_part (vehicle_part);
             veh->part_removal_cleanup();
+            if( remove_all_ ) {
+                g->u.invalidate_crafting_inventory();
+                veh_interact vin( *veh );
+                std::string msg;
+                vin.do_remove_all( msg );
+                const auto act = vin.serialize_activity();
+                if( act ) {
+                    g->u.assign_activity( act, false );
+                }
+            }
         }
         break;
     }
