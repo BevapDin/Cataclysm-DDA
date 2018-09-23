@@ -354,9 +354,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
         }
     }
 
-    bool blood_inside_set = false;
-    int blood_inside_x = 0;
-    int blood_inside_y = 0;
+    cata::optional<tripoint> blood_inside_loc;
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
         auto &pt = parts[ p ];
@@ -460,19 +458,16 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             }
 
             if( blood_inside ) {
-                // blood is splattered around (blood_inside_x, blood_inside_y),
+                // blood is splattered around (blood_inside_loc),
                 // coordinates relative to mount point; the center is always a seat
-                if( blood_inside_set ) {
-                    int distSq = std::pow( ( blood_inside_x - parts[p].mount().x ), 2 ) +
-                                 std::pow( ( blood_inside_y - parts[p].mount().y ), 2 );
+                if( blood_inside_loc ) {
+                    const int distSq = std::pow( blood_inside_loc->x - parts[p].mount().x, 2 ) + std::pow( blood_inside_loc->y - parts[p].mount().y, 2 );
                     if( distSq <= 1 ) {
                         parts[p].blood = rng( 200, 400 ) - distSq * 100;
                     }
                 } else if( part_flag( p, "SEAT" ) ) {
                     // Set the center of the bloody mess inside
-                    blood_inside_x = parts[p].mount().x;
-                    blood_inside_y = parts[p].mount().y;
-                    blood_inside_set = true;
+                    blood_inside_loc.emplace( parts[p].mount() );
                 }
             }
         }
