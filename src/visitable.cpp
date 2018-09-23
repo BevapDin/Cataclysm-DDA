@@ -119,9 +119,7 @@ static int has_quality_from_vpart( const vehicle &veh, int part, const quality_i
 {
     int qty = 0;
 
-    const tripoint pos = veh.parts[ part ].mount();
-    //@todo change parts_at_relative to take tripoint
-    for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
+    for( const auto &n : veh.parts_at_relative( veh.parts[part].mount() ) ) {
 
         // only unbroken parts can provide tool qualities
         if( !veh.parts[ n ].is_broken() ) {
@@ -214,9 +212,7 @@ static int max_quality_from_vpart( const vehicle &veh, int part, const quality_i
 {
     int res = INT_MIN;
 
-    const tripoint pos = veh.parts[ part ].mount();
-    //@todo change parts_at_relative to take tripoint
-    for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
+    for( const auto &n : veh.parts_at_relative( veh.parts[part].mount() ) ) {
 
         // only unbroken parts can provide tool qualities
         if( !veh.parts[ n ].is_broken() ) {

@@ -178,7 +178,8 @@ void vehicle::add_missing_frames()
         std::pair<int, int> mount_location = std::make_pair( next_x, next_y );
 
         if( locations_checked.count( mount_location ) == 0 ) {
-            std::vector<int> parts_here = parts_at_relative( next_x, next_y, false );
+            //@todo change this function to work on tripoints
+            std::vector<int> parts_here = parts_at_relative( tripoint( next_x, next_y, 0 ), false );
             bool found = false;
             for( auto &elem : parts_here ) {
                 if( part_info( elem ).location == part_location_structure ) {
@@ -522,7 +523,7 @@ void vehicle::smash( float hp_percent_loss_min, float hp_percent_loss_max,
             continue;
         }
 
-        std::vector<int> parts_in_square = parts_at_relative( part.mount().x, part.mount().y );
+        std::vector<int> parts_in_square = parts_at_relative( part.mount() );
         int structures_found = 0;
         for( auto &square_part_index : parts_in_square ) {
             if( part_info( square_part_index ).location == part_location_structure ) {
@@ -755,7 +756,8 @@ int vehicle::power_to_epower( int const power )
 
 bool vehicle::has_structural_part( int const dx, int const dy ) const
 {
-    std::vector<int> parts_here = parts_at_relative( dx, dy, false );
+    //@todo change this function to take tripoint
+    std::vector<int> parts_here = parts_at_relative( tripoint( dx, dy, 0 ), false );
 
     for( auto &elem : parts_here ) {
         if( part_info( elem ).location == part_location_structure &&
@@ -803,7 +805,8 @@ bool vehicle::can_mount( int const dx, int const dy, const vpart_id &id ) const
         return false;
     }
 
-    const std::vector<int> parts_in_square = parts_at_relative( dx, dy, false );
+    //@todo change this function to take tripoint
+    const std::vector<int> parts_in_square = parts_at_relative( tripoint( dx, dy, 0 ), false );
 
     //First part in an empty square MUST be a structural part
     if( parts_in_square.empty() && part.location != part_location_structure ) {
@@ -1055,7 +1058,8 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
     //Structural parts have extra requirements
     if( part_info( p ).location == part_location_structure ) {
 
-        std::vector<int> parts_in_square = parts_at_relative( dx, dy, false );
+        //@todo change this function to take tripoint
+        std::vector<int> parts_in_square = parts_at_relative( tripoint( dx, dy, 0 ), false );
         /* To remove a structural part, there can be only structural parts left
          * in that square (might be more than one in the case of wreckage) */
         for( auto &elem : parts_in_square ) {
@@ -1080,7 +1084,8 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
             for( int i = 0; i < 4; i++ ) {
                 int next_x = i < 2 ? ( i == 0 ? -1 : 1 ) : 0;
                 int next_y = i < 2 ? 0 : ( i == 2 ? -1 : 1 );
-                std::vector<int> parts_over_there = parts_at_relative( dx + next_x, dy + next_y, false );
+                //@todo change this function to take tripoint
+                std::vector<int> parts_over_there = parts_at_relative( tripoint( dx + next_x, dy + next_y, 0 ), false );
                 //Ignore empty squares
                 if( !parts_over_there.empty() ) {
                     //Just need one part from the square to track the x/y
@@ -1153,7 +1158,8 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
                 continue;
             }
 
-            std::vector<int> parts_there = parts_at_relative( next.x, next.y );
+            //@todo change this function to take tripoint
+            std::vector<int> parts_there = parts_at_relative( tripoint( next.x, next.y, 0 ) );
 
             if( !parts_there.empty() && !parts[ parts_there[ 0 ] ].removed &&
                 part_info( parts_there[ 0 ] ).location == "structure" &&
@@ -1506,7 +1512,7 @@ bool vehicle::remove_part( int p )
     const bool grab_found = g->u.get_grab_type() == OBJECT_VEHICLE && g->u.grab_point == part_loc;
     // Checking these twice to avoid calling the relatively expensive parts_at_relative() unnecessarily.
     if( no_label || grab_found ) {
-        if( parts_at_relative( parts[p].mount().x, parts[p].mount().y, false ).empty() ) {
+        if( parts_at_relative( parts[p].mount(), false ).empty() ) {
             if( no_label ) {
                 labels.erase( iter );
             }
@@ -1773,20 +1779,19 @@ void vehicle::break_part_into_pieces( int p, int x, int y, bool scatter )
     }
 }
 
-std::vector<int> vehicle::parts_at_relative( const int dx, const int dy,
-        bool const use_cache ) const
+std::vector<int> vehicle::parts_at_relative( const tripoint &d, bool const use_cache ) const
 {
     if( !use_cache ) {
         std::vector<int> res;
         for( const vpart_reference vp : get_parts() ) {
             const size_t i = vp.part_index();
-            if( parts[i].mount_2d() == point( dx, dy ) && !parts[i].removed ) {
+            if( parts[i].mount() == d && !parts[i].removed ) {
                 res.push_back( ( int )i );
             }
         }
         return res;
     } else {
-        const auto &iter = relative_parts.find( point( dx, dy ) );
+        const auto &iter = relative_parts.find( d );
         if( iter != relative_parts.end() ) {
             return iter->second;
         } else {
@@ -1853,7 +1858,7 @@ int vehicle::part_with_feature( int part, vpart_bitflags const flag, bool unbrok
     if( part_flag( part, flag ) && ( !unbroken || !parts[part].is_broken() ) ) {
         return part;
     }
-    const auto it = relative_parts.find( parts[part].mount_2d() );
+    const auto it = relative_parts.find( parts[part].mount() );
     if( it != relative_parts.end() ) {
         const std::vector<int> &parts_here = it->second;
         for( auto &i : parts_here ) {
@@ -1873,7 +1878,8 @@ int vehicle::part_with_feature( int part, const std::string &flag, bool unbroken
 int vehicle::part_with_feature_at_relative( const point &pt, const std::string &flag,
         bool unbroken ) const
 {
-    std::vector<int> parts_here = parts_at_relative( pt.x, pt.y, false );
+    //@todo change this function to take tripoint
+    std::vector<int> parts_here = parts_at_relative( tripoint( pt.x, pt.y, 0 ), false );
     for( auto &elem : parts_here ) {
         if( part_flag( elem, flag ) && ( !unbroken || !parts[ elem ].is_broken() ) ) {
             return elem;
@@ -2036,7 +2042,7 @@ void vpart_position::set_label( const std::string &text ) const
 
 int vehicle::next_part_to_close( int p, bool outside ) const
 {
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount().x, parts[p].mount().y );
+    std::vector<int> parts_here = parts_at_relative( parts[p].mount() );
 
     // We want reverse, since we close the outermost thing first (curtains), and then the innermost thing (door)
     for( std::vector<int>::reverse_iterator part_it = parts_here.rbegin();
@@ -2055,7 +2061,7 @@ int vehicle::next_part_to_close( int p, bool outside ) const
 
 int vehicle::next_part_to_open( int p, bool outside ) const
 {
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount().x, parts[p].mount().y );
+    std::vector<int> parts_here = parts_at_relative( parts[p].mount() );
 
     // We want forwards, since we open the innermost thing first (curtains), and then the innermost thing (door)
     for( auto &elem : parts_here ) {
@@ -2269,7 +2275,8 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
     // it's clear where the magic number comes from.
     const int ON_ROOF_Z = 9;
 
-    std::vector<int> parts_in_square = parts_at_relative( local_x, local_y );
+    //@todo change this function to take tripoint
+    std::vector<int> parts_in_square = parts_at_relative( tripoint( local_x, local_y, 0 ) );
 
     if( parts_in_square.empty() ) {
         return -1;
@@ -2305,7 +2312,7 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
 
 int vehicle::roof_at_part( const int part ) const
 {
-    std::vector<int> parts_in_square = parts_at_relative( parts[part].mount().x, parts[part].mount().y );
+    std::vector<int> parts_in_square = parts_at_relative( parts[part].mount() );
     for( const int p : parts_in_square ) {
         if( part_info( p ).location == "on_roof" || part_flag( p, "ROOF" ) ) {
             return p;
@@ -2732,13 +2739,14 @@ void vehicle::spew_smoke( double joules, int part, int density )
     if( rng( 1, 10000 ) > joules ) {
         return;
     }
-    point p = parts[part].mount_2d();
+    tripoint p = parts[part].mount();
     density = std::max( joules / 10000, double( density ) );
     // Move back from engine/muffler until we find an open space
     while( relative_parts.find( p ) != relative_parts.end() ) {
         p.x += ( velocity < 0 ? 1 : -1 );
     }
-    point q = coord_translate( p );
+    //@todo change coord_translate to take tripoint
+    point q = coord_translate( point( p.x, p.y ) );
     tripoint dest( global_x() + q.x, global_y() + q.y, smz );
     g->m.adjust_field_strength( dest, fd_smoke, density );
 }
@@ -3850,7 +3858,7 @@ void vehicle::refresh()
             extra_drag += vpi.power;
         }
         // Build map of point -> all parts in that point
-        const point pt = parts[p].mount_2d();
+        const tripoint pt = parts[p].mount();
         // This will keep the parts at point pt sorted
         vii = std::lower_bound( relative_parts[pt].begin(), relative_parts[pt].end(), static_cast<int>( p ),
                                 svpv );
@@ -4032,8 +4040,8 @@ void vehicle::refresh_insides()
         for( int i = 0; i < 4; i++ ) { // let's check four neighbor parts
             int ndx = i < 2 ? ( i == 0 ? -1 : 1 ) : 0;
             int ndy = i < 2 ? 0 : ( i == 2 ? - 1 : 1 );
-            std::vector<int> parts_n3ar = parts_at_relative( parts[p].mount().x + ndx,
-                                          parts[p].mount().y + ndy );
+            //@todo change this function to take tripoint
+            std::vector<int> parts_n3ar = parts_at_relative( parts[p].mount() + tripoint( ndx, ndy, 0 ) );
             bool cover = false; // if we aren't covered from sides, the roof at p won't save us
             for( auto &j : parts_n3ar ) {
                 // another roof -- cover
@@ -4084,7 +4092,7 @@ int vehicle::damage( int p, int dmg, damage_type type, bool aimed )
         return dmg;
     }
 
-    std::vector<int> pl = parts_at_relative( parts[p].mount().x, parts[p].mount().y );
+    std::vector<int> pl = parts_at_relative( parts[p].mount() );
     if( pl.empty() ) {
         // We ran out of non removed parts at this location already.
         return dmg;
@@ -4213,7 +4221,7 @@ void vehicle::shift_parts( const point delta )
  */
 bool vehicle::shift_if_needed()
 {
-    std::vector<int> vehicle_origin = parts_at_relative( 0, 0 );
+    std::vector<int> vehicle_origin = parts_at_relative( tripoint( 0, 0, 0 ) );
     if( !vehicle_origin.empty() && !parts[ vehicle_origin[ 0 ] ].removed ) {
         // Shifting is not needed.
         return false;
@@ -4253,7 +4261,7 @@ int vehicle::break_off( int p, int dmg )
     const tripoint pos = global_part_pos3( p );
     if( part_info( p ).location == part_location_structure ) {
         // For structural parts, remove other parts first
-        std::vector<int> parts_in_square = parts_at_relative( parts[p].mount().x, parts[p].mount().y );
+        std::vector<int> parts_in_square = parts_at_relative( parts[p].mount() );
         for( int index = parts_in_square.size() - 1; index >= 0; index-- ) {
             // Ignore the frame being destroyed
             if( parts_in_square[index] == p ) {
@@ -4291,11 +4299,10 @@ int vehicle::break_off( int p, int dmg )
         remove_part( p );
         shift_if_needed();
         for( point offset : offsets ) {
-            std::vector<int> vehicle_origin = parts_at_relative( 0, 0, false );
-            const point smashed_part_position = parts[ p ].mount_2d();
-            std::vector<int> at_risk_part = parts_at_relative( smashed_part_position.x + offset.x,
-                                            smashed_part_position.y + offset.y,
-                                            false );
+            std::vector<int> vehicle_origin = parts_at_relative( tripoint( 0, 0, 0 ), false );
+            const tripoint smashed_part_position = parts[ p ].mount();
+            //@todo change this function to take tripoint
+            std::vector<int> at_risk_part = parts_at_relative( smashed_part_position + tripoint( offset.x, offset.y, 0 ), false );
             if( at_risk_part.empty() ) {
                 continue;
             }

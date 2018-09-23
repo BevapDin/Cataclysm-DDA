@@ -1780,7 +1780,7 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     wheel = NULL;
     if( cpart >= 0 ) {
         //@todo accept tripoint
-        parts_here = veh->parts_at_relative( veh->parts[cpart].mount().x, veh->parts[cpart].mount().y );
+        parts_here = veh->parts_at_relative( veh->parts[cpart].mount() );
         for( size_t i = 0; i < parts_here.size(); i++ ) {
             auto &pt = veh->parts[parts_here[i]];
 
@@ -2722,7 +2722,8 @@ void veh_interact::complete_vehicle()
     }
 
     case 'c':
-        std::vector<int> parts = veh->parts_at_relative( dx, dy );
+        //@todo change dx,dy to tripoint
+        std::vector<int> parts = veh->parts_at_relative( tripoint( dx, dy, 0 ) );
         if( parts.size() ) {
             item removed_wheel;
             int replaced_wheel = veh->part_with_feature( parts[0], "WHEEL", false );

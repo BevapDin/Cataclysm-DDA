@@ -2685,8 +2685,7 @@ bool map::mop_spills( const tripoint &p )
     if( const optional_vpart_position vp = veh_at( p ) ) {
         vehicle *const veh = &vp->vehicle();
         const int vpart = vp->part_index();
-        std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount().x,
-                                      veh->parts[vpart].mount().y );
+        std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount() );
         for( auto &elem : parts_here ) {
             if( veh->parts[elem].blood > 0 ) {
                 veh->parts[elem].blood = 0;
