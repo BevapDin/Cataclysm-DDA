@@ -7396,13 +7396,13 @@ int iuse::cable_attach( player *p, item *it, bool, const tripoint & )
             vehicle_part source_part( vpid, vcoords.x, vcoords.y, item( *it ) );
             source_part.target.first = target_global;
             source_part.target.second = target_veh->real_global_pos3();
-            source_veh->install_part( vcoords.x, vcoords.y, source_part );
+            source_veh->install_part( tripoint( vcoords.x, vcoords.y, 0 ), source_part );
 
             vcoords = veh_part_coordinates( *target_veh, target_vp->part_index() );
             vehicle_part target_part( vpid, vcoords.x, vcoords.y, item( *it ) );
             target_part.target.first = source_global;
             target_part.target.second = source_veh->real_global_pos3();
-            target_veh->install_part( vcoords.x, vcoords.y, target_part );
+            target_veh->install_part( tripoint( vcoords.x, vcoords.y, 0 ), target_part );
 
             if( p != nullptr && p->has_item( *it ) ) {
                 p->add_msg_if_player( m_good, _( "You link up the electric systems of the %1$s and the %2$s." ),

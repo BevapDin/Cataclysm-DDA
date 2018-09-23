@@ -693,13 +693,13 @@ class vehicle
         bool can_unmount( int p, std::string &reason ) const;
 
         // install a new part to vehicle
-        int install_part( int dx, int dy, const vpart_id &id, bool force = false );
+        int install_part( const tripoint &d, const vpart_id &id, bool force = false );
 
         // Install a copy of the given part, skips possibility check
-        int install_part( int dx, int dy, const vehicle_part &part );
+        int install_part( const tripoint &d, const vehicle_part &part );
 
         /** install item specified item to vehicle as a vehicle part */
-        int install_part( int dx, int dy, const vpart_id &id, item &&obj, bool force = false );
+        int install_part( const tripoint &d, const vpart_id &id, item &&obj, bool force = false );
 
         // find a single tile wide vehicle adjacent to a list of part indices
         bool find_rackable_vehicle( std::vector<std::vector<int>> list_of_racks );

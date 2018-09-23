@@ -6954,12 +6954,12 @@ vehicle *map::add_vehicle_to_map( std::unique_ptr<vehicle> veh, const bool merge
 
             for( auto &part : veh->parts ) {
                 const tripoint part_pos = veh->global_part_pos3( part ) - global_pos;
-                wreckage->install_part( part_pos.x, part_pos.y, part );
+                wreckage->install_part( part_pos, part );
             }
 
             for( auto &part : other_veh->parts ) {
                 const tripoint part_pos = other_veh->global_part_pos3( part ) - global_pos;
-                wreckage->install_part( part_pos.x, part_pos.y, part );
+                wreckage->install_part( part_pos, part );
 
             }
 
