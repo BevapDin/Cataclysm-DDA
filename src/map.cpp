@@ -477,7 +477,7 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
                 continue;
             }
 
-            const point &collision_point = veh.parts[coll.part].mount_2d();
+            const tripoint &collision_point = veh.parts[coll.part].mount();
             const int coll_dmg = coll.imp;
             impulse += coll_dmg;
             // Shock damage
@@ -731,7 +731,8 @@ float map::vehicle_vehicle_collision( vehicle &veh, vehicle &veh2,
 
     if( dmg2_part > 100 ) {
         // Shake vehicle because of collision
-        veh2.damage_all( dmg2_part / 2, dmg2_part, DT_BASH, epicenter2 );
+        // @todo chance epicenter2 to tripoint
+        veh2.damage_all( dmg2_part / 2, dmg2_part, DT_BASH, tripoint( epicenter2.x, epicenter2.y, 0 ) );
     }
 
     if( dmg_veh1 > 800 ) {
