@@ -3987,13 +3987,9 @@ void vehicle::refresh_insides()
         }
 
         parts[p].inside = true; // inside if not otherwise
-        for( int i = 0; i < 4; i++ ) { // let's check four neighbor parts
-            int ndx = i < 2 ? ( i == 0 ? -1 : 1 ) : 0;
-            int ndy = i < 2 ? 0 : ( i == 2 ? - 1 : 1 );
-            //@todo change this function to take tripoint
-            std::vector<int> parts_n3ar = parts_at_relative( parts[p].mount() + tripoint( ndx, ndy, 0 ) );
+        for( const tripoint &offset : six_direct_neighbours ) {
             bool cover = false; // if we aren't covered from sides, the roof at p won't save us
-            for( auto &j : parts_n3ar ) {
+            for( const int j : parts_at_relative( parts[p].mount() + offset ) ) {
                 // another roof -- cover
                 if( part_flag( j, "ROOF" ) && parts[ j ].is_available() ) {
                     cover = true;
