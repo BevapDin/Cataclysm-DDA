@@ -1162,8 +1162,7 @@ bool vehicle::is_connected( const tripoint &target, const tripoint &from, const 
                 !part_info( parts_there[ 0 ] ).has_flag( "PROTRUSION" ) ) {
                 //Only add the part if we haven't been here before
                 if( std::find( discovered.begin(), discovered.end(), next ) == discovered.end() && std::find( searched.begin(), searched.end(), next ) == searched.end() ) {
-                    const tripoint next_part = parts[parts_there[0]].mount();
-                    discovered.push_back( next_part );
+                    discovered.push_back( next );
                 }
             }
         }
