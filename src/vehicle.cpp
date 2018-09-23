@@ -1001,9 +1001,6 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
         return false;
     }
 
-    int dx = parts[p].mount().x;
-    int dy = parts[p].mount().y;
-
     // Can't remove an engine if there's still an alternator there
     if( part_flag( p, VPFLAG_ENGINE ) && part_with_feature( p, VPFLAG_ALTERNATOR ) >= 0 ) {
         reason = _( "Remove attached alternator first." );
@@ -1050,7 +1047,7 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
     if( part_info( p ).location == part_location_structure ) {
 
         //@todo change this function to take tripoint
-        std::vector<int> parts_in_square = parts_at_relative( tripoint( dx, dy, 0 ), false );
+        std::vector<int> parts_in_square = parts_at_relative( parts[p].mount(), false );
         /* To remove a structural part, there can be only structural parts left
          * in that square (might be more than one in the case of wreckage) */
         for( auto &elem : parts_in_square ) {
@@ -1072,11 +1069,9 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
             //First, find all the squares connected to the one we're removing
             std::vector<vehicle_part> connected_parts;
 
-            for( int i = 0; i < 4; i++ ) {
-                int next_x = i < 2 ? ( i == 0 ? -1 : 1 ) : 0;
-                int next_y = i < 2 ? 0 : ( i == 2 ? -1 : 1 );
-                //@todo change this function to take tripoint
-                std::vector<int> parts_over_there = parts_at_relative( tripoint( dx + next_x, dy + next_y, 0 ), false );
+            for( const tripoint &offset : six_direct_neighbours ) {
+                const tripoint next = parts[p].mount() + offset;
+                std::vector<int> parts_over_there = parts_at_relative( next, false );
                 //Ignore empty squares
                 if( !parts_over_there.empty() ) {
                     //Just need one part from the square to track the x/y
