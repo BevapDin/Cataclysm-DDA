@@ -1872,14 +1872,13 @@ int vehicle::part_with_feature( int part, vpart_bitflags const flag, bool unbrok
 
 int vehicle::part_with_feature( int part, const std::string &flag, bool unbroken ) const
 {
-    return part_with_feature_at_relative( parts[part].mount_2d(), flag, unbroken );
+    return part_with_feature_at_relative( parts[part].mount(), flag, unbroken );
 }
 
-int vehicle::part_with_feature_at_relative( const point &pt, const std::string &flag,
+int vehicle::part_with_feature_at_relative( const tripoint &pt, const std::string &flag,
         bool unbroken ) const
 {
-    //@todo change this function to take tripoint
-    std::vector<int> parts_here = parts_at_relative( tripoint( pt.x, pt.y, 0 ), false );
+    std::vector<int> parts_here = parts_at_relative( pt, false );
     for( auto &elem : parts_here ) {
         if( part_flag( elem, flag ) && ( !unbroken || !parts[ elem ].is_broken() ) ) {
             return elem;
@@ -3681,7 +3680,8 @@ void vehicle::place_spawn_items()
 
     for( const auto &pt : type->parts ) {
         if( pt.with_ammo ) {
-            int turret = part_with_feature_at_relative( pt.pos, "TURRET" );
+            //@todo change pos to be tripoint
+            int turret = part_with_feature_at_relative( tripoint( pt.pos.x, pt.pos.y, 0 ) , "TURRET" );
             if( turret >= 0 && x_in_y( pt.with_ammo, 100 ) ) {
                 parts[ turret ].ammo_set( random_entry( pt.ammo_types ), rng( pt.ammo_qty.first,
                                           pt.ammo_qty.second ) );
@@ -3691,7 +3691,8 @@ void vehicle::place_spawn_items()
 
     for( const auto &spawn : type.obj().item_spawns ) {
         if( rng( 1, 100 ) <= spawn.chance ) {
-            int part = part_with_feature_at_relative( spawn.pos, "CARGO", false );
+            //@todo change pos to be tripoint
+            int part = part_with_feature_at_relative( tripoint( spawn.pos.x, spawn.pos.y, 0 ), "CARGO", false );
             if( part < 0 ) {
                 debugmsg( "No CARGO parts at (%d, %d) of %s!", spawn.pos.x, spawn.pos.y, name.c_str() );
 
