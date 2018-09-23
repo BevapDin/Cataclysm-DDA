@@ -172,30 +172,19 @@ void vehicle::add_missing_frames()
 {
     static const vpart_id frame_id( "frame_vertical" );
     const vpart_info &frame_part = frame_id.obj(); // NOT static, could be different each time
-    //No need to check the same (x, y) spot more than once
-    std::set< std::pair<int, int> > locations_checked;
+    //No need to check the same spot more than once
+    std::set<tripoint> locations_checked;
     for( auto &i : parts ) {
-        int next_x = i.mount().x;
-        int next_y = i.mount().y;
-        std::pair<int, int> mount_location = std::make_pair( next_x, next_y );
-
-        if( locations_checked.count( mount_location ) == 0 ) {
-            //@todo change this function to work on tripoints
-            std::vector<int> parts_here = parts_at_relative( tripoint( next_x, next_y, 0 ), false );
-            bool found = false;
-            for( auto &elem : parts_here ) {
-                if( part_info( elem ).location == part_location_structure ) {
-                    found = true;
-                    break;
-                }
-            }
-            if( !found ) {
+        const tripoint next = i.mount();
+        if( locations_checked.count( next ) == 0 ) {
+            std::vector<int> parts_here = parts_at_relative( next, false );
+            if( std::find_if( parts_here.begin(), parts_here.end(), [&]( const int p ) { return part_info( p ).location == part_location_structure; } ) == parts_here.end() ) {
                 // Install missing frame
-                parts.emplace_back( frame_part.get_id(), next_x, next_y, item( frame_part.item ) );
+                // @todo change constructor to take tripoint
+                parts.emplace_back( frame_part.get_id(), next.x, next.y, item( frame_part.item ) );
             }
+            locations_checked.insert( next );
         }
-
-        locations_checked.insert( mount_location );
     }
 }
 
