@@ -291,19 +291,12 @@ void set_up_butchery( player_activity &act, player &u, butcher_type action )
         }
     }
 
-    bool has_table_nearby = false;
-    for( const tripoint &pt : g->m.points_in_radius( u.pos(), 2 ) ) {
-        if( g->m.has_flag_furn( "FLAT_SURF", pt ) || g->m.has_flag( "FLAT_SURF", pt ) ||
-            ( g->m.veh_at( pt ) && g->m.veh_at( pt )->vehicle().has_part( "KITCHEN" ) ) ) {
-            has_table_nearby = true;
-        }
-    }
-    bool has_tree_nearby = false;
-    for( const tripoint &pt : g->m.points_in_radius( u.pos(), 2 ) ) {
-        if( g->m.has_flag( "TREE", pt ) ) {
-            has_tree_nearby = true;
-        }
-    }
+    const tripoint_range range = g->m.points_in_radius( u.pos(), 2 );
+    static const auto is_table = []( const tripoint &pt ) {
+        return g->m.has_flag_furn( "FLAT_SURF", pt ) || g->m.has_flag( "FLAT_SURF", pt ) || ( g->m.veh_at( pt ) && g->m.veh_at( pt )->vehicle().has_part( "KITCHEN" ) );
+    };
+    const bool has_table_nearby = std::find_if( range.begin(), range.end(), is_table ) != range.end();
+    const bool has_tree_nearby = std::find_if( range.begin(), range.end(), []( const tripoint &pt ) { return g->m.has_flag( "TREE", pt ); } ) != range.end();
     // workshop butchery (full) prequisites
     if( action == BUTCHER_FULL ) {
         bool has_rope = u.has_amount( "rope_30", 1 ) || u.has_amount( "rope_makeshift_30", 1 ) ||
