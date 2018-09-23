@@ -2266,7 +2266,7 @@ int vehicle::index_of_part( const vehicle_part *const part, bool const check_rem
  * @param local_y The local y-coordinate.
  * @return The index of the part that will be displayed.
  */
-int vehicle::part_displayed_at( int const local_x, int const local_y ) const
+int vehicle::part_displayed_at( const tripoint &local ) const
 {
     // Z-order is implicitly defined in game::load_vehiclepart, but as
     // numbers directly set on parts rather than constants that can be
@@ -2274,8 +2274,7 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
     // it's clear where the magic number comes from.
     const int ON_ROOF_Z = 9;
 
-    //@todo change this function to take tripoint
-    std::vector<int> parts_in_square = parts_at_relative( tripoint( local_x, local_y, 0 ) );
+    std::vector<int> parts_in_square = parts_at_relative( local );
 
     if( parts_in_square.empty() ) {
         return -1;

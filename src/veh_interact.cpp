@@ -1696,7 +1696,8 @@ int veh_interact::part_at( int dx, int dy )
 {
     int vdx = -ddx - dy;
     int vdy = dx - ddy;
-    return veh->part_displayed_at( vdx, vdy );
+    // @todo add vdz and make them into a single tripoint
+    return veh->part_displayed_at( tripoint( vdx, vdy, 0 ) );
 }
 
 /**
