@@ -1205,7 +1205,7 @@ float npc::vehicle_danger( int radius ) const
              * vehicles. This should just count frames instead. Or actually find the
              * size. */
             vehicle_part last_part = wrapped_veh.v->parts.back();
-            int size = std::max( last_part.mount.x, last_part.mount.y );
+            int size = std::max( last_part.mount().x, last_part.mount().y );
 
             double normal = sqrt( ( float )( ( bx - ax ) * ( bx - ax ) + ( by - ay ) * ( by - ay ) ) );
             int closest = int( abs( ( posx() - ax ) * ( by - ay ) - ( posy() - ay ) * ( bx - ax ) ) / normal );

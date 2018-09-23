@@ -477,7 +477,7 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
                 continue;
             }
 
-            const point &collision_point = veh.parts[coll.part].mount;
+            const point &collision_point = veh.parts[coll.part].mount_2d();
             const int coll_dmg = coll.imp;
             impulse += coll_dmg;
             // Shock damage
@@ -717,10 +717,10 @@ float map::vehicle_vehicle_collision( vehicle &veh, vehicle &veh2,
             parm2 = veh_veh_coll.target_part;
         }
 
-        epicenter1 += veh.parts[parm1].mount;
+        epicenter1 += veh.parts[parm1].mount_2d();
         veh.damage( parm1, dmg1_part, DT_BASH );
 
-        epicenter2 += veh2.parts[parm2].mount;
+        epicenter2 += veh2.parts[parm2].mount_2d();
         veh2.damage( parm2, dmg2_part, DT_BASH );
     }
 
@@ -2685,8 +2685,8 @@ bool map::mop_spills( const tripoint &p )
     if( const optional_vpart_position vp = veh_at( p ) ) {
         vehicle *const veh = &vp->vehicle();
         const int vpart = vp->part_index();
-        std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount.x,
-                                      veh->parts[vpart].mount.y );
+        std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount().x,
+                                      veh->parts[vpart].mount().y );
         for( auto &elem : parts_here ) {
             if( veh->parts[elem].blood > 0 ) {
                 veh->parts[elem].blood = 0;
@@ -4477,7 +4477,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         }
         auto const it = std::find_if( begin( cargo_parts ),
         end( cargo_parts ), [&]( const vpart_reference & part ) {
-            return active_item.location == cur_veh.parts[part.part_index()].mount;
+            return active_item.location == cur_veh.parts[part.part_index()].mount_2d();
         } );
 
         if( it == end( cargo_parts ) ) {
@@ -5287,8 +5287,8 @@ void map::add_splatter( const field_id type, const tripoint &where, int intensit
             vehicle *const veh = &vp->vehicle();
             const int anchor_part = vp->part_index();
             // Might be -1 if all the vehicle's parts at where are marked for removal
-            const int part = veh->part_displayed_at( veh->parts[anchor_part].mount.x,
-                             veh->parts[anchor_part].mount.y );
+            const int part = veh->part_displayed_at( veh->parts[anchor_part].mount().x,
+                             veh->parts[anchor_part].mount().y );
             if( part != -1 ) {
                 veh->parts[part].blood += 200 * std::min( intensity, 3 ) / 3;
                 return;

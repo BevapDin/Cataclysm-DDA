@@ -362,7 +362,7 @@ bool vehicle::interact_vehicle_locked()
                 //assign long activity
                 g->u.assign_activity( activity_id( "ACT_HOTWIRE_CAR" ), hotwire_time, -1, INT_MIN, _( "Hotwire" ) );
                 // use part 0 as the reference point
-                point q = coord_translate( parts[0].mount );
+                point q = coord_translate( parts[0].mount_2d() );
                 g->u.activity.values.push_back( global_x() + q.x ); //[0]
                 g->u.activity.values.push_back( global_y() + q.y ); //[1]
                 g->u.activity.values.push_back( g->u.get_skill_level( skill_mechanics ) ); //[2]
@@ -1122,7 +1122,7 @@ bool vehicle::is_open( int part_index ) const
 
 void vehicle::open_all_at( int p )
 {
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount.x, parts[p].mount.y );
+    std::vector<int> parts_here = parts_at_relative( parts[p].mount().x, parts[p].mount().y );
     for( auto &elem : parts_here ) {
         if( part_flag( elem, VPFLAG_OPENABLE ) ) {
             // Note that this will open multi-square and non-multipart parts in the tile. This
@@ -1153,8 +1153,8 @@ void vehicle::open_or_close( int const part_index, bool const opening )
         }
 
         //Look for parts 1 square off in any cardinal direction
-        const int dx = parts[next_index].mount.x - parts[part_index].mount.x;
-        const int dy = parts[next_index].mount.y - parts[part_index].mount.y;
+        const int dx = parts[next_index].mount().x - parts[part_index].mount().x;
+        const int dy = parts[next_index].mount().y - parts[part_index].mount().y;
         const int delta = dx * dx + dy * dy;
 
         const bool is_near = ( delta == 1 );

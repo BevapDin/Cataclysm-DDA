@@ -106,7 +106,8 @@ player_activity veh_interact::serialize_activity()
 
     // if we're working on an existing part, use that part as the reference point
     // otherwise (e.g. installing a new frame), just use part 0
-    point q = veh->coord_translate( pt ? pt->mount : veh->parts[0].mount );
+    //@todo change to accept tripoint
+    point q = veh->coord_translate( pt ? pt->mount_2d() : veh->parts[0].mount_2d() );
     res.values.push_back( veh->global_x() + q.x );    // values[0]
     res.values.push_back( veh->global_y() + q.y );    // values[1]
     res.values.push_back( ddx );   // values[2]
@@ -605,7 +606,7 @@ bool veh_interact::can_install_part() {
         for (auto &p : veh->steering) {
             if (!veh->part_flag(p, "TRACKED")) {
                 // tracked parts don't contribute to axle complexity
-                axles.insert(veh->parts[p].mount.x);
+                axles.insert(veh->parts[p].mount().x);
             }
         }
 
@@ -936,7 +937,7 @@ bool veh_interact::do_repair( std::string &msg )
             {
                 vehicle_part *most_repairable = get_most_repariable_part();
                 if( most_repairable ) {
-                    move_cursor( most_repairable->mount.y + ddy, -( most_repairable->mount.x + ddx ) );
+                    move_cursor( most_repairable->mount().y + ddy, -( most_repairable->mount().x + ddx ) );
                     return false;
                 } else {
                     msg = _( "There are no damaged parts on this vehicle." );
@@ -1306,7 +1307,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
             return false; // nothing is selectable
         }
 
-        move_cursor( opts[pos].part->mount.y + ddy, -( opts[pos].part->mount.x + ddx ) );
+        move_cursor( opts[pos].part->mount().y + ddy, -( opts[pos].part->mount().x + ddx ) );
 
         if( opts[pos].message ) {
             opts[pos].message( *opts[pos].part );
@@ -1778,7 +1779,8 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     parts_here.clear();
     wheel = NULL;
     if( cpart >= 0 ) {
-        parts_here = veh->parts_at_relative( veh->parts[cpart].mount.x, veh->parts[cpart].mount.y );
+        //@todo accept tripoint
+        parts_here = veh->parts_at_relative( veh->parts[cpart].mount().x, veh->parts[cpart].mount().y );
         for( size_t i = 0; i < parts_here.size(); i++ ) {
             auto &pt = veh->parts[parts_here[i]];
 
@@ -1883,8 +1885,8 @@ void veh_interact::display_veh ()
         long sym = veh->part_sym (p);
         nc_color col = veh->part_color (p);
 
-        int x =   veh->parts[p].mount.y + ddy;
-        int y = -(veh->parts[p].mount.x + ddx);
+        int x =   veh->parts[p].mount().y + ddy;
+        int y = -(veh->parts[p].mount().x + ddx);
 
         if (x == 0 && y == 0) {
             col = hilite(col);

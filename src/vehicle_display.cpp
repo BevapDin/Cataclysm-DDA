@@ -41,7 +41,7 @@ char vehicle::part_sym( const int p, const bool exact ) const
         return ' ';
     }
 
-    const int displayed_part = exact ? p : part_displayed_at( parts[p].mount.x, parts[p].mount.y );
+    const int displayed_part = exact ? p : part_displayed_at( parts[p].mount().x, parts[p].mount().y );
 
     if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
         return '\''; // open door
@@ -60,7 +60,7 @@ vpart_id vehicle::part_id_string( int const p, char &part_mod ) const
         return vpart_id::NULL_ID();
     }
 
-    int displayed_part = part_displayed_at( parts[p].mount.x, parts[p].mount.y );
+    int displayed_part = part_displayed_at( parts[p].mount().x, parts[p].mount().y );
     const vpart_id idinfo = parts[displayed_part].id;
 
     if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
@@ -90,7 +90,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     if( parm >= 0 ) {
         col = part_info( parm ).color;
     } else {
-        const int displayed_part = exact ? p : part_displayed_at( parts[p].mount.x, parts[p].mount.y );
+        const int displayed_part = exact ? p : part_displayed_at( parts[p].mount().x, parts[p].mount().y );
 
         if( displayed_part < 0 || displayed_part >= ( int )parts.size() ) {
             return c_black;
@@ -144,7 +144,7 @@ int vehicle::print_part_list( const catacurses::window &win, int y1, const int m
     if( p < 0 || p >= ( int )parts.size() ) {
         return y1;
     }
-    std::vector<int> pl = this->parts_at_relative( parts[p].mount.x, parts[p].mount.y );
+    std::vector<int> pl = this->parts_at_relative( parts[p].mount().x, parts[p].mount().y );
     int y = y1;
     for( size_t i = 0; i < pl.size(); i++ ) {
         if( y >= max_y ) {
@@ -225,7 +225,7 @@ void vehicle::print_vparts_descs( const catacurses::window &win, int max_y, int 
         return;
     }
 
-    std::vector<int> pl = this->parts_at_relative( parts[p].mount.x, parts[p].mount.y );
+    std::vector<int> pl = this->parts_at_relative( parts[p].mount().x, parts[p].mount().y );
     std::ostringstream msg;
 
     int lines = 0;

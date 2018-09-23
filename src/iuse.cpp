@@ -7385,7 +7385,7 @@ int iuse::cable_attach( player *p, item *it, bool, const tripoint & )
             }
 
             const auto veh_part_coordinates = []( const vehicle & veh, const int part_num ) {
-                return veh.parts[part_num].mount;
+                return veh.parts[part_num].mount_2d();
             };
 
             // TODO: make sure there is always a matching vpart id here. Maybe transform this into

@@ -119,7 +119,8 @@ static int has_quality_from_vpart( const vehicle &veh, int part, const quality_i
 {
     int qty = 0;
 
-    auto pos = veh.parts[ part ].mount;
+    const tripoint pos = veh.parts[ part ].mount();
+    //@todo change parts_at_relative to take tripoint
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities
@@ -213,7 +214,8 @@ static int max_quality_from_vpart( const vehicle &veh, int part, const quality_i
 {
     int res = INT_MIN;
 
-    auto pos = veh.parts[ part ].mount;
+    const tripoint pos = veh.parts[ part ].mount();
+    //@todo change parts_at_relative to take tripoint
     for( const auto &n : veh.parts_at_relative( pos.x, pos.y ) ) {
 
         // only unbroken parts can provide tool qualities
@@ -703,9 +705,10 @@ std::list<item> visitable<vehicle_cursor>::remove_items_with( const
     vehicle_part &part = cur->veh.parts[ idx ];
     for( auto iter = part.items.begin(); iter != part.items.end(); ) {
         if( filter( *iter ) ) {
+            //@todo change functions below to take tripoints
             // check for presence in the active items cache
-            if( cur->veh.active_items.has( iter, part.mount ) ) {
-                cur->veh.active_items.remove( iter, part.mount );
+            if( cur->veh.active_items.has( iter, part.mount_2d() ) ) {
+                cur->veh.active_items.remove( iter, part.mount_2d() );
             }
             res.splice( res.end(), part.items, iter++ );
             if( --count == 0 ) {

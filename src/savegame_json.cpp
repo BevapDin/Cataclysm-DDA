@@ -1866,8 +1866,11 @@ void vehicle_part::deserialize( JsonIn &jsin )
         base = item( id.obj().item );
     }
 
-    data.read( "mount_dx", mount.x );
-    data.read( "mount_dy", mount.y );
+    data.read( "mount_dx", mount_.x );
+    data.read( "mount_dy", mount_.y );
+    if( !data.read( "mount_dz", mount_.z ) ) {
+        mount_.z = 0;
+    }
     data.read( "open", open );
     data.read( "direction", direction );
     data.read( "blood", blood );
@@ -1928,8 +1931,9 @@ void vehicle_part::serialize( JsonOut &json ) const
     json.start_object();
     json.member( "id", id.str() );
     json.member( "base", base );
-    json.member( "mount_dx", mount.x );
-    json.member( "mount_dy", mount.y );
+    json.member( "mount_dx", mount_.x );
+    json.member( "mount_dy", mount_.y );
+    json.member( "mount_dz", mount_.z );
     json.member( "open", open );
     json.member( "direction", direction );
     json.member( "blood", blood );
@@ -2037,13 +2041,13 @@ void vehicle::deserialize( JsonIn &jsin )
         auto end = parts[cargo_index].items.end();
         for( ; it != end; ++it ) {
             if( it->needs_processing() ) {
-                active_items.add( it, parts[cargo_index].mount );
+                active_items.add( it, parts[cargo_index].mount_2d() );
             }
         }
     }
 
     for( auto turret : get_parts( "TURRET", false ) ) {
-        install_part( turret->mount.x, turret->mount.y, vpart_id( "turret_mount" ), false );
+        install_part( turret->mount().x, turret->mount().y, vpart_id( "turret_mount" ), false );
     }
 
     /* After loading, check if the vehicle is from the old rules and is missing

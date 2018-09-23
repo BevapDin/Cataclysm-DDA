@@ -262,7 +262,12 @@ struct vehicle_part {
 
     public:
         /** mount point: x is on the forward/backward axis, y is on the left/right axis */
-        point mount;
+        const tripoint &mount() const {
+            return mount_;
+        }
+        point mount_2d() const {
+            return point( mount_.x, mount_.y );
+        }
 
         /** mount translated to face.dir [0] and turn_dir [1] */
         std::array<point, 2> precalc = { { point( -1, -1 ), point( -1, -1 ) } };
@@ -340,6 +345,8 @@ struct vehicle_part {
          *  @see vehicle_part::crew() accessor which excludes dead and non-allied NPC's
          */
         int crew_id = -1;
+
+        tripoint mount_;
 
     public:
         /** Get part definition common to all parts of this type */

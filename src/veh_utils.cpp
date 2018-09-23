@@ -137,10 +137,11 @@ bool repair_part( vehicle &veh, vehicle_part &pt, Character &who_c )
     std::string partname = pt.name();
     if( pt.is_broken() ) {
         const int dir = pt.direction;
-        point loc = pt.mount;
+        const tripoint loc = pt.mount();
         auto replacement_id = pt.info().get_id();
         veh.break_part_into_pieces( part_index, who.posx(), who.posy() );
         veh.remove_part( part_index );
+        //@todo change to tripoint
         const int partnum = veh.install_part( loc.x, loc.y, replacement_id, std::move( base ) );
         veh.parts[partnum].direction = dir;
         veh.part_removal_cleanup();
