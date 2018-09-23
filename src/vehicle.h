@@ -1199,7 +1199,7 @@ class vehicle
         void damage_all( int dmg1, int dmg2, damage_type type, const tripoint &impact );
 
         //Shifts the coordinates of all parts and moves the vehicle in the opposite direction.
-        void shift_parts( point delta );
+        void shift_parts( const tripoint delta );
         bool shift_if_needed();
 
         void shed_loose_parts();

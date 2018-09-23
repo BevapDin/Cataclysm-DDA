@@ -4135,16 +4135,15 @@ void vehicle::damage_all( int dmg1, int dmg2, damage_type type, const tripoint &
  * Shifts all parts of the vehicle by the given amounts, and then shifts the
  * vehicle itself in the opposite direction. The end result is that the vehicle
  * appears to have not moved. Useful for re-zeroing a vehicle to ensure that a
- * (0, 0) part is always present.
+ * (0, 0, 0) part is always present.
  * @param delta How much to shift along each axis
  */
-void vehicle::shift_parts( const point delta )
+void vehicle::shift_parts( const tripoint delta )
 {
     // Don't invalidate the active item cache's location!
-    active_items.subtract_locations( delta );
+    active_items.subtract_locations( point( delta.x, delta.y ) );
     for( auto &elem : parts ) {
-        //@todo decltype(delta) == tripoint
-        elem.mount_ -= tripoint( delta.x, delta.y, 0 );
+        elem.mount_ -= delta;
     }
 
     decltype( labels ) new_labels;
@@ -4153,7 +4152,7 @@ void vehicle::shift_parts( const point delta )
     }
     labels = new_labels;
 
-    pivot_anchor[0] -= delta;
+    pivot_anchor[0] -= point( delta.x, delta.y );
     refresh();
 
     //Need to also update the map after this
@@ -4178,7 +4177,7 @@ bool vehicle::shift_if_needed()
         if( part_info( next_part ).location == "structure"
             && !part_info( next_part ).has_flag( "PROTRUSION" )
             && !parts[next_part].removed ) {
-            shift_parts( parts[next_part].mount_2d() );
+            shift_parts( parts[next_part].mount() );
             refresh();
             return true;
         }
@@ -4187,7 +4186,7 @@ bool vehicle::shift_if_needed()
     for( const vpart_reference vp : get_parts() ) {
         const size_t next_part = vp.part_index();
         if( !parts[next_part].removed ) {
-            shift_parts( parts[next_part].mount_2d() );
+            shift_parts( parts[next_part].mount() );
             refresh();
             return true;
         }
