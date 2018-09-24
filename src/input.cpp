@@ -1344,7 +1344,7 @@ class macro_controller
                 return;
             }
             const std::string path = FILENAMES["macrodir"] + menu.entries[menu.ret].txt + ".json";
-            std::ifstream buffer;
+            std::ifstream buffer( path.c_str() );
             JsonIn jsin( buffer );
             jsin.read(current);
         }
