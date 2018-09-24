@@ -1313,7 +1313,7 @@ class macro_controller
                 popup(_("A macro with that name already exists!"));
                 return;
             }
-            std::ofstream buffer;
+            std::ofstream buffer( path.c_str() );
             JsonOut jsout( buffer, true );
             jsout.write( current );
         }
