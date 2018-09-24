@@ -309,7 +309,7 @@ void input_event::serialize( JsonOut &jsout ) const
             jsout.member( "input_method", "mouse" );
             break;
         default:
-            throw std::runtime_error( "unknown input_event_t" );
+            throw std::runtime_error( "unknown input_event_t: " + std::to_string( type ) );
     }
     jsout.member( "key" );
     jsout.start_array();
