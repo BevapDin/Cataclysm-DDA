@@ -1350,7 +1350,7 @@ class macro_controller
         }
         bool on_input( const std::string &category, const input_event &event ) {
             if( state == state_type::DISABLED) {
-                return false;
+                return true;
             } else if( is_toogle_record( event ) ) {
                 toogle_record();
                 return false;
