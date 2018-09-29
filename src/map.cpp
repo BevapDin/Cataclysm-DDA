@@ -889,9 +889,8 @@ void map::unboard_vehicle( const tripoint &p )
 
 vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
 {
-    const tripoint p2 = p + dp;
     const tripoint src = p;
-    const tripoint dst = p2;
+    const tripoint dst = p + dp;
 
     if( !inbounds( src ) ) {
         add_msg( m_debug, "map::displace_vehicle: coordinates out of bounds %d,%d,%d->%d,%d,%d",
@@ -1001,17 +1000,17 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
 
     veh->posx = dst_offset_x;
     veh->posy = dst_offset_y;
-    veh->smz = p2.z;
+    veh->smz = dst.z;
     // Invalidate vehicle's point cache
     veh->occupied_cache_time = calendar::before_time_starts;
     if( src_submap != dst_submap ) {
-        veh->set_submap_moved( int( p2.x / SEEX ), int( p2.y / SEEY ) );
+        veh->set_submap_moved( int( dst.x / SEEX ), int( dst.y / SEEY ) );
         dst_submap->vehicles.push_back( veh );
         src_submap->vehicles.erase( src_submap->vehicles.begin() + our_i );
         dst_submap->is_uniform = false;
     }
 
-    p = p2;
+    p = dst;
 
     update_vehicle_cache( veh, src.z );
 
