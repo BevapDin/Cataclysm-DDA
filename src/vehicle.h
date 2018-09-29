@@ -1123,9 +1123,6 @@ class vehicle
          * @param y direction player is steering
          */
         void pldrive( int x, int y );
-
-        // stub for per-vpart limit
-        units::volume stored_volume( int part ) const;
         /**
          * Update an item's active status, for example when adding
          * hot or perishable liquid to a container.
