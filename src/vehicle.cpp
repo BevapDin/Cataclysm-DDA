@@ -3382,8 +3382,7 @@ vehicle *vehicle::find_vehicle( const tripoint &where )
         return nullptr;
     }
 
-    for( auto &elem : sm->vehicles ) {
-        vehicle *found_veh = elem;
+    for( const vehicle *found_veh : sm->vehicles ) {
         point veh_location( found_veh->posx, found_veh->posy );
 
         if( veh_in_sm == veh_location ) {
