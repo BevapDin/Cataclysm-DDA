@@ -1967,7 +1967,7 @@ void veh_interact::display_stats()
     units::volume free_cargo = 0;
     for( const vpart_reference vp : veh->get_parts( "CARGO" ) ) {
         const size_t p = vp.part_index();
-        total_cargo += veh->max_volume(p);
+        total_cargo += veh->get_items( p ).max_volume();
         free_cargo += veh->free_volume(p);
     }
 

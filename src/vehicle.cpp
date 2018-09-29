@@ -3646,11 +3646,6 @@ units::volume vehicle::stored_volume( int const part ) const
     return get_items( part ).stored_volume();
 }
 
-units::volume vehicle::max_volume( int const part ) const
-{
-    return get_items( part ).max_volume();
-}
-
 units::volume vehicle::free_volume( int const part ) const
 {
     return get_items( part ).free_volume();
