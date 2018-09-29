@@ -2126,7 +2126,7 @@ units::volume advanced_inv_area::free_volume( bool in_vehicle ) const
     if( id == AIM_INVENTORY || id == AIM_WORN ) {
         return ( g->u.volume_capacity() - g->u.volume_carried() );
     }
-    return ( in_vehicle ) ? veh->free_volume( vstor ) : g->m.free_volume( pos );
+    return ( in_vehicle ) ? veh->get_items( vstor ).free_volume() : g->m.free_volume( pos );
 }
 
 static units::volume unit_volume( const item &i )

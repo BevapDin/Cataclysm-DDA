@@ -1968,7 +1968,7 @@ void veh_interact::display_stats()
     for( const vpart_reference vp : veh->get_parts( "CARGO" ) ) {
         const size_t p = vp.part_index();
         total_cargo += veh->get_items( p ).max_volume();
-        free_cargo += veh->free_volume(p);
+        free_cargo += veh->get_items( p ).free_volume();
     }
 
     const int second_column = 33 + (extraw / 4);
