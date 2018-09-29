@@ -888,47 +888,24 @@ void map::unboard_vehicle( const tripoint &p )
 
 void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
 {
-    const tripoint src = veh_.global_pos3();
-    const tripoint dst = src + dp;
+    const int old_veh_pos_z = veh_.global_pos3().z;
+    const tripoint dst = veh_.global_pos3() + dp;
     vehicle *const veh = &veh_; // @todo change code below to use reference
 
-    if( !inbounds( src ) ) {
-        add_msg( m_debug, "map::displace_vehicle: coordinates out of bounds %d,%d,%d->%d,%d,%d",
-                 src.x, src.y, src.z, dst.x, dst.y, dst.z );
+    const auto find_vehicle_iter = [&]( submap &sm ) {
+        return std::find_if( sm.vehicles.begin(), sm.vehicles.end(), [&]( const vehicle *const v ) {
+            return v == &veh_;
+        } );
+    };
+    // For now, do a broad scan on all submaps, this will be changed later.
+    const auto siter = std::find_if( grid.begin(), grid.end(), [&]( submap *const sm ) {
+        return find_vehicle_iter( *sm ) != sm->vehicles.end();
+    } );
+    if( siter == grid.end() ) {
+        debugmsg( "Vehicle to displace not found (supposed to be at %d, %d, %d)", veh_.global_pos3().x, veh_.global_pos3().y, veh_.global_pos3().z );
         return;
     }
-
-    int src_offset_x = 0;
-    int src_offset_y = 0;
-    submap *const src_submap = get_submap_at( src, src_offset_x, src_offset_y );
-
-    // first, let's find our position in current vehicles vector
-    int our_i = -1;
-    for( size_t i = 0; i < src_submap->vehicles.size(); i++ ) {
-        if( src_submap->vehicles[i]->posx == src_offset_x &&
-            src_submap->vehicles[i]->posy == src_offset_y ) {
-            our_i = i;
-            break;
-        }
-    }
-    if( our_i < 0 ) {
-        vehicle *v = veh_pointer_or_null( veh_at( src ) );
-        for( auto &smap : grid ) {
-            for( size_t i = 0; i < smap->vehicles.size(); i++ ) {
-                if( smap->vehicles[i] == v ) {
-                    our_i = i;
-                    const_cast<submap *&>( src_submap ) = smap;
-                    break;
-                }
-            }
-        }
-    }
-    if( our_i < 0 ) {
-        add_msg( m_debug, "displace_vehicle our_i=%d", our_i );
-        return;
-    }
-    // move the vehicle
-    vehicle *veh = src_submap->vehicles[our_i];
+    submap &src_submap = **siter;
 
     int dst_offset_x = 0;
     int dst_offset_y = 0;
@@ -1002,14 +979,14 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
     veh->smz = dst.z;
     // Invalidate vehicle's point cache
     veh->occupied_cache_time = calendar::before_time_starts;
-    if( src_submap != dst_submap ) {
+    if( &src_submap != dst_submap ) {
         veh->set_submap_moved( dst.x / SEEX, dst.y / SEEY );
         dst_submap->vehicles.push_back( veh );
-        src_submap->vehicles.erase( src_submap->vehicles.begin() + our_i );
+        src_submap.vehicles.erase( find_vehicle_iter( src_submap ) );
         dst_submap->is_uniform = false;
     }
 
-    update_vehicle_cache( veh, src.z );
+    update_vehicle_cache( veh, old_veh_pos_z );
 
     if( need_update ) {
         g->update_map( g->u );
