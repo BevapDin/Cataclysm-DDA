@@ -900,10 +900,7 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
 
     int src_offset_x = 0;
     int src_offset_y = 0;
-    int dst_offset_x = 0;
-    int dst_offset_y = 0;
     submap *const src_submap = get_submap_at( src, src_offset_x, src_offset_y );
-    submap *const dst_submap = get_submap_at( dst, dst_offset_x, dst_offset_y );
 
     // first, let's find our position in current vehicles vector
     int our_i = -1;
@@ -932,15 +929,17 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
     }
     // move the vehicle
     vehicle *veh = src_submap->vehicles[our_i];
-    // don't let it go off grid
-    if( !inbounds( p2 ) ) {
+
+    int dst_offset_x = 0;
+    int dst_offset_y = 0;
+    submap *const dst_submap = get_submap_at( dst, dst_offset_x, dst_offset_y );
+    if( dst_submap == nullptr ) {
+        // @todo maybe generated the submap?
+        add_msg( m_debug, "Vehicle wants to go off the map. This is not implemented." );
         veh->stop();
-        // Silent debug
-        dbg( D_ERROR ) << "map:displace_vehicle: Stopping vehicle, displaced dp=("
-                       << dp.x << ", " << dp.y << ", " << dp.z << ")";
         return;
     }
-
+    
     // Need old coordinates to check for remote control
     const bool remote = veh->remote_controlled( g->u );
 
