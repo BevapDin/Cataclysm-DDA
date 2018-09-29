@@ -1125,7 +1125,6 @@ class vehicle
         void pldrive( int x, int y );
 
         // stub for per-vpart limit
-        units::volume max_volume( int part ) const;
         units::volume free_volume( int part ) const;
         units::volume stored_volume( int part ) const;
         /**
