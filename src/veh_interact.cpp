@@ -1771,10 +1771,9 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     if( ovp && &ovp->vehicle() != veh ) {
         obstruct = true;
     }
-    nc_color col = cpart >= 0 ? veh->part_color( cpart ) : c_black;
-    long sym = cpart >= 0 ? veh->part_sym( cpart ) : ' ';
-    mvwputch( w_disp, hh, hw, obstruct ? red_background( col ) : hilite( col ),
-              special_symbol( sym ) );
+    const auto sym = cpart >= 0 ? veh->part_sym( cpart ) : std::pair<char, nc_color>( ' ', c_black );
+    mvwputch( w_disp, hh, hw, obstruct ? red_background( sym.second ) : hilite( sym.second ),
+              special_symbol( sym.first ) );
     wrefresh( w_disp );
     werase( w_parts );
     veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1 );
@@ -1911,8 +1910,8 @@ void veh_interact::display_veh ()
     std::vector<int> structural_parts = veh->all_parts_at_location("structure");
     for( auto &structural_part : structural_parts ) {
         const int p = structural_part;
-        long sym = veh->part_sym (p);
-        nc_color col = veh->part_color (p);
+        const auto pair = veh->part_sym( p );
+        nc_color col = pair.second;
 
         int x =   veh->parts[p].mount.y + ddy;
         int y = -(veh->parts[p].mount.x + ddx);
@@ -1921,7 +1920,7 @@ void veh_interact::display_veh ()
             col = hilite(col);
             cpart = p;
         }
-        mvwputch (w_disp, hh + y, hw + x, col, special_symbol(sym));
+        mvwputch( w_disp, hh + y, hw + x, col, special_symbol( pair.first ) );
     }
     wrefresh (w_disp);
 }

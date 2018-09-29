@@ -1492,7 +1492,7 @@ void cata_tiles::draw_minimap( int destx, int desty, const tripoint &center, int
                 color.g = 12;
                 color.b = 12;
             } else if( const optional_vpart_position vp = g->m.veh_at( p ) ) {
-                color = cursesColorToSDL( vp->vehicle().part_color( vp->part_index() ) );
+                color = cursesColorToSDL( vp->vehicle().part_sym( vp->part_index() ).second );
             } else if( g->m.has_furn( p ) ) {
                 auto &furniture = g->m.furn( p ).obj();
                 color = cursesColorToSDL( furniture.color() );
@@ -2475,7 +2475,7 @@ bool cata_tiles::draw_vpart( const tripoint &p, lit_level ll, int &height_3d )
     // Gets the visible part, should work fine once tileset vp_ids are updated to work with the vehicle part json ids
     // get the vpart_id
     const std::pair<vpart_id, char> &vp_id = veh->part_id_string( veh_part );
-    const char sym = veh->face.dir_symbol( veh->part_sym( veh_part ) );
+    const char sym = veh->face.dir_symbol( veh->part_sym( veh_part ).first );
     std::string subcategory( 1, sym );
 
     // prefix with vp_ ident

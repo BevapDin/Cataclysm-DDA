@@ -877,12 +877,9 @@ class vehicle
         // Given a part, finds its index in the vehicle
         int index_of_part( const vehicle_part *part, bool check_removed = false ) const;
 
-        // get symbol for map
-        char part_sym( int p, bool exact = false ) const;
+        // get symbol and color for map
+        std::pair<char, nc_color> part_sym( int p, bool exact = false ) const;
         std::pair<vpart_id, char> part_id_string( int p ) const;
-
-        // get color for map
-        nc_color part_color( int p, bool exact = false ) const;
 
         // Vehicle parts description
         int print_part_desc( const catacurses::window &win, int y1, int max_y, int width, int p,

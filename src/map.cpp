@@ -5795,8 +5795,9 @@ bool map::draw_maptile( const catacurses::window &w, player &u, const tripoint &
     int veh_part = 0;
     const vehicle *veh = veh_at_internal( p, veh_part );
     if( veh != nullptr ) {
-        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( veh_part ) ) );
-        tercol = veh->part_color( veh_part );
+        const auto pair = veh->part_sym( veh_part );
+        sym = special_symbol( veh->face.dir_symbol( pair.first ) );
+        tercol = pair.second;
         item_sym.clear(); // clear the item symbol so `sym` is used instead.
 
         if( !veh->forward_velocity() ) {
@@ -5876,7 +5877,7 @@ void map::draw_from_above( const catacurses::window &w, player &u, const tripoin
     } else if( ( veh = veh_at_internal( p, part_below ) ) != nullptr ) {
         const int roof = veh->roof_at_part( part_below );
         const int displayed_part = roof >= 0 ? roof : part_below;
-        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ) ) );
+        sym = special_symbol( veh->face.dir_symbol( veh->part_sym( displayed_part, true ).first ) );
         tercol = ( roof >= 0 ||
                    vpart_position( const_cast<vehicle &>( *veh ),
                                    part_below ).obstacle_at_part() ) ? c_light_gray : c_light_gray_cyan;

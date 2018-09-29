@@ -35,19 +35,52 @@ const std::string vehicle::disp_name() const
     return string_format( _( "the %s" ), name.c_str() );
 }
 
-char vehicle::part_sym( const int p, const bool exact ) const
+std::pair<char, nc_color> vehicle::part_sym( const int p, const bool exact ) const
 {
     if( p < 0 || p >= ( int )parts.size() || parts[p].removed ) {
-        return ' ';
+        return { ' ', c_unset };
     }
-
     const int displayed_part = exact ? p : part_displayed_at( parts[p].mount.x, parts[p].mount.y );
 
-    if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
-        return '\''; // open door
+    int parm = -1;
+    nc_color col;
+
+    //If armoring is present and the option is set, it colors the visible part
+    if( get_option<bool>( "VEHICLE_ARMOR_COLOR" ) ) {
+        parm = part_with_feature( p, VPFLAG_ARMOR, false );
+    }
+    if( parm >= 0 ) {
+        col = part_info( parm ).color;
     } else {
-        return parts[ displayed_part ].is_broken() ?
-               part_info( displayed_part ).sym_broken : part_info( displayed_part ).sym;
+        if( parts[displayed_part].blood > 200 ) {
+            col = c_red;
+        } else if( parts[displayed_part].blood > 0 ) {
+            col = c_light_red;
+        } else if( parts[displayed_part].is_broken() ) {
+            col = part_info( displayed_part ).color_broken;
+        } else {
+            col = part_info( displayed_part ).color;
+        }
+    }
+
+    if( !exact ) {
+        // curtains turn windshields gray
+        int curtains = part_with_feature( p, VPFLAG_CURTAIN, false );
+        if( curtains >= 0&&part_with_feature( p, VPFLAG_WINDOW, true ) >= 0 && !parts[curtains].open ) {
+            col = part_info( curtains ).color;
+        }
+
+        //Invert colors for cargo parts with stuff in them
+        int cargo_part = part_with_feature( p, VPFLAG_CARGO );
+        if( cargo_part > 0 && !get_items( cargo_part ).empty() ) {
+            col = invert_color( col );
+        }
+    }
+
+    if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
+        return { '\'', col }; // open door
+    } else {
+        return { parts[ displayed_part ].is_broken() ? part_info( displayed_part ).sym_broken : part_info( displayed_part ).sym, col };
     }
 }
 
@@ -70,62 +103,6 @@ std::pair<vpart_id, char> vehicle::part_id_string( int const p ) const
     }
 
     return { idinfo, part_mod };
-}
-
-nc_color vehicle::part_color( const int p, const bool exact ) const
-{
-    if( p < 0 || p >= ( int )parts.size() ) {
-        return c_black;
-    }
-
-    nc_color col;
-
-    int parm = -1;
-
-    //If armoring is present and the option is set, it colors the visible part
-    if( get_option<bool>( "VEHICLE_ARMOR_COLOR" ) ) {
-        parm = part_with_feature( p, VPFLAG_ARMOR, false );
-    }
-
-    if( parm >= 0 ) {
-        col = part_info( parm ).color;
-    } else {
-        const int displayed_part = exact ? p : part_displayed_at( parts[p].mount.x, parts[p].mount.y );
-
-        if( displayed_part < 0 || displayed_part >= ( int )parts.size() ) {
-            return c_black;
-        }
-        if( parts[displayed_part].blood > 200 ) {
-            col = c_red;
-        } else if( parts[displayed_part].blood > 0 ) {
-            col = c_light_red;
-        } else if( parts[displayed_part].is_broken() ) {
-            col = part_info( displayed_part ).color_broken;
-        } else {
-            col = part_info( displayed_part ).color;
-        }
-
-    }
-
-    if( exact ) {
-        return col;
-    }
-
-    // curtains turn windshields gray
-    int curtains = part_with_feature( p, VPFLAG_CURTAIN, false );
-    if( curtains >= 0 ) {
-        if( part_with_feature( p, VPFLAG_WINDOW, true ) >= 0 && !parts[curtains].open ) {
-            col = part_info( curtains ).color;
-        }
-    }
-
-    //Invert colors for cargo parts with stuff in them
-    int cargo_part = part_with_feature( p, VPFLAG_CARGO, true );
-    if( cargo_part > 0 && !get_items( cargo_part ).empty() ) {
-        return invert_color( col );
-    } else {
-        return col;
-    }
 }
 
 /**
