@@ -887,10 +887,9 @@ void map::unboard_vehicle( const tripoint &p )
     vp->vehicle().invalidate_mass();
 }
 
-vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
+vehicle *map::displace_vehicle( tripoint &src, const tripoint &dp )
 {
-    const tripoint src = p;
-    const tripoint dst = p + dp;
+    const tripoint dst = src + dp;
 
     if( !inbounds( src ) ) {
         add_msg( m_debug, "map::displace_vehicle: coordinates out of bounds %d,%d,%d->%d,%d,%d",
@@ -915,7 +914,7 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
         }
     }
     if( our_i < 0 ) {
-        vehicle *v = veh_pointer_or_null( veh_at( p ) );
+        vehicle *v = veh_pointer_or_null( veh_at( src ) );
         for( auto &smap : grid ) {
             for( size_t i = 0; i < smap->vehicles.size(); i++ ) {
                 if( smap->vehicles[i] == v ) {
@@ -1010,9 +1009,9 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
         dst_submap->is_uniform = false;
     }
 
-    p = dst;
-
     update_vehicle_cache( veh, src.z );
+
+    src = dst
 
     if( need_update ) {
         g->update_map( g->u );
