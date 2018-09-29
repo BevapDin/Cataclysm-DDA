@@ -501,9 +501,12 @@ class map
         // put player on vehicle at x,y
         void board_vehicle( const tripoint &p, player *pl );
         void unboard_vehicle( const tripoint &p );//remove player from vehicle at p
-        // Change vehicle coordinates and move vehicle's driver along.
-        // WARNING: not checking collisions!
-        vehicle *displace_vehicle( tripoint &p, const tripoint &dp );
+        /**
+         * Changes the vehicles position along the given vector @p dp and moves
+         * boarded creatures along.
+         * No collision checking is done.
+         */
+        void displace_vehicle( vehicle &veh, const tripoint &dp );
         // move water under wheels. true if moved
         bool displace_water( const tripoint &dp );
 

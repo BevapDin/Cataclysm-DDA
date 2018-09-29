@@ -574,8 +574,7 @@ void map::move_vehicle( vehicle &veh, const tripoint &dp, const tileray &facing 
         }
         veh.on_move();
         // Actually change position
-        tripoint pt = veh.global_pos3(); // displace_vehicle needs a non-const reference
-        displace_vehicle( pt, dp1 );
+        displace_vehicle( veh, dp1 );
     } else if( !vertical ) {
         veh.stop();
     }
@@ -887,14 +886,16 @@ void map::unboard_vehicle( const tripoint &p )
     vp->vehicle().invalidate_mass();
 }
 
-vehicle *map::displace_vehicle( tripoint &src, const tripoint &dp )
+void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
 {
+    tripoint src = veh_.global_pos3();
     const tripoint dst = src + dp;
+    vehicle *const veh = &veh_; // @todo change code below to use reference
 
     if( !inbounds( src ) ) {
         add_msg( m_debug, "map::displace_vehicle: coordinates out of bounds %d,%d,%d->%d,%d,%d",
                  src.x, src.y, src.z, dst.x, dst.y, dst.z );
-        return nullptr;
+        return;
     }
 
     int src_offset_x = 0;
@@ -927,7 +928,7 @@ vehicle *map::displace_vehicle( tripoint &src, const tripoint &dp )
     }
     if( our_i < 0 ) {
         add_msg( m_debug, "displace_vehicle our_i=%d", our_i );
-        return nullptr;
+        return;
     }
     // move the vehicle
     vehicle *veh = src_submap->vehicles[our_i];
@@ -937,7 +938,7 @@ vehicle *map::displace_vehicle( tripoint &src, const tripoint &dp )
         // Silent debug
         dbg( D_ERROR ) << "map:displace_vehicle: Stopping vehicle, displaced dp=("
                        << dp.x << ", " << dp.y << ", " << dp.z << ")";
-        return veh;
+        return;
     }
 
     // Need old coordinates to check for remote control
@@ -1031,7 +1032,6 @@ vehicle *map::displace_vehicle( tripoint &src, const tripoint &dp )
     }
 
     on_vehicle_moved( veh->smz );
-    return veh;
 }
 
 bool map::displace_water( const tripoint &p )
