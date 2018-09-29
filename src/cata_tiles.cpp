@@ -2474,23 +2474,20 @@ bool cata_tiles::draw_vpart( const tripoint &p, lit_level ll, int &height_3d )
 
     // Gets the visible part, should work fine once tileset vp_ids are updated to work with the vehicle part json ids
     // get the vpart_id
-    char part_mod = 0;
-    const vpart_id &vp_id = veh->part_id_string( veh_part, part_mod );
+    const std::pair<vpart_id, char> &vp_id = veh->part_id_string( veh_part );
     const char sym = veh->face.dir_symbol( veh->part_sym( veh_part ) );
     std::string subcategory( 1, sym );
 
     // prefix with vp_ ident
-    const std::string vpid = "vp_" + vp_id.str();
+    const std::string vpid = "vp_" + vp_id.first.str();
     int subtile = 0;
-    if( part_mod > 0 ) {
-        switch( part_mod ) {
-            case 1:
-                subtile = open_;
-                break;
-            case 2:
-                subtile = broken;
-                break;
-        }
+    switch( vp_id.second ) {
+        case 1:
+            subtile = open_;
+            break;
+        case 2:
+            subtile = broken;
+            break;
     }
     const cata::optional<vpart_reference> cargopart = vp.part_with_feature( "CARGO", true );
     bool draw_highlight = cargopart && !veh->get_items( cargopart->part_index() ).empty();
