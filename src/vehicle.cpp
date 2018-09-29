@@ -3640,12 +3640,6 @@ void vehicle::slow_leak()
     }
 }
 
-// total volume of all the things
-units::volume vehicle::stored_volume( int const part ) const
-{
-    return get_items( part ).stored_volume();
-}
-
 void vehicle::make_active( item_location &loc )
 {
     item *target = loc.get_item();

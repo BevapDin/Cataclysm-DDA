@@ -166,7 +166,7 @@ int vehicle::print_part_list( const catacurses::window &win, int y1, const int m
         if( part_flag( pl[i], "CARGO" ) ) {
             //~ used/total volume of a cargo vehicle part
             partname += string_format( _( " (vol: %s/%s %s)" ),
-                                       format_volume( stored_volume( pl[i] ) ).c_str(),
+                                       format_volume( get_items( pl[i] ).stored_volume() ).c_str(),
                                        format_volume( get_items( pl[i] ).max_volume() ).c_str(),
                                        volume_units_abbr() );
         }
