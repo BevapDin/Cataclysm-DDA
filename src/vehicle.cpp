@@ -2242,15 +2242,13 @@ int vehicle::next_part_to_open( int p, bool outside ) const
 vehicle_part_with_feature_range<std::string> vehicle::parts_with_feature( std::string feature,
         const bool unbroken ) const
 {
-    return vehicle_part_with_feature_range<std::string>( const_cast<vehicle &>( *this ),
-            std::move( feature ), unbroken );
+    return vehicle_part_with_feature_range<std::string>( const_cast<vehicle &>( *this ), std::move( feature ), unbroken, false );
 }
 
 vehicle_part_with_feature_range<vpart_bitflags> vehicle::parts_with_feature(
     const vpart_bitflags feature, const bool unbroken ) const
 {
-    return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature,
-            unbroken );
+    return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature, unbroken, false );
 }
 
 /**
@@ -4826,13 +4824,17 @@ vehicle_part_range vehicle::get_parts() const
 template<>
 bool vehicle_part_with_feature_range<std::string>::contained( const size_t part ) const
 {
-    return this->vehicle().part_info( part ).has_flag( feature_ ) && ( !unbroken_ ||
-            !this->vehicle().parts[part].is_broken() );
+    const vehicle_part &vp = this->vehicle().parts[part];
+    return vp.info().has_flag( feature_ ) &&
+           ( !unbroken_ || !vp.is_broken() ) &&
+           ( !enabled_ || vp.enabled );
 }
 
 template<>
 bool vehicle_part_with_feature_range<vpart_bitflags>::contained( const size_t part ) const
 {
-    return this->vehicle().part_info( part ).has_flag( feature_ ) && ( !unbroken_ ||
-            !this->vehicle().parts[part].is_broken() );
+    const vehicle_part &vp = this->vehicle().parts[part];
+    return vp.info().has_flag( feature_ ) &&
+           ( !unbroken_ || !vp.is_broken() ) &&
+           ( !enabled_ || vp.enabled );
 }
