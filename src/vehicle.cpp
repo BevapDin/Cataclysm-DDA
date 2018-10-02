@@ -1325,18 +1325,18 @@ bool vehicle::merge_rackable_vehicle( vehicle *carry_veh, std::vector<int> rack_
         point carry_mount;
         point old_mount;
     };
-    std::vector<int> carry_veh_structs = carry_veh->all_parts_at_location( part_location_structure );
+    const auto carry_veh_structs = carry_veh->all_parts_at_location( part_location_structure );
     std::vector<mapping> carry_data;
-    carry_data.reserve( carry_veh_structs.size() );
+    carry_data.reserve( size( carry_veh_structs ) );
     bool found_all_parts = true;
     const point mount_zero = point( 0, 0 );
     std::string axis;
-    if( carry_veh_structs.size() == 1 ) {
+    if( size( carry_veh_structs ) == 1 ) {
         axis = "X";
     } else {
-        for( auto carry_part : carry_veh_structs ) {
-            if( carry_veh->parts[ carry_part ].mount.x || carry_veh->parts[ carry_part ].mount.y ) {
-                axis = carry_veh->parts[ carry_part ].mount.x ? "X" : "Y";
+        for( const vpart_reference cvp : carry_veh_structs ) {
+            if( cvp.part().mount.x || cvp.part().mount.y ) {
+                axis = cvp.part().mount.x ? "X" : "Y";
             }
         }
     }
@@ -1356,8 +1356,8 @@ bool vehicle::merge_rackable_vehicle( vehicle *carry_veh, std::vector<int> rack_
         }
     }
 
-    for( auto carry_part : carry_veh_structs ) {
-        tripoint carry_pos = carry_veh->global_part_pos3( carry_part );
+    for( const vpart_reference cvp : carry_veh_structs ) {
+        const tripoint carry_pos = carry_veh->global_part_pos3( cvp.part_index() );
         bool merged_part = false;
         for( int rack_part : rack_parts ) {
             size_t j = 0;
@@ -1373,7 +1373,7 @@ bool vehicle::merge_rackable_vehicle( vehicle *carry_veh, std::vector<int> rack_
             }
             if( j < 4 ) {
                 mapping carry_map;
-                point old_mount = carry_veh->parts[ carry_part ].mount;
+                point old_mount = cvp.part().mount;
                 carry_map.carry_parts_here = carry_veh->parts_at_relative( old_mount.x, old_mount.y, true );
                 carry_map.rack_part = rack_part;
                 carry_map.carry_mount = carry_mount;
@@ -1683,7 +1683,6 @@ bool vehicle::remove_carried_vehicle( std::vector<int> carried_parts )
 // split the current vehicle into up to 3 new vehicles that do not connect to each other
 bool vehicle::find_and_split_vehicles( int exclude )
 {
-    std::vector<int> valid_parts = all_parts_at_location( part_location_structure );
     std::set<int> checked_parts;
     checked_parts.insert( exclude );
 
@@ -1692,9 +1691,9 @@ bool vehicle::find_and_split_vehicles( int exclude )
     size_t cnt;
     for( cnt = 0 ; cnt < 4 ; cnt++ ) {
         int test_part = -1;
-        for( auto p : valid_parts ) {
-            if( checked_parts.find( p ) == checked_parts.end() ) {
-                test_part = p;
+        for( const vpart_reference vp : all_parts_at_location( part_location_structure ) ) {
+            if( checked_parts.find( vp.part_index() ) == checked_parts.end() ) {
+                test_part = vp.part_index();
                 break;
             }
         }
@@ -2222,21 +2221,11 @@ vehicle_part_with_feature_range<vpart_bitflags> vehicle::get_enabled_parts( cons
     return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature, false, true );
 }
 
-/**
- * Returns all parts in the vehicle that exist in the given location slot. If
- * the empty string is passed in, returns all parts with no slot.
- * @param location The location slot to get parts for.
- * @return A list of indices to all parts with the specified location.
- */
-std::vector<int> vehicle::all_parts_at_location( const std::string &location ) const
+vehicle_part_with_condition_range vehicle::all_parts_at_location( const std::string &location ) const
 {
-    std::vector<int> parts_found;
-    for( size_t part_index = 0; part_index < parts.size(); ++part_index ) {
-        if( part_info( part_index ).location == location && !parts[part_index].removed ) {
-            parts_found.push_back( part_index );
-        }
-    }
-    return parts_found;
+    return vehicle_part_with_condition_range( const_cast<vehicle&>( *this ), [location]( const vehicle &veh, const size_t part ) {
+        return !veh.parts[part].removed && veh.part_info( part ).location == location;
+    } );
 }
 
 /**
@@ -2969,11 +2958,9 @@ float vehicle::k_aerodynamics() const
     for( auto &elem : obst ) {
         elem = 0;
     }
-    std::vector<int> structure_indices = all_parts_at_location( part_location_structure );
-    for( auto &structure_indice : structure_indices ) {
-        int p = structure_indice;
-        int frame_size = part_with_feature( p, VPFLAG_OBSTACLE, true ) ? 30 : 10;
-        int pos = parts[p].mount.y + max_obst / 2;
+    for( const vpart_reference vp : all_parts_at_location( part_location_structure ) ) {
+        int frame_size = part_with_feature( vp.part_index(), VPFLAG_OBSTACLE, true ) ? 30 : 10;
+        int pos = vp.part().mount.y + max_obst / 2;
         if( pos < 0 ) {
             pos = 0;
         }
@@ -3063,7 +3050,7 @@ bool vehicle::sufficient_wheel_config( bool boat ) const
     } else if( size( wheels ) == 1 ) {
         //Has to be a stable wheel, and one wheel can only support a 1-3 tile vehicle
         if( !part_info( ( *wheels.begin() ).part_index() ).has_flag( "STABLE" ) ||
-            all_parts_at_location( part_location_structure ).size() > 3 ) {
+            size( all_parts_at_location( part_location_structure ) ) > 3 ) {
             return false;
         }
     }

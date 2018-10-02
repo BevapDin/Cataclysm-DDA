@@ -34,6 +34,7 @@ struct vehicle_prototype;
 using vproto_id = string_id<vehicle_prototype>;
 template<typename feature_type>
 class vehicle_part_with_feature_range;
+class vehicle_part_with_condition_range;
 namespace catacurses
 {
 class window;
@@ -762,6 +763,11 @@ class vehicle
         vehicle_part_with_feature_range<std::string> get_enabled_parts( std::string feature ) const;
         vehicle_part_with_feature_range<vpart_bitflags> get_enabled_parts( vpart_bitflags f ) const;
         /**@}*/
+        /**
+         * Contains all parts that have given @ref vpart_info::location.
+         * Does not return removed parts.
+         */
+        vehicle_part_with_condition_range all_parts_at_location( const std::string &location ) const;
 
         // returns the list of indices of parts at certain position (not accounting frame direction)
         std::vector<int> parts_at_relative( int dx, int dy, bool use_cache ) const;
@@ -828,9 +834,6 @@ class vehicle
          *  @return part index or -1 if no part
          */
         int next_part_to_close( int p, bool outside = false ) const;
-
-        // returns indices of all parts in the given location slot
-        std::vector<int> all_parts_at_location( const std::string &location ) const;
 
         // Given a part and a flag, returns the indices of all continiguously adjacent parts
         // with the same flag on the X and Y Axis

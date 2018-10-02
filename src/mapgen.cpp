@@ -6953,7 +6953,7 @@ vehicle *map::add_vehicle( const vproto_id &type, const tripoint &p, const int d
 vehicle *map::add_vehicle_to_map( std::unique_ptr<vehicle> veh, const bool merge_wrecks )
 {
     //We only want to check once per square, so loop over all structural parts
-    std::vector<int> frame_indices = veh->all_parts_at_location( "structure" );
+    const auto frame_indices = veh->all_parts_at_location( "structure" );
 
     //Check for boat type vehicles that should be placeable in deep water
     const bool can_float = size( veh->get_parts( "FLOATS" ) ) > 2;
@@ -6961,9 +6961,8 @@ vehicle *map::add_vehicle_to_map( std::unique_ptr<vehicle> veh, const bool merge
     //When hitting a wall, only smash the vehicle once (but walls many times)
     bool needs_smashing = false;
 
-    for( std::vector<int>::const_iterator part = frame_indices.begin();
-         part != frame_indices.end(); part++ ) {
-        const auto p = veh->global_part_pos3( *part );
+    for( const vpart_reference vp : frame_indices ) {
+        const auto p = veh->global_part_pos3( vp.part_index() );
 
         //Don't spawn anything in water
         if( has_flag_ter( TFLAG_DEEP_WATER, p ) && !can_float ) {
@@ -6986,7 +6985,7 @@ vehicle *map::add_vehicle_to_map( std::unique_ptr<vehicle> veh, const bool merge
 
             // Hard wreck-merging limit: 200 tiles
             // Merging is slow for big vehicles which lags the mapgen
-            if( frame_indices.size() + other_veh->all_parts_at_location( "structure" ).size() > 200 ) {
+            if( size( frame_indices ) + size( other_veh->all_parts_at_location( "structure" ) ) > 200 ) {
                 return nullptr;
             }
 
