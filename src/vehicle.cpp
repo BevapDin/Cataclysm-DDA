@@ -2426,10 +2426,9 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
 
 int vehicle::roof_at_part( const int part ) const
 {
-    std::vector<int> parts_in_square = parts_at_relative( parts[part].mount.x, parts[part].mount.y, true );
-    for( const int p : parts_in_square ) {
-        if( part_info( p ).location == "on_roof" || part_flag( p, "ROOF" ) ) {
-            return p;
+    for( const vpart_reference vp : vpart_position( const_cast<vehicle&>( *this ), part ).parts_here() ) {
+        if( vp.info().location == "on_roof" || vp.has_feature( "ROOF" ) ) {
+            return vp.part_index();
         }
     }
 
@@ -4819,4 +4818,12 @@ bool vpart_reference::has_feature( const vpart_bitflags feature ) const
 const vpart_info &vpart_reference::info() const
 {
     return part().info();
+}
+
+vehicle_part_with_condition_range vpart_position::parts_here() const
+{
+    const point mount = this->vehicle().parts[part_index()].mount;
+    return vehicle_part_with_condition_range( this->vehicle(), [mount]( const ::vehicle &veh, const size_t part ) {
+        return !veh.parts[part].removed && veh.parts[part].mount == mount;
+    } );
 }

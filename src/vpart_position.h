@@ -10,6 +10,7 @@
 class vehicle;
 enum vpart_bitflags : int;
 class vpart_reference;
+class vehicle_part_with_condition_range;
 
 /**
  * Reference to a position (a point) of the @ref vehicle.
@@ -63,6 +64,12 @@ class vpart_position
          * Broken parts are also never obstacles.
          */
         cata::optional<vpart_reference> obstacle_at_part() const;
+        /**
+         * Yields an range that contains all vehicle parts at this position.
+         * In other words: all parts that have the same mount point.
+         * Removed parts are excluded.
+         */
+        vehicle_part_with_condition_range parts_here() const;
 };
 
 /**
