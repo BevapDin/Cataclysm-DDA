@@ -9,6 +9,7 @@
 class vehicle;
 class vehicle_part;
 enum vpart_bitflags : int;
+class vpart_info;
 
 /**
  * This is a wrapper over a vehicle pointer and a reference to a part of it.
@@ -29,6 +30,7 @@ class vpart_reference : public vpart_position
         using vpart_position::vehicle;
 
         vehicle_part &part() const;
+        const vpart_info &info() const;
 
         bool has_feature( const std::string &feature ) const;
         bool has_feature( vpart_bitflags feature ) const;

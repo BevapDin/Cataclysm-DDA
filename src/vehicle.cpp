@@ -220,7 +220,7 @@ void vehicle::add_steerable_wheels()
         }
 
         if( vp.has_feature( VPFLAG_WHEEL ) ) {
-            vpart_id steerable_id( part_info( p ).get_id().str() + "_steerable" );
+            vpart_id steerable_id( vp.info().get_id().str() + "_steerable" );
             if( steerable_id.is_valid() ) {
                 // We can convert this.
                 if( vp.part().mount.x != axle ) {
@@ -408,7 +408,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
         // initial vehicle damage
         if( veh_status == 0 ) {
             // Completely mint condition vehicle
-            set_hp( pt, part_info( p ).durability );
+            set_hp( pt, vp.info().durability );
         } else {
             //a bit of initial damage :)
             //clamp 4d8 to the range of [8,20]. 8=broken, 20=undamaged.
@@ -420,10 +420,10 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
                     set_hp( pt, 0 );
                     pt.ammo_unset(); //empty broken batteries and fuel tanks
                 } else {
-                    set_hp( pt, ( roll - broken ) / double( unhurt - broken ) * part_info( p ).durability );
+                    set_hp( pt, ( roll - broken ) / double( unhurt - broken ) * vp.info().durability );
                 }
             } else {
-                set_hp( pt, part_info( p ).durability );
+                set_hp( pt, vp.info().durability );
             }
 
             if( vp.has_feature( VPFLAG_ENGINE ) ) {
@@ -2265,8 +2265,8 @@ std::vector<std::vector<int>> vehicle::find_lines_of_parts( int part, const std:
     for( const vpart_reference vp : possible_parts ) {
         const size_t possible_part = vp.part_index();
         if( vp.part().is_unavailable() ||
-            !part_info( possible_part ).has_flag( "MULTISQUARE" ) ||
-            part_info( possible_part ).get_id() != part_id )  {
+            !vp.info().has_flag( "MULTISQUARE" ) ||
+            vp.info().get_id() != part_id )  {
             continue;
         }
         if( vp.part().mount.x == target.x ) {
@@ -2584,11 +2584,10 @@ units::volume vehicle::total_folded_volume() const
 {
     units::volume m = 0;
     for( const vpart_reference vp : get_parts() ) {
-        const size_t i = vp.part_index();
         if( vp.part().removed ) {
             continue;
         }
-        m += part_info( i ).folded_volume;
+        m += vp.info().folded_volume;
     }
     return m;
 }
@@ -2886,7 +2885,7 @@ void vehicle::noise_and_smoke( double load, double time )
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
         if( vp.has_feature( "MUFFLER" ) ) {
-            m = 1.0 - ( 1.0 - part_info( p ).bonus / 100.0 ) * vp.part().health_percent();
+            m = 1.0 - ( 1.0 - vp.info().bonus / 100.0 ) * vp.part().health_percent();
             if( m < muffle ) {
                 muffle = m;
                 exhaust_part = int( p );
@@ -3926,7 +3925,7 @@ void vehicle::refresh()
     // Main loop over all vehicle parts.
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
-        const vpart_info &vpi = part_info( p );
+        const vpart_info &vpi = vp.info();
         if( vp.part().removed ) {
             continue;
         }
@@ -4335,9 +4334,8 @@ bool vehicle::shift_if_needed()
     }
     //Find a frame, any frame, to shift to
     for( const vpart_reference vp : get_parts() ) {
-        const size_t next_part = vp.part_index();
-        if( part_info( next_part ).location == "structure"
-            && !part_info( next_part ).has_flag( "PROTRUSION" )
+        if( vp.info().location == "structure"
+            && !vp.info().has_flag( "PROTRUSION" )
             && !vp.part().removed ) {
             shift_parts( vp.part().mount );
             refresh();
@@ -4709,7 +4707,7 @@ void vehicle::calc_mass_center( bool use_precalc ) const
         }
 
         units::mass m_part = 0;
-        const auto &pi = part_info( i );
+        const vpart_info &pi = vp.info();
         m_part += vp.part().base.weight();
         for( const auto &j : get_items( i ) ) {
             //m_part += j.type->weight;
@@ -4717,7 +4715,7 @@ void vehicle::calc_mass_center( bool use_precalc ) const
             m_part += j.weight();
         }
 
-        if( pi.has_flag( VPFLAG_BOARDABLE ) && vp.part().has_flag( vehicle_part::passenger_flag ) ) {
+        if( vp.has_feature( VPFLAG_BOARDABLE ) && vp.part().has_flag( vehicle_part::passenger_flag ) ) {
             const player *p = get_passenger( i );
             // Sometimes flag is wrongly set, don't crash!
             m_part += p != nullptr ? p->get_weight() : units::mass( 0 );
@@ -4831,10 +4829,15 @@ vehicle_part &vpart_reference::part() const
 
 bool vpart_reference::has_feature( const std::string &feature ) const
 {
-    return part().info().has_flag( feature );
+    return info().has_flag( feature );
 }
 
 bool vpart_reference::has_feature( const vpart_bitflags feature ) const
 {
-    return part().info().has_flag( feature );
+    return info().has_flag( feature );
+}
+
+const vpart_info &vpart_reference::info() const
+{
+    return part().info();
 }

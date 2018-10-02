@@ -831,7 +831,7 @@ void vehicle::honk_horn()
     for( const vpart_reference vp : get_parts( "HORN" ) ) {
         const size_t p = vp.part_index();
         //Only bicycle horn doesn't need electricity to work
-        const vpart_info &horn_type = part_info( p );
+        const vpart_info &horn_type = vp.info();
         if( ( horn_type.get_id() != vpart_id( "horn_bicycle" ) ) && no_power ) {
             continue;
         }
@@ -874,7 +874,7 @@ void vehicle::beeper_sound()
             continue;
         }
 
-        const vpart_info &beeper_type = part_info( p );
+        const vpart_info &beeper_type = vp.info();
         //~ Beeper sound
         sounds::sound( global_part_pos3( p ), beeper_type.bonus, _( "beep!" ) );
     }

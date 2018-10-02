@@ -4489,7 +4489,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         int it_temp = g->get_temperature( item_loc );
         float it_insulation = 1.0;
         if( item_iter->is_food() || item_iter->is_food_container() ) {
-            const vpart_info &pti = pt.info();
+            const vpart_info &pti = it->info();
             if( engine_heater_is_on ) {
                 it_temp = std::max( it_temp, temperatures::cold + 1 );
             }
