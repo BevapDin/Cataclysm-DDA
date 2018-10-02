@@ -838,14 +838,14 @@ void map::board_vehicle( const tripoint &pos, player *p )
     }
     vehicle *const veh = &vp->vehicle();
     const int seat_part = vp->part_index();
-    if( veh->parts[seat_part].has_flag( vehicle_part::passenger_flag ) ) {
+    if( vp->part().has_flag( vehicle_part::passenger_flag ) ) {
         player *psg = veh->get_passenger( seat_part );
         debugmsg( "map::board_vehicle: passenger (%s) is already there",
                   psg ? psg->name.c_str() : "<null>" );
         unboard_vehicle( pos );
     }
-    veh->parts[seat_part].set_flag( vehicle_part::passenger_flag );
-    veh->parts[seat_part].passenger_id = p->getID();
+    vp->part().set_flag( vehicle_part::passenger_flag );
+    vp->part().passenger_id = p->getID();
     veh->invalidate_mass();
 
     p->setpos( pos );
@@ -878,7 +878,7 @@ void map::unboard_vehicle( const tripoint &p )
     }
     passenger->in_vehicle = false;
     passenger->controlling_vehicle = false;
-    veh->parts[seat_part].remove_flag( vehicle_part::passenger_flag );
+    vp->part().remove_flag( vehicle_part::passenger_flag );
     veh->skidding = true;
     veh->invalidate_mass();
 }
@@ -1133,7 +1133,7 @@ std::string map::disp_name( const tripoint &p )
 std::string map::obstacle_name( const tripoint &p )
 {
     if( const cata::optional<vpart_reference> vp = veh_at( p ).obstacle_at_part() ) {
-        return vp->vehicle().parts[vp->part_index()].info().name();
+        return vp->part().info().name();
     }
     return name( p );
 }
@@ -2689,8 +2689,7 @@ bool map::mop_spills( const tripoint &p )
     if( const optional_vpart_position vp = veh_at( p ) ) {
         vehicle *const veh = &vp->vehicle();
         const int vpart = vp->part_index();
-        std::vector<int> parts_here = veh->parts_at_relative( veh->parts[vpart].mount.x,
-                                      veh->parts[vpart].mount.y, true );
+        std::vector<int> parts_here = veh->parts_at_relative( vp->part().mount.x, vp->part().mount.y, true );
         for( auto &elem : parts_here ) {
             if( veh->parts[elem].blood > 0 ) {
                 veh->parts[elem].blood = 0;
@@ -4459,8 +4458,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
 {
     const bool engine_heater_is_on = cur_veh.has_part( "E_HEATER", true ) && cur_veh.engine_on;
     for( const vpart_reference vp : cur_veh.get_parts_including_broken( VPFLAG_FLUIDTANK ) ) {
-        const size_t idx = vp.part_index();
-        cur_veh.parts[idx].process_contents( cur_veh.global_part_pos3( idx ), engine_heater_is_on );
+        vp.part().process_contents( cur_veh.global_part_pos3( vp.part_index() ), engine_heater_is_on );
     }
 
     auto cargo_parts = cur_veh.get_parts( VPFLAG_CARGO );
@@ -4476,7 +4474,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         }
         auto const it = std::find_if( begin( cargo_parts ),
         end( cargo_parts ), [&]( const vpart_reference & part ) {
-            return active_item.location == cur_veh.parts[part.part_index()].mount;
+            return active_item.location == part.part().mount;
         } );
 
         if( it == end( cargo_parts ) ) {
@@ -4485,7 +4483,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         auto &item_iter = active_item.item_iterator;
         // Find the cargo part and coordinates corresponding to the current active item.
         const size_t part_index = ( *it ).part_index();
-        const vehicle_part &pt = cur_veh.parts[part_index];
+        const vehicle_part &pt = it->part();
         const tripoint item_loc = cur_veh.global_part_pos3( part_index );
         auto items = cur_veh.get_items( static_cast<int>( part_index ) );
         int it_temp = g->get_temperature( item_loc );
@@ -5285,8 +5283,7 @@ void map::add_splatter( const field_id type, const tripoint &where, int intensit
             vehicle *const veh = &vp->vehicle();
             const int anchor_part = vp->part_index();
             // Might be -1 if all the vehicle's parts at where are marked for removal
-            const int part = veh->part_displayed_at( veh->parts[anchor_part].mount.x,
-                             veh->parts[anchor_part].mount.y );
+            const int part = veh->part_displayed_at( vp->part().mount.x, vp->part().mount.y );
             if( part != -1 ) {
                 veh->parts[part].blood += 200 * std::min( intensity, 3 ) / 3;
                 return;
@@ -7404,8 +7401,8 @@ void map::build_obstacle_cache( const tripoint &start, const tripoint &end,
     for( auto &v : vehs ) {
         for( const vpart_reference vp : v.v->get_parts() ) {
             const size_t part = vp.part_index();
-            int px = v.x + v.v->parts[part].precalc[0].x;
-            int py = v.y + v.v->parts[part].precalc[0].y;
+            int px = v.x + vp.part().precalc[0].x;
+            int py = v.y + vp.part().precalc[0].y;
             if( v.z != sz ) {
                 break;
             }
@@ -7496,8 +7493,8 @@ void map::build_map_cache( const int zlev, bool skip_lightmap )
         auto &floor_cache = ch.floor_cache;
         for( const vpart_reference vp : v.v->get_parts() ) {
             const size_t part = vp.part_index();
-            int px = v.x + v.v->parts[part].precalc[0].x;
-            int py = v.y + v.v->parts[part].precalc[0].y;
+            int px = v.x + vp.part().precalc[0].x;
+            int py = v.y + vp.part().precalc[0].y;
             if( !inbounds( px, py ) ) {
                 continue;
             }
@@ -7506,14 +7503,14 @@ void map::build_map_cache( const int zlev, bool skip_lightmap )
                 outside_cache[px][py] = false;
             }
 
-            if( v.v->part_flag( part, VPFLAG_OPAQUE ) && !v.v->parts[part].is_broken() ) {
+            if( v.v->part_flag( part, VPFLAG_OPAQUE ) && !vp.part().is_broken() ) {
                 int dpart = v.v->part_with_feature( part, VPFLAG_OPENABLE, true );
                 if( dpart < 0 || !v.v->parts[dpart].open ) {
                     transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
                 }
             }
 
-            if( v.v->part_flag( part, VPFLAG_BOARDABLE ) && !v.v->parts[part].is_broken() ) {
+            if( v.v->part_flag( part, VPFLAG_BOARDABLE ) && !vp.part().is_broken() ) {
                 floor_cache[px][py] = true;
             }
         }
@@ -7994,7 +7991,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX *MAPSIZE>, SEEY *MAPS
         // Doors, but only the closed ones
         for( const vpart_reference vp : veh.get_parts( VPFLAG_OPENABLE ) ) {
             const size_t p = vp.part_index();
-            if( veh.parts[p].open ) {
+            if( vp.part().open ) {
                 continue;
             }
 
