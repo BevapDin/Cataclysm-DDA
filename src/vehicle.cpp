@@ -2232,16 +2232,14 @@ vehicle_part_with_feature_range<vpart_bitflags> vehicle::get_parts( const vpart_
     return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature, true, false );
 }
 
-vehicle_part_with_feature_range<std::string> vehicle::parts_with_feature( std::string feature,
-        const bool unbroken ) const
+vehicle_part_with_feature_range<std::string> vehicle::get_parts_including_broken( std::string feature ) const
 {
-    return vehicle_part_with_feature_range<std::string>( const_cast<vehicle &>( *this ), std::move( feature ), unbroken, false );
+    return vehicle_part_with_feature_range<std::string>( const_cast<vehicle &>( *this ), std::move( feature ), false, false );
 }
 
-vehicle_part_with_feature_range<vpart_bitflags> vehicle::parts_with_feature(
-    const vpart_bitflags feature, const bool unbroken ) const
+vehicle_part_with_feature_range<vpart_bitflags> vehicle::get_parts_including_broken( const vpart_bitflags feature ) const
 {
-    return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature, unbroken, false );
+    return vehicle_part_with_feature_range<vpart_bitflags>( const_cast<vehicle &>( *this ), feature, false, false );
 }
 
 /**
