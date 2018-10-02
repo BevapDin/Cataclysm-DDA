@@ -640,7 +640,7 @@ void npc::execute_action( npc_action action )
             // This is mount point, not actual position
             point last_dest( INT_MIN, INT_MIN );
             if( !path.empty() && veh_pointer_or_null( g->m.veh_at( path[path.size() - 1] ) ) == veh ) {
-                last_dest = veh->parts[vp->part_index()].mount;
+                last_dest = vp->part().mount;
             }
 
             // Prioritize last found path, then seats
@@ -663,7 +663,7 @@ void npc::execute_action( npc_action action )
                     return !who || who->getID() == getID();
                 };
 
-                const auto &pt = veh->parts[p2];
+                const vehicle_part &pt = vp.part();
 
                 int priority = 0;
 

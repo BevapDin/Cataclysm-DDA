@@ -3817,10 +3817,10 @@ std::string talk_function::camp_car_description( vehicle *car )
     std::string entry = string_format( _( "Name:     %25s\n" ), car->name );
     entry += _( "----          Engines          ----\n" );
     for( const vpart_reference vp_ : car->get_parts( "ENGINE" ) ) {
-        const vehicle_part *const pt = &vp_.vehicle().parts[vp_.part_index()];
-        const vpart_info &vp = pt->info();
+        const vehicle_part &pt = vp_.part();
+        const vpart_info &vp = pt.info();
         entry += string_format( _( "Engine:  %25s\n" ), vp.name() );
-        entry += string_format( _( ">Status:  %24d%%\n" ), int( 100.0 * pt->hp() / vp.durability ) );
+        entry += string_format( _( ">Status:  %24d%%\n" ), int( 100.0 * pt.hp() / vp.durability ) );
         entry += string_format( _( ">Fuel:    %25s\n" ), vp.fuel_type );
     }
     std::map<itype_id, long> fuels = car->fuels_left();
