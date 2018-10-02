@@ -2247,7 +2247,7 @@ std::vector<std::vector<int>> vehicle::find_lines_of_parts( int part, const std:
     for( const vpart_reference vp : possible_parts ) {
         const size_t possible_part = vp.part_index();
         if( vp.part().is_unavailable() ||
-            !vp.info().has_flag( "MULTISQUARE" ) ||
+            !vp.has_feature( "MULTISQUARE" ) ||
             vp.info().get_id() != part_id )  {
             continue;
         }
@@ -4309,9 +4309,7 @@ bool vehicle::shift_if_needed()
     }
     //Find a frame, any frame, to shift to
     for( const vpart_reference vp : get_parts() ) {
-        if( vp.info().location == "structure"
-            && !vp.info().has_flag( "PROTRUSION" )
-            && !vp.part().removed ) {
+        if( vp.info().location == "structure" && !vp.has_feature( "PROTRUSION" ) && !vp.part().removed ) {
             shift_parts( vp.part().mount );
             refresh();
             return true;
