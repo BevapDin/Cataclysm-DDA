@@ -170,4 +170,19 @@ class vehicle_part_with_feature_range : public
         bool contained( const size_t part ) const;
 };
 
+/** A range that contains parts matching a given condition. */
+class vehicle_part_with_condition_range : public generic_vehicle_part_range<vehicle_part_with_condition_range>
+{
+    private:
+        // For now it's separate values, but @todo change this to take vpart_reference
+        std::function<bool(const ::vehicle &, size_t)> condition_;
+
+    public:
+        vehicle_part_with_condition_range( ::vehicle &v, decltype(condition_) c ) : generic_vehicle_part_range( v ), condition_( std::move( c ) ) { }
+
+        bool contained( const size_t part ) const {
+            return condition_( this->vehicle(), part );
+        }
+};
+
 #endif

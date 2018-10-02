@@ -2686,17 +2686,14 @@ bool map::mop_spills( const tripoint &p )
         retval |= fld.removeField( fid );
     }
 
-    if( const optional_vpart_position vp = veh_at( p ) ) {
-        vehicle *const veh = &vp->vehicle();
-        const int vpart = vp->part_index();
-        std::vector<int> parts_here = veh->parts_at_relative( vp->part().mount.x, vp->part().mount.y, true );
-        for( auto &elem : parts_here ) {
-            if( veh->parts[elem].blood > 0 ) {
-                veh->parts[elem].blood = 0;
+    if( const optional_vpart_position vpos = veh_at( p ) ) {
+        for( const vpart_reference vp : vpos->parts_here() ) {
+            if( vp.part().blood > 0 ) {
+                vp.part().blood = 0;
                 retval = true;
             }
             //remove any liquids that somehow didn't fall through to the ground
-            vehicle_stack here = veh->get_items( elem );
+            vehicle_stack here = vp.vehicle().get_items( vp.part_index() );
             auto new_end = std::remove_if( here.begin(), here.end(), []( const item & it ) {
                 return it.made_of( LIQUID );
             } );
