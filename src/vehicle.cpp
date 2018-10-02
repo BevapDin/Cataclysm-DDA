@@ -207,7 +207,7 @@ void vehicle::add_steerable_wheels()
     // Convert the wheel(s) with the largest x value.
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
-        if( part_flag( p, "STEERABLE" ) || part_flag( p, "TRACKED" ) ) {
+        if( vp.has_feature( "STEERABLE" ) || vp.has_feature( "TRACKED" ) ) {
             // Has a wheel that is inherently steerable
             // (e.g. unicycle, casters), this vehicle doesn't
             // need conversion.
@@ -219,7 +219,7 @@ void vehicle::add_steerable_wheels()
             continue;
         }
 
-        if( part_flag( p, VPFLAG_WHEEL ) ) {
+        if( vp.has_feature( VPFLAG_WHEEL ) ) {
             vpart_id steerable_id( part_info( p ).get_id().str() + "_steerable" );
             if( steerable_id.is_valid() ) {
                 // We can convert this.
@@ -369,7 +369,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
         const size_t p = vp.part_index();
         vehicle_part &pt = vp.part();
 
-        if( part_flag( p, "REACTOR" ) ) {
+        if( vp.has_feature( "REACTOR" ) ) {
             // De-hardcoded reactors. Should always start active
             pt.enabled = true;
         }
@@ -396,12 +396,12 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             pt.ammo_set( type->parts[ p ].fuel, qty );
         }
 
-        if( part_flag( p, "OPENABLE" ) ) { // doors are closed
+        if( vp.has_feature( "OPENABLE" ) ) { // doors are closed
             if( !pt.open && one_in( 4 ) ) {
                 open( p );
             }
         }
-        if( part_flag( p, "BOARDABLE" ) ) {   // no passengers
+        if( vp.has_feature( "BOARDABLE" ) ) {   // no passengers
             pt.remove_flag( vehicle_part::passenger_flag );
         }
 
@@ -426,7 +426,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
                 set_hp( pt, part_info( p ).durability );
             }
 
-            if( part_flag( p, VPFLAG_ENGINE ) ) {
+            if( vp.has_feature( VPFLAG_ENGINE ) ) {
                 // If possible set an engine fault rather than destroying the engine outright
                 if( destroyEngine && pt.faults_potential().empty() ) {
                     set_hp( pt, 0 );
@@ -436,9 +436,9 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
                     } while( one_in( 3 ) );
                 }
 
-            } else if( ( destroySeats && ( part_flag( p, "SEAT" ) || part_flag( p, "SEATBELT" ) ) ) ||
-                       ( destroyControls && ( part_flag( p, "CONTROLS" ) || part_flag( p, "SECURITY" ) ) ) ||
-                       ( destroyAlarm && part_flag( p, "SECURITY" ) ) ) {
+            } else if( ( destroySeats && ( vp.has_feature( "SEAT" ) || vp.has_feature( "SEATBELT" ) ) ) ||
+                       ( destroyControls && ( vp.has_feature( "CONTROLS" ) || vp.has_feature( "SECURITY" ) ) ) ||
+                       ( destroyAlarm && vp.has_feature( "SECURITY" ) ) ) {
                 set_hp( pt, 0 );
             }
 
@@ -449,7 +449,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             }
 
             //Solar panels have 25% of being destroyed
-            if( part_flag( p, "SOLAR_PANEL" ) && one_in( 4 ) ) {
+            if( vp.has_feature( "SOLAR_PANEL" ) && one_in( 4 ) ) {
                 set_hp( pt, 0 );
             }
 
@@ -476,7 +476,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
                     if( distSq <= 1 ) {
                         pt.blood = rng( 200, 400 ) - distSq * 100;
                     }
-                } else if( part_flag( p, "SEAT" ) ) {
+                } else if( vp.has_feature( "SEAT" ) ) {
                     // Set the center of the bloody mess inside
                     blood_inside_x = pt.mount.x;
                     blood_inside_y = pt.mount.y;
@@ -485,7 +485,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             }
         }
         //sets the vehicle to locked, if there is no key and an alarm part exists
-        if( part_flag( p, "SECURITY" ) && has_no_key && pt.is_available() ) {
+        if( vp.has_feature( "SECURITY" ) && has_no_key && pt.is_available() ) {
             is_locked = true;
 
             if( one_in( 2 ) ) {
@@ -2528,7 +2528,7 @@ std::vector<int> vehicle::boarded_parts() const
     std::vector<int> res;
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
-        if( part_flag( p, VPFLAG_BOARDABLE ) &&
+        if( vp.has_feature( VPFLAG_BOARDABLE ) &&
             vp.part().has_flag( vehicle_part::passenger_flag ) ) {
             res.push_back( ( int )p );
         }
@@ -2885,7 +2885,7 @@ void vehicle::noise_and_smoke( double load, double time )
     int exhaust_part = -1;
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
-        if( part_flag( p, "MUFFLER" ) ) {
+        if( vp.has_feature( "MUFFLER" ) ) {
             m = 1.0 - ( 1.0 - part_info( p ).bonus / 100.0 ) * vp.part().health_percent();
             if( m < muffle ) {
                 muffle = m;
@@ -4526,7 +4526,7 @@ std::map<itype_id, long> vehicle::fuels_left() const
 bool vehicle::is_foldable() const
 {
     for( const vpart_reference vp : get_parts() ) {
-        if( !part_flag( vp.part_index(), "FOLDABLE" ) ) {
+        if( !vp.has_feature( "FOLDABLE" ) ) {
             return false;
         }
     }
@@ -4827,4 +4827,14 @@ bool vehicle_part_with_feature_range<vpart_bitflags>::contained( const size_t pa
 vehicle_part &vpart_reference::part() const
 {
     return this->vehicle().parts[part_index()];
+}
+
+bool vpart_reference::has_feature( const std::string &feature ) const
+{
+    return part().info().has_flag( feature );
+}
+
+bool vpart_reference::has_feature( const vpart_bitflags feature ) const
+{
+    return part().info().has_flag( feature );
 }
