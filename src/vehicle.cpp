@@ -3422,7 +3422,7 @@ int vehicle::traverse_vehicle_graph( Vehicle *start_veh, int amount, Func action
         g->u.add_msg_if_player( m_debug, "Traversing graph with %d power", amount );
 
         for( auto &p : current_veh->loose_parts ) {
-            if( !current_veh->part_info( p ).has_flag( "POWER_TRANSFER" ) ) {
+            if( !current_veh->part_flag( p, "POWER_TRANSFER" ) ) {
                 continue; // ignore loose parts that aren't power transfer cables
             }
 
