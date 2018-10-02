@@ -1887,14 +1887,13 @@ void veh_interact::display_veh ()
     }
 
     //Iterate over structural parts so we only hit each square once
-    std::vector<int> structural_parts = veh->all_parts_at_location("structure");
-    for( auto &structural_part : structural_parts ) {
-        const int p = structural_part;
+    for( const vpart_reference struct_part : veh->all_parts_at_location( "structure" ) ) {
+        const size_t p = struct_part.part_index();
         long sym = veh->part_sym (p);
         nc_color col = veh->part_color (p);
 
-        int x =   veh->parts[p].mount.y + ddy;
-        int y = -(veh->parts[p].mount.x + ddx);
+        int x =   struct_part.part().mount.y + ddy;
+        int y = -(struct_part.part().mount.x + ddx);
 
         if (x == 0 && y == 0) {
             col = hilite(col);
