@@ -196,7 +196,7 @@ void drop_on_map( const player &p, const std::list<item> &items, const tripoint 
 void put_into_vehicle_or_drop( player &p, const std::list<item> &items,
                                const tripoint &where )
 {
-    if( const cata::optional<vpart_reference> vp = g->m.veh_at( where ).part_with_feature( "CARGO" ) ) {
+    if( const cata::optional<vpart_reference> vp = g->m.veh_at( where ).part_with_feature( "CARGO", true ) ) {
         put_into_vehicle( p, items, vp->vehicle(), vp->part_index() );
         return;
     }
@@ -525,16 +525,14 @@ static void move_items( const tripoint &src, bool from_vehicle,
 
     // load vehicle information if requested
     if( from_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( source ).part_with_feature( "CARGO",
-                false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( source ).part_with_feature( "CARGO", false );
         assert( vp );
         s_veh = &vp->vehicle();
         s_cargo = vp->part_index();
         assert( s_cargo >= 0 );
     }
     if( to_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( destination ).part_with_feature( "CARGO",
-                false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( destination ).part_with_feature( "CARGO", false );
         assert( vp );
         d_veh = &vp->vehicle();
         d_cargo = vp->part_index();

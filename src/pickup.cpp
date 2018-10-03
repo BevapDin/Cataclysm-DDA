@@ -242,7 +242,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
                     act.coords.push_back( pos );
                     // Finally tell if it is the vehicle part with welding rig
                     act.values.resize( 2 );
-                    act.values[1] = veh->part_with_feature( veh_root_part, "WELDRIG" );
+                    act.values[1] = veh->part_with_feature( veh_root_part, "WELDRIG", true );
                 }
             }
             return DONE;
@@ -572,8 +572,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
     PickupMap mapPickup;
 
     if( from_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( pickup_target ).part_with_feature( "CARGO",
-                false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( pickup_target ).part_with_feature( "CARGO", false );
         veh = &vp->vehicle();
         cargo_part = vp->part_index();
     }
