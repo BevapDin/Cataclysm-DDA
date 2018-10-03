@@ -137,8 +137,7 @@ bool vehicle::player_in_control( player const &p ) const
     }
 
     const optional_vpart_position vp = g->m.veh_at( p.pos() );
-    if( vp && &vp->vehicle() == this &&
-        part_with_feature_including_broken( vp->part_index(), VPFLAG_CONTROLS ) >= 0 && p.controlling_vehicle ) {
+    if( vp && &vp->vehicle() == this && vp->part_with_feature_including_broken( VPFLAG_CONTROLS ) && p.controlling_vehicle ) {
         return true;
     }
 
@@ -1039,37 +1038,37 @@ bool vehicle::can_unmount( int const p, std::string &reason ) const
     int dy = parts[p].mount.y;
 
     // Can't remove an engine if there's still an alternator there
-    if( part_flag( p, VPFLAG_ENGINE ) && part_with_feature( p, VPFLAG_ALTERNATOR ) >= 0 ) {
+    if( part_flag( p, VPFLAG_ENGINE ) && part_with_feature( p, VPFLAG_ALTERNATOR ) ) {
         reason = _( "Remove attached alternator first." );
         return false;
     }
 
     //Can't remove a seat if there's still a seatbelt there
-    if( part_flag( p, "BELTABLE" ) && part_with_feature( p, "SEATBELT" ) >= 0 ) {
+    if( part_flag( p, "BELTABLE" ) && part_with_feature( p, "SEATBELT" ) ) {
         reason = _( "Remove attached seatbelt first." );
         return false;
     }
 
     // Can't remove a window with curtains still on it
-    if( part_flag( p, "WINDOW" ) && part_with_feature( p, "CURTAIN" ) >= 0 ) {
+    if( part_flag( p, "WINDOW" ) && part_with_feature( p, "CURTAIN" ) ) {
         reason = _( "Remove attached curtains first." );
         return false;
     }
 
     //Can't remove controls if there's something attached
-    if( part_flag( p, "CONTROLS" ) && part_with_feature( p, "ON_CONTROLS" ) >= 0 ) {
+    if( part_flag( p, "CONTROLS" ) && part_with_feature( p, "ON_CONTROLS" ) ) {
         reason = _( "Remove attached part first." );
         return false;
     }
 
     //Can't remove a battery mount if there's still a battery there
-    if( part_flag( p, "BATTERY_MOUNT" ) && part_with_feature( p, "NEEDS_BATTERY_MOUNT" ) >= 0 ) {
+    if( part_flag( p, "BATTERY_MOUNT" ) && part_with_feature( p, "NEEDS_BATTERY_MOUNT" ) ) {
         reason = _( "Remove battery from mount first." );
         return false;
     }
 
     //Can't remove a turret mount if there's still a turret there
-    if( part_flag( p, "TURRET_MOUNT" ) && part_with_feature( p, "TURRET" ) >= 0 ) {
+    if( part_flag( p, "TURRET_MOUNT" ) && part_with_feature( p, "TURRET" ) ) {
         reason = _( "Remove attached mounted weapon first." );
         return false;
     }
@@ -1441,11 +1440,10 @@ bool vehicle::remove_part( int p )
     const auto remove_dependent_part = [&]( const std::string & parent_flag,
     const std::string & child_flag ) {
         if( part_flag( p, parent_flag ) ) {
-            int dep = part_with_feature_including_broken( p, child_flag );
-            if( dep >= 0 ) {
-                item it = parts[dep].properties_to_item();
+            if( const auto dep = part_with_feature_including_broken( p, child_flag ) ) {
+                item it = dep->part().properties_to_item();
                 g->m.add_item_or_charges( part_loc, it );
-                remove_part( dep );
+                remove_part( dep->part_index() );
                 return true;
             }
         }
@@ -1964,38 +1962,22 @@ cata::optional<vpart_reference> vpart_position::obstacle_at_part() const
 
 cata::optional<vpart_reference> vpart_position::part_with_feature( const std::string &f ) const
 {
-    const int i = vehicle().part_with_feature( part_index(), f );
-    if( i < 0 ) {
-        return cata::nullopt;
-    }
-    return vpart_reference( vehicle(), i );
+    return vehicle().part_with_feature( part_index(), f );
 }
 
 cata::optional<vpart_reference> vpart_position::part_with_feature( const vpart_bitflags f ) const
 {
-    const int i = vehicle().part_with_feature( part_index(), f );
-    if( i < 0 ) {
-        return cata::nullopt;
-    }
-    return vpart_reference( vehicle(), i );
+    return vehicle().part_with_feature( part_index(), f );
 }
 
 cata::optional<vpart_reference> vpart_position::part_with_feature_including_broken( const std::string &f ) const
 {
-    const int i = vehicle().part_with_feature_including_broken( part_index(), f );
-    if( i < 0 ) {
-        return cata::nullopt;
-    }
-    return vpart_reference( vehicle(), i );
+    return vehicle().part_with_feature_including_broken( part_index(), f );
 }
 
 cata::optional<vpart_reference> vpart_position::part_with_feature_including_broken( const vpart_bitflags f ) const
 {
-    const int i = vehicle().part_with_feature_including_broken( part_index(), f );
-    if( i < 0 ) {
-        return cata::nullopt;
-    }
-    return vpart_reference( vehicle(), i );
+    return vehicle().part_with_feature_including_broken( part_index(), f );
 }
 
 cata::optional<vpart_reference> optional_vpart_position::part_with_feature( const std::string &f ) const
@@ -2023,76 +2005,76 @@ cata::optional<vpart_reference> optional_vpart_position::obstacle_at_part() cons
     return has_value() ? value().obstacle_at_part() : cata::nullopt;
 }
 
-int vehicle::part_with_feature( int part, vpart_bitflags const flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature( const size_t part, vpart_bitflags const flag ) const
 {
     if( part_flag( part, flag ) && !parts[part].is_broken() ) {
-        return part;
+        return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), part );
     }
     return part_with_feature( parts[part].mount, flag );
 }
 
-int vehicle::part_with_feature( int part, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature( const size_t part, const std::string &flag ) const
 {
     if( part_flag( part, flag ) && !parts[part].is_broken() ) {
-        return part;
+        return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), part );
     }
     return part_with_feature( parts[part].mount, flag );
 }
 
-int vehicle::part_with_feature_including_broken( int part, vpart_bitflags const flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature_including_broken( const size_t part, const std::string &flag ) const
 {
     if( part_flag( part, flag ) ) {
-        return part;
+        return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), part );
     }
     return part_with_feature_including_broken( parts[part].mount, flag );
 }
 
-int vehicle::part_with_feature_including_broken( int part, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature_including_broken( const size_t part, const std::string &flag ) const
 {
     if( part_flag( part, flag ) ) {
-        return part;
+        return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), part );
     }
     return part_with_feature_including_broken( parts[part].mount, flag );
 }
 
-int vehicle::part_with_feature( const point &pt, const vpart_bitflags flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature( const point &pt, const vpart_bitflags flag ) const
 {
     for( const int i : parts_at_relative( pt.x, pt.y, false ) ) {
         if( part_flag( i, flag ) && !parts[i].is_broken() ) {
-            return i;
+            return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), i );
         }
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::part_with_feature( const point &pt, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature( const point &pt, const std::string &flag ) const
 {
     for( const int i : parts_at_relative( pt.x, pt.y, false ) ) {
         if( part_flag( i, flag ) && !parts[i].is_broken() ) {
-            return i;
+            return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), i );
         }
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::part_with_feature_including_broken( const point &pt, const vpart_bitflags flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature_including_broken( const point &pt, const vpart_bitflags flag ) const
 {
     for( const int i : parts_at_relative( pt.x, pt.y, false ) ) {
         if( part_flag( i, flag ) ) {
-            return i;
+            return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), i );
         }
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::part_with_feature_including_broken( const point &pt, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::part_with_feature_including_broken( const point &pt, const std::string &flag ) const
 {
     for( const int i : parts_at_relative( pt.x, pt.y, false ) ) {
         if( part_flag( i, flag ) ) {
-            return i;
+            return cata::optional<vpart_reference>( const_cast<vehicle&>( *this ), i );
         }
     }
-    return -1;
+    return cata::nullopt;
 }
 
 int vehicle::avail_part_with_feature( int part, vpart_bitflags const flag ) const
@@ -2577,11 +2559,11 @@ vehicle_part_with_condition_range vehicle::boarded_parts() const
 
 player *vehicle::get_passenger( int p ) const
 {
-    p = part_with_feature_including_broken( p, VPFLAG_BOARDABLE );
-    if( p >= 0 && parts[p].has_flag( vehicle_part::passenger_flag ) ) {
-        return g->critter_by_id<player>( parts[p].passenger_id );
+    const auto pp = part_with_feature_including_broken( p, VPFLAG_BOARDABLE );
+    if( pp && pp->part().has_flag( vehicle_part::passenger_flag ) ) {
+        return g->critter_by_id<player>( pp->part().passenger_id );
     }
-    return 0;
+    return nullptr;
 }
 
 tripoint vehicle::global_pos3() const
@@ -2694,8 +2676,8 @@ int vehicle::fuel_left( const itype_id &ftype, bool recurse ) const
 
         //if the engine in the player tile is a muscle engine, and player is controlling vehicle
         if( vp && &vp->vehicle() == this && player_controlling ) {
-            const int p = part_with_feature( vp->part_index(), VPFLAG_ENGINE, true );
-            if( p >= 0 && part_info( p ).fuel_type == fuel_type_muscle && is_part_on( p ) ) {
+            const auto pp = vp->part_with_feature( VPFLAG_ENGINE );
+            if( pp && pp.info().fuel_type == fuel_type_muscle && is_part_on( pp.part_index() ) ) {
                 fl += 10;
             }
         }
@@ -3012,7 +2994,7 @@ float vehicle::k_aerodynamics() const
         elem = 0;
     }
     for( const vpart_reference vp : all_parts_at_location( part_location_structure ) ) {
-        int frame_size = part_with_feature( vp.part_index(), VPFLAG_OBSTACLE, true ) ? 30 : 10;
+        int frame_size = vp.part_with_feature( VPFLAG_OBSTACLE ) ? 30 : 10;
         int pos = vp.part().mount.y + max_obst / 2;
         if( pos < 0 ) {
             pos = 0;
@@ -3828,9 +3810,9 @@ void vehicle::place_spawn_items()
 
     for( const auto &pt : type->parts ) {
         if( pt.with_ammo ) {
-            int turret = part_with_feature( pt.pos, "TURRET", true );
-            if( turret >= 0 && x_in_y( pt.with_ammo, 100 ) ) {
-                parts[ turret ].ammo_set( random_entry( pt.ammo_types ), rng( pt.ammo_qty.first,
+            const auto turret = part_with_feature( pt.pos, "TURRET" );
+            if( turret && x_in_y( pt.with_ammo, 100 ) ) {
+                turret.part().ammo_set( random_entry( pt.ammo_types ), rng( pt.ammo_qty.first,
                                           pt.ammo_qty.second ) );
             }
         }
@@ -3838,13 +3820,13 @@ void vehicle::place_spawn_items()
 
     for( const auto &spawn : type.obj().item_spawns ) {
         if( rng( 1, 100 ) <= spawn.chance ) {
-            int part = part_with_feature_including_broken( spawn.pos, "CARGO" );
-            if( part < 0 ) {
+            const auto part = part_with_feature_including_broken( spawn.pos, "CARGO" );
+            if( !part ) {
                 debugmsg( "No CARGO parts at (%d, %d) of %s!", spawn.pos.x, spawn.pos.y, name.c_str() );
 
             } else {
                 // if vehicle part is broken only 50% of items spawn and they will be variably damaged
-                bool broken = parts[ part ].is_broken();
+                const bool broken = part.part().is_broken();
                 if( broken && one_in( 2 ) ) {
                     continue;
                 }
@@ -3879,7 +3861,7 @@ void vehicle::place_spawn_items()
                             e.ammo_set( e.ammo_type()->default_ammotype() );
                         }
                     }
-                    add_item( part, e );
+                    add_item( part.part_index(), e );
                 }
             }
         }
@@ -4176,7 +4158,7 @@ void vehicle::refresh_insides()
         }
         /* If there's no roof, or there is a roof but it's broken, it's outside.
          * (Use short-circuiting && so broken frames don't screw this up) */
-        if( !( part_with_feature( p, "ROOF", true ) >= 0 && vp.part().is_available() ) ) {
+        if( !( part_with_feature( p, "ROOF" ) && vp.part().is_available() ) ) {
             vp.part().inside = false;
             continue;
         }
@@ -4280,13 +4262,13 @@ int vehicle::damage( int p, int dmg, damage_type type, bool aimed )
 
     int damage_dealt;
 
-    int armor_part = part_with_feature( p, "ARMOR", true );
-    if( armor_part < 0 ) {
+    const cata::optional<vpart_reference> armor_part = part_with_feature( p, "ARMOR" );
+    if( !armor_part ) {
         // Not covered by armor -- damage part
         damage_dealt = damage_direct( target_part, dmg, type );
     } else {
         // Covered by armor -- hit both armor and part, but reduce damage by armor's reduction
-        int protection = part_info( armor_part ).damage_reduction[ type ];
+        int protection = armor_part.info().damage_reduction[ type ];
         // Parts on roof aren't protected
         bool overhead = part_flag( target_part, "ROOF" ) || part_info( target_part ).location == "on_roof";
         // Calling damage_direct may remove the damaged part
@@ -4295,11 +4277,11 @@ int vehicle::damage( int p, int dmg, damage_type type, bool aimed )
         // Damaging the part with the higher index first is save,
         // as removing a part only changes indices after the
         // removed part.
-        if( armor_part < target_part ) {
+        if( armor_part.part_index() < target_part ) {
             damage_direct( target_part, overhead ? dmg : dmg - protection, type );
-            damage_dealt = damage_direct( armor_part, dmg, type );
+            damage_dealt = damage_direct( armor_part.part_index(), dmg, type );
         } else {
-            damage_dealt = damage_direct( armor_part, dmg, type );
+            damage_dealt = damage_direct( armor_part.part_index(), dmg, type );
             damage_direct( target_part, overhead ? dmg : dmg - protection, type );
         }
     }

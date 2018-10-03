@@ -391,7 +391,9 @@ void vehicle::smash_security_system()
         int p = speciality[d];
         if( part_flag( p, "SECURITY" ) && !parts[ p ].is_broken() ) {
             s = p;
-            c = part_with_feature( s, "CONTROLS", true );
+            if( const auto ctrls = part_with_feature( s, "CONTROLS" ) ) {
+                c = ctrls.part_index();
+            }
             break;
         }
     }

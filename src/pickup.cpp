@@ -83,8 +83,8 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
     const bool has_controls = ( ( veh->avail_part_with_feature( veh_root_part, "CONTROLS" ) >= 0 ) );
     const bool has_electronics = ( ( veh->avail_part_with_feature( veh_root_part,
                                      "CTRL_ELECTRONIC" ) >= 0 ) );
-    const int cargo_part = veh->part_with_feature_including_broken( veh_root_part, "CARGO" );
-    const bool from_vehicle = cargo_part >= 0 && !veh->get_items( cargo_part ).empty();
+    const cata::optional<vpart_reference> cargo_part = veh->part_with_feature_including_broken( veh_root_part, "CARGO" );
+    const bool from_vehicle = cargo_part && !veh->get_items( cargo_part ).empty();
     const bool can_be_folded = veh->is_foldable();
     const bool is_convertible = ( veh->tags.count( "convertible" ) > 0 );
     const bool remotely_controlled = g->remoteveh() == veh;
