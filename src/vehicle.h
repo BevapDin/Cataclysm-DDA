@@ -11,6 +11,7 @@
 #include "line.h"
 #include "string_id.h"
 #include "tileray.h"
+#include "optional.h"
 #include "ui.h"
 #include "units.h"
 
@@ -21,6 +22,7 @@
 #include <vector>
 
 class nc_color;
+class vpart_reference;
 class map;
 class player;
 class npc;
@@ -762,15 +764,15 @@ class vehicle
         std::vector<int> parts_at_relative( const point &dp, bool use_cache ) const;
 
         // returns index of part, inner to given, with certain flag, or -1
-        int part_with_feature( int p, vpart_bitflags f ) const;
-        int part_with_feature( int p, const std::string &f ) const;
-        int part_with_feature( const point &pt, vpart_bitflags f ) const;
-        int part_with_feature( const point &pt, const std::string &f ) const;
+        cata::optional<vpart_reference> part_with_feature( int p, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> part_with_feature( int p, const std::string &f ) const;
+        cata::optional<vpart_reference> part_with_feature( const point &pt, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> part_with_feature( const point &pt, const std::string &f ) const;
 
-        int part_with_feature_including_broken( int p, vpart_bitflags f ) const;
-        int part_with_feature_including_broken( int p, const std::string &f ) const;
-        int part_with_feature_including_broken( const point &pt, vpart_bitflags f ) const;
-        int part_with_feature_including_broken( const point &pt, const std::string &f ) const;
+        cata::optional<vpart_reference> part_with_feature_including_broken( int p, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> part_with_feature_including_broken( int p, const std::string &f ) const;
+        cata::optional<vpart_reference> part_with_feature_including_broken( const point &pt, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> part_with_feature_including_broken( const point &pt, const std::string &f ) const;
 
         // returns index of part, inner to given, with certain flag, or -1
         int avail_part_with_feature( int p, const std::string &f ) const;
