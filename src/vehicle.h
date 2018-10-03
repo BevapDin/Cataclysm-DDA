@@ -778,9 +778,15 @@ class vehicle
         std::vector<int> parts_at_relative( int dx, int dy, bool use_cache ) const;
 
         // returns index of part, inner to given, with certain flag, or -1
-        int part_with_feature( int p, const std::string &f, bool unbroken ) const;
-        int part_with_feature( const point &pt, const std::string &f, bool unbroken ) const;
-        int part_with_feature( int p, vpart_bitflags f, bool unbroken ) const;
+        int part_with_feature( int p, vpart_bitflags f ) const;
+        int part_with_feature( int p, const std::string &f ) const;
+        int part_with_feature( const point &pt, vpart_bitflags f ) const;
+        int part_with_feature( const point &pt, const std::string &f ) const;
+
+        int part_with_feature_including_broken( int p, vpart_bitflags f ) const;
+        int part_with_feature_including_broken( int p, const std::string &f ) const;
+        int part_with_feature_including_broken( const point &pt, vpart_bitflags f ) const;
+        int part_with_feature_including_broken( const point &pt, const std::string &f ) const;
 
         // returns index of part, inner to given, with certain flag, or -1
         int avail_part_with_feature( int p, const std::string &f, bool unbroken ) const;

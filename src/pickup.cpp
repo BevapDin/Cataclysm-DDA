@@ -83,7 +83,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
     const bool has_controls = ( ( veh->avail_part_with_feature( veh_root_part, "CONTROLS", true ) >= 0 ) );
     const bool has_electronics = ( ( veh->avail_part_with_feature( veh_root_part,
                                      "CTRL_ELECTRONIC", true ) >= 0 ) );
-    const int cargo_part = veh->part_with_feature( veh_root_part, "CARGO", false );
+    const int cargo_part = veh->part_with_feature_including_broken( veh_root_part, "CARGO" );
     const bool from_vehicle = cargo_part >= 0 && !veh->get_items( cargo_part ).empty();
     const bool can_be_folded = veh->is_foldable();
     const bool is_convertible = ( veh->tags.count( "convertible" ) > 0 );
@@ -572,7 +572,7 @@ bool Pickup::do_pickup( const tripoint &pickup_target_arg, bool from_vehicle,
     PickupMap mapPickup;
 
     if( from_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( pickup_target ).part_with_feature( "CARGO", false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( pickup_target ).part_with_feature_including_broken( "CARGO" );
         veh = &vp->vehicle();
         cargo_part = vp->part_index();
     }
@@ -634,7 +634,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
             case DONE:
                 return;
             case ITEMS_FROM_CARGO: {
-                const cata::optional<vpart_reference> carg = vp.part_with_feature( "CARGO", false );
+                const cata::optional<vpart_reference> carg = vp.part_with_feature_including_broken( "CARGO" );
                 cargo_part = carg ? carg->part_index() : -1;
             }
             from_vehicle = cargo_part >= 0;
