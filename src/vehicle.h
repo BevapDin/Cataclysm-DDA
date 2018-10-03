@@ -776,8 +776,8 @@ class vehicle
          *  @param flag Flag to get parts for
          *  @param enabled if set part must also be enabled to be considered
          */
-        std::vector<vehicle_part *> get_parts( const std::string &flag, bool enabled = false );
-        std::vector<const vehicle_part *> get_parts( const std::string &flag, bool enabled = false ) const;
+        std::vector<vehicle_part *> get_parts( const std::string &flag, bool enabled, bool include_broken_parts );
+        std::vector<const vehicle_part *> get_parts( const std::string &flag, bool enabled, bool include_broken_parts ) const;
 
         /**
          *  Get all unbroken vehicle parts with cached with a given bitflag
@@ -785,10 +785,8 @@ class vehicle
          *  @param enabled if set part must also be enabled to be considered
          *  @param enabled if you want to get broken parts too
          */
-        std::vector<vehicle_part *> get_parts( vpart_bitflags flag, bool enabled = false,
-                                               bool include_broken_parts = false );
-        std::vector<const vehicle_part *> get_parts( vpart_bitflags flag, bool enabled = false,
-                bool include_broken_parts = false ) const;
+        std::vector<vehicle_part *> get_parts( vpart_bitflags flag, bool enabled, bool include_broken_parts );
+        std::vector<const vehicle_part *> get_parts( vpart_bitflags flag, bool enabled, bool include_broken_parts ) const;
 
         /**
          *  Get all unbroken vehicle parts at specified position
@@ -797,10 +795,8 @@ class vehicle
          *  @param enabled if set part must also be enabled to be considered
          *  @param enabled if you want to get broken parts too
          */
-        std::vector<vehicle_part *> get_parts( const tripoint &pos, const std::string &flag = "",
-                                               bool enabled = false, bool include_broken_parts = false );
-        std::vector<const vehicle_part *> get_parts( const tripoint &pos, const std::string &flag = "",
-                bool enabled = false, bool include_broken_parts = false ) const;
+        std::vector<vehicle_part *> get_parts( const tripoint &pos, const std::string &flag, bool enabled, bool include_broken_parts );
+        std::vector<const vehicle_part *> get_parts( const tripoint &pos, const std::string &flag, bool enabled, bool include_broken_parts ) const;
 
         /** Test if part can be enabled (unbroken, sufficient fuel etc), optionally displaying failures to user */
         bool can_enable( const vehicle_part &pt, bool alert = false ) const;
