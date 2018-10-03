@@ -75,28 +75,26 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
 
     auto turret = veh->turret_query( pos );
 
-    const bool has_kitchen = ( veh->avail_part_with_feature( veh_root_part, "KITCHEN" ) >= 0 );
-    const bool has_faucet = ( veh->avail_part_with_feature( veh_root_part, "FAUCET" ) >= 0 );
-    const bool has_weldrig = ( veh->avail_part_with_feature( veh_root_part, "WELDRIG" ) >= 0 );
-    const bool has_chemlab = ( veh->avail_part_with_feature( veh_root_part, "CHEMLAB" ) >= 0 );
-    const bool has_purify = ( veh->avail_part_with_feature( veh_root_part, "WATER_PURIFIER" ) >= 0 );
-    const bool has_controls = ( ( veh->avail_part_with_feature( veh_root_part, "CONTROLS" ) >= 0 ) );
-    const bool has_electronics = ( ( veh->avail_part_with_feature( veh_root_part,
-                                     "CTRL_ELECTRONIC" ) >= 0 ) );
+    const bool has_kitchen = veh->avail_part_with_feature( veh_root_part, "KITCHEN" ).has_value();
+    const bool has_faucet = veh->avail_part_with_feature( veh_root_part, "FAUCET" ).has_value();
+    const cata::optional<vpart_reference> weldrig_part = veh->avail_part_with_feature( veh_root_part, "WELDRIG" );
+    const bool has_weldrig = weldrig_part.has_value();
+    const bool has_chemlab = veh->avail_part_with_feature( veh_root_part, "CHEMLAB" ).has_value();
+    const bool has_purify = veh->avail_part_with_feature( veh_root_part, "WATER_PURIFIER" ).has_value();
+    const bool has_controls = veh->avail_part_with_feature( veh_root_part, "CONTROLS" ).has_value();
+    const bool has_electronics = veh->avail_part_with_feature( veh_root_part, "CTRL_ELECTRONIC" ).has_value();
     const cata::optional<vpart_reference> cargo_part = veh->part_with_feature_including_broken( veh_root_part, "CARGO" );
     const bool from_vehicle = cargo_part && !veh->get_items( cargo_part ).empty();
     const bool can_be_folded = veh->is_foldable();
     const bool is_convertible = ( veh->tags.count( "convertible" ) > 0 );
     const bool remotely_controlled = g->remoteveh() == veh;
-    const int washing_machine_part = veh->avail_part_with_feature( veh_root_part, "WASHING_MACHINE" );
-    const bool has_washmachine = washing_machine_part >= 0;
-    bool washing_machine_on = ( washing_machine_part == -1 ) ? false :
-                              veh->parts[washing_machine_part].enabled;
-    const int monster_capture_part = veh->avail_part_with_feature( veh_root_part,
-                                     "CAPTURE_MONSTER_VEH" );
-    const bool has_monster_capture = ( monster_capture_part >= 0 );
-    const int bike_rack_part = veh->avail_part_with_feature( veh_root_part, "BIKE_RACK_VEH" );
-    const bool has_bike_rack = ( bike_rack_part >= 0 );
+    const cata::optional<vpart_reference> washing_machine_part = veh->avail_part_with_feature( veh_root_part, "WASHING_MACHINE" );
+    const bool has_washmachine = washing_machine_part.has_value();
+    const bool washing_machine_on = washing_machine_part && washing_machine_part.part().enabled;
+    const cata::optional<vpart_reference> monster_capture_part = veh->avail_part_with_feature( veh_root_part, "CAPTURE_MONSTER_VEH" );
+    const bool has_monster_capture = monster_capture_part.has_value();
+    const cata::optional<vpart_reference> bike_rack_part = veh->avail_part_with_feature( veh_root_part, "BIKE_RACK_VEH" );
+    const bool has_bike_rack = bike_rack_part.has_value();
 
 
     typedef enum {
@@ -200,12 +198,12 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
 
     switch( static_cast<options>( choice ) ) {
         case USE_BIKE_RACK: {
-            veh->use_bike_rack( bike_rack_part );
+            veh->use_bike_rack( bike_rack_part->part_index() );
             return DONE;
         }
 
         case USE_MONSTER_CAPTURE: {
-            veh->use_monster_capture( monster_capture_part, pos );
+            veh->use_monster_capture( monster_capture_part->part_index(), pos );
             return DONE;
         }
 
@@ -214,7 +212,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
             return DONE;
 
         case USE_WASHMACHINE: {
-            veh->use_washing_machine( washing_machine_part );
+            veh->use_washing_machine( washing_machine_part->part_index() );
             return DONE;
         }
 
@@ -242,7 +240,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
                     act.coords.push_back( pos );
                     // Finally tell if it is the vehicle part with welding rig
                     act.values.resize( 2 );
-                    act.values[1] = veh->part_with_feature( veh_root_part, "WELDRIG", true );
+                    act.values[1] = weldrig_part->part_index();
                 }
             }
             return DONE;
