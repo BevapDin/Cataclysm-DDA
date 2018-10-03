@@ -117,7 +117,7 @@ void vehicle::add_toggle_to_opts( std::vector<uimenu_entry> &options,
 
 void vehicle::control_doors()
 {
-    const auto door_motors = parts_with_feature( "DOOR_MOTOR", true );
+    const auto door_motors = get_parts( "DOOR_MOTOR" );
     std::vector< int > doors_with_motors; // Indices of doors
     std::vector< tripoint > locations; // Locations used to display the doors
     // it is possible to have one door to open and one to close for single motor
@@ -635,7 +635,7 @@ bool vehicle::fold_up()
     item bicycle( can_be_folded ? "generic_folded_vehicle" : "folding_bicycle", calendar::turn );
 
     // Drop stuff in containers on ground
-    for( const vpart_reference vp : parts_with_feature( "CARGO" ) ) {
+    for( const vpart_reference vp : get_parts( "CARGO" ) ) {
         const size_t p = vp.part_index();
         for( auto &elem : get_items( p ) ) {
             g->m.add_item_or_charges( g->u.pos(), elem );
@@ -828,7 +828,7 @@ void vehicle::honk_horn()
     const bool no_power = ! fuel_left( fuel_type_battery, true );
     bool honked = false;
 
-    for( const vpart_reference vp : parts_with_feature( "HORN" ) ) {
+    for( const vpart_reference vp : get_parts( "HORN" ) ) {
         const size_t p = vp.part_index();
         //Only bicycle horn doesn't need electricity to work
         const vpart_info &horn_type = part_info( p );
@@ -867,7 +867,7 @@ void vehicle::beeper_sound()
     }
 
     const bool odd_turn = calendar::once_every( 2_turns );
-    for( const vpart_reference vp : parts_with_feature( "BEEPER" ) ) {
+    for( const vpart_reference vp : get_parts( "BEEPER" ) ) {
         const size_t p = vp.part_index();
         if( ( odd_turn && part_flag( p, VPFLAG_EVENTURN ) ) ||
             ( !odd_turn && part_flag( p, VPFLAG_ODDTURN ) ) ) {
@@ -900,7 +900,7 @@ void vehicle::play_chimes()
 
 void vehicle::operate_plow()
 {
-    for( const vpart_reference vp : parts_with_feature( "PLOW" ) ) {
+    for( const vpart_reference vp : get_parts( "PLOW" ) ) {
         const size_t plow_id = vp.part_index();
         const tripoint start_plow = global_part_pos3( plow_id );
         if( g->m.has_flag( "DIGGABLE", start_plow ) ) {
@@ -916,7 +916,7 @@ void vehicle::operate_plow()
 
 void vehicle::operate_rockwheel()
 {
-    for( const vpart_reference vp : parts_with_feature( "ROCKWHEEL" ) ) {
+    for( const vpart_reference vp : get_parts( "ROCKWHEEL" ) ) {
         const size_t rockwheel_id = vp.part_index();
         const tripoint start_dig = global_part_pos3( rockwheel_id );
         if( g->m.has_flag( "DIGGABLE", start_dig ) ) {
@@ -932,7 +932,7 @@ void vehicle::operate_rockwheel()
 
 void vehicle::operate_reaper()
 {
-    for( const vpart_reference vp : parts_with_feature( "REAPER" ) ) {
+    for( const vpart_reference vp : get_parts( "REAPER" ) ) {
         const size_t reaper_id = vp.part_index();
         const tripoint reaper_pos = global_part_pos3( reaper_id );
         const int plant_produced =  rng( 1, parts[ reaper_id ].info().bonus );
@@ -971,7 +971,7 @@ void vehicle::operate_reaper()
 
 void vehicle::operate_planter()
 {
-    for( const vpart_reference vp : parts_with_feature( "PLANTER" ) ) {
+    for( const vpart_reference vp : get_parts( "PLANTER" ) ) {
         const size_t planter_id = vp.part_index();
         const tripoint &loc = global_part_pos3( planter_id );
         vehicle_stack v = get_items( planter_id );
@@ -1007,7 +1007,7 @@ void vehicle::operate_planter()
 
 void vehicle::operate_scoop()
 {
-    for( const vpart_reference vp : parts_with_feature( "SCOOP" ) ) {
+    for( const vpart_reference vp : get_parts( "SCOOP" ) ) {
         const size_t scoop = vp.part_index();
         const int chance_to_damage_item = 9;
         const units::volume max_pickup_volume = parts[scoop].info().size / 10;
