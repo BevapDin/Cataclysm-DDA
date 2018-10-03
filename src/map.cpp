@@ -941,20 +941,13 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
     // Need old coordinates to check for remote control
     const bool remote = veh->remote_controlled( g->u );
 
-    // record every passenger inside
-    std::vector<int> psg_parts = veh->boarded_parts();
-    std::vector<player *> psgs;
-    for( auto &prt : psg_parts ) {
-        psgs.push_back( veh->get_passenger( prt ) );
-    }
-
     bool need_update = false;
     int z_change = 0;
     // Move passengers
-    for( size_t i = 0; i < psg_parts.size(); i++ ) {
-        player *psg = psgs[i];
-        const int prt = psg_parts[i];
-        const tripoint part_pos = veh->global_part_pos3( prt );
+    for( const vpart_reference seat : veh->boarded_parts() ) {
+        const size_t prt = seat.part_index();
+        player *const psg = veh->get_passenger( prt );
+        const tripoint part_pos = seat.position();
         if( psg == nullptr ) {
             debugmsg( "Empty passenger part %d pcoord=%d,%d,%d u=%d,%d,%d?",
                       prt,
@@ -972,7 +965,7 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
         }
 
         // Place passenger on the new part location
-        const vehicle_part &veh_part = veh->parts[prt];
+        const vehicle_part &veh_part = seat.part();
         tripoint psgp( part_pos.x + dp.x + veh_part.precalc[1].x - veh_part.precalc[0].x,
                        part_pos.y + dp.y + veh_part.precalc[1].y - veh_part.precalc[0].y,
                        psg->posz() );

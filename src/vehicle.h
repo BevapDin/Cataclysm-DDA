@@ -768,6 +768,11 @@ class vehicle
          * Does not return removed parts.
          */
         vehicle_part_with_condition_range all_parts_at_location( const std::string &location ) const;
+        /**
+         * Contains all parts that are currently boarded by a character. Ignores
+         * all other properties of the parts (e.g. broken/removed).
+         */
+        vehicle_part_with_condition_range boarded_parts() const;
 
         // returns the list of indices of parts at certain position (not accounting frame direction)
         std::vector<int> parts_at_relative( int dx, int dy, bool use_cache ) const;
@@ -886,9 +891,6 @@ class vehicle
 
         // Pre-calculate mount points for (idir=0) - current direction or (idir=1) - next turn direction
         void precalc_mounts( int idir, int dir, const point &pivot );
-
-        // get a list of part indices where is a passenger inside
-        std::vector<int> boarded_parts() const;
 
         // get passenger at part p
         player *get_passenger( int p ) const;

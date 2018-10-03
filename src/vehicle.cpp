@@ -1463,11 +1463,8 @@ bool vehicle::remove_part( int p )
 
     // Unboard any entities standing on removed boardable parts
     if( part_flag( p, "BOARDABLE" ) ) {
-        std::vector<int> bp = boarded_parts();
-        for( auto &elem : bp ) {
-            if( elem == p ) {
-                g->m.unboard_vehicle( part_loc );
-            }
+        if( parts[p].has_flag( vehicle_part::passenger_flag ) ) {
+            g->m.unboard_vehicle( part_loc );
         }
     }
 
@@ -2386,14 +2383,10 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
     bool in_vehicle = g->u.in_vehicle;
     if( in_vehicle ) {
         // They're in a vehicle, but are they in /this/ vehicle?
-        std::vector<int> psg_parts = boarded_parts();
-        in_vehicle = false;
-        for( auto &psg_part : psg_parts ) {
-            if( get_passenger( psg_part ) == &( g->u ) ) {
-                in_vehicle = true;
-                break;
-            }
-        }
+        const auto parts = boarded_parts();
+        in_vehicle = std::find_if( parts.begin(), parts.end(), [&]( const vpart_reference &vp ) {
+            return get_passenger( vp.part_index() ) == &g->u;
+        } ) != parts.end();
     }
 
     int hide_z_at_or_above = ( in_vehicle ) ? ( ON_ROOF_Z ) : INT_MAX;
@@ -2488,17 +2481,12 @@ void vehicle::precalc_mounts( int idir, int dir, const point &pivot )
     pivot_rotation[idir] = dir;
 }
 
-std::vector<int> vehicle::boarded_parts() const
+vehicle_part_with_condition_range vehicle::boarded_parts() const
 {
-    std::vector<int> res;
-    for( const vpart_reference vp : get_parts() ) {
-        const size_t p = vp.part_index();
-        if( vp.has_feature( VPFLAG_BOARDABLE ) &&
-            vp.part().has_flag( vehicle_part::passenger_flag ) ) {
-            res.push_back( ( int )p );
-        }
-    }
-    return res;
+    return vehicle_part_with_condition_range( const_cast<vehicle&>( *this ), []( const vehicle &veh, const size_t part ) {
+        const vehicle_part &p = veh.parts[part];
+        return p.info().has_flag( VPFLAG_BOARDABLE ) && p.has_flag( vehicle_part::passenger_flag );
+    } );
 }
 
 player *vehicle::get_passenger( int p ) const
@@ -4149,9 +4137,8 @@ bool vpart_position::is_inside() const
 
 void vehicle::unboard_all()
 {
-    std::vector<int> bp = boarded_parts();
-    for( auto &i : bp ) {
-        g->m.unboard_vehicle( global_part_pos3( i ) );
+    for( const vpart_reference vp : boarded_parts() ) {
+        g->m.unboard_vehicle( vp.position() );
     }
 }
 
