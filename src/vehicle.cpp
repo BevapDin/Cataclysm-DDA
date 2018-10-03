@@ -2111,7 +2111,7 @@ int vehicle::part_with_feature_including_broken( const point &pt, const std::str
     return -1;
 }
 
-int vehicle::avail_part_with_feature( int part, vpart_bitflags const flag, bool unbroken ) const
+int vehicle::avail_part_with_feature( int part, vpart_bitflags const flag ) const
 {
     int part_a = part_with_feature( part, flag, unbroken );
     if( ( part_a >= 0 ) && parts[ part_a ].is_available() ) {
@@ -2120,14 +2120,37 @@ int vehicle::avail_part_with_feature( int part, vpart_bitflags const flag, bool 
     return -1;
 }
 
-int vehicle::avail_part_with_feature( int part, const std::string &flag, bool unbroken ) const
+int vehicle::avail_part_with_feature_include_broken( int part, vpart_bitflags const flag ) const
 {
-    return avail_part_with_feature( parts[ part ].mount, flag, unbroken );
+    int part_a = part_with_feature_including_broken( part, flag, unbroken );
+    if( ( part_a > 0 ) && parts[ part_a ].is_available() ) {
+        return part_a;
+    }
+    return -1;
 }
 
-int vehicle::avail_part_with_feature( const point &pt, const std::string &flag, bool unbroken ) const
+int vehicle::avail_part_with_feature( int part, const std::string &flag ) const
 {
-    int part_a = part_with_feature( pt, flag, unbroken );
+    return avail_part_with_feature( parts[ part ].mount, flag );
+}
+
+int vehicle::avail_part_with_feature_include_broken( int part, const std::string &flag ) const
+{
+    return avail_part_with_feature_include_broken( parts[ part ].mount, flag );
+}
+
+int vehicle::avail_part_with_feature( const point &pt, const std::string &flag ) const
+{
+    int part_a = part_with_feature( pt, flag );
+    if( ( part_a > 0 ) && parts[ part_a ].is_available() ) {
+        return part_a;
+    }
+    return -1;
+}
+
+int vehicle::avail_part_with_feature_include_broken( const point &pt, const std::string &flag ) const
+{
+    int part_a = part_with_feature_including_broken( pt, flag );
     if( ( part_a >= 0 ) && parts[ part_a ].is_available() ) {
         return part_a;
     }
