@@ -153,8 +153,7 @@ bool vehicle::remote_controlled( player const &p ) const
     }
 
     for( const vpart_reference vp : get_parts( "REMOTE_CONTROLS" ) ) {
-        const size_t part = vp.part_index();
-        if( rl_dist( p.pos(), global_part_pos3( part ) ) <= 40 ) {
+        if( rl_dist( p.pos(), vp.position() ) <= 40 ) {
             return true;
         }
     }
@@ -1751,9 +1750,8 @@ void vehicle::relocate_passengers( std::vector<player *> passengers )
     const auto boardables = get_parts( "BOARDABLE" );
     for( player *passenger : passengers ) {
         for( const vpart_reference vp : boardables ) {
-            const size_t p = vp.part_index();
             if( vp.part().passenger_id == passenger->getID() ) {
-                passenger->setpos( global_part_pos3( p ) );
+                passenger->setpos( vp.position() );
             }
         }
     }
@@ -2781,8 +2779,7 @@ bool vehicle::do_environmental_effects()
     bool needed = false;
     // check for smoking parts
     for( const vpart_reference vp : get_parts() ) {
-        const size_t p = vp.part_index();
-        const tripoint part_pos = global_part_pos3( p );
+        const tripoint part_pos = vp.position();
 
         /* Only lower blood level if:
          * - The part is outside.
@@ -4826,4 +4823,9 @@ vehicle_part_with_condition_range vpart_position::parts_here() const
     return vehicle_part_with_condition_range( this->vehicle(), [mount]( const ::vehicle &veh, const size_t part ) {
         return !veh.parts[part].removed && veh.parts[part].mount == mount;
     } );
+}
+
+tripoint vpart_position::position() const
+{
+    return vpart_reference( this->vehicle(), part_index() ).position();
 }
