@@ -1069,7 +1069,7 @@ bool vehicle::act_on_map()
         bool controlled = false;
         // It can even be a NPC, but must be at the controls
         for( int boarded : boarded_parts() ) {
-            if( part_with_feature( boarded, VPFLAG_CONTROLS, true ) >= 0 ) {
+            if( part_with_feature( boarded, VPFLAG_CONTROLS ) >= 0 ) {
                 controlled = true;
                 player *passenger = get_passenger( boarded );
                 if( passenger != nullptr ) {

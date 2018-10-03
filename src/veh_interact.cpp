@@ -2768,7 +2768,7 @@ void veh_interact::complete_vehicle()
     case 'c':
         std::vector<int> parts = veh->parts_at_relative( point( dx, dy ), true );
         if( parts.size() ) {
-            int replaced_wheel = veh->part_with_feature( parts[0], "WHEEL", false );
+            int replaced_wheel = veh->part_with_feature_including_broken( parts[0], "WHEEL" );
             if( replaced_wheel == -1 ) {
                 debugmsg( "no wheel to remove when changing wheels." );
                 return;
