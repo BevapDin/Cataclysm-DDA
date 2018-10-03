@@ -525,14 +525,14 @@ static void move_items( const tripoint &src, bool from_vehicle,
 
     // load vehicle information if requested
     if( from_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( source ).part_with_feature( "CARGO", false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( source ).part_with_feature_including_broken( "CARGO" );
         assert( vp );
         s_veh = &vp->vehicle();
         s_cargo = vp->part_index();
         assert( s_cargo >= 0 );
     }
     if( to_vehicle ) {
-        const cata::optional<vpart_reference> vp = g->m.veh_at( destination ).part_with_feature( "CARGO", false );
+        const cata::optional<vpart_reference> vp = g->m.veh_at( destination ).part_with_feature_including_broken( "CARGO" );
         assert( vp );
         d_veh = &vp->vehicle();
         d_cargo = vp->part_index();
@@ -723,8 +723,7 @@ static int move_cost( const item &it, const tripoint &src, const tripoint &dest 
     if( g->u.get_grab_type() == OBJECT_VEHICLE ) {
         tripoint cart_position = g->u.pos() + g->u.grab_point;
 
-        if( const cata::optional<vpart_reference> vp = g->m.veh_at(
-                    cart_position ).part_with_feature( "CARGO", false ) ) {
+        if( const cata::optional<vpart_reference> vp = g->m.veh_at( cart_position ).part_with_feature_including_broken( "CARGO" ) ) {
             auto veh = vp->vehicle();
             auto vstor = vp->part_index();
             auto capacity = veh.free_volume( vstor );

@@ -857,7 +857,7 @@ void map::board_vehicle( const tripoint &pos, player *p )
 
 void map::unboard_vehicle( const tripoint &p )
 {
-    const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature( VPFLAG_BOARDABLE, false );
+    const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature_including_broken( VPFLAG_BOARDABLE );
     player *passenger = nullptr;
     if( !vp ) {
         debugmsg( "map::unboard_vehicle: vehicle not found" );
