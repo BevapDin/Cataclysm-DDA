@@ -84,7 +84,9 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
 
     //If armoring is present and the option is set, it colors the visible part
     if( get_option<bool>( "VEHICLE_ARMOR_COLOR" ) ) {
-        parm = part_with_feature_including_broken( p, VPFLAG_ARMOR );
+        if( const auto parmor = part_with_feature_including_broken( p, VPFLAG_ARMOR ) ) {
+            parm = parmor.part_index();
+        }
     }
 
     if( parm >= 0 ) {
@@ -112,16 +114,15 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     }
 
     // curtains turn windshields gray
-    int curtains = part_with_feature_including_broken( p, VPFLAG_CURTAIN );
-    if( curtains >= 0 ) {
-        if( part_with_feature( p, VPFLAG_WINDOW ) >= 0 && !parts[curtains].open ) {
-            col = part_info( curtains ).color;
+    if( const auto curtains = part_with_feature_including_broken( p, VPFLAG_CURTAIN ) ) {
+        if( part_with_feature( p, VPFLAG_WINDOW ) && !curtains->part().open ) {
+            col = curtains->info().color;
         }
     }
 
     //Invert colors for cargo parts with stuff in them
-    int cargo_part = part_with_feature( p, VPFLAG_CARGO, true );
-    if( cargo_part > 0 && !get_items( cargo_part ).empty() ) {
+    const auto cargo_part = part_with_feature( p, VPFLAG_CARGO );
+    if( cargo_part && !get_items( cargo_part->part_index() ).empty() ) {
         return invert_color( col );
     } else {
         return col;

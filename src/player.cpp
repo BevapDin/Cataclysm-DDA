@@ -1495,7 +1495,7 @@ int player::floor_bedding_warmth( const tripoint &pos )
 
     const optional_vpart_position vp = g->m.veh_at( pos );
     const bool veh_bed = static_cast<bool>( vp.part_with_feature( "BED", true ) );
-    const bool veh_seat =static_cast<bool>( vp.part_with_feature( "SEAT", true ) );
+    const bool veh_seat = static_cast<bool>( vp.part_with_feature( "SEAT", true ) );
 
     // Search the floor for bedding
     if( furn_at_pos == f_bed ) {

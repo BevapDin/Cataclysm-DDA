@@ -358,37 +358,29 @@ static void pldrive( int x, int y )
         return;
     }
     player &u = g->u;
-    vehicle *veh = g->remoteveh();
-    bool remote = true;
-    int part = -1;
-    if( !veh ) {
-        if( const optional_vpart_position vp = g->m.veh_at( u.pos() ) ) {
-            veh = &vp->vehicle();
-            part = vp->part_index();
-        }
-        remote = false;
+    cata::optional<vpart_reference> vphere;
+    vehicle *const veh_remote = g->remoteveh();
+    if( !veh_remote ) {
+        vphere = g->m.veh_at( u.pos() );
     }
-    if( !veh ) {
+    if( !veh_remote && !vphere ) {
         dbg( D_ERROR ) << "game::pldrive: can't find vehicle! Drive mode is now off.";
         debugmsg( "game::pldrive error: can't find vehicle! Drive mode is now off." );
         u.in_vehicle = false;
         return;
     }
-    if( !remote ) {
-        int pctr = veh->part_with_feature( part, "CONTROLS", true );
-        if( pctr < 0 ) {
-            add_msg( m_info, _( "You can't drive the vehicle from here. You need controls!" ) );
-            u.controlling_vehicle = false;
-            return;
-        }
-    } else {
-        if( empty( veh->get_parts( "REMOTE_CONTROLS" ) ) ) {
-            add_msg( m_info, _( "Can't drive this vehicle remotely. It has no working controls." ) );
-            return;
-        }
+    if( vphere && !vphere->part_with_feature( "CONTROLS", true ) ) {
+        add_msg( m_info, _( "You can't drive the vehicle from here. You need controls!" ) );
+        u.controlling_vehicle = false;
+        return;
+    }
+    if( veh_remote && empty( veh_remote->get_parts( "REMOTE_CONTROLS" ) ) ) {
+        add_msg( m_info, _( "Can't drive this vehicle remotely. It has no working controls." ) );
+        return;
     }
 
-    veh->pldrive( x, y );
+    vehicle &veh = veh_remote ? *veh_remote : vphere->vehicle();
+    veh.pldrive( x, y );
 }
 
 static void open()

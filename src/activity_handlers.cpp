@@ -2253,14 +2253,11 @@ repeat_type repeat_menu( const std::string &title, repeat_type last_selection )
 // Note: similar hack could be used to implement all sorts of vehicle pseudo-items
 //  and possibly CBM pseudo-items too.
 struct weldrig_hack {
-    vehicle *veh;
-    int part;
+    cata::optional<vpart_reference> weldrig;
     item pseudo;
 
     weldrig_hack()
-        : veh( nullptr )
-        , part( -1 )
-        , pseudo( "welder", calendar::turn )
+        : pseudo( "welder", calendar::turn )
     { }
 
     bool init( const player_activity &act ) {
@@ -2268,20 +2265,19 @@ struct weldrig_hack {
             return false;
         }
 
-        part = act.values[1];
-        veh = veh_pointer_or_null( g->m.veh_at( act.coords[0] ) );
-        if( veh == nullptr || veh->parts.size() <= ( size_t )part ) {
-            part = -1;
+        const size_t part = act.values[1];
+        vehicle *const veh = veh_pointer_or_null( g->m.veh_at( act.coords[0] ) );
+        if( veh == nullptr || veh->parts.size() <= part ) {
             return false;
         }
 
-        part = veh->part_with_feature( part, "WELDRIG", true );
-        return part >= 0;
+        weldrig = veh->part_with_feature( part, "WELDRIG", true );
+        return weldrig.has_value();
     }
 
     item &get_item() {
-        if( veh != nullptr && part >= 0 ) {
-            pseudo.charges = veh->drain( "battery", 1000 - pseudo.charges );
+        if( weldrig ) {
+            pseudo.charges = weldrig->vehicle().drain( "battery", 1000 - pseudo.charges );
             return pseudo;
         }
 
@@ -2291,11 +2287,11 @@ struct weldrig_hack {
 
     void clean_up() {
         // Return unused charges
-        if( veh == nullptr || part < 0 ) {
+        if( !weldrig ) {
             return;
         }
 
-        veh->charge_battery( pseudo.charges );
+        weldrig->vehicle().charge_battery( pseudo.charges );
         pseudo.charges = 0;
     }
 };

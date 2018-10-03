@@ -709,20 +709,20 @@ float map::vehicle_vehicle_collision( vehicle &veh, vehicle &veh2,
             continue;
         }
 
-        int parm1 = veh.part_with_feature( veh_veh_coll.part, VPFLAG_ARMOR, true );
-        if( parm1 < 0 ) {
-            parm1 = veh_veh_coll.part;
+        auto parm1 = veh.part_with_feature( veh_veh_coll.part, VPFLAG_ARMOR, true );
+        if( !parm1 ) {
+            parm1.emplace( veh, veh_veh_coll.part );
         }
-        int parm2 = veh2.part_with_feature( veh_veh_coll.target_part, VPFLAG_ARMOR, true );
-        if( parm2 < 0 ) {
-            parm2 = veh_veh_coll.target_part;
+        auto parm2 = veh2.part_with_feature( veh_veh_coll.target_part, VPFLAG_ARMOR, true );
+        if( !parm2 ) {
+            parm2.emplace( veh2, veh_veh_coll.target_part );
         }
 
-        epicenter1 += veh.parts[parm1].mount;
-        veh.damage( parm1, dmg1_part, DT_BASH );
+        epicenter1 += parm1.part().mount;
+        parm1.vehicle().damage( parm1.part_index(), dmg1_part, DT_BASH );
 
-        epicenter2 += veh2.parts[parm2].mount;
-        veh2.damage( parm2, dmg2_part, DT_BASH );
+        epicenter2 += parm2.part().mount;
+        parm2.vehicle().damage( parm2.part_index(), dmg2_part, DT_BASH );
     }
 
     epicenter1.x /= coll_parts_cnt;
@@ -4338,7 +4338,7 @@ static void process_vehicle_items( vehicle &cur_veh, int part )
         }
     }
 
-    if( cur_veh.part_with_feature( part, VPFLAG_RECHARGE, true ) >= 0 &&
+    if( cur_veh.part_with_feature( part, VPFLAG_RECHARGE, true ) &&
         cur_veh.has_part( "RECHARGE", true ) ) {
         for( auto &n : cur_veh.get_items( part ) ) {
             static const std::string recharge_s( "RECHARGE" );
@@ -7493,8 +7493,8 @@ void map::build_map_cache( const int zlev, bool skip_lightmap )
             }
 
             if( vp.has_feature( VPFLAG_OPAQUE ) && !vp.part().is_broken() ) {
-                int dpart = v.v->part_with_feature( part, VPFLAG_OPENABLE, true );
-                if( dpart < 0 || !v.v->parts[dpart].open ) {
+                const cata::optional<vpart_reference> dpart = vp.part_with_feature( VPFLAG_OPENABLE, true );
+                if( !dpart || !dpart.part().open ) {
                     transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
                 }
             }

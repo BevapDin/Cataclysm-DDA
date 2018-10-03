@@ -2303,24 +2303,23 @@ void CheckMessages()
                         const tripoint pos( x, y, z );
         
                         // Check if we're near a vehicle, if so, vehicle controls should be top.
-                        {
-                            const optional_vpart_position vp = g->m.veh_at( pos );
-                            vehicle *const veh = veh_pointer_or_null( vp );
-                            if( veh ) {
-                                int veh_part = vp ? vp->part_index() : -1;
-                                if (veh->part_with_feature(veh_part, "CONTROLS", true) >= 0)
-                                    actions.insert(ACTION_CONTROL_VEHICLE);
-                                int openablepart = veh->part_with_feature(veh_part, "OPENABLE", true);
-                                if (openablepart >= 0 && veh->is_open(openablepart) && (dx != 0 || dy != 0)) // an open door adjacent to us
-                                    actions.insert(ACTION_CLOSE);
-                                int curtainpart = veh->part_with_feature(veh_part, "CURTAIN", true);
-                                if (curtainpart >= 0 && veh->is_open(curtainpart) && (dx != 0 || dy != 0))
-                                    actions.insert(ACTION_CLOSE);
-                                if (dx == 0 && dy == 0) {
-                                    int cargopart = veh->part_with_feature(veh_part, "CARGO", true);
-                                    bool can_pickup = cargopart >= 0 && (!veh->get_items(cargopart).empty());
-                                    if (can_pickup)
-                                        actions.insert(ACTION_PICKUP);
+                        if( const optional_vpart_position vp = g->m.veh_at( pos ) ) {
+                            vehicle &veh = vp->vehicle();
+                            if( vp.part_with_feature( "CONTROLS", true ) ) {
+                                actions.insert(ACTION_CONTROL_VEHICLE);
+                            }
+                            const cata::optional<vpart_reference> openablepart = vp.part_with_feature( "OPENABLE", true );
+                            if( openablepart && veh.is_open( openablepart.part_index() ) && ( dx != 0 || dy != 0 ) ) { // an open door adjacent to us
+                                actions.insert(ACTION_CLOSE);
+                            }
+                            const cata::optional<vpart_reference> curtainpart = vp.part_with_feature( "CURTAIN", true );
+                            if( curtainpart && veh.is_open( curtainpart.part_index() ) && ( dx != 0 || dy != 0 ) ) {
+                                actions.insert(ACTION_CLOSE);
+                            }
+                            if (dx == 0 && dy == 0) {
+                                const cata::optional<vpart_reference> cargopart = vp.part_with_feature( "CARGO", true );
+                                if( cargopart && !veh.get_items( cargopart.part_index() ).empty() ) {
+                                    actions.insert(ACTION_PICKUP);
                                 }
                             }
                         }

@@ -431,9 +431,8 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
 
     // Damage armor before damaging any other parts
     // Actually target, not just damage - spiked plating will "hit back", for example
-    const int armor_part = part_with_feature( ret.part, VPFLAG_ARMOR, true );
-    if( armor_part >= 0 ) {
-        ret.part = armor_part;
+    if( const auto armor_part = part_with_feature( ret.part, VPFLAG_ARMOR ) ) {
+        ret.part = armor_part.part_index();
     }
 
     int dmg_mod = part_info( ret.part ).dmg_mod;
@@ -471,11 +470,11 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
     } else if( ( bash_floor && g->m.is_bashable_ter_furn( p, true ) ) ||
                ( g->m.is_bashable_ter_furn( p, false ) && g->m.move_cost_ter_furn( p ) != 2 &&
                  // Don't collide with tiny things, like flowers, unless we have a wheel in our space.
-                 ( part_with_feature( ret.part, VPFLAG_WHEEL, true ) >= 0 ||
+                 ( part_with_feature( ret.part, VPFLAG_WHEEL ) ||
                    !g->m.has_flag_ter_or_furn( "TINY", p ) ) &&
                  // Protrusions don't collide with short terrain.
                  // Tiny also doesn't, but it's already excluded unless there's a wheel present.
-                 !( part_with_feature( ret.part, "PROTRUSION", true ) >= 0 &&
+                 !( part_with_feature( ret.part, "PROTRUSION" ) &&
                     g->m.has_flag_ter_or_furn( "SHORT", p ) ) &&
                  // These are bashable, but don't interact with vehicles.
                  !g->m.has_flag_ter_or_furn( "NOCOLLIDE", p ) ) ) {
@@ -732,8 +731,8 @@ veh_collision vehicle::part_collision( int part, const tripoint &p,
 
 void vehicle::handle_trap( const tripoint &p, int part )
 {
-    int pwh = part_with_feature( part, VPFLAG_WHEEL, true );
-    if( pwh < 0 ) {
+    const auto pwh = part_with_feature( part, VPFLAG_WHEEL );
+    if( !pwh ) {
         return;
     }
     const trap &tr = g->m.tr_at( p );
@@ -824,7 +823,7 @@ void vehicle::handle_trap( const tripoint &p, int part )
     }
     if( part_damage && chance >= rng( 1, 100 ) ) {
         // Hit the wheel directly since it ran right over the trap.
-        damage_direct( pwh, part_damage );
+        damage_direct( pwh.part_index(), part_damage );
     }
     if( expl > 0 ) {
         g->explosion( p, expl, 0.5f, false, shrap );
@@ -1103,7 +1102,7 @@ bool map::vehact( vehicle &veh )
         bool controlled = false;
         // It can even be a NPC, but must be at the controls
         for( const vpart_reference boarded : veh.boarded_parts() ) {
-            if( veh.part_with_feature( boarded.part_index(), VPFLAG_CONTROLS ) >= 0 ) {
+            if( boarded.part_with_feature( VPFLAG_CONTROLS ) ) {
                 controlled = true;
                 player *passenger = veh.get_passenger( boarded.part_index() );
                 if( passenger != nullptr ) {
@@ -1278,7 +1277,7 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
         }
 
         bool throw_from_seat = false;
-        if( veh.part_with_feature( ps, VPFLAG_SEATBELT, true ) == -1 ) {
+        if( !veh.part_with_feature( ps, VPFLAG_SEATBELT ) ) {
             ///\EFFECT_STR reduces chance of being thrown from your seat when not wearing a seatbelt
             throw_from_seat = d_vel * rng( 80, 120 ) / 100 > ( psg->str_cur * 1.5 + 5 );
         }
