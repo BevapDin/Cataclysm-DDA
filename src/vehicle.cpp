@@ -2077,50 +2077,50 @@ cata::optional<vpart_reference> vehicle::part_with_feature_including_broken( con
     return cata::nullopt;
 }
 
-int vehicle::avail_part_with_feature( int part, vpart_bitflags const flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature( const size_t part, vpart_bitflags const flag ) const
 {
-    int part_a = part_with_feature( part, flag, unbroken );
-    if( ( part_a >= 0 ) && parts[ part_a ].is_available() ) {
+    const auto part_a = part_with_feature( part, flag );
+    if( part_a && part_a->part().is_available() ) {
         return part_a;
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::avail_part_with_feature_include_broken( int part, vpart_bitflags const flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature_include_broken( const size_t part, const std::string &flag ) const
 {
-    int part_a = part_with_feature_including_broken( part, flag, unbroken );
-    if( ( part_a > 0 ) && parts[ part_a ].is_available() ) {
+    const auto part_a = part_with_feature_including_broken( part, flag );
+    if( part_a && part_a->part().is_available() ) {
         return part_a;
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::avail_part_with_feature( int part, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature( const size_t part, const std::string &flag ) const
 {
     return avail_part_with_feature( parts[ part ].mount, flag );
 }
 
-int vehicle::avail_part_with_feature_include_broken( int part, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature_include_broken( const size_t part, const std::string &flag ) const
 {
     return avail_part_with_feature_include_broken( parts[ part ].mount, flag );
 }
 
-int vehicle::avail_part_with_feature( const point &pt, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature( const point &pt, const std::string &flag ) const
 {
-    int part_a = part_with_feature( pt, flag );
-    if( ( part_a > 0 ) && parts[ part_a ].is_available() ) {
+    const auto part_a = part_with_feature( pt, flag );
+    if( part_a && part_a->part().is_available() ) {
         return part_a;
     }
-    return -1;
+    return cata::nullopt;
 }
 
-int vehicle::avail_part_with_feature_include_broken( const point &pt, const std::string &flag ) const
+cata::optional<vpart_reference> vehicle::avail_part_with_feature_include_broken( const point &pt, const std::string &flag ) const
 {
-    int part_a = part_with_feature_including_broken( pt, flag );
-    if( ( part_a >= 0 ) && parts[ part_a ].is_available() ) {
+    const auto part_a = part_with_feature_including_broken( pt, flag );
+    if( part_a && part_a->part().is_available() ) {
         return part_a;
     }
-    return -1;
+    return cata::nullopt;
 }
 
 bool vehicle::has_part( const std::string &flag, bool enabled ) const

@@ -791,13 +791,13 @@ class vehicle
         cata::optional<vpart_reference> part_with_feature_including_broken( const point &pt, const std::string &f ) const;
 
         // returns index of part, inner to given, with certain flag, or -1
-        int avail_part_with_feature( int p, const std::string &f ) const;
-        int avail_part_with_feature( const point &pt, const std::string &f ) const;
-        int avail_part_with_feature( int p, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature( size_t p, const std::string &f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature( const point &pt, const std::string &f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature( size_t p, vpart_bitflags f ) const;
 
-        int avail_part_with_feature_include_broken( int p, const std::string &f ) const;
-        int avail_part_with_feature_include_broken( const point &pt, const std::string &f ) const;
-        int avail_part_with_feature_include_broken( int p, vpart_bitflags f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature_include_broken( size_t p, const std::string &f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature_include_broken( const point &pt, const std::string &f ) const;
+        cata::optional<vpart_reference> avail_part_with_feature_include_broken( size_t p, vpart_bitflags f ) const;
 
         /**
          *  Check if vehicle has at least one unbroken part with specified flag
