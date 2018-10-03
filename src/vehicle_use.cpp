@@ -829,7 +829,6 @@ void vehicle::honk_horn()
     bool honked = false;
 
     for( const vpart_reference vp : get_parts( "HORN" ) ) {
-        const size_t p = vp.part_index();
         //Only bicycle horn doesn't need electricity to work
         const vpart_info &horn_type = vp.info();
         if( ( horn_type.get_id() != vpart_id( "horn_bicycle" ) ) && no_power ) {
@@ -840,7 +839,7 @@ void vehicle::honk_horn()
             honked = true;
         }
         //Get global position of horn
-        const auto horn_pos = global_part_pos3( p );
+        const auto horn_pos = vp.position();
         //Determine sound
         if( horn_type.bonus >= 110 ) {
             //~ Loud horn sound
@@ -868,7 +867,6 @@ void vehicle::beeper_sound()
 
     const bool odd_turn = calendar::once_every( 2_turns );
     for( const vpart_reference vp : get_parts( "BEEPER" ) ) {
-        const size_t p = vp.part_index();
         if( ( odd_turn && vp.has_feature( VPFLAG_EVENTURN ) ) ||
             ( !odd_turn && vp.has_feature( VPFLAG_ODDTURN ) ) ) {
             continue;
@@ -876,14 +874,14 @@ void vehicle::beeper_sound()
 
         const vpart_info &beeper_type = vp.info();
         //~ Beeper sound
-        sounds::sound( global_part_pos3( p ), beeper_type.bonus, _( "beep!" ) );
+        sounds::sound( vp.position(), beeper_type.bonus, _( "beep!" ) );
     }
 }
 
 void vehicle::play_music()
 {
     for( const vpart_reference vp : get_enabled_parts( "STEREO" ) ) {
-        iuse::play_music( g->u, global_part_pos3( vp.part() ), 15, 30 );
+        iuse::play_music( g->u, vp.position(), 15, 30 );
     }
 }
 
@@ -894,7 +892,7 @@ void vehicle::play_chimes()
     }
 
     for( const vpart_reference vp : get_enabled_parts( "CHIMES" ) ) {
-        sounds::sound( global_part_pos3( vp.part() ), 40, _( "a simple melody blaring from the loudspeakers." ) );
+        sounds::sound( vp.position(), 40, _( "a simple melody blaring from the loudspeakers." ) );
     }
 }
 
@@ -902,7 +900,7 @@ void vehicle::operate_plow()
 {
     for( const vpart_reference vp : get_parts( "PLOW" ) ) {
         const size_t plow_id = vp.part_index();
-        const tripoint start_plow = global_part_pos3( plow_id );
+        const tripoint start_plow = vp.position();
         if( g->m.has_flag( "DIGGABLE", start_plow ) ) {
             g->m.ter_set( start_plow, t_dirtmound );
         } else {
@@ -918,7 +916,7 @@ void vehicle::operate_rockwheel()
 {
     for( const vpart_reference vp : get_parts( "ROCKWHEEL" ) ) {
         const size_t rockwheel_id = vp.part_index();
-        const tripoint start_dig = global_part_pos3( rockwheel_id );
+        const tripoint start_dig = vp.position();
         if( g->m.has_flag( "DIGGABLE", start_dig ) ) {
             g->m.ter_set( start_dig, t_pit_shallow );
         } else {
@@ -934,7 +932,7 @@ void vehicle::operate_reaper()
 {
     for( const vpart_reference vp : get_parts( "REAPER" ) ) {
         const size_t reaper_id = vp.part_index();
-        const tripoint reaper_pos = global_part_pos3( reaper_id );
+        const tripoint reaper_pos = vp.position();
         const int plant_produced =  rng( 1, vp.part().info().bonus );
         const int seed_produced = rng( 1, 3 );
         const units::volume max_pickup_volume = vp.part().info().size / 20;
@@ -973,7 +971,7 @@ void vehicle::operate_planter()
 {
     for( const vpart_reference vp : get_parts( "PLANTER" ) ) {
         const size_t planter_id = vp.part_index();
-        const tripoint &loc = global_part_pos3( planter_id );
+        const tripoint &loc = vp.position();
         vehicle_stack v = get_items( planter_id );
         for( auto i = v.begin(); i != v.end(); i++ ) {
             if( i->is_seed() ) {
@@ -1015,10 +1013,9 @@ void vehicle::operate_scoop()
                 _( "Whirrrr" ), _( "Ker-chunk" ), _( "Swish" ), _( "Cugugugugug" )
             }
         };
-        sounds::sound( global_part_pos3( scoop ), rng( 20, 35 ), random_entry_ref( sound_msgs ) );
+        sounds::sound( vp.position(), rng( 20, 35 ), random_entry_ref( sound_msgs ) );
         std::vector<tripoint> parts_points;
-        for( const tripoint &current :
-             g->m.points_in_radius( global_part_pos3( scoop ), 1 ) ) {
+        for( const tripoint &current : g->m.points_in_radius( vp.position(), 1 ) ) {
             parts_points.push_back( current );
         }
         for( const tripoint &position : parts_points ) {

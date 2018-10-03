@@ -4455,7 +4455,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
 {
     const bool engine_heater_is_on = cur_veh.has_part( "E_HEATER", true ) && cur_veh.engine_on;
     for( const vpart_reference vp : cur_veh.get_parts_including_broken( VPFLAG_FLUIDTANK ) ) {
-        vp.part().process_contents( cur_veh.global_part_pos3( vp.part_index() ), engine_heater_is_on );
+        vp.part().process_contents( vp.position(), engine_heater_is_on );
     }
 
     auto cargo_parts = cur_veh.get_parts( VPFLAG_CARGO );
@@ -4479,10 +4479,9 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         }
         auto &item_iter = active_item.item_iterator;
         // Find the cargo part and coordinates corresponding to the current active item.
-        const size_t part_index = ( *it ).part_index();
         const vehicle_part &pt = it->part();
-        const tripoint item_loc = cur_veh.global_part_pos3( part_index );
-        auto items = cur_veh.get_items( static_cast<int>( part_index ) );
+        const tripoint item_loc = it->position();
+        auto items = cur_veh.get_items( it->part_index() );
         int it_temp = g->get_temperature( item_loc );
         float it_insulation = 1.0;
         if( item_iter->is_food() || item_iter->is_food_container() ) {
@@ -7979,7 +7978,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX *MAPSIZE>, SEEY *MAPS
     for( auto &wrapped_veh : vehs ) {
         vehicle &veh = *( wrapped_veh.v );
         for( const vpart_reference vp : veh.get_parts( VPFLAG_OBSTACLE ) ) {
-            const tripoint part_pos = vp.vehicle().global_part_pos3( vp.part_index() );
+            const tripoint part_pos = vp.position();
             if( local_bounds( part_pos ) ) {
                 reduces_scent[part_pos.x][part_pos.y] = true;
             }
@@ -7987,12 +7986,11 @@ void map::scent_blockers( std::array<std::array<bool, SEEX *MAPSIZE>, SEEY *MAPS
 
         // Doors, but only the closed ones
         for( const vpart_reference vp : veh.get_parts( VPFLAG_OPENABLE ) ) {
-            const size_t p = vp.part_index();
             if( vp.part().open ) {
                 continue;
             }
 
-            const tripoint part_pos = veh.global_part_pos3( p );
+            const tripoint part_pos = vp.position();
             if( local_bounds( part_pos ) ) {
                 reduces_scent[part_pos.x][part_pos.y] = true;
             }

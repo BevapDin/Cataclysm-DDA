@@ -11,6 +11,7 @@ class vehicle;
 enum vpart_bitflags : int;
 class vpart_reference;
 class vehicle_part_with_condition_range;
+struct tripoint;
 
 /**
  * Reference to a position (a point) of the @ref vehicle.
@@ -70,6 +71,13 @@ class vpart_position
          * Removed parts are excluded.
          */
         vehicle_part_with_condition_range parts_here() const;
+        /**
+         * Yields the position of the part in the coordinate system used
+         * by the @ref map (specifically the main game map @ref game::m).
+         * It contains the vehicle rotation (according to where it's facing)
+         * and the mount point of the specific part.
+         */
+        tripoint position() const;
 };
 
 /**
