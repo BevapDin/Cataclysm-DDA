@@ -638,12 +638,12 @@ bool vehicle::fold_up()
 
     // Drop stuff in containers on ground
     for( const vpart_reference vp : get_parts( "CARGO" ) ) {
-        const size_t p = vp.part_index();
-        for( auto &elem : get_items( p ) ) {
+        vehicle_stack items = vp.get_items();
+        for( auto &elem : items ) {
             g->m.add_item_or_charges( g->u.pos(), elem );
         }
-        while( !get_items( p ).empty() ) {
-            get_items( p ).erase( get_items( p ).begin() );
+        while( !items.empty() ) {
+            items.erase( items.begin() );
         }
     }
 
@@ -974,7 +974,7 @@ void vehicle::operate_planter()
     for( const vpart_reference vp : get_parts( "PLANTER" ) ) {
         const size_t planter_id = vp.part_index();
         const tripoint &loc = vp.position();
-        vehicle_stack v = get_items( planter_id );
+        vehicle_stack v = vp.get_items();
         for( auto i = v.begin(); i != v.end(); i++ ) {
             if( i->is_seed() ) {
                 // If it is an "advanced model" then it will avoid damaging itself or becoming damaged. It's a real feature.
@@ -1166,7 +1166,7 @@ void vehicle::open_or_close( int const part_index, bool const opening )
 void vehicle::use_washing_machine( int p )
 {
     bool detergent_is_enough = g->u.crafting_inventory().has_charges( "detergent", 5 );
-    auto items = get_items( p );
+    vehicle_stack items = vpart_reference( *this, p ).get_items();
     static const std::string filthy( "FILTHY" );
     bool filthy_items = std::all_of( items.begin(), items.end(), []( const item & i ) {
         return i.has_flag( filthy );

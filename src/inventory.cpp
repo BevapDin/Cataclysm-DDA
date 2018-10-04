@@ -414,7 +414,7 @@ void inventory::form_from_map( const tripoint &origin, int range, bool assign_in
         const cata::optional<vpart_reference> cargo = vp.part_with_feature( "CARGO", true );
 
         if( cargo ) {
-            const auto items = veh->get_items( cargo->part_index() );
+            const vehicle_stack items = cargo->get_items();
             *this += std::list<item>( items.begin(), items.end() );
         }
 

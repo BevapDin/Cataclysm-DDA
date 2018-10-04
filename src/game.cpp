@@ -952,7 +952,7 @@ bool game::start_game()
 
                     // Delete the items that would have spawned here from a "corpse"
                     for( const vpart_reference vphere : vp.parts_here() ) {
-                        vehicle_stack here = vphere.vehicle().get_items( vphere.part_index() );
+                        vehicle_stack here = vphere.get_items();
 
                         for( auto iter = here.begin(); iter != here.end(); ) {
                             iter = here.erase( iter );

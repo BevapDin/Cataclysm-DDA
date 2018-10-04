@@ -1057,7 +1057,7 @@ void inventory_selector::add_vehicle_items( const tripoint &target )
     }
     vehicle *const veh = &vp->vehicle();
     const int part = vp->part_index();
-    const auto items = veh->get_items( part );
+    const auto items = vp->get_items();
     const std::string name = to_upper_case( veh->parts[part].name() );
     const item_category vehicle_cat( name, name, 200 );
 

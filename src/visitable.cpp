@@ -15,6 +15,7 @@
 #include "game.h"
 #include "itype.h"
 #include "player.h"
+#include "vpart_reference.h"
 
 /** @relates visitable */
 template <typename T>
@@ -451,7 +452,7 @@ VisitResponse visitable<vehicle_cursor>::visit_items(
     auto self = static_cast<vehicle_cursor *>( this );
 
     if( const auto vpcargo = self->veh.part_with_feature( self->part, "CARGO" ) ) {
-        for( auto &e : self->veh.get_items( vpcargo.part_index() ) ) {
+        for( auto &e : vpcargo->get_items() ) {
             if( visit_internal( func, &e ) == VisitResponse::ABORT ) {
                 return VisitResponse::ABORT;
             }

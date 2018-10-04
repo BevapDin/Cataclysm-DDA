@@ -1979,7 +1979,7 @@ void npc::find_item()
             continue;
         }
 
-        for( const item &it : cargo->vehicle().get_items( cargo->part_index() ) ) {
+        for( const item &it : cargo->get_items() ) {
             consider_item( it, p );
         }
     }
@@ -2157,7 +2157,7 @@ std::list<item> npc::pick_up_item_map( const tripoint &where )
 
 std::list<item> npc::pick_up_item_vehicle( vehicle &veh, int part_index )
 {
-    auto stack = veh.get_items( part_index );
+    auto stack = vpart_reference( veh, part_index ).get_items();
     return npc_pickup_from_stack( *this, stack );
 }
 

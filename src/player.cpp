@@ -10230,11 +10230,10 @@ std::string player::is_snuggling() const
 
     if( in_vehicle ) {
         if( const cata::optional<vpart_reference> vp = g->m.veh_at( pos() ).part_with_feature_including_broken( VPFLAG_CARGO ) ) {
-            vehicle *const veh = &vp->vehicle();
-            const int cargo = vp->part_index();
-            if( !veh->get_items(cargo).empty() ) {
-                begin = veh->get_items(cargo).begin();
-                end = veh->get_items(cargo).end();
+            vehicle_stack items = vp->get_items();
+            if( !items.empty() ) {
+                begin = items.begin();
+                end = item.end();
             }
         }
     }

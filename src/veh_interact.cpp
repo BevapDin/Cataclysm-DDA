@@ -18,6 +18,7 @@
 #include "translations.h"
 #include "veh_type.h"
 #include "vpart_position.h"
+#include "vpart_reference.h"
 #include "ui.h"
 #include "vpart_range.h"
 #include "vpart_reference.h"
@@ -1966,9 +1967,8 @@ void veh_interact::display_stats()
     units::volume total_cargo = 0;
     units::volume free_cargo = 0;
     for( const vpart_reference vp : veh->get_parts( "CARGO" ) ) {
-        const size_t p = vp.part_index();
-        total_cargo += veh->get_items( p ).max_volume();
-        free_cargo += veh->get_items( p ).free_volume();
+        total_cargo += vp.get_items().max_volume();
+        free_cargo += vp.get_items().free_volume();
     }
 
     const int second_column = 33 + (extraw / 4);
@@ -2687,7 +2687,7 @@ void veh_interact::complete_vehicle()
         g->u.invalidate_crafting_inventory();
 
         // Dump contents of part at player's feet, if any.
-        vehicle_stack contents = veh->get_items( vehicle_part );
+        vehicle_stack contents = vpart_reference( *veh, vehicle_part ).get_items();
         for( auto iter = contents.begin(); iter != contents.end(); ) {
             g->m.add_item_or_charges( g->u.posx(), g->u.posy(), *iter );
             iter = contents.erase( iter );

@@ -2686,7 +2686,7 @@ bool map::mop_spills( const tripoint &p )
                 retval = true;
             }
             //remove any liquids that somehow didn't fall through to the ground
-            vehicle_stack here = vp.vehicle().get_items( vp.part_index() );
+            vehicle_stack here = vp.get_items();
             auto new_end = std::remove_if( here.begin(), here.end(), []( const item & it ) {
                 return it.made_of( LIQUID );
             } );
@@ -4319,7 +4319,7 @@ static void process_vehicle_items( vehicle &cur_veh, int part )
                                   cur_veh.is_part_on( part );
     bool washing_machine_finished = false;
     if( washmachine_here ) {
-        for( auto &n : cur_veh.get_items( part ) ) {
+        for( auto &n : vpart_reference( cur_veh, part ).get_items() ) {
             const time_duration washing_time = 90_minutes;
             const time_duration time_left = washing_time - n.age();
             static const std::string filthy( "FILTHY" );
@@ -4340,7 +4340,7 @@ static void process_vehicle_items( vehicle &cur_veh, int part )
 
     if( cur_veh.part_with_feature( part, VPFLAG_RECHARGE, true ) &&
         cur_veh.has_part( "RECHARGE", true ) ) {
-        for( auto &n : cur_veh.get_items( part ) ) {
+        for( auto &n : vpart_reference( cur_veh, part ).get_items() ) {
             static const std::string recharge_s( "RECHARGE" );
             static const std::string ups_s( "USE_UPS" );
             if( !n.has_flag( recharge_s ) && !n.has_flag( ups_s ) ) {
@@ -4474,7 +4474,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         // Find the cargo part and coordinates corresponding to the current active item.
         const vehicle_part &pt = it->part();
         const tripoint item_loc = it->position();
-        auto items = cur_veh.get_items( it->part_index() );
+        vehicle_stack items = it->get_items();
         int it_temp = g->get_temperature( item_loc );
         float it_insulation = 1.0;
         if( item_iter->is_food() || item_iter->is_food_container() ) {
@@ -4586,8 +4586,7 @@ std::list<item> map::use_amount_square( const tripoint &p, const itype_id type,
     }
 
     if( const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature( "CARGO", true ) ) {
-        std::list<item> tmp = use_amount_stack( vp->vehicle().get_items( vp->part_index() ), type,
-                                                quantity );
+        std::list<item> tmp = use_amount_stack( vp->get_items(), type, quantity );
         ret.splice( ret.end(), tmp );
     }
     std::list<item> tmp = use_amount_stack( i_at( p ), type, quantity );
@@ -4865,8 +4864,7 @@ std::list<item> map::use_charges( const tripoint &origin, const int range,
         }
 
         if( cargo ) {
-            std::list<item> tmp =
-                use_charges_from_stack( cargo->vehicle().get_items( cargo->part_index() ), type, quantity, p );
+            std::list<item> tmp = use_charges_from_stack( cargo->get_items(), type, quantity, p );
             ret.splice( ret.end(), tmp );
             if( quantity <= 0 ) {
                 return ret;
@@ -4957,7 +4955,7 @@ item *map::item_from( const tripoint &pos, size_t index )
 
 item *map::item_from( vehicle *veh, int cargo_part, size_t index )
 {
-    auto items = veh->get_items( cargo_part );
+    auto items = vpart_reference( *veh, cargo_part ).get_items();
 
     if( index >= items.size() ) {
         return nullptr;

@@ -12,6 +12,7 @@
 #include "catacharset.h"
 #include "messages.h"
 #include "mission.h"
+#include "vpart_reference.h"
 #include "ammo.h"
 #include "output.h"
 #include "overmap.h"
@@ -3327,7 +3328,7 @@ bool talk_function::camp_garage_chop_start( npc &p, std::string task )
     int prt = 0;
     int skillLevel = comp->get_skill_level( skill_mechanics );
     while( p_all.size() > 0 ) {
-        vehicle_stack contents = car->get_items( prt );
+        vehicle_stack contents = vpart_reference( *car, prt ).get_items();
         for( auto iter = contents.begin(); iter != contents.end(); ) {
             comp->companion_mission_inv.add_item( *iter );
             iter = contents.erase( iter );

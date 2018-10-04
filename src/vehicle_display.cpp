@@ -122,7 +122,7 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
 
     //Invert colors for cargo parts with stuff in them
     const auto cargo_part = part_with_feature( p, VPFLAG_CARGO );
-    if( cargo_part && !get_items( cargo_part->part_index() ).empty() ) {
+    if( cargo_part && !cargo_part->get_items().empty() ) {
         return invert_color( col );
     } else {
         return col;
@@ -164,10 +164,11 @@ int vehicle::print_part_list( const catacurses::window &win, int y1, const int m
         }
 
         if( part_flag( pl[i], "CARGO" ) ) {
+            const vehicle_stack items = vpart_reference( *this, pl[i] ).get_items();
             //~ used/total volume of a cargo vehicle part
             partname += string_format( _( " (vol: %s/%s %s)" ),
-                                       format_volume( get_items( pl[i] ).stored_volume() ).c_str(),
-                                       format_volume( get_items( pl[i] ).max_volume() ).c_str(),
+                                       format_volume( items.stored_volume() ).c_str(),
+                                       format_volume( items.max_volume() ).c_str(),
                                        volume_units_abbr() );
         }
 

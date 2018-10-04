@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "player.h"
 #include "translations.h"
+#include "vpart_reference.h"
 #include "cata_tiles.h"
 #include "get_version.h"
 #include "init.h"
@@ -2304,7 +2305,6 @@ void CheckMessages()
         
                         // Check if we're near a vehicle, if so, vehicle controls should be top.
                         if( const optional_vpart_position vp = g->m.veh_at( pos ) ) {
-                            vehicle &veh = vp->vehicle();
                             if( vp.part_with_feature( "CONTROLS", true ) ) {
                                 actions.insert(ACTION_CONTROL_VEHICLE);
                             }
@@ -2318,7 +2318,7 @@ void CheckMessages()
                             }
                             if (dx == 0 && dy == 0) {
                                 const cata::optional<vpart_reference> cargopart = vp.part_with_feature( "CARGO", true );
-                                if( cargopart && !veh.get_items( cargopart.part_index() ).empty() ) {
+                                if( cargopart && !cargopart->get_items().empty() ) {
                                     actions.insert(ACTION_PICKUP);
                                 }
                             }

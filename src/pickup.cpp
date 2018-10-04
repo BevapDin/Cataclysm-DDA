@@ -84,7 +84,7 @@ interact_results interact_with_vehicle( vehicle *veh, const tripoint &pos,
     const bool has_controls = veh->avail_part_with_feature( veh_root_part, "CONTROLS" ).has_value();
     const bool has_electronics = veh->avail_part_with_feature( veh_root_part, "CTRL_ELECTRONIC" ).has_value();
     const cata::optional<vpart_reference> cargo_part = veh->part_with_feature_including_broken( veh_root_part, "CARGO" );
-    const bool from_vehicle = cargo_part && !veh->get_items( cargo_part ).empty();
+    const bool from_vehicle = cargo_part && !cargo_part->get_items().empty();
     const bool can_be_folded = veh->is_foldable();
     const bool is_convertible = ( veh->tags.count( "convertible" ) > 0 );
     const bool remotely_controlled = g->remoteveh() == veh;
@@ -670,7 +670,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
     // which items are we grabbing?
     std::vector<item> here;
     if( from_vehicle ) {
-        auto vehitems = veh->get_items( cargo_part );
+        auto vehitems = vpart_reference( *veh, cargo_part ).get_items();
         here.resize( vehitems.size() );
         std::copy( vehitems.begin(), vehitems.end(), here.begin() );
     } else {

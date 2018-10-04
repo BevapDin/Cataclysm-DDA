@@ -1165,9 +1165,6 @@ class vehicle
         bool remove_item( int part, const item *it );
         std::list<item>::iterator remove_item( int part, std::list<item>::iterator it );
 
-        vehicle_stack get_items( int part ) const;
-        vehicle_stack get_items( int part );
-
         // Generates starting items in the car, should only be called when placed on the map
         void place_spawn_items();
 

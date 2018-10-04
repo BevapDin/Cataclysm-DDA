@@ -1540,7 +1540,7 @@ bool vehicle::remove_part( int p )
         }
     }
 
-    for( auto &i : get_items( p ) ) {
+    for( auto &i : vpart_reference( *this, p ).get_items() ) {
         // Note: this can spawn items on the other side of the wall!
         tripoint dest( part_loc.x + rng( -3, 3 ), part_loc.y + rng( -3, 3 ), part_loc.z );
         g->m.add_item_or_charges( dest, i );
@@ -1555,10 +1555,6 @@ void vehicle::part_removal_cleanup()
     bool changed = false;
     for( std::vector<vehicle_part>::iterator it = parts.begin(); it != parts.end(); /* noop */ ) {
         if( it->removed ) {
-            auto items = get_items( std::distance( parts.begin(), it ) );
-            while( !items.empty() ) {
-                items.erase( items.begin() );
-            }
             it = parts.erase( it );
             changed = true;
         } else {
@@ -1963,11 +1959,6 @@ bool vpart_reference::add_item( const item &obj ) const
 bool vpart_reference::remove_item( const item *it )
 {
     return vehicle().remove_item( part_index(), it );
-}
-
-vehicle_stack vpart_reference::get_items() const
-{
-    return vehicle().get_items( part_index() );
 }
 
 cata::optional<vpart_reference> vpart_position::obstacle_at_part() const
@@ -3691,7 +3682,7 @@ long vehicle::add_charges( int part, const item &itm )
         debugmsg( "Add charges was called for an item not counted by charges!" );
         return 0;
     }
-    const long ret = get_items( part ).amount_can_fit( itm );
+    const long ret = vpart_reference( *this, part ).get_items().amount_can_fit( itm );
     if( ret == 0 ) {
         return 0;
     }
@@ -3716,7 +3707,7 @@ bool vehicle::add_item( int part, const item &itm )
         }
     }
     bool charge = itm.count_by_charges();
-    vehicle_stack istack = get_items( part );
+    vehicle_stack istack = vpart_reference( *this, part ).get_items();
     const long to_move = istack.amount_can_fit( itm );
     if( to_move == 0 || ( charge && to_move < itm.charges ) ) {
         return false; // @add_charges should be used in the latter case
@@ -3798,17 +3789,9 @@ std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::itera
     return veh_items.erase( it );
 }
 
-vehicle_stack vehicle::get_items( int const part )
+vehicle_stack vpart_reference::get_items() const
 {
-    const tripoint pos = global_part_pos3( part );
-    return vehicle_stack( &parts[part].items, point( pos.x, pos.y ), this, part );
-}
-
-vehicle_stack vehicle::get_items( int const part ) const
-{
-    // HACK: callers could modify items through this
-    // TODO: a const version of vehicle_stack is needed
-    return const_cast<vehicle *>( this )->get_items( part );
+    return vehicle_stack( &part().items, position(), &vehicle(), part_index() );
 }
 
 void vehicle::place_spawn_items()
@@ -4733,7 +4716,7 @@ void vehicle::calc_mass_center( bool use_precalc ) const
         units::mass m_part = 0;
         const vpart_info &pi = vp.info();
         m_part += vp.part().base.weight();
-        for( const auto &j : get_items( i ) ) {
+        for( const item &j : vp.get_items() ) {
             //m_part += j.type->weight;
             // Change back to the above if it runs too slowly
             m_part += j.weight();
