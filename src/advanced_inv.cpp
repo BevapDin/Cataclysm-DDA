@@ -140,8 +140,7 @@ void advanced_inventory::load_settings()
         }
         auto square = squares[location];
         // determine the square's vehicle/map item presence
-        bool has_veh_items = ( square.can_store_in_vehicle() ) ?
-                             !square.veh->get_items( square.vstor ).empty() : false;
+        bool has_veh_items = square.can_store_in_vehicle() && !square.vpcargo->get_items().empty();
         bool has_map_items = !g->m.i_at( square.pos ).empty();
         // determine based on map items and settings to show cargo
         bool show_vehicle = ( aim_code == exit_re_entry ) ?
@@ -260,7 +259,7 @@ void advanced_inventory::print_items( advanced_inventory_pane &pane, bool active
             if( pane.get_area() == AIM_CONTAINER && s.get_container( pane.in_vehicle() ) != nullptr ) {
                 maxvolume = s.get_container( pane.in_vehicle() )->get_container_capacity();
             } else if( pane.in_vehicle() ) {
-                maxvolume = s.veh->get_items( s.vstor ).max_volume();
+                maxvolume = s.vpcargo->get_items().max_volume();
             } else {
                 maxvolume = g->m.max_volume( s.pos );
             }
@@ -586,7 +585,7 @@ int advanced_inv_area::get_item_count() const
     } else if( id == AIM_ALL ) {
         return 0;
     } else if( id == AIM_DRAGGED ) {
-        return can_store_in_vehicle() ? veh->get_items( vstor ).size() : 0;
+        return can_store_in_vehicle() ? vpcargo->get_items().size() : 0;
     } else {
         return g->m.i_at( pos ).size();
     }
@@ -595,8 +594,7 @@ int advanced_inv_area::get_item_count() const
 void advanced_inv_area::init()
 {
     pos = g->u.pos() + off;
-    veh = nullptr;
-    vstor = -1;
+    vpcargo.reset();
     volume = 0; // must update in main function
     weight = 0; // must update in main function
     switch( id ) {
@@ -614,19 +612,11 @@ void advanced_inv_area::init()
             off = g->u.grab_point;
             // Reset position because offset changed
             pos = g->u.pos() + off;
-            if( const cata::optional<vpart_reference> vp = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" ) ) {
-                veh = &vp->vehicle();
-                vstor = vp->part_index();
-            } else {
-                veh = nullptr;
-                vstor = -1;
-            }
-            if( vstor >= 0 ) {
-                desc[0] = veh->name;
+            if( vpcargo = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" ) ) {
+                desc[0] = vpcargo->vehicle().name;
                 canputitemsloc = true;
                 max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
             } else {
-                veh = nullptr;
                 canputitemsloc = false;
                 desc[0] = _( "No dragged vehicle!" );
             }
@@ -654,17 +644,11 @@ void advanced_inv_area::init()
         case AIM_NORTHWEST:
         case AIM_NORTH:
         case AIM_NORTHEAST:
-            if( const cata::optional<vpart_reference> vp = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" ) ) {
-                veh = &vp->vehicle();
-                vstor = vp->part_index();
-            } else {
-                veh = nullptr;
-                vstor = -1;
-            }
+            vpcargo = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" );
             canputitemsloc = can_store_in_vehicle() || g->m.can_put_items_ter_furn( pos );
             max_size = MAX_ITEM_IN_SQUARE;
             if( can_store_in_vehicle() ) {
-                desc[1] = vpart_position( *veh, vstor ).get_label().value_or( "" );
+                desc[1] = vpcargo->position().get_label().value_or( "" );
             }
             // get graffiti or terrain name
             desc[0] = g->m.has_graffiti_at( pos ) ?
@@ -945,7 +929,7 @@ void advanced_inventory_pane::add_items_from_area( advanced_inv_area &square,
     } else {
         bool is_in_vehicle = square.can_store_in_vehicle() && ( in_vehicle() || vehicle_override );
         const itemstack &stacks = ( is_in_vehicle ) ?
-                                  i_stacked( square.veh->get_items( square.vstor ) ) :
+                                  i_stacked( square.vpcargo->get_items() ) :
                                   i_stacked( m.i_at( square.pos ) );
 
         for( size_t x = 0; x < stacks.size(); ++x ) {
@@ -1087,7 +1071,7 @@ void advanced_inventory::redraw_pane( side p )
                            square.off == squares[AIM_DRAGGED].off; // make sure the offsets are the same as the grab point
     const advanced_inv_area &sq = ( same_as_dragged ) ? squares[AIM_DRAGGED] : square;
     bool car = square.can_store_in_vehicle() && panes[p].in_vehicle() && sq.id != AIM_DRAGGED;
-    auto name = utf8_truncate( car ? sq.veh->name : sq.name, width );
+    auto name = utf8_truncate( car ? sq.vpcargo->vehicle().name : sq.name, width );
     auto desc = utf8_truncate( sq.desc[car], width );
     width -= 2 + 1; // starts at offset 2, plus space between the header and the text
     mvwprintz( w, 1, 2, active ? c_green  : c_light_gray, name );
@@ -1327,8 +1311,8 @@ bool advanced_inventory::move_all_items( bool nested_call )
 
         std::list<item>::iterator begin, end;
         if( panes[src].in_vehicle() ) {
-            begin = sarea.veh->get_items( sarea.vstor ).begin();
-            end = sarea.veh->get_items( sarea.vstor ).end();
+            begin = sarea.vpcargo->get_items().begin();
+            end = sarea.vpcargo->get_items().end();
         } else {
             begin = g->m.i_at( sarea.pos ).begin();
             end = g->m.i_at( sarea.pos ).end();
@@ -1554,7 +1538,7 @@ void advanced_inventory::display()
                         // check item stacks in vehicle and map at said square
                         auto sq = squares[changeSquare];
                         auto map_stack = g->m.i_at( sq.pos );
-                        auto veh_stack = sq.veh->get_items( sq.vstor );
+                        auto veh_stack = sq.vpcargo->get_items();
                         // auto switch to vehicle storage if vehicle items are there, or neither are there
                         if( !veh_stack.empty() || map_stack.empty() ) {
                             in_vehicle_cargo = true;
@@ -1969,7 +1953,7 @@ bool advanced_inventory::query_destination( aim_location &def )
             menu.addentry( *iter,
                            ( s.canputitems() && s.id != panes[src].get_area() ),
                            get_location_key( *iter ),
-                           prefix + " " + s.name + " " + ( s.veh != nullptr ? s.veh->name : "" ) );
+                           prefix + " " + s.name + " " + ( s.vpcargo ? s.vpcargo->vehicle().name : "" ) );
         }
     }
     // Selected keyed to uimenu.entries, which starts at 0.
@@ -2016,7 +2000,7 @@ int advanced_inventory::remove_item( advanced_inv_listitem &sitem, int count )
         } else if( sitem.area == AIM_WORN ) {
             rc &= g->u.takeoff( sitem.idx );
         } else if( sitem.from_vehicle ) {
-            rc &= s.veh->remove_item( s.vstor, sitem.items.front() );
+            rc &= s.vpcargo->remove_item( sitem.items.front() );
         } else {
             g->m.i_rem( s.pos, sitem.items.front() );
         }
@@ -2059,7 +2043,7 @@ int advanced_inventory::add_item( aim_location destarea, item &new_item, int cou
             advanced_inv_area &p = squares[destarea];
             bool added = true;
             if( panes[dest].in_vehicle() ) {
-                added = p.veh->add_item( p.vstor, new_item );
+                added = p.vpcargo->add_item( new_item );
             } else {
                 added = !g->m.add_item_or_charges( p.pos, new_item, false ).is_null();
             }
@@ -2126,7 +2110,7 @@ units::volume advanced_inv_area::free_volume( bool in_vehicle ) const
     if( id == AIM_INVENTORY || id == AIM_WORN ) {
         return ( g->u.volume_capacity() - g->u.volume_carried() );
     }
-    return ( in_vehicle ) ? veh->get_items( vstor ).free_volume() : g->m.free_volume( pos );
+    return in_vehicle ? vpcargo->get_items().free_volume() : g->m.free_volume( pos );
 }
 
 static units::volume unit_volume( const item &i )
@@ -2260,7 +2244,7 @@ bool advanced_inv_area::is_same( const advanced_inv_area &other ) const
         id != AIM_WORN      && other.id != AIM_WORN      &&
         id != AIM_CONTAINER && other.id != AIM_CONTAINER ) {
         //     have a vehicle?...     ...do the cargo index and pos match?...    ...at least pos?
-        return ( veh == other.veh ) ? ( pos == other.pos && vstor == other.vstor ) : pos == other.pos;
+        return ( vpcargo && other.vpcargo ) ? *vpcargo == *other.vpcargo : pos == other.pos;
     }
     //      ...is the id?
     return id == other.id;
@@ -2343,12 +2327,12 @@ item *advanced_inv_area::get_container( bool in_vehicle )
             }
         } else {
             map &m = g->m;
-            bool is_in_vehicle = veh &&
+            bool is_in_vehicle = vpcargo &&
                                  ( uistate.adv_inv_container_in_vehicle ||
                                    ( can_store_in_vehicle() && in_vehicle ) );
 
             const itemstack &stacks = ( is_in_vehicle ) ?
-                                      i_stacked( veh->get_items( vstor ) ) :
+                                      i_stacked( vpcargo->get_items() ) :
                                       i_stacked( m.i_at( pos ) );
 
             // check index first
@@ -2432,13 +2416,7 @@ void advanced_inv_area::set_container_position()
     // update the absolute position
     pos = g->u.pos() + off;
     // update vehicle information
-    if( const cata::optional<vpart_reference> vp = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" ) ) {
-        veh = &vp->vehicle();
-        vstor = vp->part_index();
-    } else {
-        veh = nullptr;
-        vstor = -1;
-    }
+    vpcargo = g->m.veh_at( pos ).part_with_feature_including_broken( "CARGO" );
 }
 
 void advanced_inv()

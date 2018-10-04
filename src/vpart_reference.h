@@ -5,11 +5,21 @@
 #include "vpart_position.h"
 
 #include <string>
+#include <list>
 
+class item;
 class vehicle;
 class vehicle_part;
 enum vpart_bitflags : int;
 class vpart_info;
+class vehicle_stack;
+namespace units
+{
+template<typename V, typename U>
+class quantity;
+class volume_in_milliliter_tag;
+using volume = quantity<int, volume_in_milliliter_tag>;
+} // namespace units
 
 /**
  * This is a wrapper over a vehicle pointer and a reference to a part of it.
@@ -34,6 +44,20 @@ class vpart_reference : public vpart_position
 
         bool has_feature( const std::string &feature ) const;
         bool has_feature( vpart_bitflags feature ) const;
+
+        bool operator==( const vpart_reference &rhs ) const {
+            return &vehicle() == &rhs.vehicle() && part_index() == rhs.part_index();
+        }
+        bool operator!=( const vpart_reference &rhs ) const {
+            return !operator==( rhs );
+        }
+
+        units::volume max_volume() const;
+        units::volume free_volume() const;
+
+        bool add_item( const item &obj ) const;
+        bool remove_item( const item *it );
+        vehicle_stack get_items() const;
 };
 
 #endif

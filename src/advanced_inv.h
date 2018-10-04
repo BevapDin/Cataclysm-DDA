@@ -5,6 +5,8 @@
 #include "cursesdef.h"
 #include "enums.h"
 #include "units.h"
+#include "optional.h"
+#include "vpart_reference.h"
 
 #include <string>
 #include <array>
@@ -82,9 +84,7 @@ struct advanced_inv_area {
     /** Can we put items there? Only checks if location is valid, not if
         selected container in pane is. For full check use canputitems() **/
     bool canputitemsloc;
-    // vehicle pointer and cargo part index
-    vehicle *veh;
-    int vstor;
+    cata::optional<vpart_reference> vpcargo;
     // description, e.g. vehicle name, label, or terrain
     std::array<std::string, 2> desc;
     // flags, e.g. FIRE, TRAP, WATER
@@ -99,7 +99,7 @@ struct advanced_inv_area {
     advanced_inv_area( aim_location id, int hscreenx, int hscreeny, tripoint off, std::string name,
                        std::string shortname ) : id( id ), hscreenx( hscreenx ),
         hscreeny( hscreeny ), off( off ), name( name ), shortname( shortname ), pos( 0, 0, 0 ),
-        canputitemsloc( false ), veh( nullptr ), vstor( -1 ), volume( 0 ), weight( 0 ),
+        canputitemsloc( false ), volume( 0 ), weight( 0 ),
         max_size( 0 ) {
     }
 
@@ -122,7 +122,7 @@ struct advanced_inv_area {
         if( id > AIM_DRAGGED || id < AIM_SOUTHWEST ) {
             return false;
         }
-        return ( veh != nullptr && vstor >= 0 );
+        return vpcargo.has_value();
     }
 };
 
