@@ -1898,6 +1898,31 @@ std::vector<int> vehicle::parts_at_relative( const point &dp,
     }
 }
 
+units::volume vpart_reference::max_volume() const
+{
+    return vehicle().max_volume( part_index() );
+}
+
+units::volume vpart_reference::free_volume() const
+{
+    return vehicle().free_volume( part_index() );
+}
+
+bool vpart_reference::add_item( const item &obj ) const
+{
+    return vehicle().add_item( part_index(), obj );
+}
+
+bool vpart_reference::remove_item( const item *it )
+{
+    return vehicle().remove_item( part_index(), it );
+}
+
+vehicle_stack vpart_reference::get_items() const
+{
+    return vehicle().get_items( part_index() );
+}
+
 cata::optional<vpart_reference> vpart_position::obstacle_at_part() const
 {
     const cata::optional<vpart_reference> part = part_with_feature( VPFLAG_OBSTACLE );
