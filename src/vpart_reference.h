@@ -7,6 +7,7 @@
 #include <string>
 #include <list>
 
+class player;
 class item;
 class vehicle;
 class vehicle_part;
@@ -64,6 +65,34 @@ class vpart_reference : public vpart_position
         void open_or_close( bool opening ) const;
         void open() const;
         void close() const;
+
+        /**
+         * Yields the currently boarded creature.
+         * Returns `nullptr` if there is no boarded creature.
+         * Returns `nullptr` if the part can not be boarded at all.
+         */
+        // @todo change to return a Creature
+        player *get_passenger() const;
+        /**
+         * Set the currently boarded creature (see @ref get_passenger).
+         * Also sets some properties in the @p passenger object.
+         * Precondition:
+         * `get_passenger() == nullptr`
+         * Postcondition:
+         * `get_passenger() == &passenger`
+         * @note Does *not* set the position of the creature, that must
+         * be done manually (if needed).
+         * See @ref map::board_vehicle.
+         */
+        void set_passenger( player &passenger ) const;
+        /**
+         * Remove the currently boarded creature (if any).
+         */
+        void unset_passenger() const;
+        /**
+         * Shortcut for `get_passenger() == &p`.
+         */
+        bool is_passenger( const player &p ) const;
 };
 
 #endif

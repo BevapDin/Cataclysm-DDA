@@ -2704,7 +2704,7 @@ void game::load( const save_t &name )
         if( u.in_vehicle ) {
             if( const cata::optional<vpart_reference> vp = m.veh_at(
                         u.pos() ).part_with_feature( "BOARDABLE", true ) ) {
-                vp->part().passenger_id = u.getID();
+                vp->set_passenger( u );
             }
         }
     }

@@ -648,8 +648,7 @@ void npc::execute_action( npc_action action )
             int my_spot = -1;
             std::vector<std::pair<int, int> > seats;
             for( const vpart_reference vp : veh->get_parts( VPFLAG_BOARDABLE ) ) {
-                const size_t p2 = vp.part_index();
-                const player *passenger = veh->get_passenger( p2 );
+                const player *const passenger = vp.get_passenger();
                 if( passenger != this && passenger != nullptr ) {
                     continue;
                 }
@@ -678,7 +677,7 @@ void npc::execute_action( npc_action action )
                     const npc *who = pt.crew();
                     priority = who && who->getID() == getID() ? 3 : 2;
 
-                } else if( vpart_position( *veh, p2 ).is_inside() ) {
+                } else if( vp.is_inside() ) {
                     priority = 1;
                 }
 
@@ -686,7 +685,7 @@ void npc::execute_action( npc_action action )
                     my_spot = priority;
                 }
 
-                seats.push_back( std::make_pair( priority, static_cast<int>( p2 ) ) );
+                seats.push_back( std::make_pair( priority, static_cast<int>( vp.part_index() ) ) );
             }
 
             if( my_spot >= 3 ) {

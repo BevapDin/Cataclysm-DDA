@@ -873,9 +873,6 @@ class vehicle
         // Pre-calculate mount points for (idir=0) - current direction or (idir=1) - next turn direction
         void precalc_mounts( int idir, int dir, const point &pivot );
 
-        // get passenger at part p
-        player *get_passenger( int p ) const;
-
         /**
          * Get the coordinates (in map squares) of this vehicle, it's the same
          * coordinate system that player::posx uses.

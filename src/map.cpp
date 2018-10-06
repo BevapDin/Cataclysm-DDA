@@ -836,20 +836,9 @@ void map::board_vehicle( const tripoint &pos, player *p )
         }
         return;
     }
-    vehicle *const veh = &vp->vehicle();
-    const int seat_part = vp->part_index();
-    if( vp->part().has_flag( vehicle_part::passenger_flag ) ) {
-        player *psg = veh->get_passenger( seat_part );
-        debugmsg( "map::board_vehicle: passenger (%s) is already there",
-                  psg ? psg->name.c_str() : "<null>" );
-        unboard_vehicle( pos );
-    }
-    vp->part().set_flag( vehicle_part::passenger_flag );
-    vp->part().passenger_id = p->getID();
-    veh->invalidate_mass();
 
+    vp->set_passenger( *p );
     p->setpos( pos );
-    p->in_vehicle = true;
     if( p == &g->u ) {
         g->update_map( g->u );
     }
@@ -858,29 +847,16 @@ void map::board_vehicle( const tripoint &pos, player *p )
 void map::unboard_vehicle( const tripoint &p )
 {
     const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature_including_broken( VPFLAG_BOARDABLE );
-    player *passenger = nullptr;
     if( !vp ) {
         debugmsg( "map::unboard_vehicle: vehicle not found" );
         // Try and force unboard the player anyway.
-        passenger = g->critter_at<player>( p );
-        if( passenger ) {
+        if( player *const passenger = g->critter_at<player>( p ) ) {
             passenger->in_vehicle = false;
             passenger->controlling_vehicle = false;
         }
         return;
     }
-    vehicle *const veh = &vp->vehicle();
-    const int seat_part = vp->part_index();
-    passenger = veh->get_passenger( seat_part );
-    if( !passenger ) {
-        debugmsg( "map::unboard_vehicle: passenger not found" );
-        return;
-    }
-    passenger->in_vehicle = false;
-    passenger->controlling_vehicle = false;
-    vp->part().remove_flag( vehicle_part::passenger_flag );
-    veh->skidding = true;
-    veh->invalidate_mass();
+    vp->unset_passenger();
 }
 
 vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
@@ -945,22 +921,19 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
     int z_change = 0;
     // Move passengers
     for( const vpart_reference seat : veh->boarded_parts() ) {
-        const size_t prt = seat.part_index();
-        player *const psg = veh->get_passenger( prt );
+        player *const psg = seat.get_passenger();
         const tripoint part_pos = seat.position();
         if( psg == nullptr ) {
-            debugmsg( "Empty passenger part %d pcoord=%d,%d,%d u=%d,%d,%d?",
-                      prt,
+            debugmsg( "Empty passenger part pcoord=%d,%d,%d u=%d,%d,%d?",
                       part_pos.x, part_pos.y, part_pos.z,
                       g->u.posx(), g->u.posy(), g->u.posz() );
-            veh->parts[prt].remove_flag( vehicle_part::passenger_flag );
+            seat.unset_passenger();
             continue;
         }
 
         if( psg->pos() != part_pos ) {
-            add_msg( m_debug, "Passenger/part position mismatch: passenger %d,%d,%d, part %d %d,%d,%d",
+            add_msg( m_debug, "Passenger/part position mismatch: passenger %d,%d,%d, part %d,%d,%d",
                      g->u.posx(), g->u.posy(), g->u.posz(),
-                     prt,
                      part_pos.x, part_pos.y, part_pos.z );
         }
 
