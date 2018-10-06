@@ -953,11 +953,7 @@ class vehicle
          */
         std::map<itype_id, int> fuel_usage() const;
 
-        /**
-         * Get all vehicle lights (excluding any that are destroyed)
-         * @param active if true return only lights which are enabled
-         */
-        std::vector<vehicle_part *> lights( bool active = false );
+        vehicle_part_with_condition_range lights() const;
 
         void power_parts();
 

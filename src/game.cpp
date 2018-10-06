@@ -1374,17 +1374,15 @@ static int veh_lumi( vehicle &veh )
 {
     float veh_luminance = 0.0;
     float iteration = 1.0;
-    auto lights = veh.lights( true );
-
-    for( const auto pt : lights ) {
-        const auto &vp = pt->info();
+    for( const vpart_reference pt : veh.lights() ) {
+        const vpart_info &vp = pt.info();
         if( vp.has_flag( VPFLAG_CONE_LIGHT ) ) {
             veh_luminance += vp.bonus / iteration;
             iteration = iteration * 1.1;
         }
     }
     // Calculation: see lightmap.cpp
-    return LIGHT_RANGE( ( veh_luminance * 3 ) );
+    return LIGHT_RANGE( veh_luminance * 3 );
 }
 
 void game::calc_driving_offset( vehicle *veh )

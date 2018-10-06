@@ -319,22 +319,22 @@ void map::generate_lightmap( const int zlev )
     for( auto &vv : vehs ) {
         vehicle *v = vv.v;
 
-        auto lights = v->lights( true );
+        const auto lights = v->lights();
 
         float veh_luminance = 0.0;
         float iteration = 1.0;
 
-        for( const auto pt : lights ) {
-            const auto &vp = pt->info();
+        for( const vpart_reference pt : lights ) {
+            const vpart_info &vp = pt.info();
             if( vp.has_flag( VPFLAG_CONE_LIGHT ) ) {
                 veh_luminance += vp.bonus / iteration;
                 iteration = iteration * 1.1;
             }
         }
 
-        for( const auto pt : lights ) {
-            const auto &vp = pt->info();
-            tripoint src = v->global_part_pos3( *pt );
+        for( const vpart_reference pt : lights ) {
+            const vpart_info &vp = pt.info();
+            const tripoint src = pt.position();
 
             if( !inbounds( src ) ) {
                 continue;
@@ -343,7 +343,7 @@ void map::generate_lightmap( const int zlev )
             if( vp.has_flag( VPFLAG_CONE_LIGHT ) ) {
                 if( veh_luminance > LL_LIT ) {
                     add_light_source( src, SQRT_2 ); // Add a little surrounding light
-                    apply_light_arc( src, v->face.dir() + pt->direction, veh_luminance, 45 );
+                    apply_light_arc( src, v->face.dir() + pt.part().direction, veh_luminance, 45 );
                 }
 
             } else if( vp.has_flag( VPFLAG_CIRCLE_LIGHT ) ) {

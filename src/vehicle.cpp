@@ -3267,15 +3267,12 @@ void vehicle::consume_fuel( double load = 1.0 )
     }
 }
 
-std::vector<vehicle_part *> vehicle::lights( bool active )
+vehicle_part_with_condition_range vehicle::lights() const
 {
-    std::vector<vehicle_part *> res;
-    for( auto &e : parts ) {
-        if( ( !active || e.enabled ) && e.is_available() && e.is_light() ) {
-            res.push_back( &e );
-        }
-    }
-    return res;
+    return vehicle_part_with_condition_range( const_cast<vehicle&>( *this ), []( const vehicle &veh, const size_t part ) {
+        const vehicle_part &p = veh.parts[part];
+        return p.enabled && p.is_available() && p.is_light();
+    } );
 }
 
 void vehicle::power_parts()
