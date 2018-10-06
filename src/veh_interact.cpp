@@ -1893,8 +1893,8 @@ void veh_interact::display_veh ()
         long sym = veh->part_sym (p);
         nc_color col = veh->part_color (p);
 
-        int x =   struct_part.part().mount.y + ddy;
-        int y = -(struct_part.part().mount.x + ddx);
+        int x =   struct_part.mount().y + ddy;
+        int y = -(struct_part.mount().x + ddx);
 
         if (x == 0 && y == 0) {
             col = hilite(col);

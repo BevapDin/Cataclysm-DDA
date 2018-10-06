@@ -2047,7 +2047,7 @@ void vehicle::deserialize( JsonIn &jsin )
         auto end = vp.part().items.end();
         for( ; it != end; ++it ) {
             if( it->needs_processing() ) {
-                active_items.add( it, vp.part().mount );
+                active_items.add( it, vp.mount() );
             }
         }
     }

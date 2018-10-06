@@ -12,6 +12,7 @@ enum vpart_bitflags : int;
 class vpart_reference;
 class vehicle_part_with_condition_range;
 struct tripoint;
+struct point;
 
 /**
  * Reference to a position (a point) of the @ref vehicle.
@@ -82,6 +83,12 @@ class vpart_position
          * and the mount point of the specific part.
          */
         tripoint position() const;
+        /**
+         * The position of the the part in the vehicle coordinate system.
+         * This is unaffected by rotation/movement of the vehicle.
+         */
+        // @todo change to tripoint
+        point mount() const;
 };
 
 /**

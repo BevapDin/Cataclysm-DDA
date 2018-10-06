@@ -718,10 +718,10 @@ float map::vehicle_vehicle_collision( vehicle &veh, vehicle &veh2,
             parm2.emplace( veh2, veh_veh_coll.target_part );
         }
 
-        epicenter1 += parm1.part().mount;
+        epicenter1 += parm1.mount();
         parm1.vehicle().damage( parm1.part_index(), dmg1_part, DT_BASH );
 
-        epicenter2 += parm2.part().mount;
+        epicenter2 += parm2.mount();
         parm2.vehicle().damage( parm2.part_index(), dmg2_part, DT_BASH );
     }
 
@@ -4464,7 +4464,7 @@ void map::process_items_in_vehicle( vehicle &cur_veh, submap &current_submap, co
         }
         auto const it = std::find_if( begin( cargo_parts ),
         end( cargo_parts ), [&]( const vpart_reference & part ) {
-            return active_item.location == part.part().mount;
+            return active_item.location == part.mount();
         } );
 
         if( it == end( cargo_parts ) ) {
@@ -5270,7 +5270,7 @@ void map::add_splatter( const field_id type, const tripoint &where, int intensit
             vehicle *const veh = &vp->vehicle();
             const int anchor_part = vp->part_index();
             // Might be -1 if all the vehicle's parts at where are marked for removal
-            const int part = veh->part_displayed_at( vp->part().mount.x, vp->part().mount.y );
+            const int part = veh->part_displayed_at( vp->mount().x, vp->mount().y );
             if( part != -1 ) {
                 veh->parts[part].blood += 200 * std::min( intensity, 3 ) / 3;
                 return;

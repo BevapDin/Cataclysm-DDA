@@ -212,7 +212,7 @@ void vehicle::add_steerable_wheels()
             return;
         }
 
-        if( vp.part().mount.x < axle ) {
+        if( vp.mount().x < axle ) {
             // there is another axle in front of this
             continue;
         }
@@ -221,11 +221,11 @@ void vehicle::add_steerable_wheels()
             vpart_id steerable_id( vp.info().get_id().str() + "_steerable" );
             if( steerable_id.is_valid() ) {
                 // We can convert this.
-                if( vp.part().mount.x != axle ) {
+                if( vp.mount().x != axle ) {
                     // Found a new axle further forward than the
                     // existing one.
                     wheels.clear();
-                    axle = vp.part().mount.x;
+                    axle = vp.mount().x;
                 }
 
                 wheels.push_back( std::make_pair( static_cast<int>( p ), steerable_id ) );
@@ -1334,8 +1334,8 @@ bool vehicle::merge_rackable_vehicle( vehicle *carry_veh, std::vector<int> rack_
         axis = "X";
     } else {
         for( const vpart_reference cvp : carry_veh_structs ) {
-            if( cvp.part().mount.x || cvp.part().mount.y ) {
-                axis = cvp.part().mount.x ? "X" : "Y";
+            if( cvp.mount().x || cvp.mount().y ) {
+                axis = cvp.mount().x ? "X" : "Y";
             }
         }
     }
@@ -1372,7 +1372,7 @@ bool vehicle::merge_rackable_vehicle( vehicle *carry_veh, std::vector<int> rack_
             }
             if( j < 4 ) {
                 mapping carry_map;
-                point old_mount = cvp.part().mount;
+                point old_mount = cvp.mount();
                 carry_map.carry_parts_here = carry_veh->parts_at_relative( old_mount.x, old_mount.y, true );
                 carry_map.rack_part = rack_part;
                 carry_map.carry_mount = carry_mount;
@@ -1925,7 +1925,7 @@ std::vector<int> vehicle::parts_at_relative( const int dx, const int dy,
         std::vector<int> res;
         for( const vpart_reference vp : get_parts() ) {
             const size_t i = vp.part_index();
-            if( vp.part().mount.x == dx && vp.part().mount.y == dy && !vp.part().removed ) {
+            if( vp.mount().x == dx && vp.mount().y == dy && !vp.part().removed ) {
                 res.push_back( ( int )i );
             }
         }
@@ -2321,10 +2321,10 @@ std::vector<std::vector<int>> vehicle::find_lines_of_parts( int part, const std:
             vp.info().get_id() != part_id )  {
             continue;
         }
-        if( vp.part().mount.x == target.x ) {
+        if( vp.mount().x == target.x ) {
             x_parts.push_back( possible_part );
         }
-        if( vp.part().mount.y == target.y ) {
+        if( vp.mount().y == target.y ) {
             y_parts.push_back( possible_part );
         }
     }
@@ -3011,7 +3011,7 @@ float vehicle::k_aerodynamics() const
     }
     for( const vpart_reference vp : all_parts_at_location( part_location_structure ) ) {
         int frame_size = vp.part_with_feature( VPFLAG_OBSTACLE ) ? 30 : 10;
-        int pos = vp.part().mount.y + max_obst / 2;
+        int pos = vp.mount().y + max_obst / 2;
         if( pos < 0 ) {
             pos = 0;
         }
@@ -3979,7 +3979,7 @@ void vehicle::refresh()
             extra_drag += vpi.power;
         }
         // Build map of point -> all parts in that point
-        const point pt = vp.part().mount;
+        const point pt = vp.mount();
         // This will keep the parts at point pt sorted
         vii = std::lower_bound( relative_parts[pt].begin(), relative_parts[pt].end(), static_cast<int>( p ),
                                 svpv );
@@ -4159,8 +4159,8 @@ void vehicle::refresh_insides()
         for( int i = 0; i < 4; i++ ) { // let's check four neighbor parts
             int ndx = i < 2 ? ( i == 0 ? -1 : 1 ) : 0;
             int ndy = i < 2 ? 0 : ( i == 2 ? - 1 : 1 );
-            std::vector<int> parts_n3ar = parts_at_relative( vp.part().mount.x + ndx,
-                                          vp.part().mount.y + ndy, true );
+            std::vector<int> parts_n3ar = parts_at_relative( vp.mount().x + ndx,
+                                          vp.mount().y + ndy, true );
             bool cover = false; // if we aren't covered from sides, the roof at p won't save us
             for( auto &j : parts_n3ar ) {
                 // another roof -- cover
@@ -4293,7 +4293,7 @@ void vehicle::damage_all( int dmg1, int dmg2, damage_type type, const point &imp
 
     for( const vpart_reference vp : get_parts() ) {
         const size_t p = vp.part_index();
-        int distance = 1 + square_dist( vp.part().mount.x, vp.part().mount.y, impact.x, impact.y );
+        int distance = 1 + square_dist( vp.mount().x, vp.mount().y, impact.x, impact.y );
         if( distance > 1 && part_info( p ).location == part_location_structure &&
             !part_info( p ).has_flag( "PROTRUSION" ) ) {
             damage_direct( p, rng( dmg1, dmg2 ) / ( distance * distance ), type );
@@ -4344,7 +4344,7 @@ bool vehicle::shift_if_needed()
     //Find a frame, any frame, to shift to
     for( const vpart_reference vp : get_parts() ) {
         if( vp.info().location == "structure" && !vp.has_feature( "PROTRUSION" ) && !vp.part().removed ) {
-            shift_parts( vp.part().mount );
+            shift_parts( vp.mount() );
             refresh();
             return true;
         }
@@ -4352,7 +4352,7 @@ bool vehicle::shift_if_needed()
     // There are only parts with PROTRUSION left, choose one of them.
     for( const vpart_reference vp : get_parts() ) {
         if( !vp.part().removed ) {
-            shift_parts( vp.part().mount );
+            shift_parts( vp.mount() );
             refresh();
             return true;
         }
@@ -4737,8 +4737,8 @@ void vehicle::calc_mass_center( bool use_precalc ) const
             xf += vp.part().precalc[0].x * m_part;
             yf += vp.part().precalc[0].y * m_part;
         } else {
-            xf += vp.part().mount.x * m_part;
-            yf += vp.part().mount.y * m_part;
+            xf += vp.mount().x * m_part;
+            yf += vp.mount().y * m_part;
         }
 
         m_total += m_part;
@@ -4860,4 +4860,9 @@ vehicle_part_with_condition_range vpart_position::parts_here() const
 tripoint vpart_position::position() const
 {
     return vpart_reference( this->vehicle(), part_index() ).position();
+}
+
+point vpart_position::mount() const
+{
+    return vpart_reference( this->vehicle(), part_index() ).mount;
 }
