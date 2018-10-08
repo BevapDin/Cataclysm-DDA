@@ -1201,7 +1201,7 @@ void remove_from_map_or_vehicle( const tripoint &pos, vehicle *veh, int cargo_pa
                                  int moves_taken, int curmit )
 {
     if( veh != nullptr ) {
-        veh->remove_item( cargo_part, curmit );
+        vpart_reference( *veh, cargo_part ).remove_item( curmit );
     } else {
         g->m.i_rem( pos, curmit );
     }

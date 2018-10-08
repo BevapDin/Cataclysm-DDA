@@ -575,7 +575,7 @@ static void move_items( const tripoint &src, bool from_vehicle,
             }
             // Remove from map or vehicle.
             if( from_vehicle ) {
-                s_veh->remove_item( s_cargo, index );
+                vpart_reference( *s_veh, s_cargo ).remove_item( index );
             } else {
                 g->m.i_rem( source, index );
             }

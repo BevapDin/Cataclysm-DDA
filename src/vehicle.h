@@ -1115,11 +1115,6 @@ class vehicle
          */
         bool add_item_at( int part, std::list<item>::iterator index, item itm );
 
-        // remove item from part's cargo
-        bool remove_item( int part, int itemdex );
-        bool remove_item( int part, const item *it );
-        std::list<item>::iterator remove_item( int part, std::list<item>::iterator it );
-
         // Generates starting items in the car, should only be called when placed on the map
         void place_spawn_items();
 

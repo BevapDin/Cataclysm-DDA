@@ -64,7 +64,11 @@ class vpart_reference : public vpart_position
          * the volume limit or item count limit, not all charges can fit, etc.)
          */
         bool add_item( const item &obj ) const;
-        bool remove_item( const item *it );
+
+        bool remove_item( const item *it ) const;
+        bool remove_item( size_t itemdex ) const;
+        std::list<item>::iterator remove_item( std::list<item>::iterator it ) const;
+
         vehicle_stack get_items() const;
 
         bool is_open() const;

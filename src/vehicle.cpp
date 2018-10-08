@@ -76,7 +76,7 @@ point vehicles::cardinal_d[5] = { point( -1, 0 ), point( 1, 0 ), point( 0, -1 ),
 // Vehicle stack methods.
 std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
 {
-    return myorigin->remove_item( part_num, it );
+    return vpart_reference( *myorigin, part_num ).remove_item( it );
 }
 
 void vehicle_stack::push_back( const item &newitem )
@@ -1939,11 +1939,6 @@ units::volume vpart_reference::free_volume() const
     return vehicle().free_volume( part_index() );
 }
 
-bool vpart_reference::remove_item( const item *it )
-{
-    return vehicle().remove_item( part_index(), it );
-}
-
 cata::optional<vpart_reference> vpart_position::obstacle_at_part() const
 {
     const cata::optional<vpart_reference> part = part_with_feature( VPFLAG_OBSTACLE );
@@ -3745,41 +3740,37 @@ bool vehicle::add_item_at( int part, std::list<item>::iterator index, item itm )
     return true;
 }
 
-bool vehicle::remove_item( int part, int itemdex )
+bool vpart_position::remove_item( const size_t itemdex ) const
 {
-    if( itemdex < 0 || itemdex >= ( int )parts[part].items.size() ) {
+    if( itemdex >= part().items.size() ) {
         return false;
     }
 
-    remove_item( part, std::next( parts[part].items.begin(), itemdex ) );
-    return true;
+    return remove_item( std::next( part().items.begin(), itemdex ) );
 }
 
-bool vehicle::remove_item( int part, const item *it )
+bool vpart_reference::remove_item( const item *it ) const
 {
-    bool rc = false;
-    std::list<item> &veh_items = parts[part].items;
-
+    std::list<item> &veh_items = part().items;
     for( auto iter = veh_items.begin(); iter != veh_items.end(); iter++ ) {
         //delete the item if the pointer memory addresses are the same
         if( it == &*iter ) {
-            remove_item( part, iter );
-            rc = true;
-            break;
+            remove_item( iter );
+            return true;
         }
     }
-    return rc;
+    return false;
 }
 
-std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::iterator it )
+std::list<item>::iterator vpart_reference::remove_item( const std::list<item>::iterator it ) const
 {
-    std::list<item> &veh_items = parts[part].items;
+    std::list<item> &veh_items = part().items;
 
-    if( active_items.has( it, parts[part].mount ) ) {
-        active_items.remove( it, parts[part].mount );
+    if( vehicle().active_items.has( it, mount() ) ) {
+        vehicle().active_items.remove( it, mount() );
     }
 
-    invalidate_mass();
+    vehicle().invalidate_mass();
     return veh_items.erase( it );
 }
 
