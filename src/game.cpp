@@ -2535,16 +2535,12 @@ bool game::is_game_over()
         return false;
     }
     if( uquit == QUIT_DIED ) {
-        if( u.in_vehicle ) {
-            m.unboard_vehicle( u.pos() );
-        }
+        m.unboard_vehicle( u );
         u.place_corpse();
         return true;
     }
     if( uquit == QUIT_SUICIDE ) {
-        if( u.in_vehicle ) {
-            m.unboard_vehicle( u.pos() );
-        }
+        m.unboard_vehicle( u );
         return true;
     }
     if( uquit != QUIT_NO ) {
@@ -5458,13 +5454,8 @@ bool game::swap_critters( Creature &a, Creature &b )
     player *u_or_npc = dynamic_cast< player * >( &first );
     player *other_npc = dynamic_cast< player * >( &second );
 
-    if( u_or_npc->in_vehicle ) {
-        g->m.unboard_vehicle( u_or_npc->pos() );
-    }
-
-    if( other_npc->in_vehicle ) {
-        g->m.unboard_vehicle( other_npc->pos() );
-    }
+    g->m.unboard_vehicle( *u_or_npc );
+    g->m.unboard_vehicle( *other_npc );
 
     tripoint temp = second.pos();
     second.setpos( first.pos() );
@@ -5763,7 +5754,7 @@ void game::moving_vehicle_dismount( const tripoint &dest_loc )
     tileray ray( dest_loc.x - u.posx(), dest_loc.y - u.posy() );
     const int d = ray.dir(); // TODO:: make dir() const correct!
     add_msg( _( "You dive from the %s." ), veh->name.c_str() );
-    m.unboard_vehicle( u.pos() );
+    m.unboard_vehicle( u );
     u.moves -= 200;
     // Dive three tiles in the direction of tox and toy
     fling_creature( &u, d, 30, true );
@@ -10695,10 +10686,7 @@ void game::place_player( const tripoint &dest_loc )
         add_msg( _( "You displace the %s." ), critter.name().c_str() );
     }
 
-    // If the player is in a vehicle, unboard them from the current part
-    if( u.in_vehicle ) {
-        m.unboard_vehicle( u.pos() );
-    }
+    m.unboard_vehicle( u );
     // Move the player
     // Start with z-level, to make it less likely that old functions (2D ones) freak out
     if( m.has_zlevels() && dest_loc.z != get_levz() ) {
@@ -10872,9 +10860,7 @@ void game::place_player_overmap( const tripoint &om_dest )
     for( monster &critter : all_monsters() ) {
         despawn_monster( critter );
     }
-    if( u.in_vehicle ) {
-        m.unboard_vehicle( u.pos() );
-    }
+    m.unboard_vehicle( u );
     const int minz = m.has_zlevels() ? -OVERMAP_DEPTH : get_levz();
     const int maxz = m.has_zlevels() ? OVERMAP_HEIGHT : get_levz();
     for( int z = minz; z <= maxz; z++ ) {
@@ -10934,9 +10920,7 @@ bool game::phasing_move( const tripoint &dest_loc )
     }
 
     if( tunneldist != 0 ) {
-        if( u.in_vehicle ) {
-            m.unboard_vehicle( u.pos() );
-        }
+        m.unboard_vehicle( u );
 
         add_msg( _( "You quantum tunnel through the %d-tile wide barrier!" ), tunneldist );
         u.charge_power( -( tunneldist * 250 ) ); //tunneling costs 250 bionic power per impassable tile
@@ -11178,9 +11162,7 @@ void game::plswim( const tripoint &p )
         }
     }
     bool diagonal = ( p.x != u.posx() && p.y != u.posy() );
-    if( u.in_vehicle ) {
-        m.unboard_vehicle( u.pos() );
-    }
+    m.unboard_vehicle( u );
     u.setpos( p );
     update_map( u );
     m.board_vehicle( u );
@@ -11317,9 +11299,7 @@ void game::fling_creature( Creature *c, const int &dir, float flvel, bool contro
         flvel -= force;
         if( thru ) {
             if( p != nullptr ) {
-                if( p->in_vehicle ) {
-                    m.unboard_vehicle( p->pos() );
-                }
+                m.unboard_vehicle( *p );
                 // If we're flinging the player around, make sure the map stays centered on them.
                 if( is_u ) {
                     update_map( pt.x, pt.y );
@@ -12320,9 +12300,7 @@ void game::teleport( player *p, bool add_teleglow )
         tries++;
     } while( tries < 15 && m.impassable( new_pos ) );
     bool can_see = ( is_u || u.sees( new_pos ) );
-    if( p->in_vehicle ) {
-        m.unboard_vehicle( p->pos() );
-    }
+    m.unboard_vehicle( *p );
     p->setx( new_pos.x );
     p->sety( new_pos.y );
     if( m.impassable( new_pos ) ) { //Teleported into a wall

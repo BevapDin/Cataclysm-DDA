@@ -1458,9 +1458,7 @@ bool vehicle::remove_part( int p )
 
     // Unboard any entities standing on removed boardable parts
     if( part_flag( p, "BOARDABLE" ) ) {
-        if( parts[p].has_flag( vehicle_part::passenger_flag ) ) {
-            g->m.unboard_vehicle( part_loc );
-        }
+        vpart_reference( *this, p ).unset_passenger();
     }
 
     // Release any animal held by the part
@@ -4213,7 +4211,7 @@ bool vpart_position::is_inside() const
 void vehicle::unboard_all()
 {
     for( const vpart_reference vp : boarded_parts() ) {
-        g->m.unboard_vehicle( vp.position() );
+        vp.unset_passenger();
     }
 }
 

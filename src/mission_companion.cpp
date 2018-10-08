@@ -2199,9 +2199,7 @@ npc *talk_function::individual_mission( npc &p, const std::string &desc, const s
             g->u.use_amount( i->typeId(), 1 );
         }
     }
-    if( comp->in_vehicle ) {
-        g->m.unboard_vehicle( comp->pos() );
-    }
+    g->m.unboard_vehicle( *comp );
     popup( "%s %s", comp->name.c_str(), desc.c_str() );
     comp->set_companion_mission( p, miss_id );
     if( group ) {

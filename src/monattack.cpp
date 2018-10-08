@@ -2439,9 +2439,7 @@ bool mattack::ranged_pull( monster *z )
         }
 
         if( foe != nullptr ) {
-            if( foe->in_vehicle ) {
-                g->m.unboard_vehicle( foe->pos() );
-            }
+            g->m.unboard_vehicle( *foe );
 
             if( target->is_player() && ( pt.x < SEEX * int( MAPSIZE / 2 ) || pt.y < SEEY * int( MAPSIZE / 2 ) ||
                                          pt.x >= SEEX * ( 1 + int( MAPSIZE / 2 ) ) || pt.y >= SEEY * ( 1 + int( MAPSIZE / 2 ) ) ) ) {
@@ -2554,9 +2552,7 @@ bool mattack::grab_drag( monster *z )
             g->update_map( zpt.x, zpt.y );
         }
         if( foe != nullptr ) {
-            if( foe->in_vehicle ) {
-                g->m.unboard_vehicle( foe->pos() );
-            }
+            g->m.unboard_vehicle( *foe );
             foe->setpos( zpt );
         } else {
             zz->setpos( zpt );

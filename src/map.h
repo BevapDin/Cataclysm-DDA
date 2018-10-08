@@ -503,7 +503,11 @@ class map
          * Does nothing if there is no boardable vehicle part.
          */
         void board_vehicle( player &p );
-        void unboard_vehicle( const tripoint &p );//remove player from vehicle at p
+        /**
+         * Unboard the creature from a vehicle (if possible).
+         * Does nothing if it is not boarded.
+         */
+        void unboard_vehicle( player &p );
         // Change vehicle coordinates and move vehicle's driver along.
         // WARNING: not checking collisions!
         vehicle *displace_vehicle( tripoint &p, const tripoint &dp );

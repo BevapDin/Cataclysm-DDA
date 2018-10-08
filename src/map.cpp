@@ -831,16 +831,17 @@ void map::board_vehicle( player &p )
     vp->set_passenger( p );
 }
 
-void map::unboard_vehicle( const tripoint &p )
+void map::unboard_vehicle( player &p )
 {
-    const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature_including_broken( VPFLAG_BOARDABLE );
+    if( !p.in_vehicle ) {
+        return;
+    }
+    const cata::optional<vpart_reference> vp = veh_at( p.pos() ).part_with_feature_including_broken( VPFLAG_BOARDABLE );
     if( !vp ) {
         debugmsg( "map::unboard_vehicle: vehicle not found" );
-        // Try and force unboard the player anyway.
-        if( player *const passenger = g->critter_at<player>( p ) ) {
-            passenger->in_vehicle = false;
-            passenger->controlling_vehicle = false;
-        }
+        // Try and force unboard the player anyway for consistency.
+        p.in_vehicle = false;
+        p.controlling_vehicle = false;
         return;
     }
     vp->unset_passenger();
