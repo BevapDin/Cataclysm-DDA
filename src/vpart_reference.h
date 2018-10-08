@@ -60,6 +60,7 @@ class vpart_reference : public vpart_position
         vehicle_stack get_items() const;
 
         bool is_open() const;
+        void open_or_close( bool opening ) const;
 };
 
 #endif

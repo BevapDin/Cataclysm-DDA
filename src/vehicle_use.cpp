@@ -169,7 +169,7 @@ void vehicle::control_doors()
     if( pmenu.ret >= 0 ) {
         if( pmenu.ret < ( int )doors_with_motors.size() ) {
             int part = doors_with_motors[pmenu.ret];
-            open_or_close( part, !( parts[part].open ) );
+            vpart_reference( *this, part ).open_or_close( part, !parts[part].open );
         } else if( pmenu.ret < ( ( int )doors_with_motors.size() + CANCEL ) ) {
             int option = pmenu.ret - ( int )doors_with_motors.size();
             bool open = option == OPENBOTH || option == OPENCURTAINS;
@@ -181,10 +181,10 @@ void vehicle::control_doors()
                         if( !part->has_feature( "CURTAIN" ) && option == OPENCURTAINS ) {
                             continue;
                         }
-                        open_or_close( part->part_index(), open );
+                        part->open_or_close( open );
                         if( option == OPENBOTH ) {
                             if( const auto next_part = vpart_position( *this, motor ).next_part_to_open( false ) ) {
-                                open_or_close( next_part->part_index(), open );
+                                next_part->open_or_close( open );
                             }
                         }
                     }
@@ -193,10 +193,10 @@ void vehicle::control_doors()
                         if( part->has_feature( "CURTAIN" ) &&  option == CLOSEDOORS ) {
                             continue;
                         }
-                        open_or_close( part->part_index(), open );
+                        part->open_or_close( open );
                         if( option == CLOSEBOTH ) {
                             if( const auto next_part = vpart_position( *this, motor ).next_part_to_close( false ) ) {
-                                open_or_close( next_part->part_index(), open );
+                                next_part->open_or_close( open );
                             }
                         }
                     }
@@ -1093,7 +1093,7 @@ void vehicle::open( int part_index )
         debugmsg( "Attempted to open non-openable part %d (%s) on a %s!", part_index,
                   parts[ part_index ].name().c_str(), name.c_str() );
     } else {
-        open_or_close( part_index, true );
+        vpart_reference( *this, part_index ).open_or_close( true );
     }
 }
 
@@ -1108,7 +1108,7 @@ void vehicle::close( int part_index )
         debugmsg( "Attempted to close non-closeable part %d (%s) on a %s!", part_index,
                   parts[ part_index ].name().c_str(), name.c_str() );
     } else {
-        open_or_close( part_index, false );
+        vpart_reference( *this, part_index ).open_or_close( false );
     }
 }
 
@@ -1130,13 +1130,13 @@ void vpart_position::open_all() const
     }
 }
 
-void vehicle::open_or_close( int const part_index, bool const opening )
+void vpart_reference::open_or_close( const bool opening )
 {
-    parts[part_index].open = opening ? 1 : 0;
-    insides_dirty = true;
-    g->m.set_transparency_cache_dirty( smz );
+    part().open = opening ? 1 : 0;
+    vehicle().insides_dirty = true;
+    g->m.set_transparency_cache_dirty( vehicle().smz );
 
-    if( !part_info( part_index ).has_flag( "MULTISQUARE" ) ) {
+    if( !has_feature( "MULTISQUARE" ) ) {
         return;
     }
 
@@ -1144,22 +1144,22 @@ void vehicle::open_or_close( int const part_index, bool const opening )
      * This is a tighter restriction than just looking for other Multisquare
      * Openable parts, and stops trunks from opening side doors and the like. */
     for( const vpart_reference vp : get_parts() ) {
-        const size_t next_index = vp.part_index();
-        if( parts[next_index].removed ) {
+        const vehicle_part &p = vp.part();
+        if( p.removed ) {
             continue;
         }
 
         //Look for parts 1 square off in any cardinal direction
-        const int dx = parts[next_index].mount.x - parts[part_index].mount.x;
-        const int dy = parts[next_index].mount.y - parts[part_index].mount.y;
+        const int dx = p.mount.x - p.mount.x;
+        const int dy = p.mount.y - p.mount.y;
         const int delta = dx * dx + dy * dy;
 
         const bool is_near = ( delta == 1 );
-        const bool is_id = part_info( next_index ).get_id() == part_info( part_index ).get_id();
-        const bool do_next = !!parts[next_index].open ^ opening;
+        const bool is_id = vp.info().get_id() == info().get_id();
+        const bool do_next = !!p.open ^ opening;
 
         if( is_near && is_id && do_next ) {
-            open_or_close( next_index, opening );
+            vp.open_or_close( opening );
         }
     }
 }
