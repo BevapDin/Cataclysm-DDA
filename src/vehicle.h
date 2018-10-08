@@ -1234,8 +1234,6 @@ class vehicle
         // opens/closes doors or multipart doors
         void open( int part_index );
         void close( int part_index );
-        // returns whether the door is open or not
-        bool is_open( int part_index ) const;
 
         // Consists only of parts with the FOLDABLE tag.
         bool is_foldable() const;

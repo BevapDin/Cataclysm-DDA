@@ -2309,11 +2309,11 @@ void CheckMessages()
                                 actions.insert(ACTION_CONTROL_VEHICLE);
                             }
                             const cata::optional<vpart_reference> openablepart = vp.part_with_feature( "OPENABLE", true );
-                            if( openablepart && veh.is_open( openablepart.part_index() ) && ( dx != 0 || dy != 0 ) ) { // an open door adjacent to us
+                            if( openablepart && openablepart->is_open() && ( dx != 0 || dy != 0 ) ) { // an open door adjacent to us
                                 actions.insert(ACTION_CLOSE);
                             }
                             const cata::optional<vpart_reference> curtainpart = vp.part_with_feature( "CURTAIN", true );
-                            if( curtainpart && veh.is_open( curtainpart.part_index() ) && ( dx != 0 || dy != 0 ) ) {
+                            if( curtainpart && openablepart->is_open() && ( dx != 0 || dy != 0 ) ) {
                                 actions.insert(ACTION_CLOSE);
                             }
                             if (dx == 0 && dy == 0) {

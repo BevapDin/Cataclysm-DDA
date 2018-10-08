@@ -58,6 +58,8 @@ class vpart_reference : public vpart_position
         bool add_item( const item &obj ) const;
         bool remove_item( const item *it );
         vehicle_stack get_items() const;
+
+        bool is_open() const;
 };
 
 #endif

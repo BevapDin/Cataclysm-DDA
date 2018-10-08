@@ -1112,9 +1112,10 @@ void vehicle::close( int part_index )
     }
 }
 
-bool vehicle::is_open( int part_index ) const
+bool vpart_reference::is_open() const
 {
-    return parts[part_index].open;
+    // @todo consider what other things need to be checked here (e.g. availability, brokenness)
+    return part().open == 1;
 }
 
 void vpart_position::open_all() const
