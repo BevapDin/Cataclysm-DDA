@@ -133,7 +133,7 @@ void vehicle::control_doors()
         if( parts[ p ].is_unavailable() ) {
             continue;
         }
-        const std::array<int, 2> doors = { { next_part_to_open( p ), next_part_to_close( p, false ) } };
+        const std::array<int, 2> doors = { { next_part_to_open( p, false ), next_part_to_close( p, false ) } };
         for( int door : doors ) {
             if( door == -1 ) {
                 continue;
@@ -173,14 +173,14 @@ void vehicle::control_doors()
                 const size_t motor = vp.part_index();
                 int next_part = -1;
                 if( open ) {
-                    int part = next_part_to_open( motor );
+                    int part = next_part_to_open( motor, false );
                     if( part != -1 ) {
                         if( ! part_flag( part, "CURTAIN" ) &&  option == OPENCURTAINS ) {
                             continue;
                         }
                         open_or_close( part, open );
                         if( option == OPENBOTH ) {
-                            next_part = next_part_to_open( motor );
+                            next_part = next_part_to_open( motor, false );
                         }
                         if( next_part != -1 ) {
                             open_or_close( next_part, open );

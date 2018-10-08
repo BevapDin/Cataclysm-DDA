@@ -405,7 +405,7 @@ static void open()
 
     if( const optional_vpart_position vp = m.veh_at( openp ) ) {
         vehicle *const veh = &vp->vehicle();
-        int openable = veh->next_part_to_open( vp->part_index() );
+        int openable = veh->next_part_to_open( vp->part_index(), false );
         if( openable >= 0 ) {
             const vehicle *player_veh = veh_pointer_or_null( m.veh_at( u.pos() ) );
             bool outside = !player_veh || player_veh != veh;

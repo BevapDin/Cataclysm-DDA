@@ -809,7 +809,7 @@ class vehicle
          *  @param outside If true, give parts that can be opened from outside only
          *  @return part index or -1 if no part
          */
-        int next_part_to_open( int p, bool outside = false ) const;
+        int next_part_to_open( int p, bool outside ) const;
 
         /**
          *  Return the index of the next part to close at `p`

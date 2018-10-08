@@ -254,7 +254,7 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const int closable = veh->next_part_to_close( vpart,
                              veh_pointer_or_null( m.veh_at( who.pos() ) ) != veh );
         const int inside_closable = veh->next_part_to_close( vpart, false );
-        const int openable = veh->next_part_to_open( vpart );
+        const int openable = veh->next_part_to_open( vpart, false );
         if( closable >= 0 ) {
             veh->close( closable );
             didit = true;
