@@ -1157,11 +1157,6 @@ class vehicle
          * @returns The number of charges added.
          */
         long add_charges( int part, const item &itm );
-        /**
-         * Position specific item insertion that skips a bunch of safety checks
-         * since it should only ever be used by item processing code.
-         */
-        bool add_item_at( int part, std::list<item>::iterator index, item itm );
 
         vehicle_stack get_items( int part ) const;
         vehicle_stack get_items( int part );
