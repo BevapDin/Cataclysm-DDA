@@ -1027,7 +1027,7 @@ bool veh_interact::do_mend( std::string &msg )
     auto sel = []( const vehicle_part &pt ) { return !pt.faults().empty(); };
 
     auto act = [&]( const vehicle_part &pt ) {
-        g->u.mend_item( veh->part_base( veh->index_of_part( &pt ) ) );
+        g->u.mend_item( item_location( vpart_reference( *veh, veh->index_of_part( &pt ) ) ) );
         sel_cmd = 'q';
         return true; // force redraw
     };

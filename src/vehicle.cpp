@@ -1881,10 +1881,8 @@ bool vehicle::split_vehicles( std::vector<std::vector <int>> new_vehs )
     return split_vehicles( new_vehs, null_vehicles, null_mounts );
 }
 
-item_location vehicle::part_base( int p )
-{
-    return item_location( vehicle_cursor( *this, p ), &parts[ p ].base );
-}
+item_location::item_location( const vpart_reference &part ) : item_location( vehicle_cursor(
+                vehicle(), part_index() ), &part().base ) { }
 
 int vehicle::find_part( const item &it ) const
 {

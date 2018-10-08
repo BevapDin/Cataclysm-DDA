@@ -12,6 +12,7 @@ class map_cursor;
 class vehicle_cursor;
 class JsonIn;
 class JsonOut;
+class vpart_reference;
 
 /**
  * A lightweight handle to an item independent of it's location
@@ -44,6 +45,8 @@ class item_location
         item_location( const map_cursor &mc, std::list<item> *which );
         item_location( const vehicle_cursor &vc, item *which );
         item_location( const vehicle_cursor &vc, std::list<item> *which );
+        /// The location of the base part of the given vehicle part.
+        item_location( const vpart_reference &vpart );
 
         void serialize( JsonOut &js ) const;
         void deserialize( JsonIn &js );

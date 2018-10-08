@@ -718,9 +718,6 @@ class vehicle
                              std::vector<std::vector <point>> new_mounts );
         bool split_vehicles( std::vector<std::vector <int>> new_veh );
 
-        /** Get handle for base item of part */
-        item_location part_base( int p );
-
         /** Get index of part with matching base item or INT_MIN if not found */
         int find_part( const item &it ) const;
 

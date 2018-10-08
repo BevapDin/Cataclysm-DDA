@@ -12,6 +12,7 @@ class vehicle;
 class vehicle_part;
 enum vpart_bitflags : int;
 class vpart_info;
+class item_location;
 class vehicle_stack;
 namespace units
 {
