@@ -3093,9 +3093,7 @@ void game::debug()
                     const vproto_id &selected_opt = veh_strings[veh_menu.ret];
                     tripoint dest = u.pos(); // TODO: Allow picking this when add_vehicle has 3d argument
                     vehicle *veh = m.add_vehicle( selected_opt, dest.x, dest.y, -90, 100, 0 );
-                    if( veh != nullptr ) {
-                        m.board_vehicle( u.pos(), &u );
-                    }
+                    m.board_vehicle( u );
                 }
             }
             break;
@@ -5472,13 +5470,8 @@ bool game::swap_critters( Creature &a, Creature &b )
     second.setpos( first.pos() );
     first.setpos( temp );
 
-    if( g->m.veh_at( u_or_npc->pos() ).part_with_feature( VPFLAG_BOARDABLE, true ) ) {
-        g->m.board_vehicle( u_or_npc->pos(), u_or_npc );
-    }
-
-    if( g->m.veh_at( other_npc->pos() ).part_with_feature( VPFLAG_BOARDABLE, true ) ) {
-        g->m.board_vehicle( other_npc->pos(), other_npc );
-    }
+    g->m.board_vehicle( *u_or_npc );
+    g->m.board_vehicle( *other_npc );
 
     if( first.is_player() ) {
         update_map( *u_or_npc );
@@ -10774,10 +10767,7 @@ void game::place_player( const tripoint &dest_loc )
         Pickup::pick_up( u.pos(), -1 );
     }
 
-    // If the new tile is a boardable part, board it
-    if( vp1.part_with_feature( "BOARDABLE", true ) ) {
-        m.board_vehicle( u.pos(), &u );
-    }
+    m.board_vehicle( u );
 
     // Traps!
     // Try to detect.
@@ -10953,9 +10943,7 @@ bool game::phasing_move( const tripoint &dest_loc )
         u.moves -= 100; //tunneling costs 100 moves
         u.setpos( dest );
 
-        if( m.veh_at( u.pos() ).part_with_feature( "BOARDABLE", true ) ) {
-            m.board_vehicle( u.pos(), &u );
-        }
+        m.board_vehicle( u );
 
         u.grab( OBJECT_NONE );
         on_move_effects();
@@ -11195,9 +11183,7 @@ void game::plswim( const tripoint &p )
     }
     u.setpos( p );
     update_map( u );
-    if( m.veh_at( u.pos() ).part_with_feature( VPFLAG_BOARDABLE, true ) ) {
-        m.board_vehicle( u.pos(), &u );
-    }
+    m.board_vehicle( u );
     u.moves -= ( movecost > 200 ? 200 : movecost )  * ( trigdist && diagonal ? 1.41 : 1 );
     u.inv.rust_iron_items();
 

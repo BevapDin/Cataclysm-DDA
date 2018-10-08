@@ -498,8 +498,11 @@ class map
         optional_vpart_position veh_at( const tripoint &p ) const;
         vehicle *veh_at_internal( const tripoint &p, int &part_num );
         const vehicle *veh_at_internal( const tripoint &p, int &part_num ) const;
-        // put player on vehicle at x,y
-        void board_vehicle( const tripoint &p, player *pl );
+        /**
+         * Board the creature onto a vehicle (if possible).
+         * Does nothing if there is no boardable vehicle part.
+         */
+        void board_vehicle( player &p );
         void unboard_vehicle( const tripoint &p );//remove player from vehicle at p
         // Change vehicle coordinates and move vehicle's driver along.
         // WARNING: not checking collisions!

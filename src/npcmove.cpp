@@ -1658,10 +1658,7 @@ void npc::move_to( const tripoint &pt, bool no_bashing, std::set<tripoint> *nomo
             doors::close_door( g->m, *this, old_pos );
         }
 
-        if( g->m.veh_at( p ).part_with_feature( VPFLAG_BOARDABLE, true ) ) {
-            g->m.board_vehicle( p, this );
-        }
-
+        g->m.board_vehicle( *this );
         g->m.creature_on_trap( *this );
         g->m.creature_in_field( *this );
     }

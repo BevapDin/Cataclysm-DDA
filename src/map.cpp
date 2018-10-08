@@ -822,26 +822,13 @@ vehicle *map::veh_at_internal( const tripoint &p, int &part_num )
     return const_cast<vehicle *>( const_cast<const map *>( this )->veh_at_internal( p, part_num ) );
 }
 
-void map::board_vehicle( const tripoint &pos, player *p )
+void map::board_vehicle( player &p )
 {
-    if( p == nullptr ) {
-        debugmsg( "map::board_vehicle: null player" );
-        return;
-    }
-
-    const cata::optional<vpart_reference> vp = veh_at( pos ).part_with_feature( VPFLAG_BOARDABLE, true );
+    const cata::optional<vpart_reference> vp = veh_at( p.pos() ).part_with_feature( VPFLAG_BOARDABLE, true );
     if( !vp ) {
-        if( p->grab_point.x == 0 && p->grab_point.y == 0 ) {
-            debugmsg( "map::board_vehicle: vehicle not found" );
-        }
         return;
     }
-
-    vp->set_passenger( *p );
-    p->setpos( pos );
-    if( p == &g->u ) {
-        g->update_map( g->u );
-    }
+    vp->set_passenger( p );
 }
 
 void map::unboard_vehicle( const tripoint &p )

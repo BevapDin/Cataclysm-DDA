@@ -2603,9 +2603,8 @@ void veh_interact::complete_vehicle()
 
         const tripoint vehp = veh->global_pos3() + tripoint( q.x, q.y, 0 );
         //@todo: allow boarding for non-players as well.
-        player * const pl = g->critter_at<player>( vehp );
-        if( vpinfo.has_flag( VPFLAG_BOARDABLE ) && pl ) {
-            g->m.board_vehicle( vehp, pl );
+        if( player *const pl = g->critter_at<player>( vehp ) ) {
+            g->m.board_vehicle( *pl );
         }
 
         add_msg( m_good, _("You install a %1$s into the %2$s." ), veh->parts[ partnum ].name().c_str(), veh->name.c_str() );

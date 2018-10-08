@@ -2127,9 +2127,7 @@ void npc::on_load()
     } else if( has_effect( effect_bouldering ) ) {
         remove_effect( effect_bouldering );
     }
-    if( g->m.veh_at( pos() ).part_with_feature( VPFLAG_BOARDABLE, true ) && !in_vehicle ) {
-        g->m.board_vehicle( pos(), this );
-    }
+    g->m.board_vehicle( *this );
 }
 
 void npc_chatbin::add_new_mission( mission *miss )
