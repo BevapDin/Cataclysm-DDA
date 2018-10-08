@@ -14,14 +14,16 @@ class volume_in_milliliter_tag;
 using volume = quantity<int, volume_in_milliliter_tag>;
 } // namespace units
 
-// A wrapper class to bundle up the references needed for a caller to safely manipulate
-// items and obtain information about items at a particular map x/y location.
-// Note this does not expose the container itself,
-// which means you cannot call e.g. vector::erase() directly.
-
-// Pure virtual base class for a collection of items with origin information.
-// Only a subset of the functionality is callable without casting to the specific
-// subclass, e.g. not begin()/end() or range loops.
+/**
+ * A wrapper class to bundle up the references needed for a caller to safely manipulate
+ * items and obtain information about items in a particular location.
+ * Note this does not expose the container itself,
+ * which means you cannot call e.g. vector::erase() directly.
+ *
+ * Pure virtual base class for a collection of items with origin information.
+ * Only a subset of the functionality is callable without casting to the specific
+ * subclass, e.g. not begin()/end() or range loops.
+ */
 class item_stack
 {
     protected:
