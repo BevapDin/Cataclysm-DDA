@@ -64,6 +64,11 @@ class vpart_reference : public vpart_position
          * the volume limit or item count limit, not all charges can fit, etc.)
          */
         bool add_item( const item &obj ) const;
+        /**
+         * Position specific item insertion that skips a bunch of safety checks
+         * since it should only ever be used by item processing code.
+         */
+        bool add_item_at( std::list<item>::iterator index, item itm ) const;
 
         bool remove_item( const item *it ) const;
         bool remove_item( size_t itemdex ) const;

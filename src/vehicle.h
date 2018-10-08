@@ -1109,11 +1109,6 @@ class vehicle
          * @returns The number of charges added.
          */
         long add_charges( int part, const item &itm );
-        /**
-         * Position specific item insertion that skips a bunch of safety checks
-         * since it should only ever be used by item processing code.
-         */
-        bool add_item_at( int part, std::list<item>::iterator index, item itm );
 
         // Generates starting items in the car, should only be called when placed on the map
         void place_spawn_items();

@@ -87,7 +87,7 @@ void vehicle_stack::push_back( const item &newitem )
 void vehicle_stack::insert_at( std::list<item>::iterator index,
                                const item &newitem )
 {
-    myorigin->add_item_at( part_num, index, newitem );
+    vpart_reference( *myorigin, part_num ).add_item_at( index, newitem );
 }
 
 units::volume vehicle_stack::max_volume() const
@@ -3718,25 +3718,25 @@ bool vpart_reference::add_item( const item &obj ) const
             return here->merge_charges( itm );
         }
     }
-    return vehicle().add_item_at( part_index(), part().items.end(), itm );
+    return add_item_at( part().items.end(), itm );
 }
 
-bool vehicle::add_item_at( int part, std::list<item>::iterator index, item itm )
+bool vpart_reference::add_item_at( const std::list<item>::iterator index, item itm ) const
 {
     if( itm.is_bucket_nonempty() ) {
         for( auto &elem : itm.contents ) {
-            g->m.add_item_or_charges( global_part_pos3( part ), elem );
+            g->m.add_item_or_charges( position(), elem );
         }
 
         itm.contents.clear();
     }
 
-    const auto new_pos = parts[part].items.insert( index, itm );
+    const auto new_pos = part().items.insert( index, itm );
     if( itm.needs_processing() ) {
-        active_items.add( new_pos, parts[part].mount );
+        vehicle().active_items.add( new_pos, mount() );
     }
 
-    invalidate_mass();
+    vehicle().invalidate_mass();
     return true;
 }
 
