@@ -1117,14 +1117,14 @@ bool vehicle::is_open( int part_index ) const
     return parts[part_index].open;
 }
 
-void vehicle::open_all_at( int p )
+void vpart_position::open_all() const
 {
-    for( const vpart_reference vp : vpart_position( *this, p ).parts_here() ) {
+    for( const vpart_reference vp : parts_here() ) {
         if( vp.has_feature( VPFLAG_OPENABLE ) ) {
             // Note that this will open multi-square and non-multipart parts in the tile. This
             // means that adjacent open multi-square openables can still have closed stuff
             // on same tile after this function returns
-            open( vp.part_index() );
+            vp.vehicle().open( vp.part_index() );
         }
     }
 }

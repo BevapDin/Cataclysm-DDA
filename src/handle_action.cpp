@@ -412,7 +412,7 @@ static void open()
                     add_msg( m_info, _( "That %s can only opened from the inside." ), name.c_str() );
                     u.moves += 100;
                 } else {
-                    veh->open_all_at( openable->part_index() );
+                    openable->open_all();
                 }
             }
         } else {
