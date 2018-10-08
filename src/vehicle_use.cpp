@@ -933,7 +933,6 @@ void vehicle::operate_rockwheel()
 void vehicle::operate_reaper()
 {
     for( const vpart_reference vp : get_parts( "REAPER" ) ) {
-        const size_t reaper_id = vp.part_index();
         const tripoint reaper_pos = vp.position();
         const int plant_produced =  rng( 1, vp.part().info().bonus );
         const int seed_produced = rng( 1, 3 );
@@ -958,8 +957,7 @@ void vehicle::operate_reaper()
         if( vp.has_feature( "CARGO" ) ) {
             map_stack stack( g->m.i_at( reaper_pos ) );
             for( auto iter = stack.begin(); iter != stack.end(); ) {
-                if( ( iter->volume() <= max_pickup_volume ) &&
-                    add_item( reaper_id, *iter ) ) {
+                if( iter->volume() <= max_pickup_volume && vp.add_item( *iter ) ) {
                     iter = stack.erase( iter );
                 } else {
                     ++iter;
@@ -1008,7 +1006,6 @@ void vehicle::operate_planter()
 void vehicle::operate_scoop()
 {
     for( const vpart_reference vp : get_parts( "SCOOP" ) ) {
-        const size_t scoop = vp.part_index();
         const int chance_to_damage_item = 9;
         const units::volume max_pickup_volume = vp.part().info().size / 10;
         const std::array<std::string, 4> sound_msgs = {{
@@ -1050,8 +1047,8 @@ void vehicle::operate_scoop()
                                _( "BEEEThump" ) );
             }
             const int battery_deficit = discharge_battery( that_item_there->weight() / 1_gram *
-                                        -part_epower( scoop ) / rng( 8, 15 ) );
-            if( battery_deficit == 0 && add_item( scoop, *that_item_there ) ) {
+                                        -part_epower( vp.part_index() ) / rng( 8, 15 ) );
+            if( battery_deficit == 0 && vp.add_item( *that_item_there ) ) {
                 g->m.i_rem( position, itemdex );
             } else {
                 break;

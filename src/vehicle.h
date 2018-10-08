@@ -1101,13 +1101,6 @@ class vehicle
          * hot or perishable liquid to a container.
          */
         void make_active( item_location &loc );
-        /**
-         * Try to add an item to part's cargo.
-         *
-         * @returns False if it can't be put here (not a cargo part, adding this would violate
-         * the volume limit or item count limit, not all charges can fit, etc.)
-         */
-        bool add_item( int part, const item &obj );
         /** Like the above */
         bool add_item( vehicle_part &pt, const item &obj );
         /**

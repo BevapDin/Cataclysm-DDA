@@ -544,7 +544,7 @@ bool pick_one_up( const tripoint &pickup_target, item &newit, vehicle *veh,
     if( leftovers.charges > 0 ) {
         bool to_map = veh == nullptr;
         if( !to_map ) {
-            to_map = !veh->add_item( cargo_part, leftovers );
+            to_map = !vpart_reference( *veh, cargo_part ).add_item( leftovers );
         }
         if( to_map ) {
             g->m.add_item_or_charges( pickup_target, leftovers );

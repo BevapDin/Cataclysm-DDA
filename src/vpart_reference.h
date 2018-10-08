@@ -57,6 +57,12 @@ class vpart_reference : public vpart_position
         units::volume max_volume() const;
         units::volume free_volume() const;
 
+        /**
+         * Try to add an item to part's cargo.
+         *
+         * @returns False if it can't be put here (not a cargo part, adding this would violate
+         * the volume limit or item count limit, not all charges can fit, etc.)
+         */
         bool add_item( const item &obj ) const;
         bool remove_item( const item *it );
         vehicle_stack get_items() const;

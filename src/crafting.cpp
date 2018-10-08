@@ -1476,7 +1476,7 @@ void player::complete_disassemble( int item_pos, const tripoint &loc,
 
         if( act_item.made_of( LIQUID ) ) {
             g->handle_all_liquid( act_item, PICKUP_RANGE );
-        } else if( vp && vp->vehicle().add_item( vp->part_index(), act_item ) ) {
+        } else if( vp && vp->add_item( act_item ) ) {
             // add_item did put the items in the vehicle, nothing further to be done
         } else {
             // TODO: For items counted by charges, add as much as we can to the vehicle, and

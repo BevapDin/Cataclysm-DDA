@@ -1462,10 +1462,9 @@ static void cycle_action( item &weap, const tripoint &pos )
     tripoint eject = tiles.empty() ? pos : random_entry( tiles );
 
     // for turrets try and drop casings or linkages directly to any CARGO part on the same tile
-    const optional_vpart_position vp = g->m.veh_at( pos );
-    std::vector<vehicle_part *> cargo;
-    if( vp && weap.has_flag( "VEHICLE" ) ) {
-        cargo = vp->vehicle().get_parts( pos, "CARGO", false, false );
+    const cata::optional<vpart_reference> cargo;
+    if( weap.has_flag( "VEHICLE" ) ) {
+        cargo = g->m.veh_at( pos ).part_with_feature( "CARGO" )
     }
 
     if( weap.ammo_data() && weap.ammo_data()->ammo->casing ) {
@@ -1473,10 +1472,10 @@ static void cycle_action( item &weap, const tripoint &pos )
         if( weap.has_flag( "RELOAD_EJECT" ) || weap.gunmod_find( "brass_catcher" ) ) {
             weap.contents.push_back( item( casing ).set_flag( "CASING" ) );
         } else {
-            if( cargo.empty() ) {
+            if( !cargo ) {
                 g->m.add_item_or_charges( eject, item( casing ) );
             } else {
-                vp->vehicle().add_item( *cargo.front(), item( casing ) );
+                cargo->add_item( item( casing ) );
             }
 
             sfx::play_variant_sound( "fire_gun", "brass_eject", sfx::get_heard_volume( eject ),
@@ -1491,10 +1490,10 @@ static void cycle_action( item &weap, const tripoint &pos )
         if( weap.gunmod_find( "brass_catcher" ) ) {
             linkage.set_flag( "CASING" );
             weap.contents.push_back( linkage );
-        } else if( cargo.empty() ) {
+        } else if( !cargo ) {
             g->m.add_item_or_charges( eject, linkage );
         } else {
-            vp->vehicle().add_item( *cargo.front(), linkage );
+            cargo->add_item( linkage );
         }
     }
 }

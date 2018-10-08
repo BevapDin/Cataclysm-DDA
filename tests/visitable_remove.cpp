@@ -414,7 +414,7 @@ TEST_CASE( "visitable_remove", "[visitable]" )
             v->remove_item( part, 0 );
         }
         for( int i = 0; i != count; ++i ) {
-            v->add_item( part, obj );
+            vp->add_item( obj );
         }
 
         vehicle_selector sel( p.pos(), 1 );

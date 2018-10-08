@@ -81,7 +81,7 @@ std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
 
 void vehicle_stack::push_back( const item &newitem )
 {
-    myorigin->add_item( part_num, newitem );
+    vpart_reference( *myorigin, part_num ).add_item( newitem );
 }
 
 void vehicle_stack::insert_at( std::list<item>::iterator index,
@@ -1939,11 +1939,6 @@ units::volume vpart_reference::free_volume() const
     return vehicle().free_volume( part_index() );
 }
 
-bool vpart_reference::add_item( const item &obj ) const
-{
-    return vehicle().add_item( part_index(), obj );
-}
-
 bool vpart_reference::remove_item( const item *it )
 {
     return vehicle().remove_item( part_index(), it );
@@ -3702,25 +3697,21 @@ long vehicle::add_charges( int part, const item &itm )
 
     item itm_copy = itm;
     itm_copy.charges = ret;
-    return add_item( part, itm_copy ) ? ret : 0;
+    return vpart_reference( *this, part ).add_item( itm_copy ) ? ret : 0;
 }
 
-bool vehicle::add_item( int part, const item &itm )
+bool vpart_reference::add_item( const item &obj ) const
 {
-    if( part < 0 || part >= ( int )parts.size() ) {
-        debugmsg( "int part (%d) is out of range", part );
-        return false;
-    }
     // const int max_weight = ?! // TODO: weight limit, calculation per vpart & vehicle stats, not a hard user limit.
     // add creaking sounds and damage to overloaded vpart, outright break it past a certain point, or when hitting bumps etc
 
-    if( parts[ part ].base.is_gun() ) {
-        if( !itm.is_ammo() || itm.ammo_type() != parts[ part ].base.ammo_type() ) {
+    if( part().base.is_gun() ) {
+        if( !itm.is_ammo() || itm.ammo_type() != part().base.ammo_type() ) {
             return false;
         }
     }
-    bool charge = itm.count_by_charges();
-    vehicle_stack istack = vpart_reference( *this, part ).get_items();
+    const bool charge = itm.count_by_charges();
+    vehicle_stack istack = get_items();
     const long to_move = istack.amount_can_fit( itm );
     if( to_move == 0 || ( charge && to_move < itm.charges ) ) {
         return false; // @add_charges should be used in the latter case
@@ -3728,21 +3719,11 @@ bool vehicle::add_item( int part, const item &itm )
     if( charge ) {
         item *here = istack.stacks_with( itm );
         if( here ) {
-            invalidate_mass();
+            vehicle().invalidate_mass();
             return here->merge_charges( itm );
         }
     }
-    return add_item_at( part, parts[part].items.end(), itm );
-}
-
-bool vehicle::add_item( vehicle_part &pt, const item &obj )
-{
-    int idx = index_of_part( &pt );
-    if( idx < 0 ) {
-        debugmsg( "Tried to add item to invalid part" );
-        return false;
-    }
-    return add_item( idx, obj );
+    return vehicle().add_item_at( part_index(), part().items.end(), itm );
 }
 
 bool vehicle::add_item_at( int part, std::list<item>::iterator index, item itm )
@@ -3866,7 +3847,7 @@ void vehicle::place_spawn_items()
                             e.ammo_set( e.ammo_type()->default_ammotype() );
                         }
                     }
-                    add_item( part.part_index(), e );
+                    part.add_item( e );
                 }
             }
         }
