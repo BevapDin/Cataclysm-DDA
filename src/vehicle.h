@@ -1101,8 +1101,6 @@ class vehicle
          * hot or perishable liquid to a container.
          */
         void make_active( item_location &loc );
-        /** Like the above */
-        bool add_item( vehicle_part &pt, const item &obj );
         /**
          * Add an item counted by charges to the part's cargo.
          *
