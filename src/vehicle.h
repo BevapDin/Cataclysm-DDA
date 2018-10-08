@@ -1230,10 +1230,6 @@ class vehicle
         // Update the set of occupied points and return a reference to it
         std::set<tripoint> &get_points( bool force_refresh = false );
 
-        // opens/closes doors or multipart doors
-        void open( int part_index );
-        void close( int part_index );
-
         // Consists only of parts with the FOLDABLE tag.
         bool is_foldable() const;
         // Restore parts of a folded vehicle.

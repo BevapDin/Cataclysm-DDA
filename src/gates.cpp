@@ -255,7 +255,7 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const auto inside_closable = vp->next_part_to_close( false );
         const auto openable = veh->next_part_to_open( vpart, false );
         if( closable ) {
-            veh->close( closable->part_index() );
+            closable->close();
             didit = true;
         } else if( inside_closable ) {
             who.add_msg_if_player( m_info, _( "That %s can only be closed from the inside." ),

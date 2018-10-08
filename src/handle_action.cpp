@@ -401,7 +401,7 @@ static void open()
             const vehicle *player_veh = veh_pointer_or_null( m.veh_at( u.pos() ) );
             bool outside = !player_veh || player_veh != veh;
             if( !outside ) {
-                veh->open( openable->part_index() );
+                openable->open();
             } else {
                 // Outside means we check if there's anything in that tile outside-openable.
                 // If there is, we open everything on tile. This means opening a closed,

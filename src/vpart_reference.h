@@ -61,6 +61,8 @@ class vpart_reference : public vpart_position
 
         bool is_open() const;
         void open_or_close( bool opening ) const;
+        void open() const;
+        void close() const;
 };
 
 #endif
