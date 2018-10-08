@@ -406,7 +406,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
         // initial vehicle damage
         if( veh_status == 0 ) {
             // Completely mint condition vehicle
-            set_hp( pt, vp.info().durability );
+            pt.set_hp( vp.info().durability );
         } else {
             //a bit of initial damage :)
             //clamp 4d8 to the range of [8,20]. 8=broken, 20=undamaged.
@@ -415,19 +415,19 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             int roll = dice( 4, 8 );
             if( roll < unhurt ) {
                 if( roll <= broken ) {
-                    set_hp( pt, 0 );
+                    pt.set_hp( 0 );
                     pt.ammo_unset(); //empty broken batteries and fuel tanks
                 } else {
-                    set_hp( pt, ( roll - broken ) / double( unhurt - broken ) * vp.info().durability );
+                    pt.set_hp( ( roll - broken ) / double( unhurt - broken ) * vp.info().durability );
                 }
             } else {
-                set_hp( pt, vp.info().durability );
+                pt.set_hp( vp.info().durability );
             }
 
             if( vp.has_feature( VPFLAG_ENGINE ) ) {
                 // If possible set an engine fault rather than destroying the engine outright
                 if( destroyEngine && pt.faults_potential().empty() ) {
-                    set_hp( pt, 0 );
+                    pt.set_hp( 0 );
                 } else if( destroyEngine || one_in( 3 ) ) {
                     do {
                         pt.fault_set( random_entry( pt.faults_potential() ) );
@@ -437,18 +437,18 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             } else if( ( destroySeats && ( vp.has_feature( "SEAT" ) || vp.has_feature( "SEATBELT" ) ) ) ||
                        ( destroyControls && ( vp.has_feature( "CONTROLS" ) || vp.has_feature( "SECURITY" ) ) ) ||
                        ( destroyAlarm && vp.has_feature( "SECURITY" ) ) ) {
-                set_hp( pt, 0 );
+                pt.set_hp( 0 );
             }
 
             // Fuel tanks should be emptied as well
             if( destroyTank && pt.is_fuel_store() ) {
-                set_hp( pt, 0 );
+                pt.set_hp( 0 );
                 pt.ammo_unset();
             }
 
             //Solar panels have 25% of being destroyed
             if( vp.has_feature( "SOLAR_PANEL" ) && one_in( 4 ) ) {
-                set_hp( pt, 0 );
+                pt.set_hp( 0 );
             }
 
             /* Bloodsplatter the front-end parts. Assume anything with x > 0 is
@@ -497,7 +497,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
         int tries = 0;
         while( valid_wheel_config( false ) && tries < 100 ) {
             // wheel config is still valid, destroy the tire.
-            set_hp( parts[random_entry( wheelcache )], 0 );
+            parts[random_entry( wheelcache )].set_hp( 0 );
             tries++;
         }
     }

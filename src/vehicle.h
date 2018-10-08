@@ -273,6 +273,11 @@ struct vehicle_part {
 
         /** current part health with range [0,durability] */
         int hp() const;
+        /**
+         * Set stat for part constrained by range [0,durability]
+         * @note does not invoke base @ref item::on_damage callback
+         */
+        void set_hp( int qty );
 
         /** Current part damage in same units as item::damage. */
         int damage() const;
@@ -621,12 +626,6 @@ class vehicle
         vehicle( const vproto_id &type_id, int veh_init_fuel = -1, int veh_init_status = -1 );
         vehicle();
         ~vehicle();
-
-        /**
-         * Set stat for part constrained by range [0,durability]
-         * @note does not invoke base @ref item::on_damage callback
-         */
-        void set_hp( vehicle_part &pt, int qty );
 
         /**
          * Apply damage to part constrained by range [0,durability] possibly destroying it

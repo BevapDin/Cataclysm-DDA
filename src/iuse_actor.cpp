@@ -445,7 +445,7 @@ long unfold_vehicle_iuse::use( player &p, item &it, bool /*t*/, const tripoint &
         for( auto &elem : veh->parts ) {
             int tmp;
             veh_data >> tmp;
-            veh->set_hp( elem, tmp );
+            elem.set_hp( tmp );
         }
     } else {
         try {
@@ -459,7 +459,7 @@ long unfold_vehicle_iuse::use( player &p, item &it, bool /*t*/, const tripoint &
                 vehicle_part &dst = veh->parts[i];
                 // and now only copy values, that are
                 // expected to be consistent.
-                veh->set_hp( dst, src.hp() );
+                dst.set_hp( src.hp() );
                 dst.blood = src.blood;
                 // door state/amount of fuel/direction of headlight
                 dst.ammo_set( src.ammo_current(), src.ammo_remaining() );

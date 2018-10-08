@@ -472,16 +472,16 @@ const vpart_info &vehicle_part::info() const
     return *info_cache;
 }
 
-void vehicle::set_hp( vehicle_part &pt, int qty )
+void vehicle_part::set_hp( const int qty )
 {
-    if( qty == pt.info().durability || pt.info().durability <= 0 ) {
-        pt.base.set_damage( 0 );
+    if( qty == info().durability || info().durability <= 0 ) {
+        base.set_damage( 0 );
 
     } else if( qty == 0 ) {
-        pt.base.set_damage( pt.base.max_damage() );
+        base.set_damage( base.max_damage() );
 
     } else {
-        pt.base.set_damage( pt.base.max_damage() - pt.base.max_damage() * qty / pt.info().durability );
+        base.set_damage( base.max_damage() - base.max_damage() * qty / info().durability );
     }
 }
 
@@ -547,4 +547,3 @@ bool vehicle::assign_seat( vehicle_part &pt, const npc &who )
 
     return true;
 }
-

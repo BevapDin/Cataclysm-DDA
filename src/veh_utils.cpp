@@ -145,7 +145,7 @@ bool repair_part( vehicle &veh, vehicle_part &pt, Character &who_c )
         veh.parts[partnum].direction = dir;
         veh.part_removal_cleanup();
     } else {
-        veh.set_hp( pt, pt.info().durability );
+        pt.set_hp( pt.info().durability );
     }
 
     // @todo: NPC doing that
