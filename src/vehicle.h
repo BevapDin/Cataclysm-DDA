@@ -824,7 +824,7 @@ class vehicle
          *  @param outside If true, give parts that can be closed from outside only
          *  @return part index or -1 if no part
          */
-        int next_part_to_close( int p, bool outside = false ) const;
+        int next_part_to_close( int p, bool outside ) const;
 
         // returns indices of all parts in the given location slot
         std::vector<int> all_parts_at_location( const std::string &location ) const;
