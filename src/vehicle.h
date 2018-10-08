@@ -828,18 +828,6 @@ class vehicle
         /** Test if part can be enabled (unbroken, sufficient fuel etc), optionally displaying failures to user */
         bool can_enable( const vehicle_part &pt, bool alert = false ) const;
 
-        /**
-         *  Return the index of the next part to open at `p`'s location
-         *
-         *  The next part to open is the first unopened part in the reversed list of
-         *  parts at part `p`'s coordinates.
-         *
-         *  @param p Part who's coordinates provide the location to check
-         *  @param outside If true, give parts that can be opened from outside only
-         *  @return part index or -1 if no part
-         */
-        int next_part_to_open( int p, bool outside ) const;
-
         // Given a part and a flag, returns the indices of all continiguously adjacent parts
         // with the same flag on the X and Y Axis
         std::vector<std::vector<int>> find_lines_of_parts( int part, const std::string flag );

@@ -2238,18 +2238,16 @@ cata::optional<vpart_reference> vpart_position::next_part_to_close( const bool o
     return result;
 }
 
-int vehicle::next_part_to_open( int p, bool outside ) const
+cata::optional<vpart_reference> vehicle::next_part_to_open( const bool outside ) const
 {
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount.x, parts[p].mount.y, true );
-
     // We want forwards, since we open the innermost thing first (curtains), and then the innermost thing (door)
-    for( auto &elem : parts_here ) {
-        if( part_flag( elem, VPFLAG_OPENABLE ) && parts[ elem ].is_available() && parts[elem].open == 0 &&
-            ( !outside || !part_flag( elem, "OPENCLOSE_INSIDE" ) ) ) {
-            return elem;
+    for(  const vpart_reference vp : parts_here() ) {
+        if( vp.has_feature( VPFLAG_OPENABLE ) && vp.part().is_available() && vp.part().open == 0 &&
+            ( !outside || !vp.has_feature( "OPENCLOSE_INSIDE" ) ) ) {
+            return vp;
         }
     }
-    return -1;
+    return cata::nullopt;
 }
 
 vehicle_part_with_feature_range<std::string> vehicle::get_parts( std::string feature ) const

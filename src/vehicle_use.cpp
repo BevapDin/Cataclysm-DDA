@@ -135,7 +135,9 @@ void vehicle::control_doors()
         }
         const auto nptc_opt = vp.next_part_to_close( false );
         const int nptc = nptc_opt ? nptc_opt->part_index() : -1;
-        const std::array<int, 2> doors = { { next_part_to_open( p, false ), nptc } };
+        const auto npto_opt = vp.next_part_to_open( false );
+        const int npto = npto_opt ? npto_opt->part_index() : -1;
+        const std::array<int, 2> doors = { { npto, nptc } };
         for( int door : doors ) {
             if( door == -1 ) {
                 continue;
@@ -175,17 +177,15 @@ void vehicle::control_doors()
                 const size_t motor = vp.part_index();
                 int next_part = -1;
                 if( open ) {
-                    int part = next_part_to_open( motor, false );
-                    if( part != -1 ) {
-                        if( ! part_flag( part, "CURTAIN" ) &&  option == OPENCURTAINS ) {
+                    if( const auto part = vpart_position( *this, motor ).next_part_to_open( false ) ) {
+                        if( !part->has_feature( "CURTAIN" ) && option == OPENCURTAINS ) {
                             continue;
                         }
-                        open_or_close( part, open );
+                        open_or_close( part->part_index(), open );
                         if( option == OPENBOTH ) {
-                            next_part = next_part_to_open( motor, false );
-                        }
-                        if( next_part != -1 ) {
-                            open_or_close( next_part, open );
+                            if( const auto next_part = vpart_position( *this, motor ).next_part_to_open( false ) ) {
+                                open_or_close( next_part->part_index(), open );
+                            }
                         }
                     }
                 } else {

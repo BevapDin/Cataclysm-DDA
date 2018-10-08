@@ -90,6 +90,13 @@ class vpart_position
         // @todo change to tripoint
         point mount() const;
         /**
+         *  The next part to open is the first unopened part in the reversed list of
+         *  parts here.
+         *
+         *  @param outside If true, give parts that can be opened from outside only
+         */
+        cata::optional<vpart_reference> next_part_to_open( bool outside ) const;
+        /**
          *  The next part to open is the first closed part in the list of
          *  parts here.
          *

@@ -253,16 +253,16 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const int vpart = vp->part_index();
         const auto closable = vp->next_part_to_close( veh_pointer_or_null( m.veh_at( who.pos() ) ) != veh );
         const auto inside_closable = vp->next_part_to_close( false );
-        const int openable = veh->next_part_to_open( vpart, false );
+        const auto openable = veh->next_part_to_open( vpart, false );
         if( closable ) {
             veh->close( closable->part_index() );
             didit = true;
         } else if( inside_closable ) {
             who.add_msg_if_player( m_info, _( "That %s can only be closed from the inside." ),
                                    inside_closable->part().name() );
-        } else if( openable >= 0 ) {
+        } else if( openable ) {
             who.add_msg_if_player( m_info, _( "That %s is already closed." ),
-                                   veh->parts[openable].name().c_str() );
+                                   openable->part().name() );
         } else {
             who.add_msg_if_player( m_info, _( "You cannot close the %s." ), veh->parts[vpart].name().c_str() );
         }

@@ -3623,10 +3623,9 @@ bool map::open_door( const tripoint &p, const bool inside, const bool check_only
 
         return true;
     } else if( const optional_vpart_position vp = veh_at( p ) ) {
-        int openable = vp->vehicle().next_part_to_open( vp->part_index(), true );
-        if( openable >= 0 ) {
+        if( const auto openable = vp->next_part_to_open( true ) ) {
             if( !check_only ) {
-                vp->vehicle().open_all_at( openable );
+                vp->vehicle().open_all_at( openable->part_index() );
             }
 
             return true;

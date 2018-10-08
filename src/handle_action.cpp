@@ -396,25 +396,23 @@ static void open()
     u.moves -= 100;
 
     if( const optional_vpart_position vp = m.veh_at( openp ) ) {
-        vehicle *const veh = &vp->vehicle();
-        int openable = veh->next_part_to_open( vp->part_index(), false );
-        if( openable >= 0 ) {
+        if( const auto openable = vp->next_part_to_open( false );
+            vehicle *const veh = &vp->vehicle();
             const vehicle *player_veh = veh_pointer_or_null( m.veh_at( u.pos() ) );
             bool outside = !player_veh || player_veh != veh;
             if( !outside ) {
-                veh->open( openable );
+                veh->open( openable->part_index() );
             } else {
                 // Outside means we check if there's anything in that tile outside-openable.
                 // If there is, we open everything on tile. This means opening a closed,
                 // curtained door from outside is possible, but it will magically open the
                 // curtains as well.
-                int outside_openable = veh->next_part_to_open( vp->part_index(), true );
-                if( outside_openable == -1 ) {
-                    const std::string name = veh->part_info( openable ).name();
+                if( !vp->next_part_to_open( true ) ) {
+                    const std::string name = openable->info().name();
                     add_msg( m_info, _( "That %s can only opened from the inside." ), name.c_str() );
                     u.moves += 100;
                 } else {
-                    veh->open_all_at( openable );
+                    veh->open_all_at( openable->part_index() );
                 }
             }
         } else {
