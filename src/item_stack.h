@@ -41,6 +41,14 @@ class item_stack
         item &front();
         item &operator[]( size_t index );
 
+        /**
+         * Repeatedly calls @ref erase to remove all items in
+         * this stack.
+         * Postcondition:
+         * `size() == 0`
+         */
+        void remove_all();
+
         std::list<item>::iterator begin();
         std::list<item>::iterator end();
         std::list<item>::const_iterator begin() const;

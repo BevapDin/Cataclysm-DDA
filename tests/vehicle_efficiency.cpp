@@ -176,7 +176,7 @@ long test_efficiency( const vproto_id &veh_id, const ter_id &terrain,
 
     // Remove all items from cargo to normalize weight.
     for( const vpart_reference vp : veh.get_parts() ) {
-        while( veh.remove_item( vp.part_index(), 0 ) );
+        veh.get_items( vp.part_index() ).remove_all();
     }
     const auto &starting_fuel = set_vehicle_fuel( veh, fuel_level );
     // This is ugly, but improves accuracy: compare the result of fuel approx function
