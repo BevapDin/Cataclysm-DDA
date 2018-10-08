@@ -840,18 +840,6 @@ class vehicle
          */
         int next_part_to_open( int p, bool outside ) const;
 
-        /**
-         *  Return the index of the next part to close at `p`
-         *
-         *  The next part to open is the first opened part in the list of
-         *  parts at part `p`'s coordinates. Returns -1 for no more to close.
-         *
-         *  @param p Part who's coordinates provide the location to check
-         *  @param outside If true, give parts that can be closed from outside only
-         *  @return part index or -1 if no part
-         */
-        int next_part_to_close( int p, bool outside ) const;
-
         // Given a part and a flag, returns the indices of all continiguously adjacent parts
         // with the same flag on the X and Y Axis
         std::vector<std::vector<int>> find_lines_of_parts( int part, const std::string flag );

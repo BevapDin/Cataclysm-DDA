@@ -2223,23 +2223,19 @@ void vpart_position::set_label( const std::string &text ) const
     }
 }
 
-int vehicle::next_part_to_close( int p, bool outside ) const
+cata::optional<vpart_reference> vpart_position::next_part_to_close( const bool outside ) const
 {
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount.x, parts[p].mount.y, true );
-
-    // We want reverse, since we close the outermost thing first (curtains), and then the innermost thing (door)
-    for( std::vector<int>::reverse_iterator part_it = parts_here.rbegin();
-         part_it != parts_here.rend();
-         ++part_it ) {
-
-        if( part_flag( *part_it, VPFLAG_OPENABLE )
-            && parts[ *part_it ].is_available()
-            && parts[*part_it].open == 1
-            && ( !outside || !part_flag( *part_it, "OPENCLOSE_INSIDE" ) ) ) {
-            return *part_it;
+    // We take the last part, since we close the outermost thing first (curtains), and then the innermost thing (door)
+    cata::optional<vpart_reference> result;
+    for( const vpart_reference vp : parts_here() ) {
+        if( vp.has_feature( VPFLAG_OPENABLE )
+            && vp.part().is_available()
+            && vp.part().open == 1
+            && ( !outside || !vp.has_feature( "OPENCLOSE_INSIDE" ) ) ) {
+            result.emplace( vp );
         }
     }
-    return -1;
+    return result;
 }
 
 int vehicle::next_part_to_open( int p, bool outside ) const

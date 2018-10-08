@@ -89,6 +89,13 @@ class vpart_position
          */
         // @todo change to tripoint
         point mount() const;
+        /**
+         *  The next part to open is the first closed part in the list of
+         *  parts here.
+         *
+         *  @param outside If true, give parts that can be closed from outside only.
+         */
+        cata::optional<vpart_reference> next_part_to_close( bool outside ) const;
 };
 
 /**
