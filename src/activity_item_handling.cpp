@@ -81,7 +81,7 @@ void put_into_vehicle( player &p, const std::list<item> &items, vehicle &veh, in
         if( !vpart_reference( veh, part ).add_item( it ) ) {
             if( it.count_by_charges() ) {
                 // Maybe we can add a few charges in the trunk and the rest on the ground.
-                it.mod_charges( -veh.add_charges( part, it ) );
+                it.mod_charges( -vpart_reference( veh, part ).add_charges( it ) );
             }
             g->m.add_item_or_charges( where, it );
             ++fallen_count;

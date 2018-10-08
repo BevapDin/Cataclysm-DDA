@@ -3679,20 +3679,20 @@ void vehicle::make_active( item_location &loc )
     active_items.add( item_index, cargo_part->mount );
 }
 
-long vehicle::add_charges( int part, const item &itm )
+long vpart_reference::add_charges( const item &itm ) const
 {
     if( !itm.count_by_charges() ) {
         debugmsg( "Add charges was called for an item not counted by charges!" );
         return 0;
     }
-    const long ret = vpart_reference( *this, part ).get_items().amount_can_fit( itm );
+    const long ret = get_items().amount_can_fit( itm );
     if( ret == 0 ) {
         return 0;
     }
 
     item itm_copy = itm;
     itm_copy.charges = ret;
-    return vpart_reference( *this, part ).add_item( itm_copy ) ? ret : 0;
+    return add_item( itm_copy ) ? ret : 0;
 }
 
 bool vpart_reference::add_item( const item &obj ) const

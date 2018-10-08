@@ -69,6 +69,12 @@ class vpart_reference : public vpart_position
          * since it should only ever be used by item processing code.
          */
         bool add_item_at( std::list<item>::iterator index, item itm ) const;
+        /**
+         * Add an item counted by charges to the part's cargo.
+         *
+         * @returns The number of charges added.
+         */
+        long add_charges( int part, const item &itm );
 
         bool remove_item( const item *it ) const;
         bool remove_item( size_t itemdex ) const;

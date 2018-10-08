@@ -1101,13 +1101,6 @@ class vehicle
          * hot or perishable liquid to a container.
          */
         void make_active( item_location &loc );
-        /**
-         * Add an item counted by charges to the part's cargo.
-         *
-         * @returns The number of charges added.
-         */
-        long add_charges( int part, const item &itm );
-
         // Generates starting items in the car, should only be called when placed on the map
         void place_spawn_items();
 
