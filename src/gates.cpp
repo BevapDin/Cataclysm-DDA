@@ -253,7 +253,7 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const int vpart = vp->part_index();
         const int closable = veh->next_part_to_close( vpart,
                              veh_pointer_or_null( m.veh_at( who.pos() ) ) != veh );
-        const int inside_closable = veh->next_part_to_close( vpart );
+        const int inside_closable = veh->next_part_to_close( vpart, false );
         const int openable = veh->next_part_to_open( vpart );
         if( closable >= 0 ) {
             veh->close( closable );
@@ -318,4 +318,3 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         who.mod_moves( -90 ); // TODO: Vary this? Based on strength, broken legs, and so on.
     }
 }
-
