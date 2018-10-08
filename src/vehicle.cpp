@@ -74,11 +74,6 @@ inline int modulo( int v, int m );
 point vehicles::cardinal_d[5] = { point( -1, 0 ), point( 1, 0 ), point( 0, -1 ), point( 0, 1 ), point( 0, 0 ) };
 
 // Vehicle stack methods.
-std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
-{
-    return myorigin->remove_item( part_num, it );
-}
-
 void vehicle_stack::push_back( const item &newitem )
 {
     myorigin->add_item( part_num, newitem );
@@ -3719,15 +3714,15 @@ bool vehicle::add_item_at( int part, std::list<item>::iterator index, item itm )
     return true;
 }
 
-std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::iterator it )
+std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
 {
-    std::list<item> &veh_items = parts[part].items;
+    std::list<item> &veh_items = myorigin->parts[part_num].items;
 
-    if( active_items.has( it, parts[part].mount ) ) {
-        active_items.remove( it, parts[part].mount );
+    if( myorigin->active_items.has( it, myorigin->parts[part_num].mount ) ) {
+        myorigin->active_items.remove( it, myorigin->parts[part_num].mount );
     }
 
-    invalidate_mass();
+    myorigin->invalidate_mass();
     return veh_items.erase( it );
 }
 

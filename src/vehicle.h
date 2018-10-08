@@ -101,6 +101,7 @@ char keybind( const std::string &opt, const std::string &context = "VEHICLE" );
  * Structure, describing vehicle part (ie, wheel, seat)
  */
 struct vehicle_part {
+        friend vehicle_stack;
         friend vehicle;
         friend class veh_interact;
         friend visitable<vehicle_cursor>;
@@ -1162,9 +1163,6 @@ class vehicle
          */
         bool add_item_at( int part, std::list<item>::iterator index, item itm );
 
-        // remove item from part's cargo
-        std::list<item>::iterator remove_item( int part, std::list<item>::iterator it );
-
         vehicle_stack get_items( int part ) const;
         vehicle_stack get_items( int part );
 
@@ -1482,6 +1480,8 @@ class vehicle
         time_point last_fluid_check = calendar::time_of_cataclysm;
 
     private:
+        friend vehicle_stack;
+
         // refresh pivot_cache, clear pivot_dirty
         void refresh_pivot() const;
 
