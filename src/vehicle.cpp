@@ -531,7 +531,7 @@ void vehicle::smash( float hp_percent_loss_min, float hp_percent_loss_max,
         if( structures_found > 1 ) {
             //Destroy everything in the square
             for( int idx : parts_in_square ) {
-                mod_hp( parts[ idx ], 0 - parts[ idx ].hp(), DT_BASH );
+                parts[ idx ].mod_hp( 0 - parts[ idx ].hp(), DT_BASH );
                 parts[ idx ].ammo_unset();
             }
             continue;
@@ -547,7 +547,7 @@ void vehicle::smash( float hp_percent_loss_min, float hp_percent_loss_max,
                 dist = 1.0f;
             }
             //Everywhere else, drop by 10-120% of max HP (anything over 100 = broken)
-            if( mod_hp( part, 0 - ( rng_float( hp_percent_loss_min * dist,
+            if( part.mod_hp( 0 - ( rng_float( hp_percent_loss_min * dist,
                                                hp_percent_loss_max * dist ) * part.info().durability ), DT_BASH ) ) {
                 part.ammo_unset();
             }
@@ -4433,7 +4433,7 @@ bool vehicle::explode_fuel( int p, damage_type type )
         //debugmsg( "damage check dmg=%d pow=%d amount=%d", dmg, pow, parts[p].amount );
 
         g->explosion( global_part_pos3( p ), pow, 0.7, data.fiery_explosion );
-        mod_hp( parts[p], 0 - parts[ p ].hp(), DT_HEAT );
+        parts[p].mod_hp( 0 - parts[ p ].hp(), DT_HEAT );
         parts[p].ammo_unset();
     }
 
@@ -4457,7 +4457,7 @@ int vehicle::damage_direct( int p, int dmg, damage_type type )
 
     dmg -= std::min<int>( dmg, part_info( p ).damage_reduction[ type ] );
     int dres = dmg - parts[p].hp();
-    if( mod_hp( parts[ p ], 0 - dmg, type ) ) {
+    if( parts[ p ].mod_hp( 0 - dmg, type ) ) {
         insides_dirty = true;
         pivot_dirty = true;
 

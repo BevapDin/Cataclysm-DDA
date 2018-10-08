@@ -36,7 +36,7 @@ static void test_repair( std::vector<item> tools, bool expect_craftable )
     }
     REQUIRE( origin_frame != nullptr );
     REQUIRE( origin_frame->hp() == origin_frame->info().durability );
-    veh_ptr->mod_hp( *origin_frame, -100 );
+    origin_frame->mod_hp( -100 );
     REQUIRE( origin_frame->hp() < origin_frame->info().durability );
 
     const vpart_info &vp = origin_frame->info();
