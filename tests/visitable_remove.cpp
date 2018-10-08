@@ -409,10 +409,7 @@ TEST_CASE( "visitable_remove", "[visitable]" )
         vehicle *const v = &vp->vehicle();
         const int part = vp->part_index();
         REQUIRE( part >= 0 );
-        // Empty the vehicle of any cargo.
-        while( !vp->get_items().empty() ) {
-            v->remove_item( part, 0 );
-        }
+        vp->get_items().remove_all();
         for( int i = 0; i != count; ++i ) {
             vp->add_item( obj );
         }

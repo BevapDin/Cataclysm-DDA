@@ -113,3 +113,10 @@ units::volume item_stack::free_volume() const
 {
     return max_volume() - stored_volume();
 }
+
+void item_stack::remove_all()
+{
+    while( !empty() ) {
+        erase( begin() );
+    }
+}
