@@ -29,9 +29,9 @@ class item_stack
     protected:
         std::list<item> *mystack;
 
-    public:
         item_stack( std::list<item> *mystack ) : mystack( mystack ) { }
 
+    public:
         size_t size() const;
         bool empty() const;
         virtual std::list<item>::iterator erase( std::list<item>::iterator it ) = 0;
