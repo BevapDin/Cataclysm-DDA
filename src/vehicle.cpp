@@ -3729,22 +3729,6 @@ bool vehicle::remove_item( int part, int itemdex )
     return true;
 }
 
-bool vehicle::remove_item( int part, const item *it )
-{
-    bool rc = false;
-    std::list<item> &veh_items = parts[part].items;
-
-    for( auto iter = veh_items.begin(); iter != veh_items.end(); iter++ ) {
-        //delete the item if the pointer memory addresses are the same
-        if( it == &*iter ) {
-            remove_item( part, iter );
-            rc = true;
-            break;
-        }
-    }
-    return rc;
-}
-
 std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::iterator it )
 {
     std::list<item> &veh_items = parts[part].items;

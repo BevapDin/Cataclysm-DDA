@@ -48,6 +48,13 @@ class item_stack
          * `size() == 0`
          */
         void remove_all();
+        /**
+         * Attempts to find and remove the given item (which is compared
+         * by its address).
+         * @returns Whether the item was found (and therefor removed, remove
+         * always succeeds).
+         */
+        bool remove( const item &it );
 
         std::list<item>::iterator begin();
         std::list<item>::iterator end();

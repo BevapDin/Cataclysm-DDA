@@ -128,3 +128,15 @@ void item_stack::remove_all()
         erase( begin() );
     }
 }
+
+bool item_stack::remove( const item &it )
+{
+    const auto iter = std::find_if( begin(), end(), [&]( const item & in_stack ) {
+        return &in_stack == &it;
+    } );
+    if( iter == end() ) {
+        return false;
+    }
+    erase( iter );
+    return true;
+}
