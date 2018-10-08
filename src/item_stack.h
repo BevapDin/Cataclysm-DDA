@@ -55,6 +55,11 @@ class item_stack
          * always succeeds).
          */
         bool remove( const item &it );
+        /**
+         * Removes the item with the given index in the stack.
+         * The index must be valid.
+         */
+        void remove( size_t index );
 
         std::list<item>::iterator begin();
         std::list<item>::iterator end();

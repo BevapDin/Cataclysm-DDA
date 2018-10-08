@@ -140,3 +140,12 @@ bool item_stack::remove( const item &it )
     erase( iter );
     return true;
 }
+
+void iem_stack::remove( const size_t index )
+{
+    if( index >= size() ) {
+        // @todo write a debgmsg
+        return;
+    }
+    erase( std::next( begin(), index ) );
+}

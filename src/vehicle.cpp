@@ -3719,16 +3719,6 @@ bool vehicle::add_item_at( int part, std::list<item>::iterator index, item itm )
     return true;
 }
 
-bool vehicle::remove_item( int part, int itemdex )
-{
-    if( itemdex < 0 || itemdex >= ( int )parts[part].items.size() ) {
-        return false;
-    }
-
-    remove_item( part, std::next( parts[part].items.begin(), itemdex ) );
-    return true;
-}
-
 std::list<item>::iterator vehicle::remove_item( int part, std::list<item>::iterator it )
 {
     std::list<item> &veh_items = parts[part].items;
