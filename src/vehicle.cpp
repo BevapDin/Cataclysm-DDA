@@ -389,9 +389,6 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
                 open( p );
             }
         }
-        if( vp.has_feature( "BOARDABLE" ) ) {   // no passengers
-            pt.remove_flag( vehicle_part::passenger_flag );
-        }
 
         // initial vehicle damage
         if( veh_status == 0 ) {
