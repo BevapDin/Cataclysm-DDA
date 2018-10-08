@@ -87,12 +87,6 @@ void map_stack::push_back( const item &newitem )
     myorigin->add_item_or_charges( location, newitem );
 }
 
-void map_stack::insert_at( std::list<item>::iterator index,
-                           const item &newitem )
-{
-    myorigin->add_item_at( location, index, newitem );
-}
-
 units::volume map_stack::max_volume() const
 {
     if( !myorigin->inbounds( location ) ) {
@@ -4165,32 +4159,31 @@ item &map::add_item( const tripoint &p, item new_item )
     int ly = 0;
     submap *const current_submap = get_submap_at( p, lx, ly );
 
-    // Process foods when they are added to the map, here instead of add_item_at()
+    // Process foods when they are added to the map, here instead of map_stack::insert_add()
     // to avoid double processing food during active item processing.
     if( /*new_item.needs_processing() &&*/ new_item.is_food() ) {
         new_item.process( nullptr, p, false );
     }
-    return add_item_at( p, current_submap->itm[lx][ly].end(), new_item );
+    return i_at( p ).insert_at( current_submap->itm[lx][ly].end(), new_item );
 }
 
-item &map::add_item_at( const tripoint &p,
-                        std::list<item>::iterator index, item new_item )
+item &map_stack::insert_at( const std::list<item>::iterator index, const item &newitem )
 {
-    if( new_item.made_of( LIQUID ) && has_flag( "SWIMMABLE", p ) ) {
+    if( new_item.made_of( LIQUID ) && myorigin->has_flag( "SWIMMABLE", location ) ) {
         return null_item_reference();
     }
 
-    if( has_flag( "DESTROY_ITEM", p ) ) {
+    if( myorigin->has_flag( "DESTROY_ITEM", location ) ) {
         return null_item_reference();
     }
 
-    if( new_item.has_flag( "ACT_IN_FIRE" ) && get_field( p, fd_fire ) != nullptr ) {
+    if( new_item.has_flag( "ACT_IN_FIRE" ) && myorigin->get_field( location, fd_fire ) != nullptr ) {
         new_item.active = true;
     }
 
     int lx = 0;
     int ly = 0;
-    submap *const current_submap = get_submap_at( p, lx, ly );
+    submap *const current_submap = myorigin->get_submap_at( location, lx, ly );
     current_submap->is_uniform = false;
 
     current_submap->update_lum_add( new_item, lx, ly );

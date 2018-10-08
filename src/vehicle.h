@@ -83,7 +83,7 @@ class vehicle_stack : public item_stack
             item_stack( newstack ), location( newloc ), myorigin( neworigin ), part_num( part ) {};
         std::list<item>::iterator erase( std::list<item>::iterator it ) override;
         void push_back( const item &newitem ) override;
-        void insert_at( std::list<item>::iterator index, const item &newitem ) override;
+        item &insert_at( std::list<item>::iterator index, const item &newitem ) override;
         int count_limit() const override {
             return MAX_ITEM_IN_VEHICLE_STORAGE;
         }

@@ -872,8 +872,6 @@ class map
          */
         item &add_item_or_charges( const tripoint &pos, item obj, bool overflow = true );
 
-        /** Helper for map::add_item */
-        item &add_item_at( const tripoint &p, std::list<item>::iterator index, item new_item );
         /**
          * Place an item on the map, despite the parameter name, this is not necessarily a new item.
          * WARNING: does -not- check volume or stack charges. player functions (drop etc) should use

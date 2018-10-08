@@ -3690,7 +3690,7 @@ bool vehicle::add_item( vehicle_part &pt, const item &obj )
     return add_item( idx, obj );
 }
 
-void vehicle_stack::insert_at( const std::list<item>::iterator index, const item &newitem )
+item &vehicle_stack::insert_at( const std::list<item>::iterator index, const item &newitem )
 {
     item itm = newitem;
     if( itm.is_bucket_nonempty() ) {
@@ -3707,6 +3707,8 @@ void vehicle_stack::insert_at( const std::list<item>::iterator index, const item
     }
 
     myorigin->invalidate_mass();
+
+    return *new_pos;
 }
 
 std::list<item>::iterator vehicle_stack::erase( std::list<item>::iterator it )
