@@ -103,18 +103,18 @@ void mx_helicopter( map &m, const tripoint &abs_sub )
     auto crashed_hull = vgroup_id( "crashed_helicopters" )->pick();
 
     // Create the vehicle so we can rotate it and calculate its bounding box, but don't place it on the map.
-    auto veh = std::unique_ptr<vehicle>( new vehicle( crashed_hull, rng( 1, 33 ), 1 ) );
+    vehicle veh( crashed_hull, rng( 1, 33 ), 1 );
 
-    veh->turn( dir1 );
+    veh.turn( dir1 );
 
-    bounding_box bbox = veh->get_bounding_box();     // Get the bounding box, centered on mount(0,0)
+    bounding_box bbox = veh.get_bounding_box();     // Get the bounding box, centered on mount(0,0)
     int x_length = std::abs( bbox.p2.x -
                              bbox.p1.x );  // Move the wreckage forward/backward half it's length so
     int y_length = std::abs( bbox.p2.y -   // that it spawns more over the center of the debris area
                              bbox.p1.y );
 
-    int x_offset = veh->dir_vec().x * ( x_length / 2 );   // cont.
-    int y_offset = veh->dir_vec().y * ( y_length / 2 );
+    int x_offset = veh.dir_vec().x * ( x_length / 2 );   // cont.
+    int y_offset = veh.dir_vec().y * ( y_length / 2 );
 
     int x_min = abs( bbox.p1.x ) + 0;
     int y_min = abs( bbox.p1.y ) + 0;
