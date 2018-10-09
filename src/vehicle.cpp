@@ -1218,25 +1218,24 @@ bool vehicle::is_connected( vehicle_part const &to, vehicle_part const &from,
  * @param dy The y coordinate of where to install the part.
  * @param id The string ID of the part to install. (see vehicle_parts.json)
  * @param force Skip check of whether we can mount the part here.
- * @return false if the part could not be installed, true otherwise.
  */
-int vehicle::install_part( int dx, int dy, const vpart_id &id, bool force )
+cata::optional<vpart_reference> vehicle::install_part( int dx, int dy, const vpart_id &id, bool force )
 {
     if( !( force || can_mount( dx, dy, id ) ) ) {
-        return -1;
+        return cata::nullopt;
     }
     return install_part( dx, dy, vehicle_part( id, dx, dy, item( id.obj().item ) ) );
 }
 
-int vehicle::install_part( int dx, int dy, const vpart_id &id, item &&obj, bool force )
+cata::optional<vpart_reference> vehicle::install_part( int dx, int dy, const vpart_id &id, item &&obj, bool force )
 {
     if( !( force || can_mount( dx, dy, id ) ) ) {
-        return -1;
+        return cata::nullopt;
     }
     return install_part( dx, dy, vehicle_part( id, dx, dy, std::move( obj ) ) );
 }
 
-int vehicle::install_part( int dx, int dy, const vehicle_part &new_part )
+cata::optional<vpart_reference> vehicle::install_part( int dx, int dy, const vehicle_part &new_part )
 {
     // Should be checked before installing the part
     bool enable = false;
@@ -1281,7 +1280,7 @@ int vehicle::install_part( int dx, int dy, const vehicle_part &new_part )
     pt.mount.y = dy;
 
     refresh();
-    return parts.size() - 1;
+    return vpart_reference( *this, parts.size() - 1 );
 }
 
 bool vehicle::find_rackable_vehicle( const std::vector<std::vector<int>> &list_of_racks )
