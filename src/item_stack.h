@@ -88,6 +88,18 @@ class item_stack
         /** Return the item (or nullptr) that stacks with the argument */
         item *stacks_with( const item &it );
         const item *stacks_with( const item &it ) const;
+
+        /**
+         * Add the item to this stack. If there is not enough room here
+         * and the item is counted by charges, it only adds parts of it.
+         * The charges of the item will be adjusted accordingly.
+         * @return Whether the item has been added *completely*. If only
+         * parts of it have been added, it will still return `false`.
+         */
+        std::list<item>::iterator add( item &itm );
+
+    private:
+        std::list<item>::iterator add_with_merge( item &itm );
 };
 
 #endif

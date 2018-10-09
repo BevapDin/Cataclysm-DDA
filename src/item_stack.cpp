@@ -149,3 +149,36 @@ void iem_stack::remove( const size_t index )
     }
     erase( std::next( begin(), index ) );
 }
+
+std::list<item>::iterator item_stack::add_with_merge( const item &itm )
+{
+    assert( itm.count_by_charges() ); // `charges` does mean "number of items"
+    assert( itm.charges > 0 ); // does not makes sense to add 0 charges
+
+    for( auto iter = mystack->begin(); iter != mystack->end(); ++iter ) {
+        if( iter->merge_charges( itm ) ) {
+            return iter;
+        }
+    }
+    return mystack->end();
+}
+
+std::list<item>::iterator item_stack::add( item &itm )
+{
+    if( itm.count_by_charges() ) {
+        const long charges_to_add = std::min( itm.charges, amount_can_fit( itm ) );
+        if( charges_to_add <= 0 ) {
+            return false;
+        }
+        const long old_charges = itm.charges;
+        itm.charges = charges_to_add;
+        const auto iter = add_with_merge( itm );
+        if( iter != mystack->end() ) {
+            itm.charges = old_charges - charges_to_add;
+            return iter;
+        }
+        // fall through to adding the whole item
+    }
+
+    return mystack->insert( mystack->end(), itm );
+}
