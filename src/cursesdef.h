@@ -3,10 +3,10 @@
 #define CURSESDEF_H
 
 #include "string_formatter.h"
+#include "display_string.h"
 
 #include <memory>
 #include <cstdint>
-#include <string>
 
 class nc_color;
 
@@ -98,19 +98,18 @@ void mvwvline( const window &win, int y, int x, chtype ch, int n );
 void wrefresh( const window &win );
 void refresh();
 void wredrawln( const window &win, int beg_line, int num_lines );
-void mvwprintw( const window &win, int y, int x, const std::string &text );
+void mvwprintw( const window &win, int y, int x, const display_string &text );
 template<typename ...Args>
-inline void mvwprintw( const window &win, const int y, const int x, const char *const fmt,
-                       Args &&... args )
+inline void mvwprintw( const window &win, const int y, const int x, const char *const fmt, Args &&... args )
 {
-    return mvwprintw( win, y, x, string_format( fmt, std::forward<Args>( args )... ) );
+    return mvwprintw( win, y, x, display_string( string_format( fmt, std::forward<Args>( args )... ) ) );
 }
 
-void wprintw( const window &win, const std::string &text );
+void wprintw( const window &win, const display_string &text );
 template<typename ...Args>
 inline void wprintw( const window &win, const char *const fmt, Args &&... args )
 {
-    return wprintw( win, string_format( fmt, std::forward<Args>( args )... ) );
+    return wprintw( win, display_string( string_format( fmt, std::forward<Args>( args )... ) ) );
 }
 
 void resizeterm();

@@ -31,6 +31,16 @@ static void curses_check_result( const int result, const int expected, const cha
     }
 }
 
+class display_string_accessor {
+    public:
+        static const char *as_c_string( const display_string &d ) {
+            return d.data_.c_str();
+        }
+};
+static const char *as_c_string( const display_string &d ) {
+    return display_string_accessor::as_c_string( d );
+}
+
 catacurses::window catacurses::newwin( const int nlines, const int ncols, const int begin_y,
                                        const int begin_x )
 {
@@ -95,15 +105,15 @@ void catacurses::wmove( const window &win, const int y, const int x )
     return curses_check_result( ::wmove( win.get<::WINDOW>(), y, x ), OK, "wmove" );
 }
 
-void catacurses::mvwprintw( const window &win, const int y, const int x, const std::string &text )
+void catacurses::mvwprintw( const window &win, const int y, const int x, const display_string &text )
 {
-    return curses_check_result( ::mvwprintw( win.get<::WINDOW>(), y, x, "%s", text.c_str() ), OK,
+    return curses_check_result( ::mvwprintw( win.get<::WINDOW>(), y, x, "%s", as_c_string( text ) ), OK,
                                 "mvwprintw" );
 }
 
-void catacurses::wprintw( const window &win, const std::string &text )
+void catacurses::wprintw( const window &win, const display_string &text )
 {
-    return curses_check_result( ::wprintw( win.get<::WINDOW>(), "%s", text.c_str() ), OK, "wprintw" );
+    return curses_check_result( ::wprintw( win.get<::WINDOW>(), "%s", as_c_string( text ) ), OK, "wprintw" );
 }
 
 void catacurses::refresh()
