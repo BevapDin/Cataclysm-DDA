@@ -1003,7 +1003,7 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
     // Invalidate vehicle's point cache
     veh->occupied_cache_time = calendar::before_time_starts;
     if( src_submap != dst_submap ) {
-        veh->set_submap_moved( int( dst.x / SEEX ), int( dst.y / SEEY ) );
+        veh->set_submap_moved( dst.x / SEEX, dst.y / SEEY );
         dst_submap->vehicles.push_back( veh );
         src_submap->vehicles.erase( src_submap->vehicles.begin() + our_i );
         dst_submap->is_uniform = false;
