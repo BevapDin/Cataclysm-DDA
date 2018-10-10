@@ -888,7 +888,7 @@ void map::unboard_vehicle( const tripoint &p )
 
 void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
 {
-    tripoint src = veh_.global_pos3();
+    const tripoint src = veh_.global_pos3();
     const tripoint dst = src + dp;
     vehicle *const veh = &veh_; // @todo change code below to use reference
 
@@ -1010,8 +1010,6 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
     }
 
     update_vehicle_cache( veh, src.z );
-
-    src = dst
 
     if( need_update ) {
         g->update_map( g->u );
