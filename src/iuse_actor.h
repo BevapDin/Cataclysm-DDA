@@ -5,6 +5,7 @@
 #include "iuse.h"
 #include "game_constants.h"
 #include "color.h"
+#include "formattable_string.h"
 #include "ret_val.h"
 #include "string_id.h"
 #include "int_id.h"
@@ -894,7 +895,7 @@ class place_trap_actor : public iuse_actor
             data();
             trap_str_id trap;
             /** The message shown when the trap has been set. */
-            std::string done_message;
+            formattable_string<std::string> done_message;
             /** Amount of practice of the "trap" skill. */
             int practice = 0;
             /** Move points that are used when placing the trap. */

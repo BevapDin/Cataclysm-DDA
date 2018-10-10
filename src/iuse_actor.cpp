@@ -3455,7 +3455,7 @@ long place_trap_actor::use( player &p, item &it, bool, const tripoint & ) const
     }
     const auto &data = bury ? buried_data : unburied_data;
 
-    p.add_msg_if_player( m_info, _( data.done_message.c_str() ), g->m.name( pos ).c_str() );
+    p.add_msg_if_player( m_info, _( data.done_message ), g->m.name( pos ) );
     p.practice( skill_id( "traps" ), data.practice );
     p.mod_moves( -data.moves );
 

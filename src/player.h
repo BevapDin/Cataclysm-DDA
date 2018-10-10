@@ -21,6 +21,8 @@
 
 static const std::string DEFAULT_HOTKEYS( "1234567890abcdefghijklmnopqrstuvwxyz" );
 
+template<typename ...Args>
+class formattable_string;
 class craft_command;
 class recipe_subset;
 enum action_id : int;
@@ -1536,6 +1538,16 @@ class player : public Character
         using Character::add_msg_if_player;
         void add_msg_if_player( const std::string &msg ) const override;
         void add_msg_if_player( game_message_type type, const std::string &msg ) const override;
+
+        template<typename ...Args>
+        void add_msg_if_player( const formattable_string<Args...> &msg, Args &&...args  ) const {
+            add_msg_if_player( string_format( msg, std::forward<Args>( args )... ) );
+        }
+        template<typename ...Args1, typename ...Args>
+        void add_msg_if_player( const game_message_type type, const formattable_string<Args1...> &msg, Args &&...args  ) const {
+            add_msg_if_player( type, string_format( msg, std::forward<Args>( args )... ) );
+        }
+
         using Character::add_msg_player_or_npc;
         void add_msg_player_or_npc( const std::string &player_msg,
                                     const std::string &npc_str ) const override;
