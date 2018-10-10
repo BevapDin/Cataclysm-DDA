@@ -70,72 +70,140 @@ using is_cstring = typename std::conditional <
                    std::is_same<typename std::decay<T>::type, const char *>::value ||
                    std::is_same<typename std::decay<T>::type, char *>::value, std::true_type, std::false_type >::type;
 
-template<typename RT, typename T>
-inline typename std::enable_if < is_integer<RT>::value &&is_integer<T>::value,
-       RT >::type convert( RT *, const string_formatter &, T &&value, int )
-{
-    return value;
-}
-template<typename RT, typename T>
-inline typename std::enable_if < is_integer<RT>::value
-&&std::is_enum<typename std::decay<T>::type>::value,
-RT >::type convert( RT *, const string_formatter &, T &&value, int )
-{
-    return static_cast<RT>( value );
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_floating_point<RT>::value &&is_numeric<T>::value
-&&!is_integer<T>::value, RT >::type convert( RT *, const string_formatter &, T &&value, int )
-{
-    return value;
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_same<RT, void *>::value
-&&std::is_pointer<typename std::decay<T>::type>::value, void * >::type convert( RT *,
-        const string_formatter &, T &&value, int )
-{
-    return const_cast<typename std::remove_const<typename std::remove_pointer<typename std::decay<T>::type>::type>::type *>
-           ( value );
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_string<T>::value,
-       const char * >::type convert( RT *, const string_formatter &, T &&value, int )
-{
-    return value.c_str();
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_cstring<T>::value,
-       const char * >::type convert( RT *, const string_formatter &, T &&value, int )
-{
-    return value;
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_numeric<T>::value
-&&!is_char<T>::value, const char * >::type convert( RT *, const string_formatter &sf, T &&value,
-        int )
-{
-    return string_formatter_set_temp_buffer( sf, to_string( value ) );
-}
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_same<RT, const char *>::value &&is_numeric<T>::value
-&&is_char<T>::value, const char * >::type convert( RT *, const string_formatter &sf, T &&value,
-        int )
-{
-    return string_formatter_set_temp_buffer( sf, std::string( 1, value ) );
-}
-// Catch all remaining conversions (the '...' makes this the lowest overload priority).
-// The enable_if is used to restrict the input type to those that can actually be printed,
-// calling `string_format` with an unknown type will trigger a compile error because no
-// `convert` function will match, not even this one.
-template<typename RT, typename T>
-inline typename std::enable_if < std::is_pointer<typename std::decay<T>::type>::value ||
-is_numeric<T>::value || is_string<T>::value || is_char<T>::value ||
-std::is_enum<typename std::decay<T>::type>::value ||
-is_cstring<T>::value, RT >::type convert( RT *, const string_formatter &sf, T &&, ... )
-{
-    throw_error( sf, "Tried to convert argument of type " + std::string( typeid(
-                     T ).name() ) + " to " + std::string( typeid( RT ).name() ) + ", which is not possible" );
-}
+template<typename RT>
+class converter;
+
+/**
+ * This class implements the fallback for incompatible types. All
+ * converter classes should inherit from it and they should
+ * introduce the functions `convert` and `can_convert` into
+ * their namespace.
+ * They should also declare their own version of those functions
+ * as needed. See documentation of them here.
+ */
+template<typename RT>
+class base_converter {
+    public:
+        template<typename T>
+        static RT convert( const string_formatter &sf, T && ) {
+            throw_error( sf, "Tried to convert argument of type " + std::string( typeid( T ).name() ) + " to " + std::string( typeid( RT ).name() ) + ", which is not possible" );
+        }
+        template<typename T>
+        static std::false_type can_convert( T && );
+};
+
+template<>
+class converter<const char *> : public base_converter<const char *> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        static const char *convert( const string_formatter &, const char * &&value )
+        {
+            return value;
+        }
+        static std::true_type can_convert( const char * &&);
+
+        static const char *convert( const string_formatter &, std::string &&value )
+        {
+            return value.c_str();
+        }
+        static std::true_type can_convert( std::string &&);
+
+        template<typename T>
+        static typename std::enable_if<is_numeric<T>::value && !is_char<T>::value, const char *>::type convert( const string_formatter &sf, T &&value )
+        {
+            return string_formatter_set_temp_buffer( sf, to_string( value ) );
+        }
+        template<typename T>
+        static typename std::enable_if<is_numeric<T>::value && !is_char<T>::value, std::true_type>::type can_convert( T && );
+
+        template<typename T>
+        static typename std::enable_if<is_char<T>::value, const char *>::type convert( const string_formatter &sf, T &&value )
+        {
+            return string_formatter_set_temp_buffer( sf, std::string( 1, value ) );
+        }
+        template<typename T>
+        static typename std::enable_if<is_char<T>::value, std::true_type>::type can_convert( T && );
+};
+
+template<>
+class converter<int> : public base_converter<int> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_signed<T>::value && sizeof(T) <= sizeof(int), int>::type convert( const string_formatter &, T &&value )
+        {
+            return value;
+        }
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_signed<T>::value && sizeof(T) <= sizeof(int), std::true_type>::type can_convert( T &&);
+};
+
+template<>
+class converter<signed long long int> : public base_converter<signed long long int> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_signed<T>::value, signed long long int>::type convert( const string_formatter &, T &&value )
+        {
+            return value;
+        }
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_signed<T>::value, std::true_type>::type can_convert( T &&);
+};
+
+template<>
+class converter<unsigned long long int> : public base_converter<unsigned long long int> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_unsigned<T>::value, unsigned long long int>::type convert( const string_formatter &, T &&value )
+        {
+            return value;
+        }
+
+        template<typename T>
+        static typename std::enable_if<is_integer<T>::value && std::is_unsigned<T>::value, std::true_type>::type can_convert( T &&);
+};
+
+template<>
+class converter<double> : public base_converter<double> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        template<typename T>
+        static typename std::enable_if<is_numeric<T>::value && !is_char<T>::value, double>::type convert( const string_formatter &, T &&value )
+        {
+            return value;
+        }
+        template<typename T>
+        static typename std::enable_if<is_numeric<T>::value && !is_char<T>::value, std::true_type>::type can_convert( T &&);
+};
+
+template<>
+class converter<void *> : public base_converter<void *> {
+    public:
+        using base_converter::convert;
+        using base_converter::can_convert;
+
+        template<typename T>
+        static typename std::enable_if<std::is_pointer<typename std::decay<T>::type>::value, void*>::type convert( const string_formatter &, T &&value )
+        {
+            return const_cast<typename std::remove_const<typename std::remove_pointer<typename std::decay<T>::type>::type>::type *>( value );
+        }
+        template<typename T>
+        static typename std::enable_if<std::is_pointer<typename std::decay<T>::type>::value, std::true_type>::type can_convert( T &&);
+};
 /**@}*/
 
 /**
@@ -232,7 +300,22 @@ class string_formatter
             if( requested > current_index ) {
                 return get_nth_arg_as < RT, current_index + 1 > ( requested, std::forward<Args>( args )... );
             } else {
-                return convert( static_cast<RT *>( nullptr ), *this, std::forward<T>( head ), 0 );
+                return converter<RT>::convert( *this, std::forward<T>( head ) );
+            }
+        }
+        /**@}*/
+
+        template<typename RT, unsigned int current_index>
+        RT test_nth_arg_as( const unsigned int requested ) const {
+            throw_error( "Requested argument " + to_string( requested ) + " but input has only " + to_string(
+                             current_index ) );
+        }
+        template<typename RT, unsigned int current_index, typename T, typename ...Args>
+        void test_nth_arg_as( const unsigned int requested ) const {
+            if( requested > current_index ) {
+                test_nth_arg_as < RT, current_index + 1, Args... > ( requested );
+            } else if( !decltype( converter<RT>::can_convert( std::declval<T>() ) )::value ) {
+                throw_error(std::string( "Argument " ) + typeid(RT).name() + " does not match expected: " + typeid(T).name());
             }
         }
         /**@}*/
@@ -290,7 +373,57 @@ class string_formatter
                     break;
             }
         }
-
+        template<typename ...Args>
+        void test_conversion( const int format_arg_index ) {
+            // Removes the prefix "ll", "l", "h" and "hh", we later add "ll" again and that
+            // would interfere with the existing prefix. We convert *all* input to (un)signed
+            // long long int and use the "ll" modifier all the time. This will print the
+            // expected value all the time, even when the original modifier did not match.
+            if( consume_next_input_if( 'l' ) ) {
+                if( consume_next_input_if( 'l' ) ) {
+                }
+            } else if( consume_next_input_if( 'h' ) ) {
+                if( consume_next_input_if( 'h' ) ) {
+                }
+            } else if( consume_next_input_if( 'z' ) ) {
+            }
+            const char c = consume_next_input();
+            switch( c ) {
+                case 'c':
+                    test_nth_arg_as<int, 0, Args...>( format_arg_index );
+                    break;
+                case 'd':
+                case 'i':
+                    test_nth_arg_as<signed long long int, 0, Args...>( format_arg_index );
+                    break;
+                case 'o':
+                case 'u':
+                case 'x':
+                case 'X':
+                    test_nth_arg_as<unsigned long long int, 0, Args...>( format_arg_index );
+                    break;
+                case 'a':
+                case 'A':
+                case 'g':
+                case 'G':
+                case 'f':
+                case 'F':
+                case 'e':
+                case 'E':
+                    test_nth_arg_as<double, 0, Args...>( format_arg_index );
+                    break;
+                case 'p':
+                    test_nth_arg_as<void *, 0, Args...>( format_arg_index );
+                    break;
+                case 's':
+                    test_nth_arg_as<const char *, 0, Args...>( format_arg_index );
+                    break;
+                default:
+                    throw_error( "Unsupported format conversion: " + std::string( 1, c ) );
+                    break;
+            }
+        }
+        
         template<typename T>
         void do_formating( T &&value ) {
             output.append( raw_string_format( current_format.c_str(), value ) );
@@ -334,6 +467,30 @@ class string_formatter
                 }
                 const int arg = format_arg_index ? *format_arg_index : current_argument_index++;
                 read_conversion( arg, std::forward<Args>( args )... );
+            }
+        }
+        template<typename ...Args>
+        void test() {
+            current_index_in_format = 0;
+            current_argument_index = 0;
+            while( const char c = consume_next_input() ) {
+                if( c != '%' ) {
+                    continue;
+                }
+                if( consume_next_input_if( '%' ) ) {
+                    continue;
+                }
+                current_format = "%";
+                const cata::optional<int> format_arg_index = read_argument_index();
+                read_flags();
+                if( const cata::optional<int> width_argument_index = read_width() ) {
+                    test_nth_arg_as<int, 0, Args...>( *width_argument_index );
+                }
+                if( const cata::optional<int> precision_argument_index = read_precision() ) {
+                    test_nth_arg_as<int, 0, Args...>( *precision_argument_index );
+                }
+                const int arg = format_arg_index ? *format_arg_index : current_argument_index++;
+                test_conversion<Args...>( arg );
             }
         }
         std::string get_output() const {
