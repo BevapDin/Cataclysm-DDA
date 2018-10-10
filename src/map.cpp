@@ -920,19 +920,20 @@ void map::displace_vehicle( vehicle &veh_, const tripoint &dp )
     // Need old coordinates to check for remote control
     const bool remote = veh->remote_controlled( g->u );
 
-    // record every passenger inside
-    std::vector<int> psg_parts = veh->boarded_parts();
-    std::vector<player *> psgs;
-    for( auto &prt : psg_parts ) {
-        psgs.push_back( veh->get_passenger( prt ) );
+    // record every passenger inside, needs to be done in a separate
+    // loop because moving the players below may put several of them on
+    // the same position
+    std::vector<std::pair<int, player*>> psg_parts;
+    for( const int prt : veh->boarded_parts() ) {
+        psg_parts.emplace_back( prt, veh->get_passenger( prt ) );
     }
 
     bool need_update = false;
     int z_change = 0;
     // Move passengers
-    for( size_t i = 0; i < psg_parts.size(); i++ ) {
-        player *psg = psgs[i];
-        const int prt = psg_parts[i];
+    for( const std::pair<int, player*> &pair : psg_parts ) {
+        const int prt = pair.first;
+        player *const psg = pair.second;
         const tripoint part_pos = veh->global_part_pos3( prt );
         if( psg == nullptr ) {
             debugmsg( "Empty passenger part %d pcoord=%d,%d,%d u=%d,%d,%d?",
