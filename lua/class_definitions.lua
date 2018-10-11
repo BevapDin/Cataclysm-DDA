@@ -71,13 +71,33 @@ variable can be used long after `some_monster` has been killed and removed from 
 no connection at all to the monster.
 --]]
 
+types = {}
+
+function has_type(name)
+    if types[name] then
+        return true
+    else
+        return false
+    end
+end
+function get_type(name)
+    if name == nil then
+        -- This is used in recursion along the parents of a class.
+        return nil
+    end
+    if not has_type(name) then
+        error(tostring(name) .. " is not a known type name")
+    end
+    return types[name]
+end
+
 Class = {
 }
 Class.__index = Class
 function register_class(name, data)
     setmetatable(data, Class)
     data.name = name
-    classes[name] = data
+    types[name] = data
 end
 
 function Class:get_output_path()
@@ -115,7 +135,7 @@ Enum.__index = Enum
 function register_enum(name, data)
     setmetatable(data, Enum)
     data.name = name
-    enums[name] = data
+    types[name] = data
 end
 
 function Enum:get_output_path()
@@ -147,52 +167,8 @@ function Enum:get_forward_declaration()
     return "enum " .. self:get_cpp_name() .. " : int;"
 end
 
--- Yields the `output_path` of the entity (class/enum) of the given name.
-function output_path_of(name)
-    if classes[name] then
-        return classes[name]:get_output_path()
-    end
-    if enums[name] then
-        return enums[name]:get_output_path()
-    end
-    error(name .. " is not a class/enum name")
-end
-
--- Yields the `code_prepend` of the entity (class/enum) of the given name.
-function code_prepend_of(name)
-    if classes[name] then
-        return classes[name]:get_code_prepend()
-    end
-    if enums[name] then
-        return enums[name]:get_code_prepend()
-    end
-    error(name .. " is not a class/enum name")
-end
-
--- Yields the `code_prepend` of the entity (class/enum) of the given name.
-function cpp_name_of(name)
-    if classes[name] then
-        return classes[name]:get_cpp_name()
-    end
-    if enums[name] then
-        return enums[name]:get_cpp_name()
-    end
-    error(name .. " is not a class/enum name")
-end
-
--- Yields the `forward_declaration` of the entity (class/enum) of the given name.
-function forward_declaration_of(name)
-    if classes[name] then
-        return classes[name]:get_forward_declaration()
-    end
-    if enums[name] then
-        return enums[name]:get_forward_declaration()
-    end
-    error(name .. " is not a class/enum name")
-end
-
 function ref_or_val(t)
-    if classes[t] then
+    if getmetatable(types[t]) == Class then
         return t .. '&'
     else
         return t
@@ -212,7 +188,7 @@ function make_std_iterator_class(container_type, element_type)
     register_class(iterator_type, {
         has_equal = true,
         -- @todo check what other members are needed
-        output_path = output_path_of(element_type),
+        output_path = get_type(element_type):get_output_path(),
         new = {
             { iterator_type },
         },
@@ -231,8 +207,8 @@ function make_std_list_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
-        output_path = output_path_of(element_type),
-        code_prepend = code_prepend_of(element_type) .. "\n#include <list>",
+        output_path = get_type(element_type):get_output_path(),
+        code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <list>",
         new = {
             { },
             { container_type },
@@ -257,8 +233,8 @@ function make_std_vector_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
-        output_path = output_path_of(element_type),
-        code_prepend = code_prepend_of(element_type) .. "\n#include <vector>",
+        output_path = get_type(element_type):get_output_path(),
+        code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <vector>",
         new = {
             { },
             { container_type },
@@ -284,8 +260,8 @@ function make_std_set_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
-        output_path = output_path_of(element_type),
-        code_prepend = code_prepend_of(element_type) .. "\n#include <set>",
+        output_path = get_type(element_type):get_output_path(),
+        code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <set>",
         new = {
             { },
             { container_type },
@@ -310,8 +286,8 @@ end
 -- T has an int_id of some name.
 -- In the class definition: add "int_id" = "XXX" (XXX is the typedef id that is used by C++).
 function make_id_classes(class_name, int_id_name, string_id_name)
-    local class = classes[class_name]
-    if int_id_name and not classes[int_id_name] then
+    local class = get_type(class_name)
+    if int_id_name and not has_type(int_id_name) then
         -- This is the common int_id<T> interface:
         local t = {
             forward_declaration = class:get_forward_declaration() .. "using " .. int_id_name .. " = int_id<" .. class:get_cpp_name() .. ">;",
@@ -338,7 +314,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
         register_class( int_id_name, t )
     end
     -- Very similar to make_int_id above
-    if string_id_name and not classes[string_id_name] then
+    if string_id_name and not has_type(string_id_name) then
         local t = {
             forward_declaration = class:get_forward_declaration() .. "using " .. string_id_name .. " = string_id<" .. class:get_cpp_name() .. ">;",
             code_prepend = class:get_code_prepend(),
@@ -368,8 +344,6 @@ function dofile_if_exists(f)
     end
 end
 
-classes = {}
-enums = {}
 -- Both are the same file, but this script might get run from the root directory
 -- (the first path would work) or from within "src/lua" (the second path would work).
 -- @todo fix this
@@ -413,8 +387,8 @@ register_class("mass", {
     },
 } )
 
-classes["ter_t"].output_path = "mapdata.gen.cpp"
-classes["furn_t"].output_path = "mapdata.gen.cpp"
+get_type("ter_t").output_path = "mapdata.gen.cpp"
+get_type("furn_t").output_path = "mapdata.gen.cpp"
 
 -- Headers that are required in order to compile the global functions wrapper
 global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""
@@ -542,28 +516,30 @@ end
 --     { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool" } },
 --     { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool", "int" } },
 --     { name = "add_effect", rval = nil, args = { "efftype_id", "time_duration", "body_part", "bool", "int", "bool" } },
-for class_name, value in pairs(classes) do
-    local new_functions = { }
-    for _, func in ipairs(value.functions) do
-        if func.optional_args then
-            local i = 0
-            while i <= #func.optional_args do
-                local t = {
-                    name = func.name,
-                    rval = func.rval,
-                    args = { table_unpack_wrapper(func.args) } -- copy args
-                }
-                local j = 1
-                while j <= i do
-                    table.insert(t.args, func.optional_args[j])
-                    j = j + 1
+for class_name, value in pairs(types) do
+    if value.functions then
+        local new_functions = { }
+        for _, func in ipairs(value.functions) do
+            if func.optional_args then
+                local i = 0
+                while i <= #func.optional_args do
+                    local t = {
+                        name = func.name,
+                        rval = func.rval,
+                        args = { table_unpack_wrapper(func.args) } -- copy args
+                    }
+                    local j = 1
+                    while j <= i do
+                        table.insert(t.args, func.optional_args[j])
+                        j = j + 1
+                    end
+                    table.insert(new_functions, t)
+                    i = i + 1
                 end
-                table.insert(new_functions, t)
-                i = i + 1
             end
         end
-    end
-    for _, new_func in ipairs(new_functions) do
-        table.insert(value.functions, new_func)
+        for _, new_func in ipairs(new_functions) do
+            table.insert(value.functions, new_func)
+        end
     end
 end

@@ -5,7 +5,7 @@
 -- Conventions:
 -- The variable holding the name of a class is named "class_name"
 -- The variable holding the data (declarations etc.) of a class is "class"
--- Example code: for class_name, class in pairs(classes) do ...
+-- Example code: for class_name, class in pairs(types) do ...
 
 -- The generated helper C++ functions use this naming system:
 -- Getter: "get_" .. class_name .. "_" .. member_name
@@ -51,6 +51,12 @@ end
 -- `push` to push a value of that type to Lua stack.
 -- `has` to check for a value of that type on the stack.
 -- See catalua.h for their implementation.
+function Class:member_type_to_cpp_type()
+    return "LuaValueOrReference<" .. self:get_cpp_name() .. ">"
+end
+function Enum:member_type_to_cpp_type()
+    return "LuaEnum<" .. self:get_cpp_name() .. ">"
+end
 function member_type_to_cpp_type(member_type)
     if member_type == "bool" then return "LuaType<bool>"
     elseif member_type == "cstring" then return "LuaType<const char*>"
@@ -58,18 +64,7 @@ function member_type_to_cpp_type(member_type)
     elseif member_type == "int" then return "LuaType<int>"
     elseif member_type == "float" then return "LuaType<float>"
     else
-        for class_name, class in pairs(classes) do
-            if class_name == member_type then
-                return "LuaValueOrReference<" .. class:get_cpp_name() .. ">"
-            end
-        end
-        for enum_name, _ in pairs(enums) do
-            if enum_name == member_type then
-                return "LuaEnum<" .. member_type .. ">"
-            end
-        end
-
-        error("'"..member_type.."' is not a build-in type and is not defined in class_definitions.lua")
+        return get_type(member_type):member_type_to_cpp_type()
     end
 end
 
@@ -87,21 +82,30 @@ end
 
 -- Returns code to take a C++ variable of the given type and push a lua version
 -- of it onto the stack.
+function Class:push_lua_value(in_variable)
+    return "LuaValue<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
+end
+function Class:push_ref_lua_value(in_variable)
+    return "LuaValue<" .. self:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+end
+function Enum:push_lua_value(in_variable)
+    return "LuaEnum<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
+end
+function Enum:push_ref_lua_value(in_variable)
+    return "LuaEnum<" .. self:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+end
 function push_lua_value(in_variable, value_type)
     if value_type:sub(-1) == "&" then
         -- A reference is to be pushed. Copying the referred to object may not be allowed  (it may
         -- be a reference to a global game object).
         local t = value_type:sub(1, -2)
-        if classes[t] then
-            return "LuaValue<" .. classes[t]:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+        if has_type(t) then
+            return get_type(t):push_ref_lua_value(in_variable)
         end
         value_type = t
     end
-    if classes[value_type] then
-        return "LuaValue<" .. classes[value_type]:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
-    end
-    if enums[value_type] then
-        return "LuaEnum<" .. enums[value_type]:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
+    if has_type(value_type) then
+        return get_type(value_type):push_lua_value(in_variable)
     end
     -- A native Lua type.
     return member_type_to_cpp_type(value_type) .. "::push( L, " .. in_variable .. " );"
@@ -190,7 +194,7 @@ The leafs have the following entries:
 - class_name: the name of the C++ class name that contains the function (optional, only present if
   the function is a class member).
 --]]
-function generate_overload_tree(classes)
+function generate_overload_tree(types)
     function generate_overload_path(root, args)
         for _, arg in pairs(args) do
             if not root[arg] then
@@ -232,9 +236,10 @@ function generate_overload_tree(classes)
         return functions_by_name
     end
 
-    for class_name, value in pairs(classes) do
-        value.functions = convert_function_list_to_tree_list(value.functions, class_name)
-
+    for class_name, value in pairs(types) do
+        if value.functions then
+            value.functions = convert_function_list_to_tree_list(value.functions, class_name)
+        end
         if value.new then
             local new_root = {}
             for _, func in ipairs(value.new) do
@@ -344,10 +349,10 @@ function Class:generate_function_wrapper(function_name, func)
         -- Non-static: `parameter0.func(parameter1, parameter2, ...)`
         local start_index
         if data.static then
-            func_invoc = classes[data.class_name]:get_cpp_name() .. '::' .. data.cpp_name .. '('
+            func_invoc = get_type(data.class_name):get_cpp_name() .. '::' .. data.cpp_name .. '('
             start_index = 0
         else
-            func_invoc = "static_cast<"..classes[data.class_name]:get_cpp_name().."&>( parameter0 )"
+            func_invoc = "static_cast<"..get_type(data.class_name):get_cpp_name().."&>( parameter0 )"
             func_invoc = func_invoc .. "."..data.cpp_name .. "("
             start_index = 1
         end
@@ -434,7 +439,7 @@ function Class:generate_operator(operator_id, cppname)
     return text
 end
 
-generate_overload_tree(classes)
+generate_overload_tree(types)
 
 function Class:generate_accessors(attributes, class_name)
     local cpp_output = ""
@@ -506,13 +511,15 @@ on a wrapped Child object would not work as there is no `Child::func` exported.
 The loop copies the declaration of `Parent::func` into `Child`, which in turn triggers
 exporting `Child::func`.
 --]]
-for class_name, class in pairs(classes) do
-    local derived_functions = class.functions
-    local parent_name = class.parent
-    while parent_name do
-        local parent_class = classes[parent_name]
-        merge_parent_class_functions(derived_functions, parent_class.functions)
-        parent_name = parent_class.parent
+for class_name, class in pairs(types) do
+    if class.functions then
+        local derived_functions = class.functions
+        local parent_name = class.parent
+        while parent_name do
+            local parent_class = get_type(parent_name)
+            merge_parent_class_functions(derived_functions, parent_class.functions)
+            parent_name = parent_class.parent
+        end
     end
 end
 
@@ -537,7 +544,7 @@ function Class:generate_functions_static(cpp_type)
         for _, name in ipairs(sorted_keys(class.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. id_to_simple_string(class_name) .. "_" .. name, name)
         end
-        class = classes[class.parent]
+        class = get_type(class.parent)
     end
     cpp_output = cpp_output .. tab .. "{NULL, NULL}" .. br -- sentinel to indicate end of array
     cpp_output = cpp_output .. "};" .. br
@@ -601,8 +608,8 @@ function Class:generate_constants()
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
-    for _, child in ipairs(sorted_keys(classes)) do
-        local class = classes[child]
+    for _, child in ipairs(sorted_keys(types)) do
+        local class = get_type(child)
         local cpp_child_name = member_type_to_cpp_type(child);
         if class.parent == self.name then
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
@@ -625,7 +632,7 @@ function Class:generate_functions()
     local attributes = self.attributes
     local parent_class = self.parent
     while parent_class do
-        local class = classes[parent_class]
+        local class = get_type(parent_class)
         for k,v in pairs(class.attributes) do
             attributes[k] = v
         end
@@ -748,6 +755,21 @@ function Enum:generate_code()
 end
 
 
+function Class:load_metatable_call()
+    local cpp_name = "LuaValue<" .. self:get_cpp_name() .. ">"
+    -- If the class has a constructor, it should be exposed via a global name (which is the class name)
+    if self.new then
+        return cpp_name .. "::load_metatable( L, \"" .. self:get_cpp_name() .. "\" );"
+    else
+        return cpp_name .. "::load_metatable( L, nullptr );"
+    end
+end
+
+function Enum:load_metatable_call()
+    -- Enumerations are always exported globally
+    return "LuaEnum<" .. self:get_cpp_name() .. ">::export_global( L, \"" .. self.name .. "\" );"
+end
+
 function generate_main_init_function()
     local cpp_output = "// This file was automatically generated by lua/generate_bindings.lua"..br
     cpp_output = cpp_output .. "extern \"C\" {"..br
@@ -759,31 +781,14 @@ function generate_main_init_function()
     cpp_output = cpp_output .. global_functions_code_prepend .. br
     cpp_output = cpp_output .. "#include \"string_id.h\"" .. br
     cpp_output = cpp_output .. "#include \"int_id.h\"" .. br
-    for _, class_name in ipairs(sorted_keys(classes)) do
-        local class = classes[class_name]
-        cpp_output = cpp_output .. class:get_forward_declaration() .. br
-    end
-    for _, enum_name in ipairs(sorted_keys(enums)) do
-        local enum = enums[enum_name]
-        cpp_output = cpp_output .. enum:get_forward_declaration() .. br
+    for _, name in ipairs(sorted_keys(types)) do
+        cpp_output = cpp_output .. get_type(name):get_forward_declaration() .. br
     end
 
     -- Create a function that calls load_metatable on all the registered LuaValue's
     cpp_output = cpp_output .. "void load_metatables(lua_State* const L) {" .. br
-    for _, class_name in ipairs(sorted_keys(classes)) do
-        local class = classes[class_name]
-        local cpp_name = "LuaValue<" .. class:get_cpp_name() .. ">"
-        -- If the class has a constructor, it should be exposed via a global name (which is the class name)
-        if class.new then
-            cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, \"" .. class:get_cpp_name() .. "\" );" .. br
-        else
-            cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, nullptr );" .. br
-        end
-    end
-    for _, enum_name in ipairs(sorted_keys(enums)) do
-        local enum = enums[enum_name]
-        -- Enumerations are always exported globally
-        cpp_output = cpp_output .. tab .. "LuaEnum<" .. enum:get_cpp_name() .. ">::export_global( L, \"" .. enum_name .. "\" );" .. br
+    for _, name in ipairs(sorted_keys(types)) do
+        cpp_output = cpp_output .. tab .. get_type(name):load_metatable_call() .. br
     end
     cpp_output = cpp_output .. "}" .. br
 
@@ -822,22 +827,16 @@ function writeFile(path,data)
     file:close()
 end
 
--- Generate all code (for class wrappers) that goes into the same output file.
--- This may contain wrappers for multiple classes.
+-- Generate all code that goes into the same output file.
+-- This may contain wrappers for multiple types.
 function generate_code_for_output_path(path)
     local result = ""
     -- @todo the common prefix (includes and the like) should only be contained
     -- once, but currently each invocation of generate_code_for creates it.
-    for _, class_name in ipairs(sorted_keys(classes)) do
-        local class = classes[class_name]
-        if path == class:get_output_path() then
-            result = result .. class:generate_code()
-        end
-    end
-    for _, enum_name in ipairs(sorted_keys(enums)) do
-        local enum = enums[enum_name]
-        if path == enum:get_output_path() then
-            result = result .. enum:generate_code()
+    for _, name in ipairs(sorted_keys(types)) do
+        local t = get_type(name)
+        if path == t:get_output_path() then
+            result = result .. t:generate_code()
         end
     end
     return result
@@ -852,11 +851,8 @@ function generate_and_write_for_path(path)
     writeFile(path, generate_code_for_output_path(path))
 end
 
-for _, class in pairs(classes) do
-    generate_and_write_for_path(class:get_output_path())
-end
-for _, enum in pairs(enums) do
-    generate_and_write_for_path(enum:get_output_path())
+for _, name in ipairs(sorted_keys(types)) do
+    generate_and_write_for_path(get_type(name):get_output_path())
 end
 
 writeFile("catabindings.gen.cpp", generate_main_init_function())
