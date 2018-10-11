@@ -615,13 +615,13 @@ function generate_LuaValue_constants(class_name, class)
     return cpp_output
 end
 
-function generate_functions_for_class(class_name, class)
-    local cur_class_name = class_name
-    local cpp_class_name = class:get_cpp_name()
+function Class:generate_functions()
+    local cur_class_name = self.name
+    local cpp_class_name = self:get_cpp_name()
     local cpp_output = ""
-    cpp_output = cpp_output .. class:generate_destructor()
-    local attributes = class.attributes
-    local parent_class = class.parent
+    cpp_output = cpp_output .. self:generate_destructor()
+    local attributes = self.attributes
+    local parent_class = self.parent
     while parent_class do
         local class = classes[parent_class]
         for k,v in pairs(class.attributes) do
@@ -629,15 +629,15 @@ function generate_functions_for_class(class_name, class)
         end
         parent_class = class.parent
     end
-    cpp_output = cpp_output .. class:generate_accessors("get_member", attributes, generate_getter_code)
-    cpp_output = cpp_output .. class:generate_accessors("set_member", attributes, generate_setter_code)
-    if class.new then
-        cpp_output = cpp_output .. class:generate_constructor()
+    cpp_output = cpp_output .. self:generate_accessors("get_member", attributes, generate_getter_code)
+    cpp_output = cpp_output .. self:generate_accessors("set_member", attributes, generate_setter_code)
+    if self.new then
+        cpp_output = cpp_output .. self:generate_constructor()
     end
-    if class.has_equal then
-        cpp_output = cpp_output .. class:generate_operator("eq", "==")
+    if self.has_equal then
+        cpp_output = cpp_output .. self:generate_operator("eq", "==")
     end
-    cpp_output = cpp_output .. class:generate_function_wrappers(class.functions, cur_class_name)
+    cpp_output = cpp_output .. self:generate_function_wrappers(self.functions, cur_class_name)
     return cpp_output
 end
 
@@ -664,7 +664,7 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. "template<typename T> T get_wrapped_from_stack( const lua_engine &, int );" .. br
     cpp_output = cpp_output .. br
     cpp_output = cpp_output .. class:get_code_prepend() .. br
-    cpp_output = cpp_output .. generate_functions_for_class(class_name, class)
+    cpp_output = cpp_output .. class:generate_functions()
     cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class)
 
     -- Checks whether we have a copy constructor, note that `new` is now in the format
