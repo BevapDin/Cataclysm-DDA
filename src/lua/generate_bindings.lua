@@ -756,11 +756,11 @@ function generate_main_init_function()
     cpp_output = cpp_output .. "#include \"int_id.h\"" .. br
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        cpp_output = cpp_output .. class.forward_declaration .. br
+        cpp_output = cpp_output .. class:get_forward_declaration() .. br
     end
     for _, enum_name in ipairs(sorted_keys(enums)) do
         local enum = enums[enum_name]
-        cpp_output = cpp_output .. enum.forward_declaration .. br
+        cpp_output = cpp_output .. enum:get_forward_declaration() .. br
     end
 
     -- Create a function that calls load_metatable on all the registered LuaValue's

@@ -101,6 +101,14 @@ function Class:get_cpp_name()
     return self.name
 end
 
+function Class:get_forward_declaration()
+    if self.forward_declaration then
+        return self.forward_declaration
+    end
+    -- @todo could be a struct!
+    return "class " .. self:get_cpp_name() .. ";"
+end
+
 Enum = {
 }
 Enum.__index = Enum
@@ -129,6 +137,14 @@ function Enum:get_cpp_name()
         return self.cpp_name
     end
     return self.name
+end
+
+function Enum:get_forward_declaration()
+    if self.forward_declaration then
+        return self.forward_declaration
+    end
+    -- @todo could be different underlying type
+    return "enum " .. self:get_cpp_name() .. " : int;"
 end
 
 -- Yields the `output_path` of the entity (class/enum) of the given name.
@@ -160,6 +176,17 @@ function cpp_name_of(name)
     end
     if enums[name] then
         return enums[name]:get_cpp_name()
+    end
+    error(name .. " is not a class/enum name")
+end
+
+-- Yields the `forward_declaration` of the entity (class/enum) of the given name.
+function forward_declaration_of(name)
+    if classes[name] then
+        return classes[name]:get_forward_declaration()
+    end
+    if enums[name] then
+        return enums[name]:get_forward_declaration()
     end
     error(name .. " is not a class/enum name")
 end
@@ -288,7 +315,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     if int_id_name and not classes[int_id_name] then
         -- This is the common int_id<T> interface:
         local t = {
-            forward_declaration = (class.forward_declaration or "") .. "using " .. int_id_name .. " = int_id<" .. class:get_cpp_name() .. ">;",
+            forward_declaration = class:get_forward_declaration() .. "using " .. int_id_name .. " = int_id<" .. class:get_cpp_name() .. ">;",
             code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
@@ -314,7 +341,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     -- Very similar to make_int_id above
     if string_id_name and not classes[string_id_name] then
         local t = {
-            forward_declaration = (class.forward_declaration or "") .. "using " .. string_id_name .. " = string_id<" .. class:get_cpp_name() .. ">;",
+            forward_declaration = class:get_forward_declaration() .. "using " .. string_id_name .. " = string_id<" .. class:get_cpp_name() .. ">;",
             code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
@@ -539,20 +566,5 @@ for class_name, value in pairs(classes) do
     end
     for _, new_func in ipairs(new_functions) do
         table.insert(value.functions, new_func)
-    end
-end
-
--- Fill in default values for optional properties
-for class_name, value in pairs(classes) do
-    if not value.forward_declaration then
-        -- @todo could be a struct!
-        value.forward_declaration = "class " .. class_name .. ";"
-    end
-end
--- same for enumerations
-for enum_name, value in pairs(enums) do
-    if not value.forward_declaration then
-        -- @todo could be different underlying type
-        value.forward_declaration = "enum " .. enum_name .. " : int;"
     end
 end
