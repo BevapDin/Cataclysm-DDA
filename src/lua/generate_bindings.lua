@@ -521,16 +521,18 @@ function luaL_Reg(cpp_name, lua_name)
     return tab .. '{"' .. lua_name .. '", ' .. cpp_name .. '},' .. br
 end
 -- Creates the LuaValue<T>::FUNCTIONS array, containing all the public functions of the class.
-function generate_functions_static(cpp_type, class, class_name)
+function Class:generate_functions_static(cpp_type)
+    local class_name = self.name
     local cpp_output = ""
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const luaL_Reg " .. cpp_type .. "::FUNCTIONS[] = {" .. br
-    if class.new then
+    if self.new then
         cpp_output = cpp_output .. luaL_Reg("new_" .. id_to_simple_string(class_name), "__call")
     end
-    if class.has_equal then
+    if self.has_equal then
         cpp_output = cpp_output .. luaL_Reg("op_" .. id_to_simple_string(class_name) .. "_eq", "__eq")
     end
+    local class = self
     while class do
         for _, name in ipairs(sorted_keys(class.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. id_to_simple_string(class_name) .. "_" .. name, name)
@@ -590,11 +592,11 @@ function Class:generate_accessors(function_name, attributes, cbc)
     return cpp_output
 end
 
-function generate_LuaValue_constants(class_name, class)
+function Class:generate_constants()
     local cpp_output = ""
-    local cpp_class_name = class:get_cpp_name()
+    local cpp_class_name = self:get_cpp_name()
     local cpp_name = "LuaValue<" .. cpp_class_name .. ">"
-    local metatable_name = class_name .. "_metatable"
+    local metatable_name = self.name .. "_metatable"
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
@@ -602,7 +604,7 @@ function generate_LuaValue_constants(class_name, class)
     for _, child in ipairs(sorted_keys(classes)) do
         local class = classes[child]
         local cpp_child_name = member_type_to_cpp_type(child);
-        if class.parent == class_name then
+        if class.parent == self.name then
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
             cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
             cpp_output = cpp_output .. tab .. "}" .. br
@@ -611,7 +613,7 @@ function generate_LuaValue_constants(class_name, class)
     cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
     cpp_output = cpp_output .. tab .. "return nullptr;" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. generate_functions_static(cpp_name, class, class_name)
+    cpp_output = cpp_output .. self:generate_functions_static(cpp_name)
     return cpp_output
 end
 
@@ -665,7 +667,7 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. br
     cpp_output = cpp_output .. class:get_code_prepend() .. br
     cpp_output = cpp_output .. class:generate_functions()
-    cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class)
+    cpp_output = cpp_output .. class:generate_constants()
 
     -- Checks whether we have a copy constructor, note that `new` is now in the format
     -- of the overload resolution tree, see generate_overload_tree
