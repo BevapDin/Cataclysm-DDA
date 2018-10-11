@@ -436,7 +436,7 @@ end
 
 generate_overload_tree(classes)
 
-function generate_accessors(attributes, class_name)
+function Class:generate_accessors(attributes, class_name)
     local cpp_output = ""
     -- Generate getters and setters for our player attributes.
     for _, key in ipairs(sorted_keys(attributes)) do
@@ -541,7 +541,7 @@ function generate_functions_static(cpp_type, class, class_name)
     cpp_output = cpp_output .. "};" .. br
     return cpp_output
 end
-function generate_accessors_impl(attributes, names, lower, upper, indentation, cbc)
+function Class:generate_accessors_impl(attributes, names, lower, upper, indentation, cbc)
     local pivot = math.floor(lower + (upper - lower) / 2)
     local name = names[pivot]
     local tab = string.rep("    ", indentation)
@@ -550,7 +550,7 @@ function generate_accessors_impl(attributes, names, lower, upper, indentation, c
     cpp_output = cpp_output .. tab .. "const int c = std::strcmp( name, \"" .. name .. "\" );" .. br
     if lower < pivot then
         cpp_output = cpp_output .. tab .. "if( c < 0 ) {" .. br
-        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, lower, pivot - 1, indentation + 1, cbc)
+        cpp_output = cpp_output .. self:generate_accessors_impl(attributes, names, lower, pivot - 1, indentation + 1, cbc)
         cpp_output = cpp_output .. tab .. "}" .. br
     end
 
@@ -561,29 +561,29 @@ function generate_accessors_impl(attributes, names, lower, upper, indentation, c
 
     if upper > pivot then
         cpp_output = cpp_output .. tab .. "if( c > 0 ) {" .. br
-        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, pivot + 1, upper, indentation + 1, cbc)
+        cpp_output = cpp_output .. self:generate_accessors_impl(attributes, names, pivot + 1, upper, indentation + 1, cbc)
         cpp_output = cpp_output .. tab .. "}" .. br
     end
 
     return cpp_output
 end
 
-function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
+function Class:generate_accessors(function_name, attributes, cbc)
     local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
     local cpp_output = ""
-    local instance_type = "const " .. classes[class_name]:get_cpp_name()
+    local instance_type = "const " .. self:get_cpp_name()
     if function_name == "set_member" then
-        instance_type = classes[class_name]:get_cpp_name()
+        instance_type = self:get_cpp_name()
     end
 
     cpp_output = cpp_output .. "template<>" .. br
     if #names == 0 then
         -- Without parameter names here because they are not used and
         -- this avoids warnings from the C++ compiler.
-        cpp_output = cpp_output .. "int LuaValue<" .. value_type_name .. ">::" .. function_name .. "( lua_State *, " .. instance_type .. " &, const char * ) {" .. br
+        cpp_output = cpp_output .. "int LuaValue<" .. self:get_cpp_name() .. ">::" .. function_name .. "( lua_State *, " .. instance_type .. " &, const char * ) {" .. br
     else
-        cpp_output = cpp_output .. "int LuaValue<" .. value_type_name .. ">::" .. function_name .. "( lua_State *const L, " .. instance_type .. " &instance, const char *const name ) {" .. br
-        cpp_output = cpp_output .. generate_accessors_impl(attributes, names, 1, #names, 1, cbc)
+        cpp_output = cpp_output .. "int LuaValue<" .. self:get_cpp_name() .. ">::" .. function_name .. "( lua_State *const L, " .. instance_type .. " &instance, const char *const name ) {" .. br
+        cpp_output = cpp_output .. self:generate_accessors_impl(attributes, names, 1, #names, 1, cbc)
     end
     cpp_output = cpp_output .. "    throw std::runtime_error( \"unknown attribute\" );" .. br
     cpp_output = cpp_output .. "}" .. br
@@ -629,8 +629,8 @@ function generate_functions_for_class(class_name, class)
         end
         parent_class = class.parent
     end
-    cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "get_member", attributes, generate_getter_code)
-    cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "set_member", attributes, generate_setter_code)
+    cpp_output = cpp_output .. class:generate_accessors("get_member", attributes, generate_getter_code)
+    cpp_output = cpp_output .. class:generate_accessors("set_member", attributes, generate_setter_code)
     if class.new then
         cpp_output = cpp_output .. class:generate_constructor()
     end
