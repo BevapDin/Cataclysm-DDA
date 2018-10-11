@@ -87,6 +87,13 @@ function Class:get_output_path()
     return output_path_for_id(self.name)
 end
 
+function Class:get_code_prepend()
+    if self.code_prepend then
+        return self.code_prepend
+    end
+    return ""
+end
+
 Enum = {
 }
 Enum.__index = Enum
@@ -103,6 +110,13 @@ function Enum:get_output_path()
     return output_path_for_id(self.name)
 end
 
+function Enum:get_code_prepend()
+    if self.code_prepend then
+        return self.code_prepend
+    end
+    return ""
+end
+
 -- Yields the `output_path` of the entity (class/enum) of the given name.
 function output_path_of(name)
     if classes[name] then
@@ -110,6 +124,25 @@ function output_path_of(name)
     end
     if enums[name] then
         return enums[name]:get_output_path()
+    end
+    error(name .. " is not a class/enum name")
+end
+
+-- Yields the `code_prepend` of the entity (class/enum) of the given name.
+function code_prepend_of(name)
+    if classes[name] then
+        return classes[name]:get_code_prepend()
+    end
+    if enums[name] then
+        return enums[name]:get_code_prepend()
+    end
+    for k,v in pairs(classes) do
+        if v.string_id == name then
+            return ""
+        end
+        if v.in_id == name then
+            return ""
+        end
     end
     error(name .. " is not a class/enum name")
 end
@@ -124,20 +157,6 @@ end
 
 function output_path_for_id(id)
     return id:gsub("[^%w_.]", "") .. ".gen.cpp"
-end
-
-function container_code_prepend(t)
-    if classes[t] then
-        if classes[t].code_prepend then
-            return classes[t].code_prepend
-        end
-    end
-    if enums[t] then
-        if enums[t].code_prepend then
-            return enums[t].code_prepend
-        end
-    end
-    return ""
 end
 
 -- Adds the declaration for an C++ iterator class to the exported classes.
@@ -170,7 +189,7 @@ function make_std_list_class(element_type)
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <list>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <list>",
         new = {
             { },
             { container_type },
@@ -196,7 +215,7 @@ function make_std_vector_class(element_type)
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <vector>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <vector>",
         new = {
             { },
             { container_type },
@@ -223,7 +242,7 @@ function make_std_set_class(element_type)
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
-        code_prepend = container_code_prepend(element_type) .. "\n#include <set>",
+        code_prepend = code_prepend_of(element_type) .. "\n#include <set>",
         new = {
             { },
             { container_type },
@@ -253,7 +272,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
         -- This is the common int_id<T> interface:
         local t = {
             forward_declaration = (class.forward_declaration or "") .. "using " .. int_id_name .. " = int_id<" .. (class.cpp_name or class.name) .. ">;",
-            code_prepend = class.code_prepend,
+            code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
@@ -279,7 +298,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     if string_id_name and not classes[string_id_name] then
         local t = {
             forward_declaration = (class.forward_declaration or "") .. "using " .. string_id_name .. " = string_id<" .. (class.cpp_name or class.name) .. ">;",
-            code_prepend = class.code_prepend,
+            code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
@@ -512,9 +531,6 @@ for class_name, value in pairs(classes) do
         -- @todo could be a struct!
         value.forward_declaration = "class " .. class_name .. ";"
     end
-    if not value.code_prepend then
-        value.code_prepend = ""
-    end
     if not value.cpp_name then
         value.cpp_name = class_name
     end
@@ -524,9 +540,6 @@ for enum_name, value in pairs(enums) do
     if not value.forward_declaration then
         -- @todo could be different underlying type
         value.forward_declaration = "enum " .. enum_name .. " : int;"
-    end
-    if not value.code_prepend then
-        value.code_prepend = ""
     end
     if not value.cpp_name then
         value.cpp_name = enum_name

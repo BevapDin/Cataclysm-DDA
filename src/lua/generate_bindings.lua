@@ -658,7 +658,7 @@ function generate_code_for(class_name, class)
     cpp_output = cpp_output .. "template<typename T> void push_wrapped_onto_stack( const lua_engine &, const T & );" .. br
     cpp_output = cpp_output .. "template<typename T> T get_wrapped_from_stack( const lua_engine &, int );" .. br
     cpp_output = cpp_output .. br
-    cpp_output = cpp_output .. class.code_prepend .. br
+    cpp_output = cpp_output .. class:get_code_prepend() .. br
     cpp_output = cpp_output .. generate_functions_for_class(class_name, class)
     cpp_output = cpp_output .. generate_LuaValue_constants(class_name, class)
 
@@ -721,7 +721,7 @@ function generate_code_for_enum(enum_name, enum)
     cpp_output = cpp_output .. "template<typename T> void push_wrapped_onto_stack( const lua_engine &, const T & );" .. br
     cpp_output = cpp_output .. "template<typename T> T get_wrapped_from_stack( const lua_engine &, int );" .. br
     cpp_output = cpp_output .. br
-    cpp_output = cpp_output .. enum.code_prepend .. br
+    cpp_output = cpp_output .. enum:get_code_prepend() .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const "..cpp_name.."::EMap "..cpp_name.."::BINDINGS = {"..br
     for _, name in ipairs(enum.values) do
