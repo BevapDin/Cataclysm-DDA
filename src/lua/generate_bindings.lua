@@ -17,6 +17,10 @@
 -- This allows a data member "foo", as well as a function member "get_foo(...)".
 -- They would get "get_class_foo", "set_class_foo" and "func_class_get_foo" wrappers.
 
+-- Generate our C++ source file with all wrappers for accessing variables and functions from lua.
+-------------------------------------------------------------------------------------------------
+dofile "../../lua/class_definitions.lua"
+
 local br = "\n"
 local tab = "    "
 
@@ -426,10 +430,6 @@ function generate_operator(class_name, operator_id, cppname)
 
     return text
 end
-
--- Generate our C++ source file with all wrappers for accessing variables and functions from lua.
--------------------------------------------------------------------------------------------------
-dofile "../../lua/class_definitions.lua"
 
 generate_overload_tree(classes)
 
