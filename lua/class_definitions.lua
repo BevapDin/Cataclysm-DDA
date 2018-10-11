@@ -19,7 +19,7 @@ Optional values are:
   header for the type itself, but may require more includes in order to (implicitly) call
   copy constructors when calling member functions. If a header is missing, you'll get a compiler
   error.
-- forward_declaration (optional, a string), how to forward declare the type. E.g. "class foo;"
+- forward_declaration (a string), how to forward declare the type. E.g. "class foo;"
   (for simple types) or (for template instances):
   "template<typename N> class wrapper;class foo;using foo_wrapper = wrapper<foo>;"
 - output_path (optional, a string), the path where to write the generated C++ code. The default
@@ -179,6 +179,7 @@ function make_std_iterator_class(container_type, element_type)
     register_class(iterator_type, {
         has_equal = true,
         -- @todo check what other members are needed
+        forward_declaration = get_type(container_type):get_forward_declaration(),
         output_path = get_type(element_type):get_output_path(),
         new = {
             { iterator_type },
@@ -198,6 +199,7 @@ function make_std_list_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
+        forward_declaration = get_type(element_type):get_forward_declaration() .. "\n#include <list>",
         output_path = get_type(element_type):get_output_path(),
         code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <list>",
         new = {
@@ -224,6 +226,7 @@ function make_std_vector_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
+        forward_declaration = get_type(element_type):get_forward_declaration() .. "\n#include <vector>",
         output_path = get_type(element_type):get_output_path(),
         code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <vector>",
         new = {
@@ -251,6 +254,7 @@ function make_std_set_class(element_type)
     local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
+        forward_declaration = get_type(element_type):get_forward_declaration() .. "\n#include <set>",
         output_path = get_type(element_type):get_output_path(),
         code_prepend = get_type(element_type):get_code_prepend() .. "\n#include <set>",
         new = {
@@ -342,6 +346,7 @@ dofile_if_exists("lua/generated_class_definitions.lua")
 dofile_if_exists("../../lua/generated_class_definitions.lua")
 
 register_class("volume", {
+    forward_declaration = "#include \"units.h\"",
     cpp_name = "units::volume",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",
@@ -353,6 +358,7 @@ register_class("volume", {
 } )
 
 register_class("mass", {
+    forward_declaration = "#include \"units.h\"",
     cpp_name = "units::mass",
     code_prepend = "#include \"units.h\"",
     output_path = "units.gen.cpp",

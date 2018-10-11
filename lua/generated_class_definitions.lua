@@ -1,4 +1,5 @@
 register_class("Character", {
+    forward_declaration = "class Character;\n",
     code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
     new = {
@@ -75,6 +76,7 @@ register_class("Character", {
             { name = "has_active_item", rval = "bool", args = { "string" } },
             { name = "has_active_mutation", rval = "bool", args = { "trait_id" } },
             { name = "has_base_trait", rval = "bool", args = { "trait_id" } },
+            { name = "has_bionic_flag", rval = "bool", args = { "string" } },
             { name = "has_nv", rval = "bool", args = { } },
             { name = "has_trait_flag", rval = "bool", args = { "string" } },
             { name = "healing_rate", rval = "float", args = { "float" } },
@@ -168,6 +170,7 @@ register_class("Character", {
 } )
 
 register_class("Creature", {
+    forward_declaration = "class Creature;\n",
     code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
     new = {
     },
@@ -247,6 +250,7 @@ register_class("Creature", {
             { name = "get_num_dodges", rval = "int", args = { } },
             { name = "get_num_dodges_bonus", rval = "int", args = { } },
             { name = "get_pain", rval = "int", args = { } },
+            { name = "get_pain_description", rval = "string", args = { } },
             { name = "get_path_avoid", rval = "std::set<tripoint>", args = { } },
             { name = "get_perceived_pain", rval = "int", args = { } },
             { name = "get_random_body_part", rval = "body_part", args = { "bool" } },
@@ -353,6 +357,7 @@ register_class("Creature", {
 } )
 
 register_class("MonsterGroup", {
+    forward_declaration = "struct MonsterGroup;\n",
     code_prepend = "#include \"mongroup.h\"\n",
     new = {
     },
@@ -369,9 +374,11 @@ register_class("MonsterGroup", {
             { name = "IsMonsterInGroup", rval = "bool", args = { "mtype_id" } },
     }
 } )
+
 make_id_classes("MonsterGroup", nil, "mongroup_id")
 
 register_class("Skill", {
+    forward_declaration = "class Skill;\n",
     code_prepend = "#include \"skill.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
@@ -389,9 +396,11 @@ register_class("Skill", {
             { name = "random_skill", static = true, rval = "skill_id", args = { } },
     }
 } )
+
 make_id_classes("Skill", nil, "skill_id")
 
 register_class("ammunition_type", {
+    forward_declaration = "class ammunition_type;\n",
     code_prepend = "#include \"ammo.h\"\n",
     new = {
             { "string" },
@@ -404,9 +413,11 @@ register_class("ammunition_type", {
             { name = "name", rval = "string", args = { } },
     }
 } )
+
 make_id_classes("ammunition_type", nil, "ammotype")
 
 register_class("calendar", {
+    forward_declaration = "class calendar;\n",
     code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
@@ -437,6 +448,7 @@ register_class("calendar", {
 } )
 
 register_class("effect_type", {
+    forward_declaration = "class effect_type;\n",
     code_prepend = "#include \"effect.h\"\n",
     new = {
             { },
@@ -456,9 +468,11 @@ register_class("effect_type", {
             { name = "use_name_ints", rval = "bool", args = { } },
     }
 } )
+
 make_id_classes("effect_type", nil, "efftype_id")
 
 register_class("encumbrance_data", {
+    forward_declaration = "struct encumbrance_data;\n",
     code_prepend = "#include \"character.h\"\n",
     new = {
     },
@@ -474,6 +488,7 @@ register_class("encumbrance_data", {
 } )
 
 register_class("field", {
+    forward_declaration = "class field;\n",
     code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n",
     new = {
             { },
@@ -494,6 +509,7 @@ register_class("field", {
 } )
 
 register_class("field_entry", {
+    forward_declaration = "class field_entry;\n",
     code_prepend = "#include \"field.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n",
     new = {
             { "field_id", "int", "time_duration" },
@@ -520,6 +536,7 @@ register_class("field_entry", {
 } )
 
 register_class("furn_t", {
+    forward_declaration = "struct furn_t;\n",
     code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
@@ -553,9 +570,11 @@ register_class("furn_t", {
             { name = "symbol", rval = "int", args = { } },
     }
 } )
+
 make_id_classes("furn_t", "furn_id", "furn_str_id")
 
 register_class("game", {
+    forward_declaration = "class game;\n",
     code_prepend = "#include \"game.h\"\n#include \"enums.h\"\n#include <vector>\n#include \"item_location.h\"\n#include <list>\n#include \"cursesdef.h\"\n#include \"int_id.h\"\n",
     new = {
             { },
@@ -584,7 +603,6 @@ register_class("game", {
             { name = "assign_npc_id", rval = "int", args = { } },
             { name = "calc_driving_offset", rval = nil, args = { } },
             { name = "cancel_activity", rval = nil, args = { } },
-            { name = "cancel_activity_or_ignore_query", rval = "bool", args = { "string" } },
             { name = "cancel_activity_query", rval = "bool", args = { "string" } },
             { name = "check_safe_mode_allowed", rval = "bool", args = { "bool" } },
             { name = "check_safe_mode_allowed", rval = "bool", args = { } },
@@ -628,6 +646,7 @@ register_class("game", {
             { name = "get_levx", rval = "int", args = { } },
             { name = "get_levy", rval = "int", args = { } },
             { name = "get_levz", rval = "int", args = { } },
+            { name = "get_moves_since_last_save", rval = "int", args = { } },
             { name = "get_player_base_save_path", rval = "string", args = { } },
             { name = "get_seed", rval = "int", args = { } },
             { name = "get_temperature", rval = "int", args = { "tripoint" } },
@@ -664,6 +683,7 @@ register_class("game", {
             { name = "is_in_viewport", rval = "bool", args = { "tripoint" } },
             { name = "is_in_viewport", rval = "bool", args = { "tripoint", "int" } },
             { name = "is_sheltered", rval = "bool", args = { "tripoint" } },
+            { name = "is_zone_manager_open", rval = "bool", args = { } },
             { name = "kill_count", rval = "int", args = { "mtype_id" } },
             { name = "kill_count", rval = "int", args = { "species_id" } },
             { name = "knockback", rval = nil, args = { "std::vector<tripoint>", "int", "int", "int" } },
@@ -737,6 +757,7 @@ register_class("game", {
 } )
 
 register_class("gun_mode", {
+    forward_declaration = "class gun_mode;\n",
     code_prepend = "#include \"gun_mode.h\"\n",
     new = {
             { },
@@ -750,9 +771,11 @@ register_class("gun_mode", {
             { name = "name", rval = "string", args = { } },
     }
 } )
+
 make_id_classes("gun_mode", nil, "gun_mode_id")
 
 register_class("item", {
+    forward_declaration = "class item;\n",
     code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
@@ -770,6 +793,7 @@ register_class("item", {
             charges = { type = "int", writable = true },
             components = { type = "std::vector<item>", writable = true },
             contents = { type = "std::list<item>", writable = true },
+            freezer = { type = "time_point", writable = true },
             frequency = { type = "int", writable = true },
             fridge = { type = "time_point", writable = true },
             invlet = { type = "int", writable = true },
@@ -828,8 +852,10 @@ register_class("item", {
             { name = "color_in_inventory", rval = "nc_color", args = { } },
             { name = "components_to_string", rval = "string", args = { } },
             { name = "conductive", rval = "bool", args = { } },
+            { name = "contain_monster", rval = "int", args = { "tripoint" } },
             { name = "contextualize_skill", rval = "skill_id", args = { "skill_id" } },
             { name = "convert", rval = "item&", args = { "string" } },
+            { name = "corpse_volume", rval = "volume", args = { "m_size" } },
             { name = "count_by_charges", rval = "bool", args = { } },
             { name = "count_by_charges", static = true, rval = "bool", args = { "string" } },
             { name = "covers", rval = "bool", args = { "body_part" } },
@@ -838,6 +864,7 @@ register_class("item", {
             { name = "cut_resist", rval = "int", args = { } },
             { name = "damage", rval = "int", args = { } },
             { name = "damage_color", rval = "nc_color", args = { } },
+            { name = "damage_level", rval = "int", args = { "int" } },
             { name = "damage_melee", rval = "int", args = { "damage_type" } },
             { name = "damage_resist", rval = "int", args = { "damage_type" } },
             { name = "damage_resist", rval = "int", args = { "damage_type", "bool" } },
@@ -860,6 +887,7 @@ register_class("item", {
             { name = "flammable", rval = "bool", args = { "int" } },
             { name = "flammable", rval = "bool", args = { } },
             { name = "fuel_energy", rval = "float", args = { } },
+            { name = "fuel_pump_terrain", rval = "string", args = { } },
             { name = "get_base_material", rval = "material_type&", args = { } },
             { name = "get_cable_target", rval = "tripoint", args = { } },
             { name = "get_chapters", rval = "int", args = { } },
@@ -913,6 +941,7 @@ register_class("item", {
             { name = "gun_set_mode", rval = "bool", args = { "gun_mode_id" } },
             { name = "gun_skill", rval = "skill_id", args = { } },
             { name = "gunmod_find", rval = "item&", args = { "string" } },
+            { name = "has_explosion_data", rval = "bool", args = { } },
             { name = "has_flag", rval = "bool", args = { "string" } },
             { name = "has_infinite_charges", rval = "bool", args = { } },
             { name = "has_label", rval = "bool", args = { } },
@@ -1006,13 +1035,13 @@ register_class("item", {
             { name = "merge_charges", rval = "bool", args = { "item" } },
             { name = "min_damage", rval = "int", args = { } },
             { name = "mod_charges", rval = nil, args = { "int" } },
-            { name = "mod_damage", rval = "bool", args = { "float" } },
-            { name = "mod_damage", rval = "bool", args = { "float", "damage_type" } },
+            { name = "mod_damage", rval = "bool", args = { "int" } },
+            { name = "mod_damage", rval = "bool", args = { "int", "damage_type" } },
             { name = "needs_processing", rval = "bool", args = { } },
             { name = "nname", static = true, rval = "string", args = { "string" } },
             { name = "nname", static = true, rval = "string", args = { "string", "int" } },
             { name = "on_contents_changed", rval = nil, args = { } },
-            { name = "on_damage", rval = nil, args = { "float", "damage_type" } },
+            { name = "on_damage", rval = nil, args = { "int", "damage_type" } },
             { name = "on_drop", rval = "bool", args = { "tripoint" } },
             { name = "on_pickup", rval = nil, args = { "Character" } },
             { name = "on_takeoff", rval = nil, args = { "Character" } },
@@ -1020,7 +1049,6 @@ register_class("item", {
             { name = "on_wield", rval = nil, args = { "player" } },
             { name = "on_wield", rval = nil, args = { "player", "int" } },
             { name = "only_made_of", rval = "bool", args = { "std::set<material_id>" } },
-            { name = "precise_damage", rval = "float", args = { } },
             { name = "price", rval = "int", args = { "bool" } },
             { name = "process", rval = "bool", args = { "player", "tripoint", "bool" } },
             { name = "process_artifact", rval = nil, args = { "player", "tripoint" } },
@@ -1028,12 +1056,14 @@ register_class("item", {
             { name = "put_in", rval = nil, args = { "item" } },
             { name = "reach_range", rval = "int", args = { "player" } },
             { name = "ready_to_revive", rval = "bool", args = { "tripoint" } },
+            { name = "release_monster", rval = "int", args = { "tripoint" } },
+            { name = "release_monster", rval = "int", args = { "tripoint", "bool" } },
             { name = "reset_cable", rval = nil, args = { "player" } },
             { name = "rotten", rval = "bool", args = { } },
             { name = "set_age", rval = nil, args = { "time_duration" } },
             { name = "set_birthday", rval = nil, args = { "time_point" } },
             { name = "set_countdown", rval = nil, args = { "int" } },
-            { name = "set_damage", rval = "item&", args = { "float" } },
+            { name = "set_damage", rval = "item&", args = { "int" } },
             { name = "set_flag", rval = "item&", args = { "string" } },
             { name = "set_mtype", rval = nil, args = { "mtype" } },
             { name = "set_relative_rot", rval = nil, args = { "float" } },
@@ -1075,6 +1105,7 @@ register_class("item", {
 } )
 
 register_class("itype", {
+    forward_declaration = "struct itype;\n",
     code_prepend = "#include \"itype.h\"\n",
     new = {
             { },
@@ -1127,6 +1158,7 @@ register_class("itype", {
 } )
 
 register_class("ma_buff", {
+    forward_declaration = "class ma_buff;\n",
     code_prepend = "#include \"martialarts.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
@@ -1150,6 +1182,7 @@ register_class("ma_buff", {
             { name = "armor_bonus", rval = "int", args = { "player", "damage_type" } },
             { name = "block_bonus", rval = "int", args = { "player" } },
             { name = "can_melee", rval = "bool", args = { } },
+            { name = "can_unarmed_weapon", rval = "bool", args = { } },
             { name = "damage_bonus", rval = "float", args = { "player", "damage_type" } },
             { name = "damage_mult", rval = "float", args = { "player", "damage_type" } },
             { name = "dodge_bonus", rval = "int", args = { "player" } },
@@ -1159,11 +1192,14 @@ register_class("ma_buff", {
             { name = "is_throw_immune", rval = "bool", args = { } },
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "speed_bonus", rval = "int", args = { "player" } },
+            { name = "stamina_mult", rval = "float", args = { } },
     }
 } )
+
 make_id_classes("ma_buff", nil, "mabuff_id")
 
 register_class("ma_technique", {
+    forward_declaration = "class ma_technique;\n",
     code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
@@ -1199,9 +1235,11 @@ register_class("ma_technique", {
             { name = "move_cost_penalty", rval = "float", args = { "player" } },
     }
 } )
+
 make_id_classes("ma_technique", nil, "matec_id")
 
 register_class("map", {
+    forward_declaration = "class map;\n",
     code_prepend = "#include \"map.h\"\n#include <vector>\n#include \"string_id.h\"\n#include \"enums.h\"\n#include \"calendar.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
             { "bool" },
@@ -1240,6 +1278,8 @@ register_class("map", {
             { name = "allow_camp", rval = "bool", args = { "tripoint" } },
             { name = "allow_camp", rval = "bool", args = { "tripoint", "int" } },
             { name = "ambient_light_at", rval = "float", args = { "tripoint" } },
+            { name = "apply_in_fridge", rval = nil, args = { "item", "int" } },
+            { name = "apply_in_fridge", rval = nil, args = { "item", "int", "bool" } },
             { name = "bash_rating", rval = "int", args = { "int", "int", "int" } },
             { name = "bash_rating", rval = "int", args = { "int", "tripoint" } },
             { name = "bash_rating", rval = "int", args = { "int", "tripoint", "bool" } },
@@ -1480,6 +1520,7 @@ register_class("map", {
             { name = "trans", rval = "bool", args = { "tripoint" } },
             { name = "translate", rval = nil, args = { "ter_id", "ter_id" } },
             { name = "translate_radius", rval = nil, args = { "ter_id", "ter_id", "float", "tripoint" } },
+            { name = "translate_radius", rval = nil, args = { "ter_id", "ter_id", "float", "tripoint", "bool" } },
             { name = "trap_locations", rval = "std::vector<tripoint>", args = { "trap_id" } },
             { name = "trap_set", rval = nil, args = { "tripoint", "trap_id" } },
             { name = "trigger_rc_items", rval = nil, args = { "string" } },
@@ -1497,6 +1538,7 @@ register_class("map", {
 } )
 
 register_class("map_stack", {
+    forward_declaration = "class map_stack;\n",
     code_prepend = "#include \"map.h\"\n#include <list>\n#include \"item_stack.h\"\n",
     new = {
     },
@@ -1521,6 +1563,7 @@ register_class("map_stack", {
 } )
 
 register_class("martialart", {
+    forward_declaration = "class martialart;\n",
     code_prepend = "#include \"martialarts.h\"\n",
     new = {
             { },
@@ -1557,9 +1600,11 @@ register_class("martialart", {
             { name = "weapon_valid", rval = "bool", args = { "item" } },
     }
 } )
+
 make_id_classes("martialart", nil, "matype_id")
 
 register_class("material_type", {
+    forward_declaration = "class material_type;\n",
     code_prepend = "#include \"material.h\"\n#include \"string_id.h\"\n",
     new = {
             { },
@@ -1573,6 +1618,7 @@ register_class("material_type", {
             { name = "bash_resist", rval = "int", args = { } },
             { name = "check", rval = nil, args = { } },
             { name = "chip_resist", rval = "int", args = { } },
+            { name = "compact_accepts", rval = "std::vector<material_id>", args = { } },
             { name = "cut_dmg_verb", rval = "string", args = { } },
             { name = "cut_resist", rval = "int", args = { } },
             { name = "dam_resist", rval = "int", args = { "damage_type" } },
@@ -1588,9 +1634,11 @@ register_class("material_type", {
             { name = "soft", rval = "bool", args = { } },
     }
 } )
+
 make_id_classes("material_type", nil, "material_id")
 
 register_class("mongroup", {
+    forward_declaration = "struct mongroup;\n",
     code_prepend = "#include \"mongroup.h\"\n#include \"enums.h\"\n",
     new = {
             { "mongroup_id", "int", "int", "int", "int", "int" },
@@ -1611,6 +1659,7 @@ register_class("mongroup", {
             type = { type = "mongroup_id", writable = true },
     },
     functions = {
+            { name = "avg_speed", rval = "float", args = { } },
             { name = "clear", rval = nil, args = { } },
             { name = "dec_interest", rval = nil, args = { "int" } },
             { name = "empty", rval = "bool", args = { } },
@@ -1623,6 +1672,7 @@ register_class("mongroup", {
 } )
 
 register_class("monster", {
+    forward_declaration = "class monster;\n",
     code_prepend = "#include \"monster.h\"\n#include \"creature.h\"\n#include \"enums.h\"\n",
     parent = "Creature",
     new = {
@@ -1727,6 +1777,7 @@ register_class("monster", {
 } )
 
 register_class("mtype", {
+    forward_declaration = "struct mtype;\n",
     code_prepend = "#include \"mtype.h\"\n",
     new = {
             { },
@@ -1795,9 +1846,11 @@ register_class("mtype", {
             { name = "set_flag", rval = nil, args = { "string", "bool" } },
     }
 } )
+
 make_id_classes("mtype", nil, "mtype_id")
 
 register_class("mutation_branch", {
+    forward_declaration = "struct mutation_branch;\n",
     code_prepend = "#include \"mutation.h\"\n#include \"creature.h\"\n",
     new = {
     },
@@ -1854,9 +1907,11 @@ register_class("mutation_branch", {
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
     }
 } )
+
 make_id_classes("mutation_branch", nil, "trait_id")
 
 register_class("nc_color", {
+    forward_declaration = "class nc_color;\n",
     code_prepend = "#include \"color.h\"\n",
     new = {
             { },
@@ -1878,6 +1933,7 @@ register_class("nc_color", {
 } )
 
 register_class("npc_template", {
+    forward_declaration = "class npc_template;\n",
     code_prepend = "#include \"npc.h\"\n",
     new = {
             { },
@@ -1889,6 +1945,7 @@ register_class("npc_template", {
 } )
 
 register_class("overmap", {
+    forward_declaration = "class overmap;\n",
     code_prepend = "#include \"overmap.h\"\n#include \"enums.h\"\n#include <vector>\n",
     new = {
             { "int", "int" },
@@ -1920,6 +1977,7 @@ register_class("overmap", {
 } )
 
 register_class("player", {
+    forward_declaration = "class player;\n",
     code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
     new = {
@@ -2292,6 +2350,7 @@ register_class("player", {
             { name = "toggle_move_mode", rval = nil, args = { } },
             { name = "try_to_sleep", rval = nil, args = { } },
             { name = "unarmed_attack", rval = "bool", args = { } },
+            { name = "unarmed_override", rval = "bool", args = { } },
             { name = "unarmed_value", rval = "float", args = { } },
             { name = "unimpaired_range", rval = "int", args = { } },
             { name = "unwield", rval = "bool", args = { } },
@@ -2334,6 +2393,7 @@ register_class("player", {
 } )
 
 register_class("point", {
+    forward_declaration = "struct point;\n",
     code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int" },
@@ -2348,6 +2408,7 @@ register_class("point", {
 } )
 
 register_class("quality", {
+    forward_declaration = "struct quality;\n",
     code_prepend = "#include \"requirements.h\"\n",
     new = {
     },
@@ -2358,9 +2419,11 @@ register_class("quality", {
     functions = {
     }
 } )
+
 make_id_classes("quality", nil, "quality_id")
 
 register_class("recipe", {
+    forward_declaration = "class recipe;\n",
     code_prepend = "#include \"recipe.h\"\n#include <vector>\n",
     new = {
             { },
@@ -2392,9 +2455,11 @@ register_class("recipe", {
             { name = "result_name", rval = "string", args = { } },
     }
 } )
+
 make_id_classes("recipe", nil, "recipe_id")
 
 register_class("species_type", {
+    forward_declaration = "struct species_type;\n",
     code_prepend = "#include \"monstergenerator.h\"\n",
     new = {
             { },
@@ -2405,9 +2470,11 @@ register_class("species_type", {
     functions = {
     }
 } )
+
 make_id_classes("species_type", nil, "species_id")
 
 register_class("start_location", {
+    forward_declaration = "class start_location;\n",
     code_prepend = "#include \"start_location.h\"\n",
     new = {
             { },
@@ -2428,9 +2495,11 @@ register_class("start_location", {
             { name = "target", rval = "string", args = { } },
     }
 } )
+
 make_id_classes("start_location", nil, "start_location_id")
 
 register_class("stats", {
+    forward_declaration = "struct stats;\n",
     code_prepend = "#include \"player.h\"\n",
     new = {
     },
@@ -2445,6 +2514,7 @@ register_class("stats", {
 } )
 
 register_class("ter_t", {
+    forward_declaration = "struct ter_t;\n",
     code_prepend = "#include \"mapdata.h\"\n#include \"color.h\"\n",
     new = {
             { },
@@ -2477,9 +2547,11 @@ register_class("ter_t", {
             { name = "symbol", rval = "int", args = { } },
     }
 } )
+
 make_id_classes("ter_t", "ter_id", "ter_str_id")
 
 register_class("time_duration", {
+    forward_declaration = "class time_duration;\n",
     code_prepend = "#include \"calendar.h\"\n",
     new = {
     },
@@ -2491,6 +2563,7 @@ register_class("time_duration", {
 } )
 
 register_class("time_point", {
+    forward_declaration = "class time_point;\n",
     code_prepend = "#include \"calendar.h\"\n",
     new = {
             { "calendar" },
@@ -2504,6 +2577,7 @@ register_class("time_point", {
 } )
 
 register_class("trap", {
+    forward_declaration = "struct trap;\n",
     code_prepend = "#include \"trap.h\"\n",
     new = {
     },
@@ -2531,9 +2605,11 @@ register_class("trap", {
             { name = "triggered_by_item", rval = "bool", args = { "item" } },
     }
 } )
+
 make_id_classes("trap", "trap_id", "trap_str_id")
 
 register_class("tripoint", {
+    forward_declaration = "struct tripoint;\n",
     code_prepend = "#include \"enums.h\"\n",
     new = {
             { "int", "int", "int" },
@@ -2550,6 +2626,7 @@ register_class("tripoint", {
 } )
 
 register_class("uimenu", {
+    forward_declaration = "class uimenu;\n",
     code_prepend = "#include \"ui.h\"\n",
     new = {
             { "string" },
@@ -2623,6 +2700,7 @@ register_class("uimenu", {
 } )
 
 register_class("w_point", {
+    forward_declaration = "struct w_point;\n",
     code_prepend = "#include \"weather_gen.h\"\n",
     new = {
     },
@@ -2637,7 +2715,9 @@ register_class("w_point", {
     }
 } )
 
+
 register_enum("add_type", {
+    code_prepend = "#include \"pldata.h\"",
     values = {
         "ADD_NULL",
         "ADD_CAFFEINE",
@@ -2655,7 +2735,9 @@ register_enum("add_type", {
         "ADD_MARLOSS_Y",
     }
 } )
+
 register_enum("body_part", {
+    code_prepend = "#include \"bodypart.h\"",
     values = {
         "bp_torso",
         "bp_head",
@@ -2672,7 +2754,9 @@ register_enum("body_part", {
         "num_bp",
     }
 } )
+
 register_enum("damage_type", {
+    code_prepend = "#include \"damage.h\"",
     values = {
         "DT_NULL",
         "DT_TRUE",
@@ -2687,7 +2771,9 @@ register_enum("damage_type", {
         "NUM_DT",
     }
 } )
+
 register_enum("field_id", {
+    code_prepend = "#include \"field.h\"",
     values = {
         "fd_null",
         "fd_blood",
@@ -2739,7 +2825,9 @@ register_enum("field_id", {
         "num_fields",
     }
 } )
+
 register_enum("hp_part", {
+    code_prepend = "#include \"pldata.h\"",
     values = {
         "hp_head",
         "hp_torso",
@@ -2750,7 +2838,9 @@ register_enum("hp_part", {
         "num_hp_parts",
     }
 } )
+
 register_enum("m_size", {
+    code_prepend = "#include \"creature.h\"",
     values = {
         "MS_TINY",
         "MS_SMALL",
@@ -2759,7 +2849,9 @@ register_enum("m_size", {
         "MS_HUGE",
     }
 } )
+
 register_enum("phase_id", {
+    code_prepend = "#include \"enums.h\"",
     values = {
         "PNULL",
         "SOLID",
@@ -2768,7 +2860,9 @@ register_enum("phase_id", {
         "PLASMA",
     }
 } )
+
 register_enum("season_type", {
+    code_prepend = "#include \"calendar.h\"",
     values = {
         "SPRING",
         "SUMMER",
@@ -2776,13 +2870,16 @@ register_enum("season_type", {
         "WINTER",
     }
 } )
+
 register_enum("side", {
+    code_prepend = "#include \"bodypart.h\"",
     values = {
         "BOTH",
         "LEFT",
         "RIGHT",
     }
 } )
+
 
 global_functions = {
 { name = "DAYS", rval = "int", args = { "int" } },

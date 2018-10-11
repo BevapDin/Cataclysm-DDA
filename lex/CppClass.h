@@ -41,4 +41,5 @@ class CppClass
         FullyQualifiedId full_name() const;
 
         bool has_equal() const;
+        std::string forward_declaration() const;
 };
