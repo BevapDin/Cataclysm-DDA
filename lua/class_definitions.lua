@@ -224,12 +224,11 @@ function make_std_iterator_class(container_type, element_type)
         },
     } )
     -- @todo maybe add more data to this?
-    return iterator_type
 end
 
 function make_std_list_class(element_type)
     local container_type = "std::list<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
+    local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
@@ -250,12 +249,12 @@ function make_std_list_class(element_type)
         },
     } )
     -- @todo maybe add more data to this?
-    return container_type
+    make_std_iterator_class(container_type, element_type)
 end
 
 function make_std_vector_class(element_type)
     local container_type = "std::vector<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
+    local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
@@ -277,12 +276,12 @@ function make_std_vector_class(element_type)
         },
     } )
     -- @todo maybe add more data to this?
-    return container_type
+    make_std_iterator_class(container_type, element_type)
 end
 
 function make_std_set_class(element_type)
     local container_type = "std::set<" .. element_type .. ">"
-    local iterator_type = make_std_iterator_class(container_type, element_type)
+    local iterator_type = container_type .. '::iterator'
     register_class(container_type, {
         -- @todo check what other members are needed
         output_path = output_path_of(element_type),
@@ -303,7 +302,7 @@ function make_std_set_class(element_type)
         },
     } )
     -- @todo maybe add more data to this?
-    return container_type
+    make_std_iterator_class(container_type, element_type)
 end
 
 -- This adds the int_id wrappers from the class definition as real classes.
