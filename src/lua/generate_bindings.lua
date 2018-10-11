@@ -823,13 +823,13 @@ function generate_code_for_output_path(path)
     -- once, but currently each invocation of generate_code_for creates it.
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        if path == class.output_path then
+        if path == class:get_output_path() then
             result = result .. generate_code_for(class_name, class)
         end
     end
     for _, enum_name in ipairs(sorted_keys(enums)) do
         local enum = enums[enum_name]
-        if path == enum.output_path then
+        if path == enum:get_output_path() then
             result = result .. generate_code_for_enum(enum_name, enum)
         end
     end
@@ -846,10 +846,10 @@ function generate_and_write_for_path(path)
 end
 
 for _, class in pairs(classes) do
-    generate_and_write_for_path(class.output_path)
+    generate_and_write_for_path(class:get_output_path())
 end
 for _, enum in pairs(enums) do
-    generate_and_write_for_path(enum.output_path)
+    generate_and_write_for_path(enum:get_output_path())
 end
 
 writeFile("catabindings.gen.cpp", generate_main_init_function())

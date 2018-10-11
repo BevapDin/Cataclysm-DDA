@@ -80,6 +80,13 @@ function register_class(name, data)
     classes[name] = data
 end
 
+function Class:get_output_path()
+    if self.output_path then
+        return self.output_path
+    end
+    return output_path_for_id(self.name)
+end
+
 Enum = {
 }
 Enum.__index = Enum
@@ -89,21 +96,20 @@ function register_enum(name, data)
     enums[name] = data
 end
 
+function Enum:get_output_path()
+    if self.output_path then
+        return self.output_path
+    end
+    return output_path_for_id(self.name)
+end
+
 -- Yields the `output_path` of the entity (class/enum) of the given name.
 function output_path_of(name)
     if classes[name] then
-        if classes[name].output_path then
-            return classes[name].output_path
-        else
-            return output_path_for_id(name)
-        end
+        return classes[name]:get_output_path()
     end
     if enums[name] then
-        if enums[name].output_path then
-            return enums[name].output_path
-        else
-            return output_path_for_id(name)
-        end
+        return enums[name]:get_output_path()
     end
     error(name .. " is not a class/enum name")
 end
@@ -248,7 +254,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
         local t = {
             forward_declaration = (class.forward_declaration or "") .. "using " .. int_id_name .. " = int_id<" .. (class.cpp_name or class.name) .. ">;",
             code_prepend = class.code_prepend,
-            output_path = class.output_path or output_path_for_id(class_name),
+            output_path = class:get_output_path(),
             has_equal = true,
             -- IDs *could* be constructed from int, but where does the Lua script get the int from?
             -- The int is only exposed as int_id<T>, so Lua should never know about it.
@@ -274,7 +280,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
         local t = {
             forward_declaration = (class.forward_declaration or "") .. "using " .. string_id_name .. " = string_id<" .. (class.cpp_name or class.name) .. ">;",
             code_prepend = class.code_prepend,
-            output_path = class.output_path or output_path_for_id(class_name),
+            output_path = class:get_output_path(),
             has_equal = true,
             -- Copy and default constructor and construct from plain string.
             new = { { string_id_name }, { }, { "string" } },
@@ -512,9 +518,6 @@ for class_name, value in pairs(classes) do
     if not value.cpp_name then
         value.cpp_name = class_name
     end
-    if not value.output_path then
-        value.output_path = output_path_for_id(class_name)
-    end
 end
 -- same for enumerations
 for enum_name, value in pairs(enums) do
@@ -527,8 +530,5 @@ for enum_name, value in pairs(enums) do
     end
     if not value.cpp_name then
         value.cpp_name = enum_name
-    end
-    if not value.output_path then
-        value.output_path = output_path_for_id(enum_name)
     end
 end
