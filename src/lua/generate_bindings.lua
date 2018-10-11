@@ -400,9 +400,9 @@ function generate_constructor(class_name, args)
     return text
 end
 
-function generate_destructor(class_name, class)
+function Class:generate_destructor()
     local cpp_output = ""
-    local cpp_class_name = class:get_cpp_name()
+    local cpp_class_name = self:get_cpp_name()
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
     -- This avoids problems where cpp_class_name is actually "foo::bar<some>" and the destructor call
@@ -616,7 +616,7 @@ function generate_functions_for_class(class_name, class)
     local cur_class_name = class_name
     local cpp_class_name = class:get_cpp_name()
     local cpp_output = ""
-    cpp_output = cpp_output .. generate_destructor(class_name, class)
+    cpp_output = cpp_output .. class:generate_destructor()
     local attributes = class.attributes
     local parent_class = class.parent
     while parent_class do
