@@ -418,8 +418,9 @@ function Class:generate_destructor()
     return cpp_output
 end
 
-function generate_operator(class_name, operator_id, cppname)
-    local cpp_class_name = classes[class_name]:get_cpp_name()
+function Class:generate_operator(operator_id, cppname)
+    local cpp_class_name = self:get_cpp_name()
+    local class_name = self.name
     local text = "static int op_" .. id_to_simple_string(class_name) .. "_" .. operator_id .. "(lua_State *L) {"..br
 
     text = text .. tab .. "const " .. cpp_class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
@@ -632,7 +633,7 @@ function generate_functions_for_class(class_name, class)
         cpp_output = cpp_output .. generate_constructor(class_name, class.new)
     end
     if class.has_equal then
-        cpp_output = cpp_output .. generate_operator(class_name, "eq", "==")
+        cpp_output = cpp_output .. class:generate_operator("eq", "==")
     end
     cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
     return cpp_output
