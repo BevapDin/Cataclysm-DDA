@@ -379,9 +379,9 @@ class comestible_inventory_preset : public inventory_selector_preset
             }, _( "JOY" ) );
 
             append_cell( [ this ]( const item_location & loc ) {
-                const time_duration spoils = get_edible_comestible( loc ).spoils;
-                if( spoils > 0 ) {
-                    return to_string_clipped( spoils );
+                const item &it = get_comestible_item( loc );
+                if( lt.type->spoilable ) {
+                    return to_string_clipped( lt.type->spoilable->spoils );
                 }
                 //~ Used for permafood shelf life in the Eat menu
                 return std::string( _( "indefinite" ) );

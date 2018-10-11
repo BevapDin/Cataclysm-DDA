@@ -1513,7 +1513,6 @@ void Item_factory::load( islot_comestible &slot, JsonObject &jo, const std::stri
     assign( jo, "healthy", slot.healthy, strict );
     assign( jo, "parasites", slot.parasites, strict, 0 );
     assign( jo, "freezing_point", slot.freeze_point, strict );
-    assign( jo, "spoils_in", slot.spoils, strict, 1_hours );
 
     if( jo.has_string( "addiction_type" ) ) {
         slot.add = addiction_type( jo.get_string( "addiction_type" ) );
@@ -1572,12 +1571,15 @@ void Item_factory::load( islot_comestible &slot, JsonObject &jo, const std::stri
             }
         }
     }
+}
 
+void Item_factory::load( islot_spoilable &slot, JsonObject &jo, const std::string & )
+{
+    assign( jo, "spoils_in", slot.spoils, strict, 1_hours );
     if( jo.has_string( "rot_spawn" ) ) {
         slot.rot_spawn = mongroup_id( jo.get_string( "rot_spawn" ) );
     }
     assign( jo, "rot_spawn_chance", slot.rot_spawn_chance, strict, 0 );
-
 }
 
 void Item_factory::load( islot_brewable &slot, JsonObject &jo, const std::string & )
@@ -1592,6 +1594,9 @@ void Item_factory::load_comestible( JsonObject &jo, const std::string &src )
     if( load_definition( jo, src, def ) ) {
         assign( jo, "stack_size", def.stack_size, src == "dda", 1 );
         load_slot( def.comestible, jo, src );
+        if( jo.has_member( "spoils_in" ) ) {
+            load_slot( def.spoilable, jo, src );
+        }
         load_basic_info( jo, def, src );
     }
 }
@@ -1962,6 +1967,7 @@ void Item_factory::load_basic_info( JsonObject &jo, itype &def, const std::strin
     load_slot_optional( def.artifact, jo, "artifact_data", src );
     load_slot_optional( def.brewable, jo, "brewable", src );
     load_slot_optional( def.fuel, jo, "fuel", src );
+    load_slot_optional( def.spoilable, jo, "spoilable", src );
 
     // optional gunmod slot may also specify mod data
     load_slot_optional( def.gunmod, jo, "gunmod_data", src );

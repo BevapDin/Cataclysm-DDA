@@ -737,7 +737,7 @@ class item : public visitable<item>
     private:
         /**
          * Accumulated rot, expressed as time the item has been in standard temperature.
-         * It is compared to shelf life (@ref islot_comestible::spoils) to decide if
+         * It is compared to shelf life (@ref islot_spoilable::spoils) to decide if
          * the item is rotten.
          */
         time_duration rot = 0;

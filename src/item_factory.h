@@ -303,6 +303,7 @@ class Item_factory
         void load( islot_ammo &slot, JsonObject &jo, const std::string &src );
         void load( islot_seed &slot, JsonObject &jo, const std::string &src );
         void load( islot_artifact &slot, JsonObject &jo, const std::string &src );
+        void load( islot_spoilable &slot, JsonObject &jo, const std::string &src );
 
         //json data handlers
         void set_use_methods_from_json( JsonObject &jo, const std::string &member,

@@ -141,9 +141,6 @@ struct islot_comestible {
     /** effect on character nutrition (may be negative) */
     int nutr = 0;
 
-    /** Time until becomes rotten at standard temperature, or zero if never spoils */
-    time_duration spoils = 0;
-
     /** addiction potential */
     int addict = 0;
 
@@ -174,9 +171,13 @@ struct islot_comestible {
     int get_calories() const {
         return nutr * kcal_per_nutr;
     }
+};
+
+struct islot_spoilable {
+    /** Time until becomes rotten at standard temperature, or zero if never spoils */
+    time_duration spoils = 0;
     /** The monster group that is drawn from when the item rots away */
     mongroup_id rot_spawn = mongroup_id::NULL_ID();
-
     /** Chance the above monster group spawns*/
     int rot_spawn_chance = 10;
 };
@@ -703,6 +704,7 @@ struct itype {
         cata::optional<islot_ammo> ammo;
         cata::optional<islot_seed> seed;
         cata::optional<islot_artifact> artifact;
+        cata::optional<islot_spoilable> spoilable;
         /*@}*/
 
     protected:

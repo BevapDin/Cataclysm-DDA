@@ -966,7 +966,7 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
                     info.push_back( iteminfo( "BASE", _( "temp rot: " ), "",
                                               to_turns<int>( food->rot ), true, "", true, true ) );
                     info.push_back( iteminfo( "BASE", space + _( "max rot: " ), "",
-                                              to_turns<int>( food->type->comestible->spoils ), true, "", true, true ) );
+                                              to_turns<int>( food->type->spoilable->spoils ), true, "", true, true ) );
                     info.push_back( iteminfo( "BASE", _( "last rot: " ), "",
                                               to_turn<int>( food->last_rot_check ), true, "", true, true ) );
                     info.push_back( iteminfo( "BASE", _( "last temp: " ), "",
@@ -1093,7 +1093,7 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
         }
 
         if( food_item->goes_bad() && parts->test( iteminfo_parts::FOOD_ROT ) ) {
-            const std::string rot_time = to_string_clipped( food_item->type->comestible->spoils );
+            const std::string rot_time = to_string_clipped( food_item->type->spoilable->spoils );
             info.emplace_back( "DESCRIPTION",
                                string_format(
                                    _( "* This food is <neutral>perishable</neutral>, and at room temperature has an estimated nominal shelf life of <info>%s</info>." ),
@@ -3395,18 +3395,18 @@ std::set<matec_id> item::get_techniques() const
 
 bool item::goes_bad() const
 {
-    return is_food() && type->comestible->spoils != 0;
+    return type->spoilable.has_value();
 }
 
 double item::get_relative_rot() const
 {
-    return goes_bad() ? rot / type->comestible->spoils : 0;
+    return goes_bad() ? rot / type->spoilable->spoils : 0;
 }
 
 void item::set_relative_rot( double val )
 {
     if( goes_bad() ) {
-        rot = type->comestible->spoils * val;
+        rot = type->spoilable->spoils * val;
         // calc_rot uses last_rot_check (when it's not time_of_cataclysm) instead of bday.
         // this makes sure the rotting starts from now, not from bday.
         last_rot_check = calendar::turn;
@@ -3429,7 +3429,7 @@ int item::spoilage_sort_order()
     }
 
     if( subject->goes_bad() ) {
-        return to_turns<int>( subject->type->comestible->spoils - subject->rot );
+        return to_turns<int>( subject->type->spoilable->spoils - subject->rot );
     }
 
     if( subject->type->comestible ) {
@@ -3476,7 +3476,7 @@ void item::calc_rot( const tripoint &location )
         // positive = food was produced some time before calendar::time_of_cataclysm and/or bad storage
         // negative = food was stored in good condiitons before calendar::time_of_cataclysm
         if( since == calendar::time_of_cataclysm && goes_bad() ) {
-            time_duration spoil_variation = type->comestible->spoils * 0.2f;
+            time_duration spoil_variation = type->spoilable->spoils * 0.2f;
             rot += factor * rng( -spoil_variation, spoil_variation );
         }
 
