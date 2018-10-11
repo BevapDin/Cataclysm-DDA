@@ -320,7 +320,8 @@ end
 -- Generate a wrapper around a class function(method) that allows us to call a method of a specific
 -- C++ instance by calling the method on the corresponding lua wrapper, e.g.
 -- monster:name() in lua translates to monster.name() in C++
-function generate_class_function_wrapper(class_name, function_name, func)
+function Class:generate_function_wrapper(function_name, func)
+    local class_name = self.name
     local text = "static int func_" .. id_to_simple_string(class_name) .. "_" .. function_name .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, data)
@@ -448,11 +449,11 @@ function generate_accessors(attributes, class_name)
     return cpp_output
 end
 
-function generate_class_function_wrappers(functions, class_name, cur_class_name)
+function Class:generate_function_wrappers(functions, cur_class_name)
     local cpp_output = ""
     for _, function_name in ipairs(sorted_keys(functions)) do
         local func = functions[function_name]
-        cpp_output = cpp_output .. generate_class_function_wrapper(class_name, function_name, func, cur_class_name)
+        cpp_output = cpp_output .. self:generate_function_wrapper(function_name, func, cur_class_name)
     end
     return cpp_output
 end
@@ -636,7 +637,7 @@ function generate_functions_for_class(class_name, class)
     if class.has_equal then
         cpp_output = cpp_output .. class:generate_operator("eq", "==")
     end
-    cpp_output = cpp_output .. generate_class_function_wrappers(class.functions, class_name, cur_class_name)
+    cpp_output = cpp_output .. class:generate_function_wrappers(class.functions, cur_class_name)
     return cpp_output
 end
 
