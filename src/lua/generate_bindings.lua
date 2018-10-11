@@ -375,8 +375,9 @@ function generate_class_function_wrapper(class_name, function_name, func)
     return text
 end
 
-function generate_constructor(class_name, args)
-    local cpp_name = classes[class_name]:get_cpp_name()
+function Class:generate_constructor()
+    local cpp_name = self:get_cpp_name()
+    local class_name = self.name
     local text = "static int new_" .. id_to_simple_string(class_name) .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, data)
@@ -393,7 +394,7 @@ function generate_constructor(class_name, args)
         return text
     end
 
-    text = text .. insert_overload_resolution(cpp_name .. "::" .. cpp_name, args, cbc, 1, 1)
+    text = text .. insert_overload_resolution(cpp_name .. "::" .. cpp_name, self.new, cbc, 1, 1)
 
     text = text .. "}"..br
 
@@ -630,7 +631,7 @@ function generate_functions_for_class(class_name, class)
     cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "get_member", attributes, generate_getter_code)
     cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "set_member", attributes, generate_setter_code)
     if class.new then
-        cpp_output = cpp_output .. generate_constructor(class_name, class.new)
+        cpp_output = cpp_output .. class:generate_constructor()
     end
     if class.has_equal then
         cpp_output = cpp_output .. class:generate_operator("eq", "==")
