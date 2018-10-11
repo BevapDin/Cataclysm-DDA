@@ -76,7 +76,7 @@ std::string CppEnum::export_( Exporter &p ) const
     static const std::string tab( 4, ' ' );
     const std::string lua_name = p.lua_name( full_name() );
     std::string r;
-    r = r + "enums[\"" + lua_name + "\"] = {\n";
+    r = r + "register_enum(\"" + lua_name + "\", {\n";
     if( lua_name != full_name().as_string() ) {
         r = r + tab + "cpp_name = \"" + Exporter::escape_to_lua_string( full_name().as_string() ) + "\",\n";
     }
@@ -86,8 +86,8 @@ std::string CppEnum::export_( Exporter &p ) const
     for( const std::string &a : values ) {
         r = r + tab + "    \"" + a + "\",\n";
     }
-    r = r + tab + "}";
-    r = r + "}";
+    r = r + tab + "}\n";
+    r = r + "} )\n";
     return r;
 }
 

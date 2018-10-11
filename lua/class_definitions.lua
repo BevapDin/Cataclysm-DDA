@@ -84,6 +84,16 @@ function register_class(name, data)
     data.name = name
     classes[name] = data
 end
+
+Enum = {
+}
+Enum.__index = Enum
+function register_enum(name, data)
+    setmetatable(data, Enum)
+    data.name = name
+    enums[name] = data
+end
+
 -- Yields the `output_path` of the entity (class/enum) of the given name.
 function output_path_of(name)
     if classes[name] then

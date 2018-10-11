@@ -2640,7 +2640,7 @@ register_class("w_point", {
     }
 } )
 
-enums["add_type"] = {
+register_enum("add_type", {
     values = {
         "ADD_NULL",
         "ADD_CAFFEINE",
@@ -2656,8 +2656,9 @@ enums["add_type"] = {
         "ADD_MARLOSS_R",
         "ADD_MARLOSS_B",
         "ADD_MARLOSS_Y",
-    }}
-enums["body_part"] = {
+    }
+} )
+register_enum("body_part", {
     values = {
         "bp_torso",
         "bp_head",
@@ -2672,8 +2673,9 @@ enums["body_part"] = {
         "bp_foot_l",
         "bp_foot_r",
         "num_bp",
-    }}
-enums["damage_type"] = {
+    }
+} )
+register_enum("damage_type", {
     values = {
         "DT_NULL",
         "DT_TRUE",
@@ -2686,8 +2688,9 @@ enums["damage_type"] = {
         "DT_COLD",
         "DT_ELECTRIC",
         "NUM_DT",
-    }}
-enums["field_id"] = {
+    }
+} )
+register_enum("field_id", {
     values = {
         "fd_null",
         "fd_blood",
@@ -2737,8 +2740,9 @@ enums["field_id"] = {
         "fd_fungicidal_gas",
         "fd_smoke_vent",
         "num_fields",
-    }}
-enums["hp_part"] = {
+    }
+} )
+register_enum("hp_part", {
     values = {
         "hp_head",
         "hp_torso",
@@ -2747,36 +2751,41 @@ enums["hp_part"] = {
         "hp_leg_l",
         "hp_leg_r",
         "num_hp_parts",
-    }}
-enums["m_size"] = {
+    }
+} )
+register_enum("m_size", {
     values = {
         "MS_TINY",
         "MS_SMALL",
         "MS_MEDIUM",
         "MS_LARGE",
         "MS_HUGE",
-    }}
-enums["phase_id"] = {
+    }
+} )
+register_enum("phase_id", {
     values = {
         "PNULL",
         "SOLID",
         "LIQUID",
         "GAS",
         "PLASMA",
-    }}
-enums["season_type"] = {
+    }
+} )
+register_enum("season_type", {
     values = {
         "SPRING",
         "SUMMER",
         "AUTUMN",
         "WINTER",
-    }}
-enums["side"] = {
+    }
+} )
+register_enum("side", {
     values = {
         "BOTH",
         "LEFT",
         "RIGHT",
-    }}
+    }
+} )
 
 global_functions = {
 { name = "DAYS", rval = "int", args = { "int" } },
