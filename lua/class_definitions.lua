@@ -369,11 +369,49 @@ register_class("mass", {
     },
 } )
 
+-- Copy constructability is not detected up by the extractor
+table.insert(get_type("tripoint").new, { "tripoint" })
+table.insert(get_type("point").new, { "point" })
+table.insert(get_type("time_point").new, { "time_point" })
+
 get_type("ter_t").output_path = "mapdata.gen.cpp"
 get_type("furn_t").output_path = "mapdata.gen.cpp"
 
 get_type("recipe").code_prepend = get_type("recipe"):get_code_prepend() .. "\n#include \"item.h\""
 get_type("map_stack").code_prepend = get_type("map_stack"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("overmap").code_prepend = get_type("overmap"):get_code_prepend() .. "\n#include \"mongroup.h\""
+get_type("mutation_branch").code_prepend = get_type("mutation_branch"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("map").code_prepend = get_type("map"):get_code_prepend() .. "\n#include \"item.h\""
+get_type("map").code_prepend = get_type("map"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("Creature").code_prepend = get_type("Creature"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("Creature").code_prepend = get_type("Creature"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("Creature").code_prepend = get_type("Creature"):get_code_prepend() .. "\n#include \"character.h\""
+get_type("Creature").code_prepend = get_type("Creature"):get_code_prepend() .. "\n#include \"monster.h\""
+get_type("monster").code_prepend = get_type("monster"):get_code_prepend() .. "\n#include \"calendar.h\""
+get_type("monster").code_prepend = get_type("monster"):get_code_prepend() .. "\n#include \"item.h\""
+get_type("monster").code_prepend = get_type("monster"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("monster").code_prepend = get_type("monster"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("player").code_prepend = get_type("player"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("player").code_prepend = get_type("player"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("Character").code_prepend = get_type("Character"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("Character").code_prepend = get_type("Character"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("Character").code_prepend = get_type("Character"):get_code_prepend() .. "\n#include \"player.h\""
+get_type("item").code_prepend = get_type("item"):get_code_prepend() .. "\n#include \"units.h\""
+get_type("item").code_prepend = get_type("item"):get_code_prepend() .. "\n#include \"gun_mode.h\""
+get_type("item").code_prepend = get_type("item"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("start_location").code_prepend = get_type("start_location"):get_code_prepend() .. "\n#include \"enums.h\""
+get_type("game").code_prepend = get_type("game"):get_code_prepend() .. "\n#include \"monster.h\""
+get_type("game").code_prepend = get_type("game"):get_code_prepend() .. "\n#include \"color.h\""
+get_type("game").code_prepend = get_type("game"):get_code_prepend() .. "\n#include \"item.h\""
+
+-- Those functions are actually not implemented in C++
+for k,v in ipairs(get_type("gun_mode_id").functions) do
+    if v.name == "obj" then
+        get_type("gun_mode_id").functions[k] = nil
+    elseif v.name == "is_valid" then
+        get_type("gun_mode_id").functions[k] = nil
+    end
+end
 
 -- Headers that are required in order to compile the global functions wrapper
 global_functions_code_prepend = "#include \"field.h\"\n#include \"bodypart.h\"\n#include \"itype.h\"\n#include \"creature.h\"\n#include \"output.h\"\n#include \"calendar.h\"\n#include \"pldata.h\"\n#include \"units.h\""

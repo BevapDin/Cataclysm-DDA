@@ -1007,7 +1007,6 @@ register_class("item", {
             { name = "is_toolmod", rval = "bool", args = { } },
             { name = "is_two_handed", rval = "bool", args = { "player" } },
             { name = "is_unarmed_weapon", rval = "bool", args = { } },
-            { name = "is_var_veh_part", rval = "bool", args = { } },
             { name = "is_watertight_container", rval = "bool", args = { } },
             { name = "is_wheel", rval = "bool", args = { } },
             { name = "is_worn_only_with", rval = "bool", args = { "item" } },
@@ -1950,7 +1949,6 @@ register_class("overmap", {
     new = {
             { "int", "int" },
             { "overmap" },
-            { },
     },
     attributes = {
     },
