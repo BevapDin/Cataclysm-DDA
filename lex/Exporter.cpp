@@ -497,6 +497,24 @@ cata::optional<std::string> Exporter::register_cata_optional( const Type &t )
     return "\"cata::optional<" + element_type + ">\"";
 }
 
+cata::optional<std::string> Exporter::register_catalua_script( const Type &t )
+{
+    static const std::string template_name( "catalua::script" );
+    const std::string sp = remove_const( t.spelling() );
+    if( sp.compare( 0, template_name.length(), template_name ) != 0 ) {
+        return {};
+    }
+    const std::string spn = trim( sp.substr( template_name.length() ) );
+    if( spn.empty() || spn.front() != '<' || spn.back() != '>' ) {
+        return {};
+    }
+    const std::string params = trim( spn.substr( 1, spn.length()  - 2 ) );
+
+    debug_message( sp + " is a catalua::script based on " + params );
+    generic_types[sp] = "make_catalua_script_class(\"" + params + "\", \"\")";
+    return "\"catalua::script<" + params + ">\"";
+}
+
 cata::optional<std::string> Exporter::register_generic( const Type &t )
 {
     if( const auto res = register_std_container( "list", t ) ) {
@@ -509,6 +527,9 @@ cata::optional<std::string> Exporter::register_generic( const Type &t )
         return res;
     }
     if( const auto res = register_cata_optional( t ) ) {
+        return res;
+    }
+    if( const auto res = register_catalua_script( t ) ) {
         return res;
     }
     // @todo add more
@@ -660,6 +681,9 @@ cata::optional<std::string> Exporter::get_header_for_argument( const Type &t ) c
     }
     if( t.spelling().compare( 0, 15, "cata::optional<" ) == 0 ) {
         return std::string( "#include \"../optional.h\"" );
+    }
+    if( t.spelling().compare( 0, 16, "catalua::script<" ) == 0 ) {
+        return std::string( "#include \"script.h\"" );
     }
     const std::string header = t.get_declaration().location_file();
     if( !header.empty() ) {

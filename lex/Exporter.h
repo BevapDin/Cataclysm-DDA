@@ -135,6 +135,7 @@ class Exporter
         ///@}
 
         cata::optional<std::string> register_cata_optional( const Type &t );
+        cata::optional<std::string> register_catalua_script( const Type &t );
         cata::optional<std::string> register_std_container( const std::string name, const Type &t );
         cata::optional<std::string> register_std_iterator( const std::string &name, const Type &t );
         cata::optional<std::string> register_generic( const Type &t );

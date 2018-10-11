@@ -115,6 +115,10 @@ function retrieve_lua_value(value_type, stack_position)
     if value_type:sub(-1) == "*" then
         return get_type(value_type:sub(1, -2)):member_type_to_cpp_type() .. "::get_pointer(L, " .. stack_position .. ")"
     end
+    local t = get_type(value_type)
+    if t.is_script then
+        return "catalua::script_reference::from_stack( " .. stack_position .. " );"
+    end
     return get_type(value_type):retrieve_lua_value(stack_position)
 end
 function retrieve_lua_value_to_variable(var_name, value_type, stack_position)

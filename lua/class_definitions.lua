@@ -193,6 +193,25 @@ function make_cata_optional_class(element_type)
     } )
 end
 
+function make_catalua_script_class(template_arguments, using_class)
+    local t = 'catalua::script<' .. template_arguments .. '>'
+    register_class( t, {
+        -- @todo check what other members are needed
+        forward_declaration = "#include \"src/lua/script.h\"",
+        output_path = output_path_of(using_class),
+        new = {
+            { },
+            { t },
+            { "string" },
+        },
+        attributes = {
+        },
+        functions = {
+        },
+        is_script = true,
+    } )
+end
+
 -- Adds the declaration for an C++ iterator class to the exported classes.
 -- @param container_type The C++ type id of the container class.
 -- @param element_type The C++ type of the container elements. This type must be exported
