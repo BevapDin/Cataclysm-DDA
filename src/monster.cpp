@@ -385,10 +385,10 @@ void monster::try_reproduce()
         if( season_spawn ) {
             season_match = false;
             for( auto &elem : type->baby_flags ) {
-                if( ( season_of_year( DAYS( baby_timer ) ) == SUMMER && elem == "SUMMER" ) ||
-                    ( season_of_year( DAYS( baby_timer ) ) == WINTER && elem == "WINTER" ) ||
-                    ( season_of_year( DAYS( baby_timer ) ) == SPRING && elem == "SPRING" ) ||
-                    ( season_of_year( DAYS( baby_timer ) ) == AUTUMN && elem == "AUTUMN" ) ) {
+                if( ( season_of_year( calendar::time_of_cataclysm + time_duration::from_days( baby_timer ) ) == SUMMER && elem == "SUMMER" ) ||
+                    ( season_of_year( calendar::time_of_cataclysm + time_duration::from_days( baby_timer ) ) == WINTER && elem == "WINTER" ) ||
+                    ( season_of_year( calendar::time_of_cataclysm + time_duration::from_days( baby_timer ) ) == SPRING && elem == "SPRING" ) ||
+                    ( season_of_year( calendar::time_of_cataclysm + time_duration::from_days( baby_timer ) ) == AUTUMN && elem == "AUTUMN" ) ) {
                     season_match = true;
                 }
             }
@@ -400,7 +400,7 @@ void monster::try_reproduce()
             if( type->baby_monster ) {
                 g->m.add_spawn( type->baby_monster, spawn_cnt, pos().x, pos().y );
             } else {
-                g->m.add_item_or_charges( pos(), item( type->baby_egg, DAYS( baby_timer ), spawn_cnt ), true );
+                g->m.add_item_or_charges( pos(), item( type->baby_egg, calendar::time_of_cataclysm + time_duration::from_days( baby_timer ), spawn_cnt ), true );
             }
         }
 
@@ -428,7 +428,7 @@ void monster::try_biosignature()
             return;
         }
 
-        g->m.add_item_or_charges( pos(), item( type->biosig_item, DAYS( biosig_timer ), 1 ), true );
+        g->m.add_item_or_charges( pos(), item( type->biosig_item, calendar::time_of_cataclysm + time_duration::from_days( biosig_timer ), 1 ), true );
         const int next_biosig = type->biosig_timer;
         if( next_biosig < 0 ) {
             return;

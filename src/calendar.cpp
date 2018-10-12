@@ -56,7 +56,7 @@ calendar::calendar()
 
 calendar::calendar( int Minute, int Hour, int Day, season_type Season, int Year )
 {
-    turn_number = MINUTES( Minute ) + HOURS( Hour ) + DAYS( Day ) + Season * to_days<int>
+    turn_number = MINUTES( Minute ) + HOURS( Hour ) + to_turns<int>( time_duration::from_days( Day ) ) + Season * to_days<int>
                   ( season_length() ) + Year * to_turns<int>( year_length() );
     sync();
 }
@@ -559,17 +559,17 @@ int calendar::day_of_year() const
 void calendar::sync()
 {
     const int sl = to_days<int>( season_length() );
-    year = turn_number / DAYS( sl * 4 );
+    year = turn_number / to_turns<int>( time_duration::from_days( sl * 4 ) );
 
     if( eternal_season() ) {
         // If we use calendar::start to determine the initial season, and the user shortens the season length
         // mid-game, the result could be the wrong season!
         season = initial_season;
     } else {
-        season = season_type( turn_number / DAYS( sl ) % 4 );
+        season = season_type( turn_number / to_turns<int>( time_duration::from_days( sl ) ) % 4 );
     }
 
-    day = turn_number / DAYS( 1 ) % sl;
+    day = turn_number / to_turns<int>( time_duration::from_days( 1 ) ) % sl;
     hour = turn_number / HOURS( 1 ) % 24;
     minute = turn_number / MINUTES( 1 ) % 60;
     second = ( turn_number * 6 ) % 60;
