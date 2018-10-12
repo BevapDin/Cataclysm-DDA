@@ -79,7 +79,7 @@ void craft_command::execute()
     }
 
     auto type = activity_id( is_long ? "ACT_LONGCRAFT" : "ACT_CRAFT" );
-    auto activity = player_activity( type, crafter->base_time_to_craft( *rec, batch_size ), -1, INT_MIN,
+    auto activity = player_activity( type, to_moves<int>( crafter->base_time_to_craft( *rec, batch_size ) ), -1, INT_MIN,
                                      rec->ident().str() );
     activity.values.push_back( batch_size );
     activity.values.push_back( calendar::turn );

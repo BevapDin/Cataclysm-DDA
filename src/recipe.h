@@ -4,6 +4,7 @@
 
 #include "string_id.h"
 #include "requirements.h"
+#include "calendar.h"
 
 #include <map>
 #include <set>
@@ -43,7 +44,7 @@ class recipe
 
         std::string description;
 
-        int time = 0; // in movement points (100 per turn)
+        time_duration time = 0;
         int difficulty = 0;
 
         /** Fetch combined requirement data (inline and via "using" syntax) */
@@ -94,7 +95,7 @@ class recipe
 
         bool has_byproducts() const;
 
-        int batch_time( int batch, float multiplier, size_t assistants ) const;
+        time_duration batch_time( int batch, float multiplier, size_t assistants ) const;
 
         bool has_flag( const std::string &flag_name ) const;
 

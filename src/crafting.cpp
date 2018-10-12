@@ -194,13 +194,13 @@ size_t available_assistant_count( const player &u, const recipe &rec )
     } );
 }
 
-int player::base_time_to_craft( const recipe &rec, int batch_size ) const
+time_duration player::base_time_to_craft( const recipe &rec, int batch_size ) const
 {
     const size_t assistants = available_assistant_count( *this, rec );
     return rec.batch_time( batch_size, 1.0f, assistants );
 }
 
-int player::expected_time_to_craft( const recipe &rec, int batch_size ) const
+time_duration player::expected_time_to_craft( const recipe &rec, int batch_size ) const
 {
     const size_t assistants = available_assistant_count( *this, rec );
     float modifier = crafting_speed_multiplier( rec );
@@ -557,7 +557,7 @@ void player::complete_craft()
 
     if( making->skill_used ) {
         // normalize experience gain to crafting time, giving a bonus for longer crafting
-        const double batch_mult = batch_size + base_time_to_craft( *making, batch_size ) / 30000.0;
+        const double batch_mult = batch_size + base_time_to_craft( *making, batch_size ) / 30_minutes;
         practice( making->skill_used, ( int )( ( making->difficulty * 15 + 10 ) * batch_mult ),
                   ( int )making->difficulty * 1.25 );
 
@@ -687,9 +687,7 @@ void player::complete_craft()
                 // 10^4/10 (1,000) minutes, or about 16 hours of crafting it to learn.
                 int difficulty = has_recipe( making, crafting_inventory(), helpers );
                 ///\EFFECT_INT increases chance to learn recipe when crafting from a book
-                if( x_in_y( making->time, ( 1000 * 8 *
-                                            ( difficulty * difficulty * difficulty * difficulty ) ) /
-                            ( std::max( get_skill_level( making->skill_used ), 1 ) * std::max( get_int(), 1 ) ) ) ) {
+                if( x_in_y( making->time, time_duration::from_moves( ( 1000 * 8 * ( difficulty * difficulty * difficulty * difficulty ) ) / ( std::max( get_skill_level( making->skill_used ), 1 ) * std::max( get_int(), 1 ) ) ) ) ) {
                     learn_recipe( ( recipe * )making );
                     add_msg( m_good, _( "You memorized the recipe for %s!" ),
                              newit.type_name( 1 ).c_str() );
@@ -1206,9 +1204,9 @@ bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
     }
 
     if( activity.id() != activity_id( "ACT_DISASSEMBLE" ) ) {
-        assign_activity( activity_id( "ACT_DISASSEMBLE" ), r.time );
+        assign_activity( activity_id( "ACT_DISASSEMBLE" ), to_moves<int>( r.time ) );
     } else if( activity.moves_left <= 0 ) {
-        activity.moves_left = r.time;
+        activity.moves_left = to_moves<int>( r.time );
     }
 
     activity.values.push_back( pos );
@@ -1321,7 +1319,7 @@ void player::complete_disassemble()
         return;
     }
 
-    activity.moves_left = next_recipe.time;
+    activity.moves_left = to_moves<int>( next_recipe.time );
 }
 
 // TODO: Make them accessible in a less ugly way

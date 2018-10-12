@@ -542,11 +542,10 @@ const recipe *select_crafting_recipe( int &batch_size )
                                         _( "Other skills used: %s" ),
                                         current[line]->required_skills_string( &g->u ) );
 
-                const int expected_turns = g->u.expected_time_to_craft( *current[line],
-                                           count ) / to_moves<int>( 1_turns );
+                const time_duration expected_turns = g->u.expected_time_to_craft( *current[line], count );
                 ypos += fold_and_print( w_data, ypos, xpos, pane, col,
                                         _( "Time to complete: <color_cyan>%s</color>" ),
-                                        to_string( time_duration::from_turns( expected_turns ) ) );
+                                        to_string( expected_turns ) );
 
                 print_colored_text(
                     w_data, ypos++, xpos, col, col,
