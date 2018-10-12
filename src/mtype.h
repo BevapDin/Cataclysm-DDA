@@ -7,6 +7,7 @@
 #include "enums.h"
 #include "color.h"
 #include "int_id.h"
+#include "glyph.h"
 #include "string_id.h"
 #include "damage.h"
 #include "pathfinding.h"
@@ -212,9 +213,7 @@ struct mtype {
         std::set<species_id> species;
         std::set<std::string> categories;
         mfaction_id default_faction;
-        /** UTF-8 encoded symbol, should be exactly one cell wide. */
-        std::string sym;
-        nc_color color = c_white;
+        glyph glyph_;
         /** hint for tilesets that don't have a tile for this monster */
         std::string looks_like;
         m_size size;

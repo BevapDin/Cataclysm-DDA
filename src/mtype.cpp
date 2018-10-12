@@ -12,13 +12,11 @@
 
 const species_id MOLLUSK( "MOLLUSK" );
 
-mtype::mtype()
+mtype::mtype() : glyph_( " ", c_white )
 {
     id = mtype_id::NULL_ID();
     name = "human";
     name_plural = "humans";
-    sym = " ";
-    color = c_white;
     size = MS_MEDIUM;
     volume = 62499_ml;
     weight = 81499_gram;

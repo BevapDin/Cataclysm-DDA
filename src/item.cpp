@@ -2882,7 +2882,7 @@ nc_color item::color() const
         return c_black;
     }
     if( is_corpse() ) {
-        return corpse->color;
+        return corpse->glyph_.color();
     }
     return type->color;
 }

@@ -549,12 +549,8 @@ void mtype::load( JsonObject &jo, const std::string &src )
         default_faction = monfactions::get_or_add_faction( faction );
     }
 
-    if( !was_loaded || jo.has_member( "symbol" ) ) {
-        sym = jo.get_string( "symbol" );
-        if( utf8_wrapper( sym ).display_width() != 1 ) {
-            jo.throw_error( "monster symbol should be exactly one console cell width", "symbol" );
-        }
-    }
+    glyph_.load_symbol( jo, "symbol", was_loaded ? glyph::optional : glyph::required );
+    glyph_.load_color( jo, "color", was_loaded ? glyph::optional : glyph::required );
     if( was_loaded && jo.has_member( "copy-from" ) && looks_like.empty() ) {
         looks_like = jo.get_string( "copy-from" );
     }
@@ -562,7 +558,6 @@ void mtype::load( JsonObject &jo, const std::string &src )
         looks_like = jo.get_string( "looks_like" );
     }
 
-    assign( jo, "color", color );
     assign( jo, "volume", volume, strict, 0_ml );
     assign( jo, "weight", weight, strict, 0_gram );
     const typed_flag_reader<decltype( gen.phase_map )> phase_reader{ gen.phase_map, "invalid phase id" };
