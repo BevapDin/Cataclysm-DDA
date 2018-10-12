@@ -1150,7 +1150,7 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
         }
         if( parts->test( iteminfo_parts::MAGAZINE_RELOAD ) )
             info.emplace_back( "MAGAZINE", _( "Reload time: " ), _( "<num> per round" ),
-                               iteminfo::lower_is_better, type->magazine->reload_time );
+                               iteminfo::lower_is_better, to_moves( type->magazine->reload_time ) );
 
         insert_separation_line();
     }
@@ -1418,9 +1418,9 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
 
         if( parts->test( iteminfo_parts::GUN_RELOAD_TIME ) )
             info.emplace_back( "GUN", _( "Reload time: " ),
-                               has_flag( "RELOAD_ONE" ) ? _( "<num> seconds per round" ) : _( "<num> seconds" ),
+                               has_flag( "RELOAD_ONE" ) ? _( "<num> moves per round" ) : _( "<num> moves" ),
                                iteminfo::lower_is_better,
-                               int( mod->get_reload_time() / 16.67 ) );
+                               to_moves<int>( mod->get_reload_time() ) );
 
         if( parts->test( iteminfo_parts::GUN_FIRE_MODES ) ) {
             std::vector<std::string> fm;
@@ -4189,15 +4189,15 @@ bool item::is_firearm() const
     return is_gun() && !has_flag( primitive_flag );
 }
 
-int item::get_reload_time() const
+time_duration item::get_reload_time() const
 {
     if( !is_gun() ) {
         return 0;
     }
 
-    int reload_time = type->gun->reload_time;
+    time_duration reload_time = type->gun->reload_time;
     for( const auto mod : gunmods() ) {
-        reload_time = int( reload_time * ( 100 + mod->type->gunmod->reload_modifier ) / 100 );
+        reload_time = reload_time * ( 100 + mod->type->gunmod->reload_modifier ) / 100;
     }
 
     return reload_time;
@@ -5417,10 +5417,11 @@ item::reload_option::reload_option( const player *who, const item *target, const
 
 int item::reload_option::moves() const
 {
-    int mv = ammo.obtain_cost( *who, qty() ) + who->item_reload_cost( *target, *ammo, qty() );
+    int mv = ammo.obtain_cost( *who, qty() ) + to_moves( who->item_reload_cost( *target, *ammo,
+             qty() ) );
     if( parent != target ) {
         if( parent->is_gun() ) {
-            mv += parent->get_reload_time();
+            mv += to_moves<int>( parent->get_reload_time() );
         } else if( parent->is_tool() ) {
             mv += 100;
         }

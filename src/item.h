@@ -1733,7 +1733,7 @@ class item : public visitable<item>
         /**
          * Returns the reload time of the gun. Returns 0 if not a gun.
          */
-        int get_reload_time() const;
+        time_duration get_reload_time() const;
         /*@}*/
 
         /**
