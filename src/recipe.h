@@ -4,6 +4,7 @@
 
 #include "string_id.h"
 #include "requirements.h"
+#include "optional.h"
 
 #include <map>
 #include <set>
@@ -122,8 +123,8 @@ class recipe
         /** Can recipe be used for disassembly of @ref result via @ref disassembly_requirements */
         bool reversible = false;
 
-        /** What does the item spawn contained in? Unset ("null") means default container. */
-        itype_id container = "null";
+        /** What does the item spawn contained in? Unset means default container. */
+        cata::optional<itype_id> container;
 
         /** External requirements (via "using" syntax) where second field is multiplier */
         std::vector<std::pair<requirement_id, int>> reqs_external;

@@ -223,8 +223,12 @@ void recipe::finalize()
     reqs_external.clear();
     reqs_internal.clear();
 
-    if( contained && container == "null" ) {
-        container = item::find_type( result_ )->default_container.value_or( "null" );
+    if( contained && !container ) {
+        container = item::find_type( result_ )->default_container;
+        if( !container ) {
+            debugmsg( "Recipe for %s has `contained` set, but item does not have a default container", result_ );
+            contained = false;
+        }
     }
 
     if( autolearn && autolearn_requirements.empty() ) {
@@ -265,11 +269,11 @@ std::string recipe::get_consistency_error() const
         return "defines invalid byproducts";
     }
 
-    if( !contained && container != "null" ) {
+    if( !contained && container ) {
         return "defines container but not contained";
     }
 
-    if( !item::type_is_defined( container ) ) {
+    if( container && !item::type_is_defined( *container ) ) {
         return "specifies unknown container";
     }
 
@@ -311,8 +315,8 @@ item recipe::create_result() const
         newit.item_tags.insert( "FIT" );
     }
 
-    if( contained ) {
-        newit = newit.in_container( container );
+    if( contained && container ) {
+        newit = newit.in_container( *container );
     }
 
     return newit;
