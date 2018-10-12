@@ -873,11 +873,11 @@ static void loot()
             add_msg( _( "Never mind." ) );
             break;
         case SortLoot:
-            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ) );
+            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ), calendar::INDEFINITELY_LONG );
             break;
         case TillPlots:
             if( has_hoe ) {
-                u.assign_activity( activity_id( "ACT_TILL_PLOT" ) );
+                u.assign_activity( activity_id( "ACT_TILL_PLOT" ), calendar::INDEFINITELY_LONG );
             } else {
                 add_msg( _( "You need a tool to dig with." ) );
             }
@@ -888,7 +888,7 @@ static void loot()
             } else if( !has_seeds ) {
                 add_msg( m_info, _( "You don't have any seeds." ) );
             } else {
-                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ) );
+                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ), calendar::INDEFINITELY_LONG );
             }
             break;
         default:
