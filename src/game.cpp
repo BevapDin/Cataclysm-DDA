@@ -3235,19 +3235,24 @@ void game::debug()
             ui::omap::display_scents();
             break;
         case 26: {
-            auto set_turn = [&]( const int initial, const int factor, const char *const msg ) {
+            auto set_turn = [&]( const time_duration &factor, const cata::optional<time_duration> larger, const char *const msg ) {
+                const time_duration since_begin = calendar::turn - calendar::time_of_cataclysm;
+                const time_duration since_begin_offset = larger ? since_begin % *larger : since_begin;
                 const auto text = string_input_popup()
                                   .title( msg )
                                   .width( 20 )
-                                  .text( to_string( initial ) )
+                                  .text( to_string( static_cast<int>( since_begin_offset / factor ) ) )
                                   .only_digits( true )
                                   .query_string();
                 if( text.empty() ) {
                     return;
                 }
-                const int new_value = ( std::atoi( text.c_str() ) - initial ) * factor;
-                calendar::turn += std::max( std::min( INT_MAX / 2 - calendar::turn, new_value ),
-                                            -calendar::turn );
+                const time_duration new_since_begin_offset = std::atoi( text.c_str() ) * factor;
+                if( larger ) {
+                    calendar::turn = calendar::time_of_cataclysm + new_since_begin_offset - since_begin_offset;
+                } else {
+                    calendar::turn = calendar::time_of_cataclysm + new_since_begin_offset;
+                }
             };
 
             uilist smenu;
@@ -3266,24 +3271,22 @@ void game::debug()
 
                 switch( smenu.ret ) {
                     case 0:
-                        set_turn( calendar::turn.years(), to_turns<int>( calendar::year_length() ), _( "Set year to?" ) );
+                        set_turn( calendar::year_length(), cata::nullopt, _( "Set year to?" ) );
                         break;
                     case 1:
-                        set_turn( int( season_of_year( calendar::turn ) ), to_turns<int>( calendar::turn.season_length() ),
-                                  _( "Set season to? (0 = spring)" ) );
+                        set_turn( calendar::season_length(), calendar::year_length(), _( "Set season to? (0 = spring)" ) );
                         break;
                     case 2:
-                        set_turn( day_of_season<int>( calendar::turn ), DAYS( 1 ), _( "Set days to?" ) );
+                        set_turn( 1_days, calendar::season_length(), _( "Set days to?" ) );
                         break;
                     case 3:
-                        set_turn( hour_of_day<int>( calendar::turn ), HOURS( 1 ), _( "Set hour to?" ) );
+                        set_turn( 1_hours, 1_days, _( "Set hour to?" ) );
                         break;
                     case 4:
-                        set_turn( minute_of_hour<int>( calendar::turn ), MINUTES( 1 ), _( "Set minute to?" ) );
+                        set_turn( 1_minutes, 1_hours, _( "Set minute to?" ) );
                         break;
                     case 5:
-                        set_turn( calendar::turn, 1,
-                                  string_format( _( "Set turn to? (One day is %i turns)" ), int( DAYS( 1 ) ) ).c_str() );
+                        set_turn( 1_turns, 1_days, string_format( _( "Set turn to? (One day is %i turns)" ), to_turns<int>( 1_day ) ) );
                         break;
                     default:
                         break;
