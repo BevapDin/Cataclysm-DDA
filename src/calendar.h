@@ -6,6 +6,8 @@
 
 #include "optional.h"
 
+#include <cstdint>
+
 class time_duration;
 class time_point;
 class JsonOut;
@@ -303,9 +305,9 @@ class time_duration
 {
     private:
         friend class time_point;
-        int turns_;
+        std::int64_t turns_;
 
-        explicit constexpr time_duration( const int t ) : turns_( t ) { }
+        explicit constexpr time_duration( const std::int64_t t ) : turns_( t ) { }
 
     public:
         /// Allows writing `time_duration d = 0;`
@@ -377,7 +379,7 @@ class time_duration
         }
         template<typename T>
         friend constexpr T to_moves( const time_duration duration ) {
-            return to_turns<int>( duration ) * 100;
+            return to_turns<std::int64_t>( duration ) * 100;
         }
         /**@{*/
 
@@ -513,12 +515,12 @@ class time_point
 {
     private:
         friend class time_duration;
-        int turn_;
+        std::int64_t turn_;
 
     public:
         //@todo: make private
         //@todo: make explicit
-        constexpr time_point( const int t ) : turn_( t ) { }
+        constexpr time_point( const std::int64_t t ) : turn_( t ) { }
 
     public:
         //@todo: replace usage of `calendar` with `time_point`, remove this constructor
@@ -527,7 +529,7 @@ class time_point
         constexpr time_point( const std::nullptr_t ) : turn_( 0 ) { }
         //@todo: remove this, nobody should need it, one should use a constant `time_point`
         // (representing turn 0) and a `time_duration` instead.
-        static constexpr time_point from_turn( const int t ) {
+        static constexpr time_point from_turn( const std::int64_t t ) {
             return time_point( t );
         }
 
@@ -545,48 +547,48 @@ class time_point
 
 constexpr inline bool operator<( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) < to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) < to_turn<std::int64_t>( rhs );
 }
 constexpr inline bool operator<=( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) <= to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) <= to_turn<std::int64_t>( rhs );
 }
 constexpr inline bool operator>( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) > to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) > to_turn<std::int64_t>( rhs );
 }
 constexpr inline bool operator>=( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) >= to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) >= to_turn<std::int64_t>( rhs );
 }
 constexpr inline bool operator==( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) == to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) == to_turn<std::int64_t>( rhs );
 }
 constexpr inline bool operator!=( const time_point lhs, const time_point rhs )
 {
-    return to_turn<int>( lhs ) != to_turn<int>( rhs );
+    return to_turn<std::int64_t>( lhs ) != to_turn<std::int64_t>( rhs );
 }
 
 constexpr inline time_duration operator-( const time_point lhs, const time_point rhs )
 {
-    return time_duration::from_turns( to_turn<int>( lhs ) - to_turn<int>( rhs ) );
+    return time_duration::from_turns( to_turn<std::int64_t>( lhs ) - to_turn<std::int64_t>( rhs ) );
 }
 constexpr inline time_point operator+( const time_point lhs, const time_duration rhs )
 {
-    return time_point::from_turn( to_turn<int>( lhs ) + to_turns<int>( rhs ) );
+    return time_point::from_turn( to_turn<std::int64_t>( lhs ) + to_turns<std::int64_t>( rhs ) );
 }
 time_point inline &operator+=( time_point &lhs, const time_duration rhs )
 {
-    return lhs = time_point::from_turn( to_turn<int>( lhs ) + to_turns<int>( rhs ) );
+    return lhs = time_point::from_turn( to_turn<std::int64_t>( lhs ) + to_turns<std::int64_t>( rhs ) );
 }
 constexpr inline time_point operator-( const time_point lhs, const time_duration rhs )
 {
-    return time_point::from_turn( to_turn<int>( lhs ) - to_turns<int>( rhs ) );
+    return time_point::from_turn( to_turn<std::int64_t>( lhs ) - to_turns<std::int64_t>( rhs ) );
 }
 time_point inline &operator-=( time_point &lhs, const time_duration rhs )
 {
-    return lhs = time_point::from_turn( to_turn<int>( lhs ) - to_turns<int>( rhs ) );
+    return lhs = time_point::from_turn( to_turn<std::int64_t>( lhs ) - to_turns<std::int64_t>( rhs ) );
 }
 
 inline time_duration time_past_midnight( const time_point &p )
