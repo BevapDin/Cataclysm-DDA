@@ -1607,6 +1607,9 @@ time_duration time_duration::read_from_json_string( JsonIn &jsin )
             { "turns", 1_turns },
             { "turn", 1_turns },
             { "t", 1_turns },
+            { "moves", 1_moves },
+            { "move", 1_moves },
+            { "o", 1_moves },
             // @todo add seconds
             { "minutes", 1_minutes },
             { "minute", 1_minutes },
