@@ -855,8 +855,8 @@ bool veh_interact::do_install( std::string &msg )
                         uimenu_entry entry = uimenu_entry( i, true, UIMENU_INVALID,
                                                            shapes[i]->name() );
                         entry.extratxt.left = 1;
-                        entry.extratxt.sym = special_symbol( shapes[i]->sym );
-                        entry.extratxt.color = shapes[i]->color;
+                        entry.extratxt.sym = special_symbol( shapes[i]->glyph_.symbol().at(0) );//@todo
+                        entry.extratxt.color = shapes[i]->glyph_.color();
                         shape_ui_entries.push_back( entry );
                     }
                     selected_shape = uilist( getbegx( w_list ), getmaxx( w_list ), getbegy( w_list ),
@@ -2181,7 +2181,7 @@ void veh_interact::display_list(size_t pos, const std::vector<const vpart_info*>
     for (size_t i = page * lines_per_page; i < (page + 1) * lines_per_page && i < list.size(); i++) {
         const vpart_info &info = *list[i];
         int y = i - page * lines_per_page + header;
-        mvwputch( w_list, y, 1, info.color, special_symbol( info.sym ) );
+        mvwputch( w_list, y, 1, info.color, special_symbol( info.glyph_.symbol().at(0) ) );//@todo
         nc_color col = can_potentially_install( info ) ? c_white : c_dark_gray;
         trim_and_print( w_list, y, 3, getmaxx( w_list ) - 3, pos == i ? hilite( col ) : col,
                         info.name().c_str() );

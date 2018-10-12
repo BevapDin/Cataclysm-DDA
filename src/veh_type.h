@@ -9,6 +9,7 @@
 #include "calendar.h"
 #include "units.h"
 #include "optional.h"
+#include "glyph.h"
 
 #include <vector>
 #include <bitset>
@@ -120,17 +121,13 @@ class vpart_info
         /** What slot of the vehicle tile does this part occupy? */
         std::string location;
 
-        /** Color of part for different states */
-        nc_color color = c_light_gray;
-        nc_color color_broken = c_light_gray;
-
         /**
          * Symbol of part which will be translated as follows:
          * y, u, n, b to NW, NE, SE, SW lines correspondingly
          * h, j, c to horizontal, vertical, cross correspondingly
          */
-        long sym = 0;
-        char sym_broken = '#';
+        glyph glyph_ = glyph( " ", c_light_gray );
+        glyph glyph_broken_ = glyph( "#", c_light_gray );
 
         /** hint to tilesets for what tile to use if this part doesn't have one */
         std::string looks_like;
