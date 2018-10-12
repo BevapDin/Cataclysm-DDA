@@ -1733,9 +1733,9 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
                 auto fmt = ngettext(
                                "A chapter of this book takes <num> <info>minute to read</info>.",
                                "A chapter of this book takes <num> <info>minutes to read</info>.",
-                               book.time );
+                               to_minutes<int>( book.time ) );
                 info.push_back( iteminfo( "BOOK", "", fmt,
-                                          iteminfo::lower_is_better, book.time ) );
+                                          iteminfo::lower_is_better, to_minutes<int>( book.time ) ) );
             }
 
             if( book.chapters > 0 && parts->test( iteminfo_parts::BOOK_NUMUNREADCHAPTERS ) ) {
