@@ -376,7 +376,7 @@ private:
                 // Money from `*i` could be transferred, but we're out of moves, schedule it for
                 // the next turn. Putting this here makes sure there will be something to be
                 // done next turn.
-                u.assign_activity( activity_id( "ACT_ATM" ), 0, transfer_all_money, u.get_item_position( dst ) );
+                u.assign_activity( activity_id( "ACT_ATM" ), 0_turns, transfer_all_money, u.get_item_position( dst ) );
                 break;
             }
 
@@ -677,11 +677,11 @@ void iexamine::cardreader( player &p, const tripoint &examp )
  */
 void iexamine::rubble(player &p, const tripoint &examp)
 {
-    int moves;
+    time_duration duration = 0;
     if( p.has_quality( quality_id( "DIG" ), 3 ) || p.has_trait( trait_BURROW ) ) {
-        moves = 1250;
+        duration = 1250_moves;
     } else if( p.has_quality( quality_id( "DIG" ), 2 ) ) {
-        moves = 2500;
+        duration = 2500_moves;
     } else {
         add_msg( m_info, _("If only you had a shovel...") );
         return;
@@ -691,7 +691,7 @@ void iexamine::rubble(player &p, const tripoint &examp)
           !query_yn(_("Clear up that %s?"), g->m.furnname( examp ).c_str() ) ) {
         return;
     }
-    p.assign_activity( activity_id( "ACT_CLEAR_RUBBLE" ), moves, -1, 0 );
+    p.assign_activity( activity_id( "ACT_CLEAR_RUBBLE" ), duration, -1, 0 );
     p.activity.placement = examp;
     return;
 }
@@ -1009,7 +1009,7 @@ void iexamine::safe(player &p, const tripoint &examp)
         ///\EFFECT_MECHANICS speeds up safe cracking
         const time_duration time = std::max( 150_minutes - 20_minutes * ( p.get_skill_level( skill_mechanics ) - 3 ) - 10_minutes * ( p.get_per() - 8 ), 30_minutes );
 
-         p.assign_activity( activity_id( "ACT_CRACKING" ), to_moves<int>( time ) );
+         p.assign_activity( activity_id( "ACT_CRACKING" ), time );
          p.activity.placement = examp;
     }
 }
@@ -2638,7 +2638,7 @@ void iexamine::tree_maple_tapped(player &p, const tripoint &examp)
             return;
 
         case REMOVE_CONTAINER: {
-            g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
+            g->u.assign_activity( activity_id( "ACT_PICKUP" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             g->u.activity.placement = examp - p.pos();
             g->u.activity.values.push_back( false );
             g->u.activity.values.push_back( 0 );
@@ -2697,7 +2697,7 @@ void iexamine::shrub_wildveggies( player &p, const tripoint &examp )
 
     add_msg( _("You forage through the %s."), g->m.tername( examp ).c_str() );
     ///\EFFECT_SURVIVAL speeds up foraging
-    int move_cost = 100000 / ( 2 * p.get_skill_level( skill_survival ) + 5 );
+    time_duration move_cost = 100_minutes / ( 2 * p.get_skill_level( skill_survival ) + 5 );
     ///\EFFECT_PER randomly speeds up foraging
     move_cost /= rng( std::max( 4, p.per_cur ), 4 + p.per_cur * 2 );
     p.assign_activity( activity_id( "ACT_FORAGE" ), move_cost, 0 );

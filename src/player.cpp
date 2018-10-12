@@ -8204,7 +8204,7 @@ void player::mend_item( item_location&& obj, bool interactive )
             return;
         }
 
-        assign_activity( activity_id( "ACT_MEND_ITEM" ), faults[ sel ].first->time() );
+        assign_activity( activity_id( "ACT_MEND_ITEM" ), time_duration::from_moves( faults[ sel ].first->time() ) );
         activity.name = faults[ sel ].first->id().str();
         activity.targets.push_back( std::move( obj ) );
     }
@@ -8600,7 +8600,7 @@ void player::drop( const std::list<std::pair<int, int>> &what, const tripoint &t
         return;
     }
 
-    assign_activity( type, calendar::INDEFINITELY_LONG );
+    assign_activity( type, time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
     activity.placement = target - pos();
 
     for( auto item_pair : what ) {
@@ -9078,9 +9078,9 @@ void player::gunmod_add( item &gun, item &mod )
         actions[ prompt.ret ]();
     }
 
-    int turns = !has_trait( trait_DEBUG_HS ) ? mod.type->gunmod->install_time : 0;
+    const time_duration duration = time_duration::from_moves( !has_trait( trait_DEBUG_HS ) ? mod.type->gunmod->install_time : 0 );
 
-    assign_activity( activity_id( "ACT_GUNMOD_ADD" ), turns, -1, get_item_position( &gun ), tool );
+    assign_activity( activity_id( "ACT_GUNMOD_ADD" ), duration, -1, get_item_position( &gun ), tool );
     activity.values.push_back( get_item_position( &mod ) );
     activity.values.push_back( roll ); // chance of success (%)
     activity.values.push_back( risk ); // chance of damage (%)
@@ -9104,7 +9104,7 @@ void player::toolmod_add( item_location tool, item_location mod )
         return; // player canceled installation
     }
 
-    assign_activity( activity_id( "ACT_TOOLMOD_ADD" ), 1, -1 );
+    assign_activity( activity_id( "ACT_TOOLMOD_ADD" ), 1_moves, -1 );
     activity.targets.emplace_back( std::move( tool ) );
     activity.targets.emplace_back( std::move( mod ) );
 }
@@ -9943,7 +9943,7 @@ void player::try_to_sleep( const time_duration &dur )
                  ter_at_pos.obj().name().c_str() );
     }
     add_msg_if_player( _( "You start trying to fall asleep." ) );
-    assign_activity( activity_id( "ACT_TRY_SLEEP" ), to_moves<int>( dur ) );
+    assign_activity( activity_id( "ACT_TRY_SLEEP" ), dur );
 }
 
 comfort_level player::base_comfort_value( const tripoint &p ) const
@@ -11011,9 +11011,9 @@ void player::learn_recipe( const recipe * const rec )
     learned_recipes->include( rec );
 }
 
-void player::assign_activity( const activity_id &type, int moves, int index, int pos, const std::string &name )
+void player::assign_activity( const activity_id &type, const time_duration &duration, int index, int pos, const std::string &name )
 {
-    assign_activity( player_activity( type, moves, index, pos, name ) );
+    assign_activity( player_activity( type, to_moves( duration ), index, pos, name ) );
 }
 
 void player::assign_activity( const player_activity &act, bool allow_resume )

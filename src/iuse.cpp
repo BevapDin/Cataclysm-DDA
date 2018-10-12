@@ -758,7 +758,7 @@ int iuse::meditate( player *p, item *it, bool t, const tripoint & )
     }
 
     if( p->has_trait( trait_SPIRITUAL ) ) {
-        p->assign_activity( activity_id( "ACT_MEDITATE" ), 2000 );
+        p->assign_activity( activity_id( "ACT_MEDITATE" ), 2_minutes );
     } else {
         p->add_msg_if_player( _( "This %s probably meant a lot to someone at one time." ),
                               it->tname().c_str() );
@@ -1780,7 +1780,7 @@ int iuse::fishing_rod( player *p, item *it, bool, const tripoint & )
 
     p->add_msg_if_player( _( "You cast your line and wait to hook something..." ) );
 
-    p->assign_activity( activity_id( "ACT_FISH" ), 30000, 0, p->get_item_position( it ), it->tname() );
+    p->assign_activity( activity_id( "ACT_FISH" ), 30_minutes, 0, p->get_item_position( it ), it->tname() );
 
     return 0;
 }
@@ -2505,25 +2505,25 @@ int iuse::dig( player *p, item *it, bool t, const tripoint &pos )
         return 0;
     }
 
-    int moves;
+    time_duration duration = 0;
 
     if( g->m.has_flag( "DIGGABLE", dirp ) ) {
         if( g->m.ter( dirp ) == t_pit_shallow ) {
             if( p->crafting_inventory().has_quality( DIG, 2 ) ) {
-                moves = MINUTES( 90 ) / it->get_quality( DIG ) * 100;
+                duration = 90_minutes / it->get_quality( DIG );
             } else {
                 p->add_msg_if_player( _( "You can't deepen this pit without a proper shovel." ) );
                 return 0;
             }
         } else {
-            moves = MINUTES( 30 ) / it->get_quality( DIG ) * 100;
+            duration = 30_minutes / it->get_quality( DIG );
         }
     } else {
         p->add_msg_if_player( _( "You can't dig a pit on this ground." ) );
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_DIG" ), moves, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_DIG" ), duration, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -2545,21 +2545,20 @@ int iuse::fill_pit( player *p, item *it, bool t, const tripoint &pos )
         return 0;
     }
 
-    int moves;
-
+    time_duration duration = 0;
     if( g->m.ter( dirp ) == t_pit || g->m.ter( dirp ) == t_pit_spiked ||
         g->m.ter( dirp ) == t_pit_glass || g->m.ter( dirp ) == t_pit_corpsed ) {
-        moves = MINUTES( 15 ) * 100;
+        duration = 15_minutes;
     } else if( g->m.ter( dirp ) == t_pit_shallow ) {
-        moves = MINUTES( 10 ) * 100;
+        duration = 10_minutes;
     } else if( g->m.ter( dirp ) == t_dirtmound ) {
-        moves = MINUTES( 5 ) * 100;
+        duration = 5_minutes;
     } else {
         p->add_msg_if_player( _( "There is nothing to fill." ) );
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_FILL_PIT" ), moves, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_FILL_PIT" ), duration, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -2839,8 +2838,7 @@ int iuse::jackhammer( player *p, item *it, bool, const tripoint &pos )
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_JACKHAMMER" ), to_turns<int>( 30_minutes ) * 100, -1,
-                        p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_JACKHAMMER" ), 30_minutes, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -2877,14 +2875,14 @@ int iuse::pickaxe( player *p, item *it, bool, const tripoint &pos )
         return 0;
     }
 
-    int turns;
+    time_duration duration = 0;
     if( g->m.move_cost( dirp ) == 2 ) {
         // We're breaking up some flat surface like pavement, which is much easier
-        turns = MINUTES( 20 );
+        duration = 20_minutes;
     } else {
-        turns = ( ( MAX_STAT + 4 ) - std::min( p->str_cur, MAX_STAT ) ) * MINUTES( 5 );
+        duration = ( MAX_STAT + 4 - std::min( p->str_cur, MAX_STAT ) ) * 5_minutes;
     }
-    p->assign_activity( activity_id( "ACT_PICKAXE" ), turns * 100, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_PICKAXE" ), duration, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
     p->add_msg_if_player( _( "You attack the %1$s with your %2$s." ),
                           g->m.tername( dirp ).c_str(), it->tname().c_str() );
@@ -3825,11 +3823,8 @@ int iuse::portable_game( player *p, item *it, bool, const tripoint & )
                 return 0;
         }
 
-        //Play in 15-minute chunks
-        int time = 15000;
-
         p->add_msg_if_player( _( "You play on your %s for a while." ), it->tname().c_str() );
-        p->assign_activity( activity_id( "ACT_GAME" ), time, -1, p->get_item_position( it ), "gaming" );
+        p->assign_activity( activity_id( "ACT_GAME" ), 15_minutes, -1, p->get_item_position( it ), "gaming" );
 
         std::map<std::string, std::string> game_data;
         game_data.clear();
@@ -3878,7 +3873,6 @@ int iuse::vibe( player *p, item *it, bool, const tripoint & )
         p->add_msg_if_player( m_info, _( "*Your* batteries are dead." ) );
         return 0;
     } else {
-        int time = 20000; // 20 minutes per
         if( it->ammo_remaining() > 0 ) {
             p->add_msg_if_player( _( "You fire up your %s and start getting the tension out." ),
                                   it->tname().c_str() );
@@ -3886,7 +3880,7 @@ int iuse::vibe( player *p, item *it, bool, const tripoint & )
             p->add_msg_if_player( _( "You whip out your %s and start getting the tension out." ),
                                   it->tname().c_str() );
         }
-        p->assign_activity( activity_id( "ACT_VIBE" ), time, -1, p->get_item_position( it ),
+        p->assign_activity( activity_id( "ACT_VIBE" ), 20_minutes, -1, p->get_item_position( it ),
                             "de-stressing" );
     }
     return it->type->charges_to_use();
@@ -4092,16 +4086,15 @@ int iuse::chop_tree( player *p, item *it, bool t, const tripoint &pos )
         return 0;
     }
 
-    int moves;
-
+    time_duration duration = 0;
     if( g->m.has_flag( "TREE", dirp ) ) {
-        moves = chop_moves( p, it );
+        duration = time_duration::from_moves( chop_moves( p, it ) );
     } else {
         add_msg( m_info, _( "You can't chop down that." ) );
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_CHOP_TREE" ), moves, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_CHOP_TREE" ), duration, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -4118,17 +4111,16 @@ int iuse::chop_logs( player *p, item *it, bool t, const tripoint &pos )
         return 0;
     }
 
-    int moves;
-
+    time_duration duration = 0;
     const ter_id ter = g->m.ter( dirp );
     if( ter == t_trunk || ter == t_stump ) {
-        moves = chop_moves( p, it );
+        duration = time_duration::from_moves( chop_moves( p, it ) );
     } else {
         add_msg( m_info, _( "You can't chop that." ) );
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_CHOP_LOGS" ), moves, -1, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_CHOP_LOGS" ), duration, -1, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -4159,25 +4151,24 @@ int iuse::oxytorch( player *p, item *it, bool, const tripoint & )
 
     const ter_id ter = g->m.ter( dirp );
     const auto furn = g->m.furn( dirp );
-    int moves;
-
+    time_duration duration = 0;
     if( furn == f_rack || ter == t_chainfence_posts ) {
-        moves = 200;
+        duration = 2_turns;
     } else if( ter == t_window_enhanced || ter == t_window_enhanced_noglass ) {
-        moves = 500;
+        duration = 5_turns;
     } else if( ter == t_chainfence || ter == t_chaingate_c ||
                ter == t_chaingate_l  || ter == t_bars || ter == t_window_bars_alarm ||
                ter == t_window_bars || ter == t_reb_cage ) {
-        moves = 1000;
+        duration = 10_turns;
     } else if( ter == t_door_metal_locked || ter == t_door_metal_c || ter == t_door_bar_c ||
                ter == t_door_bar_locked || ter == t_door_metal_pickable ) {
-        moves = 1500;
+        duration = 15_turns;
     } else {
         add_msg( m_info, _( "You can't cut that." ) );
         return 0;
     }
 
-    const int charges = moves / 100 * it->ammo_required();
+    const int charges = to_turns<float>( duration ) * it->ammo_required();
 
     if( charges > it->ammo_remaining() ) {
         add_msg( m_info, _( "Your torch doesn't have enough acetylene to cut that." ) );
@@ -4185,7 +4176,7 @@ int iuse::oxytorch( player *p, item *it, bool, const tripoint & )
     }
 
     // placing ter here makes resuming tasks work better
-    p->assign_activity( activity_id( "ACT_OXYTORCH" ), moves, ( int )ter, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_OXYTORCH" ), duration, ( int )ter, p->get_item_position( it ) );
     p->activity.placement = dirp;
     p->activity.values.push_back( charges );
 
@@ -4211,23 +4202,22 @@ int iuse::hacksaw( player *p, item *it, bool t, const tripoint &pos )
     }
 
     const ter_id ter = g->m.ter( dirp );
-    int moves;
-
+    time_duration duration = 0;
     if( ter == t_chainfence_posts || g->m.furn( dirp ) == f_rack ) {
-        moves = 10000;
+        duration = 10_minutes;
     } else if( ter == t_window_enhanced || ter == t_window_enhanced_noglass ) {
-        moves = 30000;
+        duration = 30_minutes;
     } else if( ter == t_chainfence || ter == t_chaingate_c ||
                ter == t_chaingate_l || ter == t_window_bars_alarm || ter == t_window_bars || ter == t_reb_cage ) {
-        moves = 60000;
+        duration = 60_minutes;
     } else if( ter == t_door_bar_c || ter == t_door_bar_locked || ter == t_bars ) {
-        moves = 90000;
+        duration = 90_minutes;
     } else {
         add_msg( m_info, _( "You can't cut that." ) );
         return 0;
     }
 
-    p->assign_activity( activity_id( "ACT_HACKSAW" ), moves, ( int )ter, p->get_item_position( it ) );
+    p->assign_activity( activity_id( "ACT_HACKSAW" ), duration, ( int )ter, p->get_item_position( it ) );
     p->activity.placement = dirp;
 
     return it->type->charges_to_use();
@@ -7405,14 +7395,14 @@ int iuse::shavekit( player *p, item *it, bool, const tripoint & )
     if( !it->ammo_sufficient() ) {
         p->add_msg_if_player( _( "You need soap to use this." ) );
     } else {
-        p->assign_activity( activity_id( "ACT_SHAVE" ), 3000 );
+        p->assign_activity( activity_id( "ACT_SHAVE" ), 3_minutes );
     }
     return it->type->charges_to_use();
 }
 
 int iuse::hairkit( player *p, item *it, bool, const tripoint & )
 {
-    p->assign_activity( activity_id( "ACT_HAIRCUT" ), 3000 );
+    p->assign_activity( activity_id( "ACT_HAIRCUT" ), 3_minutes );
     return it->type->charges_to_use();
 }
 
@@ -7715,7 +7705,7 @@ int iuse::washclothes( player *p, item *it, bool, const tripoint & )
         return 0;
     }
     int required_water = 0;
-    int time = 0;
+    duration time = 0;
     int required_cleanser = 0;
 
     // Determine if we have enough water and cleanser for all the items.
@@ -7726,7 +7716,7 @@ int iuse::washclothes( player *p, item *it, bool, const tripoint & )
             return 0;
         }
         required_water += ( mod.volume() / 125_ml ) * pair.second;
-        time += ( 1000 * mod.volume() / 250_ml ) * pair.second;
+        time += 1_minutes * ( mod.volume() / 250_ml ) * pair.second;
         required_cleanser += ( mod.volume() / 1000_ml ) * pair.second;
     }
     if( required_water < 1 ) {

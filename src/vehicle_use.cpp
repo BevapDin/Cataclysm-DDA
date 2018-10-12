@@ -354,7 +354,7 @@ bool vehicle::interact_vehicle_locked()
                           name.c_str() ) ) {
                 ///\EFFECT_MECHANICS speeds up vehicle hotwiring
                 int mechanics_skill = g->u.get_skill_level( skill_mechanics );
-                int hotwire_time = 6000 / ( ( mechanics_skill > 0 ) ? mechanics_skill : 1 );
+                const time_duration hotwire_time = 6_minutes / std::max( mechanics_skill, 1 );
                 //assign long activity
                 g->u.assign_activity( activity_id( "ACT_HOTWIRE_CAR" ), hotwire_time, -1, INT_MIN, _( "Hotwire" ) );
                 // use part 0 as the reference point
@@ -785,7 +785,7 @@ void vehicle::start_engines( const bool take_control )
         }
     }
 
-    int start_time = 0;
+    time_duration start_time = 0;
     // record the first usable engine as the referenced position checked at the end of the engine starting activity
     bool has_starting_engine_position = false;
     tripoint starting_engine_position;
@@ -796,7 +796,7 @@ void vehicle::start_engines( const bool take_control )
             has_starting_engine_position = true;
         }
         has_engine = has_engine || is_engine_on( e );
-        start_time = std::max( start_time, engine_start_time( e ) );
+        start_time = std::max( start_time, time_duration::from_moves( engine_start_time( e ) ) );
     }
 
     if( !has_starting_engine_position ) {

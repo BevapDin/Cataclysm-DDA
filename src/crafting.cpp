@@ -1204,7 +1204,7 @@ bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
     }
 
     if( activity.id() != activity_id( "ACT_DISASSEMBLE" ) ) {
-        assign_activity( activity_id( "ACT_DISASSEMBLE" ), to_moves<int>( r.time ) );
+        assign_activity( activity_id( "ACT_DISASSEMBLE" ), r.time );
     } else if( activity.moves_left <= 0 ) {
         activity.moves_left = to_moves<int>( r.time );
     }
@@ -1219,7 +1219,7 @@ bool player::disassemble( item &obj, int pos, bool ground, bool interactive )
 void player::disassemble_all( bool one_pass )
 {
     // Reset all the activity values
-    assign_activity( activity_id( "ACT_DISASSEMBLE" ), 0 );
+    assign_activity( activity_id( "ACT_DISASSEMBLE" ), 0_turns );
     auto items = g->m.i_at( pos() );
     bool found_any = false;
     if( !one_pass ) {

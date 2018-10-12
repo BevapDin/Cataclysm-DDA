@@ -1118,26 +1118,24 @@ long firestarter_actor::use( player &p, item &it, bool t, const tripoint &spos )
     double skill_level = p.get_skill_level( skill_survival );
     /** @EFFECT_SURVIVAL speeds up fire starting */
     float moves_modifier = std::pow( 0.8, std::min( 5.0, skill_level ) );
-    const int moves_base = moves_cost_by_fuel( pos );
-    const int min_moves = std::min<int>( moves_base,
-                                         sqrt( 1 + moves_base / to_moves<int>( 1_turns ) ) * to_moves<int>( 1_turns ) );
-    const int moves = std::max<int>( min_moves, moves_base * moves_modifier ) / light;
-    if( moves > to_moves<int>( 1_minutes ) ) {
+    const time_duration duration_base = time_duration::from_moves( moves_cost_by_fuel( pos ) );
+    const time_duration min_duration = std::min( duration_base, sqrt( 1 + duration_base / 1_moves ) * 1_moves );
+    const time_duration duration = time_duration::from_moves( std::max( min_duration, duration_base * moves_modifier ) / light );
+    if( duration > 1_minutes ) {
         // If more than 1 minute, inform the player
         static const std::string sun_msg =
             _( "If the current weather holds, it will take around %d minutes to light a fire." );
         static const std::string normal_msg =
             _( "At your skill level, it will take around %d minutes to light a fire." );
         p.add_msg_if_player( m_info, ( need_sunlight ? sun_msg : normal_msg ).c_str(),
-                             moves / to_moves<int>( 1_minutes ) );
-    } else if( moves < to_moves<int>( 2_turns ) ) {
+                             to_minutes( duration ) );
+    } else if( duration < 2_turns ) {
         // If less than 2 turns, don't start a long action
         resolve_firestarter_use( p, pos );
-        p.mod_moves( -moves );
+        p.mod_moves( -to_moves( duration ) );
         return it.type->charges_to_use();
     }
-    p.assign_activity( activity_id( "ACT_START_FIRE" ), moves, -1, p.get_item_position( &it ),
-                       it.tname() );
+    p.assign_activity( activity_id( "ACT_START_FIRE" ), duration, -1, p.get_item_position( &it ), it.tname() );
     p.activity.values.push_back( g->natural_light_level( pos.z ) );
     p.activity.placement = pos;
     p.practice( skill_survival, moves_modifier + moves_cost_fast / 100 + 2, 5 );
@@ -1718,9 +1716,9 @@ long enzlave_actor::use( player &p, item &it, bool t, const tripoint & ) const
     int success = rng( 0, skills ) - rng( 0, difficulty );
 
     /** @EFFECT_FIRSTAID speeds up enzlavement */
-    const int moves = difficulty * 1200 / p.get_skill_level( skill_firstaid );
+    const time_duration duration = difficulty * 12_turns / p.get_skill_level( skill_firstaid );
 
-    p.assign_activity( activity_id( "ACT_MAKE_ZLAVE" ), moves );
+    p.assign_activity( activity_id( "ACT_MAKE_ZLAVE" ), duration );
     p.activity.values.push_back( success );
     p.activity.str_values.push_back( corpses[selected_corpse]->display_name() );
 
@@ -2394,7 +2392,7 @@ long ammobelt_actor::use( player &p, item &, bool, const tripoint & ) const
 
     item::reload_option opt = p.select_ammo( mag, true );
     if( opt ) {
-        p.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
+        p.assign_activity( activity_id( "ACT_RELOAD" ), time_duration::from_moves( opt.moves() ), opt.qty() );
         p.activity.targets.emplace_back( p, &p.i_add( mag ) );
         p.activity.targets.push_back( std::move( opt.ammo ) );
     }
@@ -2473,7 +2471,7 @@ long repair_item_actor::use( player &p, item &it, bool, const tripoint &position
         return 0;
     }
 
-    p.assign_activity( activity_id( "ACT_REPAIR_ITEM" ), 0, p.get_item_position( &it ), pos );
+    p.assign_activity( activity_id( "ACT_REPAIR_ITEM" ), 0_turns, p.get_item_position( &it ), pos );
     // We also need to store the repair actor subtype in the activity
     p.activity.str_values.push_back( type );
     // storing of item_location to support repairs by tools on the ground
@@ -2969,7 +2967,7 @@ long heal_actor::use( player &p, item &it, bool, const tripoint &pos ) const
         return 0;
     }
 
-    int cost = move_cost;
+    time_duration cost = time_duration::from_moves( move_cost );
     if( long_action ) {
         // A hack: long action healing on NPCs isn't done yet.
         // So just heal at start and paralyze the player for 5 minutes.
@@ -2986,7 +2984,7 @@ long heal_actor::use( player &p, item &it, bool, const tripoint &pos ) const
         return 0;
     }
 
-    p.moves -= cost;
+    p.moves -= to_moves( cost );
     p.add_msg_if_player( m_good, _( "You use your %s." ), it.tname().c_str() );
     return it.type->charges_to_use();
 }

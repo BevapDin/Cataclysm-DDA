@@ -600,7 +600,7 @@ static void smash()
         if( maybe_corpse.is_corpse() && maybe_corpse.damage() < maybe_corpse.max_damage() &&
             maybe_corpse.get_mtype()->has_flag( MF_REVIVES ) ) {
             // do activity forever. ACT_PULP stops itself
-            u.assign_activity( activity_id( "ACT_PULP" ), calendar::INDEFINITELY_LONG, 0 );
+            u.assign_activity( activity_id( "ACT_PULP" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ), 0 );
             u.activity.placement = smashp;
             return; // don't smash terrain if we've smashed a corpse
         }
@@ -873,11 +873,11 @@ static void loot()
             add_msg( _( "Never mind." ) );
             break;
         case SortLoot:
-            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ), calendar::INDEFINITELY_LONG );
+            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             break;
         case TillPlots:
             if( has_hoe ) {
-                u.assign_activity( activity_id( "ACT_TILL_PLOT" ), calendar::INDEFINITELY_LONG );
+                u.assign_activity( activity_id( "ACT_TILL_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             } else {
                 add_msg( _( "You need a tool to dig with." ) );
             }
@@ -888,7 +888,7 @@ static void loot()
             } else if( !has_seeds ) {
                 add_msg( m_info, _( "You don't have any seeds." ) );
             } else {
-                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ), calendar::INDEFINITELY_LONG );
+                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             }
             break;
         default:

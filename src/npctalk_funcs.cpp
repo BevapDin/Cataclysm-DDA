@@ -366,7 +366,7 @@ void talk_function::give_aid( npc &p )
             g->u.remove_effect( effect_infected, bp_healed );
         }
     }
-    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 10000 );
+    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 10_minutes );
     g->u.activity.str_values.push_back( p.name );
 }
 
@@ -399,7 +399,7 @@ void talk_function::buy_haircut( npc &p )
 {
     g->u.add_morale( MORALE_HAIRCUT, 5, 5, 720_minutes, 3_minutes );
     g->u.cash -= 1000;
-    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 300 );
+    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 3_turns );
     g->u.activity.str_values.push_back( p.name );
     add_msg( m_good, _( "%s gives you a decent haircut..." ), p.name );
 }
@@ -408,7 +408,7 @@ void talk_function::buy_shave( npc &p )
 {
     g->u.add_morale( MORALE_SHAVE, 10, 10, 360_minutes, 3_minutes );
     g->u.cash -= 500;
-    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 100 );
+    g->u.assign_activity( activity_id( "ACT_WAIT_NPC" ), 1_turns );
     g->u.activity.str_values.push_back( p.name );
     add_msg( m_good, _( "%s gives you a decent shave..." ), p.name );
 }
@@ -613,8 +613,6 @@ void talk_function::start_training( npc &p )
     } else if( !pay_npc( p, cost ) ) {
         return;
     }
-    g->u.assign_activity( activity_id( "ACT_TRAIN" ), to_moves<int>( time ), p.getID(), 0, name );
+    g->u.assign_activity( activity_id( "ACT_TRAIN" ), time, p.getID(), 0, name );
     p.add_effect( effect_asked_to_train, 6_hours );
 }
-
-

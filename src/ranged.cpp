@@ -1268,7 +1268,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
             }
             if( pc.moves <= 0 ) {
                 // We've run out of moves, clear target vector, but leave target selected.
-                pc.assign_activity( activity_id( "ACT_AIM" ), 0, 0 );
+                pc.assign_activity( activity_id( "ACT_AIM" ), 0_turns, 0 );
                 pc.activity.str_values.push_back( "AIM" );
                 pc.view_offset = old_offset;
                 set_last_target( dst );
@@ -1328,7 +1328,7 @@ std::vector<tripoint> target_handler::target_ui( player &pc, target_mode mode,
                 // Set the string value of the aim action to the right thing
                 // so we re-enter this loop.
                 // Also clear target vector, but leave target selected.
-                pc.assign_activity( activity_id( "ACT_AIM" ), 0, 0 );
+                pc.assign_activity( activity_id( "ACT_AIM" ), 0_turns, 0 );
                 pc.activity.str_values.push_back( action );
                 pc.view_offset = old_offset;
                 set_last_target( dst );

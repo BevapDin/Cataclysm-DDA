@@ -1871,7 +1871,7 @@ void game::update_weather()
         }
 
         if( weather != old_weather && u.has_activity( activity_id( "ACT_WAIT_WEATHER" ) ) ) {
-            u.assign_activity( activity_id( "ACT_WAIT_WEATHER" ), 0, 0 );
+            u.assign_activity( activity_id( "ACT_WAIT_WEATHER" ), 0_turns, 0 );
         }
 
         if( weather_data( weather ).sight_penalty !=
@@ -8639,11 +8639,11 @@ bool game::perform_liquid_transfer( item &liquid, const tripoint *const source_p
 
     const auto create_activity = [&]() {
         if( source_veh != nullptr ) {
-            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), calendar::INDEFINITELY_LONG );
+            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             serialize_liquid_source( u.activity, *source_veh, part_num, liquid );
             return true;
         } else if( source_pos != nullptr ) {
-            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), calendar::INDEFINITELY_LONG );
+            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
             serialize_liquid_source( u.activity, *source_pos, liquid );
             return true;
         } else if( source_mon != nullptr ) {
@@ -9382,13 +9382,13 @@ void game::butcher()
         case BUTCHER_OTHER:
             switch( indexer_index ) {
                 case MULTISALVAGE:
-                    u.assign_activity( activity_id( "ACT_LONGSALVAGE" ), 0, salvage_tool_index );
+                    u.assign_activity( activity_id( "ACT_LONGSALVAGE" ), 0_turns, salvage_tool_index );
                     break;
                 case MULTIBUTCHER:
                     if( g->m.has_flag_furn( "BUTCHER_EQ", u.pos() ) ) {
-                        u.assign_activity( activity_id( "ACT_BUTCHER_FULL" ), 0, -1 );
+                        u.assign_activity( activity_id( "ACT_BUTCHER_FULL" ), 0_turns, -1 );
                     } else {
-                        u.assign_activity( activity_id( "ACT_BUTCHER" ), 0, -1 );
+                        u.assign_activity( activity_id( "ACT_BUTCHER" ), 0_turns, -1 );
                     }
                     for( int i : corpses ) {
                         u.activity.values.push_back( i );
@@ -9426,19 +9426,19 @@ void game::butcher()
             smenu.query();
             switch( smenu.ret ) {
                 case BUTCHER:
-                    u.assign_activity( activity_id( "ACT_BUTCHER" ), 0, -1 );
+                    u.assign_activity( activity_id( "ACT_BUTCHER" ), 0_turns, -1 );
                     break;
                 case BUTCHER_FULL:
-                    u.assign_activity( activity_id( "ACT_BUTCHER_FULL" ), 0, -1 );
+                    u.assign_activity( activity_id( "ACT_BUTCHER_FULL" ), 0_turns, -1 );
                     break;
                 case F_DRESS:
-                    u.assign_activity( activity_id( "ACT_FIELD_DRESS" ), 0, -1 );
+                    u.assign_activity( activity_id( "ACT_FIELD_DRESS" ), 0_turns, -1 );
                     break;
                 case QUARTER:
-                    u.assign_activity( activity_id( "ACT_QUARTER" ), 0, -1 );
+                    u.assign_activity( activity_id( "ACT_QUARTER" ), 0_turns, -1 );
                     break;
                 case DISSECT:
-                    u.assign_activity( activity_id( "ACT_DISSECT" ), 0, -1 );
+                    u.assign_activity( activity_id( "ACT_DISSECT" ), 0_turns, -1 );
                     break;
                 default:
                     return;
@@ -9599,7 +9599,7 @@ void game::reload( item_location &loc, bool prompt )
     item::reload_option opt = u.select_ammo( *it, prompt );
 
     if( opt ) {
-        u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
+        u.assign_activity( activity_id( "ACT_RELOAD" ), time_duration::from_moves( opt.moves() ), opt.qty() );
         if( use_loc ) {
             u.activity.targets.emplace_back( loc.clone() );
         } else {
@@ -9623,7 +9623,7 @@ void game::reload()
         if( veh && ( turret = veh->turret_query( u.pos() ) ) && turret.can_reload() ) {
             item::reload_option opt = g->u.select_ammo( *turret.base(), true );
             if( opt ) {
-                g->u.assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
+                g->u.assign_activity( activity_id( "ACT_RELOAD" ), time_duration::from_moves( opt.moves() ), opt.qty() );
                 g->u.activity.targets.emplace_back( turret.base() );
                 g->u.activity.targets.push_back( std::move( opt.ammo ) );
             }
@@ -10181,14 +10181,12 @@ bool game::plmove( int dx, int dy, int dz )
     }
 
     if( !u.has_effect( effect_stunned ) && !u.is_underwater() ) {
-        int turns;
         if( get_option<bool>( "AUTO_FEATURES" ) && mostseen == 0 && get_option<bool>( "AUTO_MINING" ) &&
             u.weapon.has_flag( "DIG_TOOL" ) && m.has_flag( "MINEABLE", dest_loc ) && !m.veh_at( dest_loc ) ) {
             if( u.weapon.has_flag( "POWERED" ) ) {
                 if( u.weapon.ammo_sufficient() ) {
-                    turns = MINUTES( 30 );
                     u.weapon.ammo_consume( u.weapon.ammo_required(), u.pos() );
-                    u.assign_activity( activity_id( "ACT_JACKHAMMER" ), turns, -1, u.get_item_position( &u.weapon ) );
+                    u.assign_activity( activity_id( "ACT_JACKHAMMER" ), 30_minutes, -1, u.get_item_position( &u.weapon ) );
                     u.activity.placement = dest_loc;
                     add_msg( _( "You start breaking the %1$s with your %2$s." ),
                              m.tername( dest_loc ).c_str(), u.weapon.tname().c_str() );
@@ -10198,14 +10196,14 @@ bool game::plmove( int dx, int dy, int dz )
                     add_msg( _( "Your %s doesn't turn on." ), u.weapon.tname().c_str() );
                 }
             } else {
+                time_duration time = 0
                 if( m.move_cost( dest_loc ) == 2 ) {
                     // breaking up some flat surface, like pavement
-                    turns = MINUTES( 20 );
+                    time = 20_minutes;
                 } else {
-                    turns = ( ( MAX_STAT + 4 ) - std::min( u.str_cur, MAX_STAT ) ) * MINUTES( 5 );
+                    time = ( ( MAX_STAT + 4 ) - std::min( u.str_cur, MAX_STAT ) ) * 5_minutes;
                 }
-                u.assign_activity( activity_id( "ACT_PICKAXE" ), turns * 100, -1,
-                                   u.get_item_position( &u.weapon ) );
+                u.assign_activity( activity_id( "ACT_PICKAXE" ), time, -1, u.get_item_position( &u.weapon ) );
                 u.activity.placement = dest_loc;
                 add_msg( _( "You start breaking the %1$s with your %2$s." ),
                          m.tername( dest_loc ).c_str(), u.weapon.tname().c_str() );
@@ -10213,12 +10211,8 @@ bool game::plmove( int dx, int dy, int dz )
                 return true;
             }
         } else if( u.has_active_mutation( trait_BURROW ) ) {
-            if( m.move_cost( dest_loc ) == 2 ) {
-                turns = MINUTES( 10 );
-            } else {
-                turns = MINUTES( 30 );
-            }
-            u.assign_activity( activity_id( "ACT_BURROW" ), turns * 100, -1, 0 );
+            const time_duration time = m.move_cost( dest_loc ) == 2 ? 10_minutes : 30_minutes;
+            u.assign_activity( activity_id( "ACT_BURROW" ), time, -1, 0 );
             u.activity.placement = dest_loc;
             add_msg( _( "You start tearing into the %s with your teeth and claws." ),
                      m.tername( dest_loc ).c_str() );
@@ -10631,7 +10625,7 @@ bool game::walk_move( const tripoint &dest_loc )
     }
 
     if( u.is_hauling() ) {
-        u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), calendar::INDEFINITELY_LONG );
+        u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
         // Whether the source is inside a vehicle (not supported)
         u.activity.values.push_back( false );
         // Whether the destination is inside a vehicle (not supported)
@@ -10795,7 +10789,7 @@ void game::place_player( const tripoint &dest_loc )
             }
 
             if( !corpses.empty() ) {
-                u.assign_activity( activity_id( "ACT_BUTCHER" ), 0, -1 );
+                u.assign_activity( activity_id( "ACT_BUTCHER" ), 0_turns, -1 );
                 for( int i : corpses ) {
                     u.activity.values.push_back( i );
                 }
@@ -10805,7 +10799,7 @@ void game::place_player( const tripoint &dest_loc )
                 for( const auto &maybe_corpse : m.i_at( pos ) ) {
                     if( maybe_corpse.is_corpse() && maybe_corpse.can_revive() &&
                         maybe_corpse.get_mtype()->bloodType() != fd_acid ) {
-                        u.assign_activity( activity_id( "ACT_PULP" ), calendar::INDEFINITELY_LONG, 0 );
+                        u.assign_activity( activity_id( "ACT_PULP" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ), 0 );
                         u.activity.placement = pos;
                         u.activity.auto_resume = true;
                         u.activity.str_values.push_back( "auto_pulp_no_acid" );

@@ -804,7 +804,7 @@ void place_construction( const std::string &desc )
     }
 
     const construction &con = *valid.find( dirp )->second;
-    g->u.assign_activity( activity_id( "ACT_BUILD" ), to_moves<int>(con.adjusted_time()), con.id );
+    g->u.assign_activity( activity_id( "ACT_BUILD" ), con.adjusted_time(), con.id );
     g->u.activity.placement = dirp;
 }
 

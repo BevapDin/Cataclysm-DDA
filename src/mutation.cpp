@@ -365,16 +365,16 @@ void player::activate_mutation( const trait_id &mut )
                         add_msg_if_player( m_info, _( "You delve into yourself." ) );
                         return;
                     }
-                    int moves;
+                    time_duration duration = 0;
                     if( g->m.ter( dirp ) == t_pit_shallow ) {
-                        moves = MINUTES( 30 ) * 100;
+                        duration = 30_minutes;
                     } else if( g->m.has_flag( "DIGGABLE", dirp ) ) {
-                        moves = MINUTES( 10 ) * 100;
+                        duration = 10_minutes;
                     } else {
                         add_msg_if_player( _( "You can't dig a pit on this ground." ) );
                         return;
                     }
-                    assign_activity( activity_id( "ACT_DIG" ), moves, -1, 0 );
+                    assign_activity( activity_id( "ACT_DIG" ), duration, -1, 0 );
                     activity.placement = dirp;
                 } else if( choice == 2 ) {
                     if( !choose_adjacent( _( "Fill pit where?" ), dirp ) ) {
@@ -384,19 +384,19 @@ void player::activate_mutation( const trait_id &mut )
                         add_msg_if_player( m_info, _( "You decide not to bury yourself that early." ) );
                         return;
                     }
-                    int moves;
+                    time_duration duration = 0;
                     if( g->m.ter( dirp ) == t_pit || g->m.ter( dirp ) == t_pit_spiked ||
                         g->m.ter( dirp ) == t_pit_glass || g->m.ter( dirp ) == t_pit_corpsed ) {
-                        moves = MINUTES( 15 ) * 100;
+                        duration = 10_minutes;
                     } else if( g->m.ter( dirp ) == t_pit_shallow ) {
-                        moves = MINUTES( 10 ) * 100;
+                        duration = 10_minutes;
                     } else if( g->m.ter( dirp ) == t_dirtmound ) {
-                        moves = MINUTES( 5 ) * 100;
+                        duration = 5_minutes;
                     } else {
                         add_msg_if_player( _( "There is no pit to fill." ) );
                         return;
                     }
-                    assign_activity( activity_id( "ACT_FILL_PIT" ), moves, -1, 0 );
+                    assign_activity( activity_id( "ACT_FILL_PIT" ), duration, -1, 0 );
                     activity.placement = dirp;
                 } else if( choice == 3 ) {
                     if( !choose_adjacent( _( "Clear rubble where?" ), dirp ) ) {
@@ -404,7 +404,7 @@ void player::activate_mutation( const trait_id &mut )
                     }
                     if( g->m.has_flag( "RUBBLE", dirp ) ) {
                         // 75 seconds
-                        assign_activity( activity_id( "ACT_CLEAR_RUBBLE" ), 1250, -1, 0 );
+                        assign_activity( activity_id( "ACT_CLEAR_RUBBLE" ), 1250_moves, -1, 0 );
                         activity.placement = dirp;
                     } else {
                         add_msg_if_player( m_bad, _( "There is no rubble to clear." ) );

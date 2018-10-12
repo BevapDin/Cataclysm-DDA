@@ -224,7 +224,7 @@ void gates::open_gate( const tripoint &pos, player &p )
     const gate_data &gate = gates_data.obj( gid );
 
     p.add_msg_if_player( gate.pull_message.c_str() );
-    p.assign_activity( activity_id( "ACT_OPEN_GATE" ), gate.moves );
+    p.assign_activity( activity_id( "ACT_OPEN_GATE" ), time_duration::from_moves( gate.moves ) );
     p.activity.placement = pos;
 }
 
@@ -318,4 +318,3 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         who.mod_moves( -90 ); // TODO: Vary this? Based on strength, broken legs, and so on.
     }
 }
-
