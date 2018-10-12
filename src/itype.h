@@ -419,9 +419,9 @@ struct islot_gun : common_ranged_data {
      */
     int clip = 0;
     /**
-     * Reload time, in moves.
+     * Reload time.
      */
-    int reload_time = 100;
+    time_duration reload_time = 1_turns;
     /**
      * Noise displayed when reloading the weapon.
      */
@@ -559,7 +559,7 @@ struct islot_magazine {
     int reliability = 0;
 
     /** How long it takes to load each unit of ammo into the magazine */
-    int reload_time = 100;
+    time_duration reload_time = 1_turns;
 
     /** For ammo belts one linkage (of given type) is dropped for each unit of ammo consumed */
     cata::optional<itype_id> linkage;

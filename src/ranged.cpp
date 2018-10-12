@@ -1692,7 +1692,7 @@ double player::gun_value( const item &weap, long ammo ) const
     int move_cost = time_to_fire( *this, *weap.type );
     if( gun.clip != 0 && gun.clip < 10 ) {
         // @todo: RELOAD_ONE should get a penalty here
-        int reload_cost = gun.reload_time + encumb( bp_hand_l ) + encumb( bp_hand_r );
+        int reload_cost = to_moves( gun.reload_time ) + encumb( bp_hand_l ) + encumb( bp_hand_r );
         reload_cost /= gun.clip;
         move_cost += reload_cost;
     }

@@ -1140,7 +1140,7 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
 
         if( parts->test( iteminfo_parts::MAGAZINE_RELOAD ) )
             info.emplace_back( "MAGAZINE", _( "Reload time: " ), _( "<num> per round" ),
-                               type->magazine->reload_time, true, "", true, true );
+                               to_moves( type->magazine->reload_time ), true, "", true, true );
 
         insert_separation_line();
     }
@@ -1391,8 +1391,8 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
 
         if( parts->test( iteminfo_parts::GUN_RELOAD_TIME ) )
             info.emplace_back( "GUN", _( "Reload time: " ),
-                               has_flag( "RELOAD_ONE" ) ? _( "<num> seconds per round" ) : _( "<num> seconds" ),
-                               int( mod->get_reload_time() / 16.67 ), true, "", true, true );
+                               has_flag( "RELOAD_ONE" ) ? _( "<num> moves per round" ) : _( "<num> moves" ),
+                               to_moves( mod->get_reload_time() ), true, "", true, true );
 
         if( parts->test( iteminfo_parts::GUN_FIRE_MODES ) ) {
             std::vector<std::string> fm;
@@ -5369,10 +5369,10 @@ item::reload_option::reload_option( const player *who, const item *target, const
 
 int item::reload_option::moves() const
 {
-    int mv = ammo.obtain_cost( *who, qty() ) + who->item_reload_cost( *target, *ammo, qty() );
+    int mv = ammo.obtain_cost( *who, qty() ) + to_moves( who->item_reload_cost( *target, *ammo, qty() ) );
     if( parent != target ) {
         if( parent->is_gun() ) {
-            mv += parent->get_reload_time();
+            mv += to_moves( parent->get_reload_time() );
         } else if( parent->is_tool() ) {
             mv += 100;
         }

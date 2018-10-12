@@ -9805,12 +9805,12 @@ bool game::unload( item &it )
         long qty = 0;
         target->contents.erase( std::remove_if( target->contents.begin(),
         target->contents.end(), [&]( item & e ) {
-            int mv = u.item_reload_cost( *target, e, e.charges ) / 2;
+            const time_duration mv = u.item_reload_cost( *target, e, e.charges ) / 2;
             if( !add_or_drop_with_msg( u, e, true ) ) {
                 return false;
             }
             qty += e.charges;
-            u.moves -= mv;
+            u.moves -= to_moves( mv );
             return true;
         } ), target->contents.end() );
 
@@ -9830,7 +9830,7 @@ bool game::unload( item &it )
             return false;
         }
         // Eject magazine consuming half as much time as required to insert it
-        u.moves -= u.item_reload_cost( *target, *target->magazine_current(), -1 ) / 2;
+        u.moves -= to_moves( u.item_reload_cost( *target, *target->magazine_current(), -1 ) / 2 );
 
         target->contents.erase( std::remove_if( target->contents.begin(),
         target->contents.end(), [&target]( const item & e ) {
@@ -9866,7 +9866,7 @@ bool game::unload( item &it )
         }
 
         // If successful remove appropriate qty of ammo consuming half as much time as required to load it
-        u.moves -= u.item_reload_cost( *target, ammo, qty ) / 2;
+        u.moves -= to_moves( u.item_reload_cost( *target, ammo, qty ) / 2 );
 
         if( target->ammo_type() == ammotype( "plutonium" ) ) {
             qty *= PLUTONIUM_CHARGES;

@@ -977,12 +977,12 @@ class player : public Character
                              int base_cost = INVENTORY_HANDLING_PENALTY ) const;
 
         /**
-         * Calculate (but do not deduct) the number of moves required to reload an item with specified quantity of ammo
+         * Calculate (but do not deduct) the time required to reload an item with specified quantity of ammo
          * @param it Item to calculate reload cost for
          * @param ammo either ammo or magazine to use when reloading the item
          * @param qty maximum units of ammo to reload. Capped by remaining capacity and ignored if reloading using a magazine.
          */
-        int item_reload_cost( const item &it, const item &ammo, long qty ) const;
+        time_duration item_reload_cost( const item &it, const item &ammo, long qty ) const;
 
         /** Calculate (but do not deduct) the number of moves required to wear an item */
         int item_wear_cost( const item &to_wear ) const;

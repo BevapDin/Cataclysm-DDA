@@ -968,8 +968,8 @@ void Item_factory::check_definitions() const
             if( type->magazine->reliability < 0 || type->magazine->reliability > 100 ) {
                 msg << string_format( "invalid reliability %i", type->magazine->reliability ) << "\n";
             }
-            if( type->magazine->reload_time < 0 ) {
-                msg << string_format( "invalid reload_time %i", type->magazine->reload_time ) << "\n";
+            if( type->magazine->reload_time < 0_turns ) {
+                msg << string_format( "invalid reload_time %s", to_string( type->magazine->reload_time ) ) << "\n";
             }
             if( type->magazine->linkage && ( !has_template( *type->magazine->linkage ) ||
                                              *type->magazine->linkage == "null" ) ) {
@@ -1334,7 +1334,7 @@ void Item_factory::load( islot_gun &slot, JsonObject &jo, const std::string &src
     assign( jo, "burst", slot.burst, strict, 1 );
     assign( jo, "loudness", slot.loudness, strict );
     assign( jo, "clip_size", slot.clip, strict, 0 );
-    assign( jo, "reload", slot.reload_time, strict, 0 );
+    assign( jo, "reload", slot.reload_time, strict, 1_moves );
     assign( jo, "reload_noise", slot.reload_noise, strict );
     assign( jo, "reload_noise_volume", slot.reload_noise_volume, strict, 0 );
     assign( jo, "barrel_length", slot.barrel_length, strict, 0 );
@@ -1675,7 +1675,7 @@ void Item_factory::load( islot_magazine &slot, JsonObject &jo, const std::string
     assign( jo, "count", slot.count, strict, 0 );
     assign( jo, "default_ammo", slot.default_ammo, strict );
     assign( jo, "reliability", slot.reliability, strict, 0, 10 );
-    assign( jo, "reload_time", slot.reload_time, strict, 0 );
+    assign( jo, "reload_time", slot.reload_time, strict, 1_moves );
     assign( jo, "linkage", slot.linkage, strict );
 }
 

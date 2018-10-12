@@ -1402,8 +1402,7 @@ bool npc::wont_hit_friend( const tripoint &tar, const item &it, bool throwing ) 
 
 bool npc::enough_time_to_reload( const item &gun ) const
 {
-    int rltime = item_reload_cost( gun, item( gun.ammo_type()->default_ammotype() ),
-                                   gun.ammo_capacity() );
+    int rltime = to_moves( item_reload_cost( gun, item( gun.ammo_type()->default_ammotype() ), gun.ammo_capacity() ) );
     const float turns_til_reloaded = ( float )rltime / get_speed();
 
     const Creature *target = current_target();
@@ -3311,7 +3310,7 @@ void npc::do_reload( item &it )
 
     long qty = std::max( 1l, std::min( usable_ammo->charges,
                                        it.ammo_capacity() - it.ammo_remaining() ) );
-    int reload_time = item_reload_cost( it, *usable_ammo, qty );
+    const time_duration reload_time = item_reload_cost( it, *usable_ammo, qty );
     // @todo: Consider printing this info to player too
     const std::string ammo_name = usable_ammo->tname();
     if( !target.reload( *this, std::move( usable_ammo ), qty ) ) {
@@ -3320,7 +3319,7 @@ void npc::do_reload( item &it )
         return;
     }
 
-    moves -= reload_time;
+    moves -= to_moves( reload_time );
     recoil = MAX_RECOIL;
 
     if( g->u.sees( *this ) ) {

@@ -8248,7 +8248,7 @@ int player::item_store_cost( const item& it, const item& /* container */, bool p
     return item_handling_cost( it, penalties, base_cost ) / ( ( lvl + 10.0f ) / 10.0f );
 }
 
-int player::item_reload_cost( const item& it, const item& ammo, long qty ) const
+time_duration player::item_reload_cost( const item& it, const item& ammo, long qty ) const
 {
     if( ammo.is_ammo() ) {
         qty = std::max( std::min( ammo.charges, qty ), 1L );
@@ -8276,7 +8276,7 @@ int player::item_reload_cost( const item& it, const item& ammo, long qty ) const
     }
 
     if( !it.is_gun() && !it.is_magazine() ) {
-        return mv + 100; // reload a tool or sealable container
+        return time_duration::from_moves( mv + 100 ); // reload a tool or sealable container
     }
 
     /** @EFFECT_GUN decreases the time taken to reload a magazine */
@@ -8286,10 +8286,10 @@ int player::item_reload_cost( const item& it, const item& ammo, long qty ) const
     /** @EFFECT_SHOTGUN decreases time taken to reload a shotgun */
     /** @EFFECT_LAUNCHER decreases time taken to reload a launcher */
 
-    int cost = ( it.is_gun() ? it.get_reload_time() : it.type->magazine->reload_time ) * qty;
+    const time_duration cost = ( it.is_gun() ? it.get_reload_time() : it.type->magazine->reload_time ) * qty;
 
     skill_id sk = it.is_gun() ? it.type->gun->skill_used : skill_gun;
-    mv += cost / ( 1.0f + std::min( get_skill_level( sk ) * 0.1f, 1.0f ) );
+    mv += to_moves( cost ) / ( 1.0f + std::min( get_skill_level( sk ) * 0.1f, 1.0f ) );
 
     if( it.has_flag( "STR_RELOAD" ) ) {
         /** @EFFECT_STR reduces reload time of some weapons */
