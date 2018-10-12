@@ -1693,8 +1693,8 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
                 info.push_back( iteminfo( "BOOK", "",
                                           ngettext( "A chapter of this book takes <num> <info>minute to read</info>.",
                                                     "A chapter of this book takes <num> <info>minutes to read</info>.",
-                                                    book.time ),
-                                          book.time, true, "", true, true ) );
+                                                    to_minutes( book.time ) ),
+                                          to_minutes( book.time ), true, "", true, true ) );
 
             if( book.chapters > 0 && parts->test( iteminfo_parts::BOOK_NUMUNREADCHAPTERS ) ) {
                 const int unread = get_remaining_chapters( g->u );

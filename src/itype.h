@@ -280,10 +280,10 @@ struct islot_book {
      */
     int intel = 0;
     /**
-     * How long, in 10-turns (aka minutes), it takes to read.
+     * How long, it takes to read.
      * "To read" means getting 1 skill point, not all of them.
      */
-    int time = 0;
+    time_duration time = 0;
     /**
      * Fun books have chapters; after all are read, the book is less fun.
      */

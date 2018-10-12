@@ -1486,7 +1486,7 @@ void Item_factory::load( islot_book &slot, JsonObject &jo, const std::string &sr
     assign( jo, "required_level", slot.req, strict, 0, MAX_SKILL );
     assign( jo, "fun", slot.fun, strict );
     assign( jo, "intelligence", slot.intel, strict, 0 );
-    assign( jo, "time", slot.time, strict, 0 );
+    assign( jo, "time", slot.time, strict, 1_minutes );
     assign( jo, "skill", slot.skill, strict );
     assign( jo, "chapters", slot.chapters, strict, 0 );
 }

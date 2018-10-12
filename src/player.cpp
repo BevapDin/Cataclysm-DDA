@@ -9169,7 +9169,7 @@ const player *player::get_book_reader( const item &book, std::vector<std::string
         return nullptr;
     }
 
-    int time_taken = INT_MAX;
+    cata::optional<time_duration> time_taken;
     auto candidates = get_crafting_helpers();
 
     for( const npc *elem : candidates ) {
@@ -9197,17 +9197,17 @@ const player *player::get_book_reader( const item &book, std::vector<std::string
             // Low morale still permits skimming
             reasons.push_back( string_format( _( "%s morale is too low!" ), elem->disp_name( true ).c_str() ) );
         } else {
-            int proj_time = time_to_read( book, *elem );
-            if( proj_time < time_taken ) {
+            const time_duration proj_time = time_to_read( book, *elem );
+            if( !time_taken || proj_time < *time_taken ) {
                 reader = elem;
-                time_taken = proj_time;
+                time_taken.emplace( proj_time );
             }
         }
     } //end for all candidates
     return reader;
 }
 
-int player::time_to_read( const item &book, const player &reader, const player *learner ) const
+time_duration player::time_to_read( const item &book, const player &reader, const player *learner ) const
 {
     const auto &type = book.type->book;
     const skill_id &skill = type->skill;
@@ -9220,7 +9220,7 @@ int player::time_to_read( const item &book, const player &reader, const player *
         reading_speed = std::max( reading_speed, learner->read_speed() );
     }
 
-    int retval = type->time * reading_speed;
+    time_duration retval = type->time * reading_speed;
     retval *= std::min( fine_detail_vision_mod(), reader.fine_detail_vision_mod() );
 
     const int effective_int = std::min( {int_cur, reader.get_int(), learner ? learner->get_int() : INT_MAX } );
@@ -9291,10 +9291,9 @@ bool player::read( int inventory_position, const bool continuous )
         }
         return false;
     }
-    const int time_taken = time_to_read( it, *reader );
+    const time_duration time_taken = time_to_read( it, *reader );
 
-    add_msg( m_debug, "player::read: time_taken = %d", time_taken );
-    player_activity act( activity_id( "ACT_READ" ), time_taken, continuous ? activity.index : 0, reader->getID() );
+    player_activity act( activity_id( "ACT_READ" ), to_moves( time_taken ), continuous ? activity.index : 0, reader->getID() );
     act.targets.emplace_back( item_location( *this, &it ) );
 
     // If the player hasn't read this book before, skim it to get an idea of what's in it.
@@ -9347,7 +9346,7 @@ bool player::read( int inventory_position, const bool continuous )
         } else if( !morale_req ) {
             nonlearners.insert( { elem, _( " (too sad)" ) } );
         } else if( skill && lvl < type->level ) {
-            const double penalty = ( double )time_taken / time_to_read( it, *reader, elem );
+            const double penalty = time_taken / time_to_read( it, *reader, elem );
             learners.insert( {elem, elem == reader ? _( " (reading aloud to you)" ) : ""} );
             act.values.push_back( elem->getID() );
             act.str_values.push_back( to_string( penalty ) );
@@ -9498,7 +9497,7 @@ bool player::read( int inventory_position, const bool continuous )
 
     // Reinforce any existing morale bonus/penalty, so it doesn't decay
     // away while you read more.
-    const time_duration decay_start = 1_turns * time_taken / 1000;
+    const time_duration decay_start = time_taken / 10;
     std::set<player *> apply_morale = { this };
     for( const auto &elem : learners ) {
         apply_morale.insert( elem.first );

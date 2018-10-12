@@ -1085,7 +1085,7 @@ class player : public Character
          * @param reader the player/NPC who's reading to the caller
          * @param learner if not nullptr, assume that the caller and reader read at a pace that isn't too fast for him
          */
-        int time_to_read( const item &book, const player &reader, const player *learner = nullptr ) const;
+        time_duration time_to_read( const item &book, const player &reader, const player *learner = nullptr ) const;
         bool fun_to_read( const item &book ) const;
         /** Handles reading effects and returns true if activity started */
         bool read( int inventory_position, const bool continuous = false );
