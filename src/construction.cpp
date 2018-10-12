@@ -2,6 +2,7 @@
 
 #include "coordinate_conversions.h"
 #include "game.h"
+#include "assign.h"
 #include "map.h"
 #include "map_iterator.h"
 #include "debug.h"
@@ -94,7 +95,7 @@ std::vector<construction> constructions;
 static const deferred_color color_title = def_c_light_red; //color for titles
 static const deferred_color color_data = def_c_cyan; //color for data parts
 
-void standardize_construction_times( int const time )
+void standardize_construction_times( const time_duration time )
 {
     for( auto &c : constructions ) {
         c.time = time;
@@ -803,7 +804,7 @@ void place_construction( const std::string &desc )
     }
 
     const construction &con = *valid.find( dirp )->second;
-    g->u.assign_activity( activity_id( "ACT_BUILD" ), con.adjusted_time(), con.id );
+    g->u.assign_activity( activity_id( "ACT_BUILD" ), to_moves<int>(con.adjusted_time()), con.id );
     g->u.activity.placement = dirp;
 }
 
@@ -814,7 +815,7 @@ void complete_construction()
 
     const auto award_xp = [&]( player & c ) {
         for( const auto &pr : built.required_skills ) {
-            c.practice( pr.first, ( int )( ( 10 + 15 * pr.second ) * ( 1 + built.time / 30000.0 ) ),
+            c.practice( pr.first, ( int )( ( 10 + 15 * pr.second ) * ( 1 + built.time / 30_minutes ) ),
                         ( int )( pr.second * 1.25 ) );
         }
     };
@@ -1201,9 +1202,7 @@ void load_construction( JsonObject &jo )
     }
 
     con.category = jo.get_string( "category", "OTHER" );
-    // constructions use different time units in json, this makes it compatible
-    // with recipes/requirements, TODO: should be changed in json
-    con.time = jo.get_int( "time" ) * 1000;
+    assign( jo, "time", con.time, false /*strict*/, 1_minutes );
 
     if( jo.has_string( "using" ) ) {
         con.requirements = requirement_id( jo.get_string( "using" ) );
@@ -1340,9 +1339,9 @@ float construction::time_scale() const
     }
 }
 
-int construction::adjusted_time() const
+time_duration construction::adjusted_time() const
 {
-    int final_time = time;
+    time_duration final_time = time;
     int assistants = 0;
 
     for( auto &elem : g->u.get_crafting_helpers() ) {
@@ -1364,8 +1363,7 @@ int construction::adjusted_time() const
 
 std::string construction::get_time_string() const
 {
-    const time_duration turns = time_duration::from_turns( adjusted_time() / 100 );
-    return _( "Time to complete: " ) + colorize( to_string( turns ), color_data );
+    return _( "Time to complete: " ) + colorize( to_string( adjusted_time() ), color_data );
 }
 
 std::vector<std::string> construction::get_folded_time_string( int width ) const

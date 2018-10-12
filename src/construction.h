@@ -3,6 +3,7 @@
 #define CONSTRUCTION_H
 
 #include "string_id.h"
+#include "calendar.h"
 
 #include <string>
 #include <set>
@@ -37,7 +38,7 @@ struct construction {
         requirement_id requirements;
 
         size_t id; // Index in construction vector
-        int time;
+        time_duration time = 0;
 
         // If true, the requirements are generated during finalization
         bool vehicle_start;
@@ -49,7 +50,7 @@ struct construction {
         bool pre_is_furniture; // whether it's furniture or terrain
         bool post_is_furniture; // whether it's furniture or terrain
 
-        int adjusted_time() const; // NPC assistance adjusted
+        time_duration adjusted_time() const; // NPC assistance adjusted
         int print_time( const catacurses::window &w, int ypos, int xpos, int width, nc_color col ) const;
         std::vector<std::string> get_folded_time_string( int width ) const;
         float time_scale() const; //result of construction scaling option
@@ -58,7 +59,7 @@ struct construction {
 };
 
 //! Set all constructions to take the specified time.
-void standardize_construction_times( int time );
+void standardize_construction_times( time_duration time );
 
 void load_construction( JsonObject &jsobj );
 void reset_constructions();
