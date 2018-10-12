@@ -1155,7 +1155,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
         if( pt.is_engine() && pt.is_available() ) {
             // if tank contains something then display the contents in milliliters
             auto details = []( const vehicle_part & pt, const catacurses::window & w, int y ) {
-                right_print( w, y, 1, item::find_type( pt.ammo_current() )->color,
+                right_print( w, y, 1, item::find_type( pt.ammo_current() )->glyph_.color(),
                              string_format( "%s     <color_light_gray>%3s</color>",
                                             pt.ammo_current() != "null" ? item::nname( pt.ammo_current() ).c_str() : "",
                                             pt.enabled ? _( "Yes" ) : _( "No" ) ) );
@@ -1195,7 +1195,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
                     }
                     const itype *pt_ammo_cur = item::find_type( pt.ammo_current() );
                     auto stack = units::legacy_volume_factor / pt_ammo_cur->stack_size;
-                    right_print( w, y, 1, pt_ammo_cur->color,
+                    right_print( w, y, 1, pt_ammo_cur->glyph_.color(),
                                  string_format( "%s %s %5.1fL", specials, pt_ammo_cur->nname( 1 ),
                                                 round_up( to_liter( pt.ammo_remaining() * stack ), 1 ) ) );
                 }
@@ -1205,7 +1205,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
         } else if( pt.is_fuel_store() && !( pt.is_battery() || pt.is_reactor() ) && !pt.is_broken() ) {
             auto details = []( const vehicle_part & pt, const catacurses::window & w, int y ) {
                 if( pt.ammo_current() != "null" ) {
-                    right_print( w, y, 1, item::find_type( pt.ammo_current() )->color,
+                    right_print( w, y, 1, item::find_type( pt.ammo_current() )->glyph_.color(),
                                  string_format( "%s  %6i", item::nname( pt.ammo_current() ),
                                                 pt.ammo_remaining() ) );
                 }
@@ -1220,7 +1220,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
             // always display total battery capacity and percentage charge
             auto details = []( const vehicle_part & pt, const catacurses::window & w, int y ) {
                 int pct = ( double( pt.ammo_remaining() ) / pt.ammo_capacity() ) * 100;
-                right_print( w, y, 1, item::find_type( pt.ammo_current() )->color,
+                right_print( w, y, 1, item::find_type( pt.ammo_current() )->glyph_.color(),
                              string_format( "%i    %3i%%", pt.ammo_capacity(), pct ) );
             };
             opts.emplace_back( "BATTERY", &pt, action && enable &&
@@ -1230,7 +1230,7 @@ bool veh_interact::overview( std::function<bool( const vehicle_part &pt )> enabl
 
     auto details_ammo = []( const vehicle_part & pt, const catacurses::window & w, int y ) {
         if( pt.ammo_remaining() ) {
-            right_print( w, y, 1, item::find_type( pt.ammo_current() )->color,
+            right_print( w, y, 1, item::find_type( pt.ammo_current() )->glyph_.color(),
                          string_format( "%s   %5i", item::nname( pt.ammo_current() ).c_str(), pt.ammo_remaining() ) );
         }
     };

@@ -15,6 +15,7 @@
 #include "translations.h"
 #include "calendar.h"
 #include "game_constants.h"
+#include "glyph.h"
 
 #include <string>
 #include <vector>
@@ -821,8 +822,7 @@ struct itype {
 
         const item_category *category = nullptr; // category pointer or NULL for automatic selection
 
-        nc_color color = c_white; // Color on the map (color.h)
-        std::string sym;
+        glyph glyph_;
 
         int damage_min = -1000; /** Minimum amount of damage to an item (state of maximum repair) */
         int damage_max =  4000; /** Maximum amount of damage to an item (state before destroyed) */

@@ -783,10 +783,8 @@ void Item_factory::check_definitions() const
             }
         }
 
-        if( type->sym.empty() ) {
+        if( type->glyph_.symbol() == " " ) {
             msg << "symbol not defined" << "\n";
-        } else if( utf8_width( type->sym ) != 1 ) {
-            msg << "symbol must be exactly one console cell width" << "\n";
         }
 
         for( const auto &_a : type->techniques ) {
@@ -1857,13 +1855,8 @@ void Item_factory::load_basic_info( JsonObject &jo, itype &def, const std::strin
         def.description = jo.get_string( "description" );
     }
 
-    if( jo.has_string( "symbol" ) ) {
-        def.sym = jo.get_string( "symbol" );
-    }
-
-    if( jo.has_string( "color" ) ) {
-        def.color = color_from_string( jo.get_string( "color" ) );
-    }
+    def.glyph_.load_symbol( jo, "symbol", glyph::optional );
+    def.glyph_.load_color( jo, "color", glyph::optional );
 
     if( jo.has_member( "material" ) ) {
         def.materials.clear();
