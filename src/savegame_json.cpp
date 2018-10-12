@@ -1598,7 +1598,7 @@ void time_point::deserialize( JsonIn &jsin )
 
 void time_duration::serialize( JsonOut &jsout ) const
 {
-    jsout.write( turns_ );
+    jsout.write( moves_ );
 }
 
 time_duration time_duration::read_from_json_string( JsonIn &jsin )
@@ -1676,11 +1676,13 @@ time_duration time_duration::read_from_json_string( JsonIn &jsin )
 }
 
 void time_duration::deserialize( JsonIn &jsin )
-{
     if( jsin.test_string() ) {
         *this = read_from_json_string( jsin );
+    } else if( savegame_loading_version <= 25 ) {
+        // used to store turns, not moves
+        moves_ = jsin.get_int() * 100;
     } else {
-        turns_ = jsin.get_int();
+        moves_ = jsin.get_int();
     }
 }
 

@@ -305,13 +305,13 @@ class time_duration
 {
     private:
         friend class time_point;
-        std::int64_t turns_;
+        std::int64_t moves_;
 
-        explicit constexpr time_duration( const std::int64_t t ) : turns_( t ) { }
+        explicit constexpr time_duration( const std::int64_t t ) : moves_( 100 * t ) { }
 
     public:
         /// Allows writing `time_duration d = 0;`
-        time_duration( const std::nullptr_t ) : turns_( 0 ) { }
+        time_duration( const std::nullptr_t ) : moves_( 0 ) { }
 
         static time_duration read_from_json_string( JsonIn &jsin );
 
@@ -329,8 +329,12 @@ class time_duration
          */
         /**@{*/
         template<typename T>
+        static constexpr time_duration from_moves( const T m ) {
+            return time_duration( m );
+        }
+        template<typename T>
         static constexpr time_duration from_turns( const T t ) {
-            return time_duration( t );
+            return from_moves( t * 100 );
         }
         template<typename T>
         static constexpr time_duration from_minutes( const T m ) {
@@ -359,19 +363,19 @@ class time_duration
         /**@{*/
         template<typename T>
         friend constexpr T to_turns( const time_duration duration ) {
-            return duration.turns_;
+            return static_cast<T>( duration.moves_ ) / static_cast<T>( 100 );
         }
         template<typename T>
         friend constexpr T to_minutes( const time_duration duration ) {
-            return static_cast<T>( duration.turns_ ) / static_cast<T>( 10 );
+            return static_cast<T>( duration.moves_ ) / static_cast<T>( 100 * 10 );
         }
         template<typename T>
         friend constexpr T to_hours( const time_duration duration ) {
-            return static_cast<T>( duration.turns_ ) / static_cast<T>( 10 * 60 );
+            return static_cast<T>( duration.moves_ ) / static_cast<T>( 100 * 10 * 60 );
         }
         template<typename T>
         friend constexpr T to_days( const time_duration duration ) {
-            return static_cast<T>( duration.turns_ ) / static_cast<T>( 10 * 60 * 24 );
+            return static_cast<T>( duration.moves_ ) / static_cast<T>( 100 * 10 * 60 * 24 );
         }
         template<typename T>
         friend constexpr T to_weeks( const time_duration duration ) {
@@ -379,70 +383,70 @@ class time_duration
         }
         template<typename T>
         friend constexpr T to_moves( const time_duration duration ) {
-            return to_turns<std::int64_t>( duration ) * 100;
+            return duration.moves_;
         }
         /**@{*/
 
         constexpr bool operator<( const time_duration rhs ) const {
-            return turns_ < rhs.turns_;
+            return moves_ < rhs.moves_;
         }
         constexpr bool operator<=( const time_duration rhs ) const {
-            return turns_ <= rhs.turns_;
+            return moves_ <= rhs.moves_;
         }
         constexpr bool operator>( const time_duration rhs ) const {
-            return turns_ > rhs.turns_;
+            return moves_ > rhs.moves_;
         }
         constexpr bool operator>=( const time_duration rhs ) const {
-            return turns_ >= rhs.turns_;
+            return moves_ >= rhs.moves_;
         }
         constexpr bool operator==( const time_duration rhs ) const {
-            return turns_ == rhs.turns_;
+            return moves_ == rhs.moves_;
         }
         constexpr bool operator!=( const time_duration rhs ) const {
-            return turns_ != rhs.turns_;
+            return moves_ != rhs.moves_;
         }
 
         friend constexpr time_duration operator-( const time_duration duration ) {
-            return time_duration( -duration.turns_ );
+            return time_duration( -duration.moves_ );
         }
         friend constexpr time_duration operator+( const time_duration lhs, const time_duration rhs ) {
-            return time_duration( lhs.turns_ + rhs.turns_ );
+            return time_duration( lhs.moves_ + rhs.moves_ );
         }
         friend time_duration &operator+=( time_duration &lhs, const time_duration rhs ) {
-            return lhs = time_duration( lhs.turns_ + rhs.turns_ );
+            return lhs = time_duration( lhs.moves_ + rhs.moves_ );
         }
         friend constexpr time_duration operator-( const time_duration lhs, const time_duration rhs ) {
-            return time_duration( lhs.turns_ - rhs.turns_ );
+            return time_duration( lhs.moves_ - rhs.moves_ );
         }
         friend time_duration &operator-=( time_duration &lhs, const time_duration rhs ) {
-            return lhs = time_duration( lhs.turns_ - rhs.turns_ );
+            return lhs = time_duration( lhs.moves_ - rhs.moves_ );
         }
         // Using double here because it has the highest precision. Callers can cast it to whatever they want.
         friend double operator/( const time_duration lhs, const time_duration rhs ) {
-            return static_cast<double>( lhs.turns_ ) / static_cast<double>( rhs.turns_ );
+            return static_cast<double>( lhs.moves_ ) / static_cast<double>( rhs.moves_ );
         }
         template<typename T>
         friend constexpr time_duration operator/( const time_duration lhs, const T rhs ) {
-            return time_duration( lhs.turns_ / rhs );
+            return time_duration( lhs.moves_ / rhs );
         }
         template<typename T>
         friend time_duration &operator/=( time_duration &lhs, const T rhs ) {
-            return lhs = time_duration( lhs.turns_ / rhs );
+            return lhs = time_duration( lhs.moves_ / rhs );
         }
         template<typename T>
         friend constexpr time_duration operator*( const time_duration lhs, const T rhs ) {
-            return time_duration( lhs.turns_ * rhs );
+            return time_duration( lhs.moves_ * rhs );
         }
         template<typename T>
         friend constexpr time_duration operator*( const T lhs, const time_duration rhs ) {
-            return time_duration( lhs * rhs.turns_ );
+            return time_duration( lhs * rhs.moves_ );
         }
         template<typename T>
         friend time_duration &operator*=( time_duration &lhs, const T rhs ) {
-            return lhs = time_duration( lhs.turns_ * rhs );
+            return lhs = time_duration( lhs.moves_ * rhs );
         }
         friend time_duration operator%( const time_duration &lhs, const time_duration &rhs ) {
-            return time_duration( lhs.turns_ % rhs.turns_ );
+            return time_duration( lhs.moves_ % rhs.moves_ );
         }
 
         /// Returns a random duration in the range [low, hi].
@@ -457,6 +461,10 @@ bool x_in_y( const time_duration &a, const time_duration &b );
  * `time_duration::from_*` function.
  */
 /**@{*/
+constexpr time_duration operator"" _moves( const unsigned long long int v )
+{
+    return time_duration::from_moves( v );
+}
 constexpr time_duration operator"" _turns( const unsigned long long int v )
 {
     return time_duration::from_turns( v );
