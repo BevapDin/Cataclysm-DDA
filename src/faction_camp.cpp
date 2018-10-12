@@ -928,7 +928,7 @@ bool talk_function::handle_camp_mission( mission_entry &cur_key, npc &p )
                 if( making->requirements().can_make_with_inventory( total_inv, 1 ) ) {
                     std::vector<std::shared_ptr<npc>> npc_list = companion_list( p,
                                                    "_faction_upgrade_exp_" + cur_key.dir );
-                    time_duration making_time = time_duration::from_turns( making->time / 100 );
+                    const time_duration making_time = making->time;
                     int need_food = time_to_food( making_time );
                     if( camp_food_supply() < need_food ) {
                         popup( _( "You don't have enough food stored to feed your companion." ) );
@@ -1151,7 +1151,7 @@ void talk_function::start_camp_upgrade( npc &p, const std::string &bldg )
     //Stop upgrade if you don't have materials
     inventory total_inv = g->u.crafting_inventory();
     if( making->requirements().can_make_with_inventory( total_inv, 1 ) ) {
-        time_duration making_time = time_duration::from_turns( making->time / 100 );
+        const time_duration making_time = making->time;
         int need_food = time_to_food( making_time );
         if( camp_food_supply() < need_food && bldg != "faction_base_camp_1" ) {
             popup( _( "You don't have enough food stored to feed your companion." ) );
@@ -1403,7 +1403,7 @@ void talk_function::start_fortifications( std::string &bldg_exp, npc &p )
                 return;
             }
             trips += 2;
-            build_time += time_duration::from_turns( making.time / 100 );
+            build_time += making.time;
             dist += rl_dist( fort_om.x, fort_om.y, omt_pos.x, omt_pos.y );
             travel_time += companion_travel_time_calc( fort_om, omt_pos, 0_minutes, 2 );
         }
@@ -1508,7 +1508,7 @@ void talk_function::camp_craft_construction( npc &p, const mission_entry &cur_ke
                     npc *comp = individual_mission( p, _( "begins to work..." ), miss_id + cur_key.dir, false, {},
                                                     making->skill_used.obj().name(), making->difficulty );
                     if( comp != nullptr ) {
-                        time_duration making_time = time_duration::from_turns( making->time / 100 ) * batch_size;
+                        const time_duration making_time = making->time * batch_size;
                         g->u.consume_components_for_craft( making, batch_size, true );
                         g->u.invalidate_crafting_inventory();
                         for( auto results : making->create_results( batch_size ) ) {
@@ -1641,7 +1641,7 @@ bool talk_function::upgrade_return( npc &p, const tripoint &omt_pos, const std::
     if( comp == nullptr || !om_camp_upgrade( p, omt_pos ) ) {
         return false;
     }
-    time_duration making_time = time_duration::from_turns( making.time / 100 );
+    const time_duration making_time = making.time;
     companion_skill_trainer( *comp, "construction", making_time, making.difficulty );
     popup( _( "%s returns from upgrading the camp having earned a bit of experience..." ), comp->name );
     camp_companion_return( *comp );
@@ -2300,7 +2300,7 @@ int talk_function::camp_recipe_batch_max( const recipe &making, const inventory 
     int max_checks = 9;
     int iter = 0;
     size_t batch_size = 1000;
-    time_duration making_time = time_duration::from_turns( making.time / 100 );
+    const time_duration making_time = making.time;
     while( batch_size > 0 ) {
         while( iter < max_checks ) {
             if( making.requirements().can_make_with_inventory( total_inv, max_batch + batch_size ) &&
@@ -3056,7 +3056,7 @@ std::string talk_function::om_upgrade_description( const std::string &bldg )
     comp = string_format(
                _( "Notes:\n%s\n \nSkill used: %s\nDifficulty: %d\n%s \nRisk: None\nTime: %s\n" ),
                making.description, making.skill_used.obj().name(), making.difficulty, comp,
-               to_string( time_duration::from_turns( making.time / 100 ) ) );
+               to_string( making.time ) );
     return comp;
 }
 
@@ -3079,7 +3079,7 @@ std::string talk_function::om_craft_description( const std::string &itm )
     }
     comp = string_format( _( "Skill used: %s\nDifficulty: %d\n%s\nTime: %s\n" ),
                           making.skill_used.obj().name(), making.difficulty,
-                          comp, to_string( time_duration::from_turns( making.time / 100 ) ) );
+                          comp, to_string( making.time ) );
     return comp;
 }
 

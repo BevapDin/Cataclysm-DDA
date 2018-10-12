@@ -1311,11 +1311,11 @@ class player : public Character
         /**
          * Time to craft not including speed multiplier
          */
-        int base_time_to_craft( const recipe &rec, int batch_size = 1 ) const;
+        time_duration base_time_to_craft( const recipe &rec, int batch_size = 1 ) const;
         /**
          * Expected time to craft a recipe, with assumption that multipliers stay constant.
          */
-        int expected_time_to_craft( const recipe &rec, int batch_size = 1 ) const;
+        time_duration expected_time_to_craft( const recipe &rec, int batch_size = 1 ) const;
         std::vector<const item *> get_eligible_containers_for_crafting() const;
         bool check_eligible_containers_for_crafting( const recipe &rec, int batch_size = 1 ) const;
         bool has_morale_to_craft() const;

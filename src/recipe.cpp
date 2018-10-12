@@ -18,7 +18,7 @@ using oter_str_id = string_id<oter_t>;
 
 recipe::recipe() : skill_used( skill_id::NULL_ID() ) {}
 
-int recipe::batch_time( int batch, float multiplier, size_t assistants ) const
+time_duration recipe::batch_time( int batch, float multiplier, size_t assistants ) const
 {
     // 1.0f is full speed
     // 0.33f is 1/3 speed
@@ -27,11 +27,11 @@ int recipe::batch_time( int batch, float multiplier, size_t assistants ) const
         multiplier = 1.0f;
     }
 
-    const float local_time = float( time ) / multiplier;
+    const float local_time = to_moves<float>( time ) / multiplier;
 
     // if recipe does not benefit from batching and we have no assistants, don't do unnecessary additional calculations
     if( batch_rscale == 0.0 && assistants == 0 ) {
-        return local_time * batch;
+        return time_duration::from_moves( local_time * batch );
     }
 
     float total_time = 0.0;
@@ -59,7 +59,7 @@ int recipe::batch_time( int batch, float multiplier, size_t assistants ) const
         total_time = local_time;
     }
 
-    return int( total_time );
+    return time_duration::from_moves( total_time );
 }
 
 bool recipe::has_flag( const std::string &flag_name ) const
@@ -80,7 +80,7 @@ void recipe::load( JsonObject &jo, const std::string &src )
         ident_ = recipe_id( result_ );
     }
 
-    assign( jo, "time", time, strict, 0 );
+    assign( jo, "time", time, strict, 1_moves );
     assign( jo, "difficulty", difficulty, strict, 0, MAX_SKILL );
     assign( jo, "flags", flags );
 
