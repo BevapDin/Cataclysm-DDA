@@ -1586,12 +1586,15 @@ void time_point::deserialize( JsonIn &jsin )
 
 void time_duration::serialize( JsonOut &jsout ) const
 {
-    jsout.write( turns_ );
+    jsout.write( std::to_string( moves_ ) + "o" );
 }
 
 time_duration time_duration::read_from_json_string( JsonIn &jsin )
 {
     static const std::vector<std::pair<std::string, time_duration>> units = { {
+            { "moves", 1_moves },
+            { "move", 1_moves },
+            { "o", 1_moves },
             { "turns", 1_turns },
             { "turn", 1_turns },
             { "t", 1_turns },
@@ -1668,7 +1671,7 @@ void time_duration::deserialize( JsonIn &jsin )
     if( jsin.test_string() ) {
         *this = read_from_json_string( jsin );
     } else {
-        turns_ = jsin.get_int();
+        moves_ = jsin.get_int();
     }
 }
 
