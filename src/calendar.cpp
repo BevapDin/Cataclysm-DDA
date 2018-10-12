@@ -10,8 +10,9 @@
 #include <cmath>
 #include <limits>
 
-// Divided by 100 to prevent overflowing when converted to moves
-const int calendar::INDEFINITELY_LONG( std::numeric_limits<int>::max() / 100 );
+// time_duration stores int64_t, but max of int is enough.
+const time_duration calendar::INDEFINITELY_LONG = time_duration::from_moves(
+            std::numeric_limits<int>::max() / 100 );
 
 calendar calendar::start;
 calendar calendar::turn;
@@ -343,8 +344,7 @@ static std::string to_string_clipped( const int num, const clipped_unit type,
 
 std::pair<int, clipped_unit> clipped_time( const time_duration &d )
 {
-    //@todo: change INDEFINITELY_LONG to time_duration
-    if( to_turns<int>( d ) >= calendar::INDEFINITELY_LONG ) {
+    if( d >= calendar::INDEFINITELY_LONG ) {
         return { 0, clipped_unit::forever };
     }
 
@@ -389,7 +389,7 @@ std::string to_string_clipped( const time_duration &d,
 
 std::string to_string( const time_duration &d )
 {
-    if( d >= time_duration::from_turns( calendar::INDEFINITELY_LONG ) ) {
+    if( d >= calendar::INDEFINITELY_LONG ) {
         return _( "forever" );
     }
 
