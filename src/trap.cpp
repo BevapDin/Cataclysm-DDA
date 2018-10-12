@@ -94,10 +94,8 @@ void trap::load( JsonObject &jo, const std::string & )
 {
     mandatory( jo, was_loaded, "id", id );
     mandatory( jo, was_loaded, "name", name_ );
-    if( !assign( jo, "color", color ) ) {
-        jo.throw_error( "missing mandatory member \"color\"" );
-    }
-    mandatory( jo, was_loaded, "symbol", sym, one_char_symbol_reader );
+    glyph_.load_symbol( jo, "symbol", was_loaded ? glyph::optional : glyph::required );
+    glyph_.load_color( jo, "color", was_loaded ? glyph::optional : glyph::required );
     mandatory( jo, was_loaded, "visibility", visibility );
     mandatory( jo, was_loaded, "avoidance", avoidance );
     mandatory( jo, was_loaded, "difficulty", difficulty );

@@ -6,6 +6,8 @@
 #include "string_id.h"
 #include "int_id.h"
 #include "units.h"
+#include "glyph.h"
+
 #include <string>
 #include <functional>
 #include <vector>
@@ -67,8 +69,8 @@ struct trap {
 
         bool was_loaded = false;
 
-        long sym;
-        nc_color color;
+        glyph glyph_;
+
     private:
         int visibility; // 1 to ??, affects detection
         int avoidance;  // 0 to ??, affects avoidance

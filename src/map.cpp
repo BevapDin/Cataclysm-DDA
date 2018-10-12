@@ -5697,8 +5697,8 @@ bool map::draw_maptile( const catacurses::window &w, player &u, const tripoint &
     }
     // If there's a trap here, and we have sufficient perception, draw that instead
     if( curr_trap.can_see( p, g->u ) ) {
-        tercol = curr_trap.color;
-        if( curr_trap.sym == '%' ) {
+        tercol = curr_trap.glyph_.color();
+        if( curr_trap.glyph_.symbol() == "%" ) { // @todo make it a flag
             switch( rng( 1, 5 ) ) {
                 case 1:
                     sym = '*';
@@ -5717,7 +5717,7 @@ bool map::draw_maptile( const catacurses::window &w, player &u, const tripoint &
                     break;
             }
         } else {
-            sym = curr_trap.sym;
+            sym = curr_trap.glyph_.symbol().at(0); // @todo
         }
     }
     if( curr_field.fieldCount() > 0 ) {
