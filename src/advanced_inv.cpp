@@ -1306,7 +1306,7 @@ bool advanced_inventory::move_all_items( bool nested_call )
         g->u.drop( dropped, g->u.pos() + darea.off );
     } else {
         if( dpane.get_area() == AIM_INVENTORY || dpane.get_area() == AIM_WORN ) {
-            g->u.assign_activity( activity_id( "ACT_PICKUP" ) );
+            g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
             g->u.activity.values.push_back( spane.in_vehicle() );
             if( dpane.get_area() == AIM_WORN ) {
                 g->u.activity.str_values.push_back( "equip" );
@@ -1319,7 +1319,7 @@ bool advanced_inventory::move_all_items( bool nested_call )
                 return false;
             }
 
-            g->u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ) );
+            g->u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), calendar::INDEFINITELY_LONG );
             // store whether the source is from a vehicle (first entry)
             g->u.activity.values.push_back( spane.in_vehicle() );
             // store whether the destination is a vehicle
@@ -2550,7 +2550,7 @@ void advanced_inventory::do_return_entry()
 {
     // only save pane settings
     save_settings( true );
-    g->u.assign_activity( activity_id( "ACT_ADV_INVENTORY" ) );
+    g->u.assign_activity( activity_id( "ACT_ADV_INVENTORY" ), calendar::INDEFINITELY_LONG );
     g->u.activity.auto_resume = true;
     uistate.adv_inv_exit_code = exit_re_entry;
 }

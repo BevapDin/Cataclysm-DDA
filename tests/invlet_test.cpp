@@ -204,7 +204,7 @@ void pick_up_from_feet( player &p, int pos )
     auto size_before = g->m.i_at( p.pos() ).size();
     REQUIRE( size_before > pos );
     p.moves = 100;
-    p.assign_activity( activity_id( "ACT_PICKUP" ) );
+    p.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
     p.activity.placement = tripoint( 0, 0, 0 );
     p.activity.values.push_back( false );   // not from vehicle
     p.activity.values.push_back( pos );     // index of item to pick up

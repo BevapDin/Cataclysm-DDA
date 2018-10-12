@@ -2638,7 +2638,7 @@ void iexamine::tree_maple_tapped(player &p, const tripoint &examp)
             return;
 
         case REMOVE_CONTAINER: {
-            g->u.assign_activity( activity_id( "ACT_PICKUP" ) );
+            g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
             g->u.activity.placement = examp - p.pos();
             g->u.activity.values.push_back( false );
             g->u.activity.values.push_back( 0 );

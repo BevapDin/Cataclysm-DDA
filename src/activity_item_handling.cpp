@@ -594,7 +594,7 @@ void activity_on_turn_pickup()
 
     // If there are items left, we ran out of moves, so make a new activity with the remainder.
     if( keep_going && !indices.empty() ) {
-        g->u.assign_activity( activity_id( "ACT_PICKUP" ) );
+        g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
         g->u.activity.placement = pickup_target;
         g->u.activity.auto_resume = autopickup;
         g->u.activity.values.push_back( from_vehicle );
@@ -735,7 +735,7 @@ void activity_on_turn_move_items()
     move_items( source, from_vehicle, destination, to_vehicle, indices, quantities );
 
     if( !indices.empty() ) {
-        g->u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ) );
+        g->u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), calendar::INDEFINITELY_LONG );
         g->u.activity.placement = source;
         g->u.activity.coords.push_back( destination );
         g->u.activity.values.push_back( from_vehicle );
@@ -982,7 +982,7 @@ void activity_on_turn_move_loot( player_activity &, player &p )
 
                 if( p.moves <= 0 ) {
                     // Restart activity and break from cycle.
-                    p.assign_activity( activity_id( "ACT_MOVE_LOOT" ) );
+                    p.assign_activity( activity_id( "ACT_MOVE_LOOT" ), calendar::INDEFINITELY_LONG );
                     return;
                 }
             }
