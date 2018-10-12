@@ -2999,7 +2999,7 @@ void activity_handlers::till_plot_do_turn( player_activity *, player *p )
 
             if( p->moves <= 0 ) {
                 // Restart activity and break from cycle.
-                p->assign_activity( activity_id( "ACT_TILL_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+                p->assign_activity( activity_id( "ACT_TILL_PLOT" ), calendar::INDEFINITELY_LONG );
                 return;
             }
         }
@@ -3082,7 +3082,7 @@ void activity_handlers::plant_plot_do_turn( player_activity *, player *p )
 
             if( p->moves <= 0 ) {
                 // Restart activity and break from cycle.
-                p->assign_activity( activity_id( "ACT_PLANT_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+                p->assign_activity( activity_id( "ACT_PLANT_PLOT" ), calendar::INDEFINITELY_LONG );
                 return;
             }
         }

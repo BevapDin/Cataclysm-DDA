@@ -203,13 +203,9 @@ class calendar
          * The expected duration of the cataclysm
          *
          * Large number that can be used to approximate infinite amounts of time.  Represents
-         * approximately 60 billion years (in six-second increments).
-         *
-         * This number should be regarded as a number of turns, and can safely be converted to a
-         * number of seconds or moves (movement points) without integer overflow.  If used to
-         * represent a larger unit (hours/days/years), then this will result in integer overflow.
+         * approximately 60 billion years.
          */
-        static const int INDEFINITELY_LONG;
+        static const time_duration INDEFINITELY_LONG;
         /// @returns Whether the eternal season is enabled.
         static bool eternal_season();
 

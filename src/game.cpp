@@ -8639,11 +8639,11 @@ bool game::perform_liquid_transfer( item &liquid, const tripoint *const source_p
 
     const auto create_activity = [&]() {
         if( source_veh != nullptr ) {
-            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), calendar::INDEFINITELY_LONG );
             serialize_liquid_source( u.activity, *source_veh, part_num, liquid );
             return true;
         } else if( source_pos != nullptr ) {
-            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+            u.assign_activity( activity_id( "ACT_FILL_LIQUID" ), calendar::INDEFINITELY_LONG );
             serialize_liquid_source( u.activity, *source_pos, liquid );
             return true;
         } else if( source_mon != nullptr ) {
@@ -10625,7 +10625,7 @@ bool game::walk_move( const tripoint &dest_loc )
     }
 
     if( u.is_hauling() ) {
-        u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+        u.assign_activity( activity_id( "ACT_MOVE_ITEMS" ), calendar::INDEFINITELY_LONG );
         // Whether the source is inside a vehicle (not supported)
         u.activity.values.push_back( false );
         // Whether the destination is inside a vehicle (not supported)
@@ -10799,7 +10799,7 @@ void game::place_player( const tripoint &dest_loc )
                 for( const auto &maybe_corpse : m.i_at( pos ) ) {
                     if( maybe_corpse.is_corpse() && maybe_corpse.can_revive() &&
                         maybe_corpse.get_mtype()->bloodType() != fd_acid ) {
-                        u.assign_activity( activity_id( "ACT_PULP" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ), 0 );
+                        u.assign_activity( activity_id( "ACT_PULP" ), calendar::INDEFINITELY_LONG, 0 );
                         u.activity.placement = pos;
                         u.activity.auto_resume = true;
                         u.activity.str_values.push_back( "auto_pulp_no_acid" );

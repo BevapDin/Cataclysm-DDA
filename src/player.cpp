@@ -8599,7 +8599,7 @@ void player::drop( const std::list<std::pair<int, int>> &what, const tripoint &t
         return;
     }
 
-    assign_activity( type, time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+    assign_activity( type, calendar::INDEFINITELY_LONG );
     activity.placement = target - pos();
 
     for( auto item_pair : what ) {

@@ -705,7 +705,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
 
     // Not many items, just grab them
     if( ( int )here.size() <= min && min != -1 ) {
-        g->u.assign_activity( activity_id( "ACT_PICKUP" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+        g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
         g->u.activity.placement = pos - g->u.pos();
         g->u.activity.values.push_back( from_vehicle );
         // Only one item means index is 0.
@@ -1152,7 +1152,7 @@ void Pickup::pick_up( const tripoint &pos, int min )
     }
 
     // At this point we've selected our items, register an activity to pick them up.
-    g->u.assign_activity( activity_id( "ACT_PICKUP" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+    g->u.assign_activity( activity_id( "ACT_PICKUP" ), calendar::INDEFINITELY_LONG );
     g->u.activity.placement = pos - g->u.pos();
     g->u.activity.values.push_back( from_vehicle );
     if( min == -1 ) {

@@ -600,7 +600,7 @@ static void smash()
         if( maybe_corpse.is_corpse() && maybe_corpse.damage() < maybe_corpse.max_damage() &&
             maybe_corpse.get_mtype()->has_flag( MF_REVIVES ) ) {
             // do activity forever. ACT_PULP stops itself
-            u.assign_activity( activity_id( "ACT_PULP" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ), 0 );
+            u.assign_activity( activity_id( "ACT_PULP" ), calendar::INDEFINITELY_LONG, 0 );
             u.activity.placement = smashp;
             return; // don't smash terrain if we've smashed a corpse
         }
@@ -648,32 +648,32 @@ static void smash()
 
 static void wait()
 {
-    std::map<int, int> durations;
+    std::map<int, time_duration> durations;
     uilist as_m;
 
     const bool has_watch = g->u.has_watch();
     const auto add_menu_item = [ &as_m, &durations, has_watch ]
                                ( int retval, int hotkey, const std::string &caption = "",
-    int duration = calendar::INDEFINITELY_LONG ) {
+    const time_duration duration = calendar::INDEFINITELY_LONG ) {
 
         std::string text( caption );
 
         if( has_watch && duration != calendar::INDEFINITELY_LONG ) {
-            const std::string dur_str( to_string( time_duration::from_turns( duration ) ) );
+            const std::string dur_str( to_string( duration ) );
             text += ( text.empty() ? dur_str : string_format( " (%s)", dur_str.c_str() ) );
         }
         as_m.addentry( retval, true, hotkey, text );
-        durations[retval] = duration;
+        durations.emplace( retval, duration );
     };
 
-    add_menu_item( 1, '1', !has_watch ? _( "Wait 300 heartbeats" ) : "", MINUTES( 5 ) );
-    add_menu_item( 2, '2', !has_watch ? _( "Wait 1800 heartbeats" ) : "", MINUTES( 30 ) );
+    add_menu_item( 1, '1', !has_watch ? _( "Wait 300 heartbeats" ) : "", 5_minutes );
+    add_menu_item( 2, '2', !has_watch ? _( "Wait 1800 heartbeats" ) : "", 30_minutes );
 
     if( has_watch ) {
-        add_menu_item( 3, '3', "", HOURS( 1 ) );
-        add_menu_item( 4, '4', "", HOURS( 2 ) );
-        add_menu_item( 5, '5', "", HOURS( 3 ) );
-        add_menu_item( 6, '6', "", HOURS( 6 ) );
+        add_menu_item( 3, '3', "", 1_hours );
+        add_menu_item( 4, '4', "", 2_hours );
+        add_menu_item( 5, '5', "", 3_hours );
+        add_menu_item( 6, '6', "", 6_hours );
     }
 
     if( g->get_levz() >= 0 || has_watch ) {
@@ -701,7 +701,7 @@ static void wait()
 
     activity_id actType = activity_id( as_m.ret == 11 ? "ACT_WAIT_WEATHER" : "ACT_WAIT" );
 
-    player_activity new_act( actType, 100 * ( durations[as_m.ret] - 1 ), 0 );
+    player_activity new_act( actType, to_moves( durations.at( as_m.ret ) - 1_turns ), 0 );
 
     g->u.assign_activity( new_act, false );
 }
@@ -873,11 +873,11 @@ static void loot()
             add_msg( _( "Never mind." ) );
             break;
         case SortLoot:
-            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+            u.assign_activity( activity_id( "ACT_MOVE_LOOT" ), calendar::INDEFINITELY_LONG );
             break;
         case TillPlots:
             if( has_hoe ) {
-                u.assign_activity( activity_id( "ACT_TILL_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+                u.assign_activity( activity_id( "ACT_TILL_PLOT" ), calendar::INDEFINITELY_LONG );
             } else {
                 add_msg( _( "You need a tool to dig with." ) );
             }
@@ -888,7 +888,7 @@ static void loot()
             } else if( !has_seeds ) {
                 add_msg( m_info, _( "You don't have any seeds." ) );
             } else {
-                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ), time_duration::from_moves( calendar::INDEFINITELY_LONG ) );
+                u.assign_activity( activity_id( "ACT_PLANT_PLOT" ), calendar::INDEFINITELY_LONG );
             }
             break;
         default:

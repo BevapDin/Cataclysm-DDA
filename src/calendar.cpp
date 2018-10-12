@@ -9,8 +9,8 @@
 #include "string_formatter.h"
 #include "rng.h"
 
-// Divided by 100 to prevent overflowing when converted to moves
-const int calendar::INDEFINITELY_LONG( std::numeric_limits<int>::max() / 100 );
+// time_duration stores int64_t, but max of int is enough.
+const time_duration calendar::INDEFINITELY_LONG = time_duration::from_moves( std::numeric_limits<int>::max() / 100 );
 
 calendar calendar::start;
 calendar calendar::turn;
@@ -362,8 +362,7 @@ static std::string to_string_clipped( const int num, const clipped_unit type,
 std::string to_string_clipped( const time_duration &d,
                                const clipped_align align )
 {
-    //@todo: change INDEFINITELY_LONG to time_duration
-    if( to_turns<int>( d ) >= calendar::INDEFINITELY_LONG ) {
+    if( d >= calendar::INDEFINITELY_LONG ) {
         return to_string_clipped( 0, clipped_unit::forever, align );
     }
 
@@ -401,7 +400,7 @@ std::string to_string_clipped( const time_duration &d,
 
 std::string to_string( const time_duration &d )
 {
-    if( d >= time_duration::from_turns( calendar::INDEFINITELY_LONG ) ) {
+    if( d >= calendar::INDEFINITELY_LONG ) {
         return _( "forever" );
     }
 

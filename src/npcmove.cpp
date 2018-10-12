@@ -2351,7 +2351,7 @@ bool npc::do_pulp()
 
     // TODO: Don't recreate the activity every time
     int old_moves = moves;
-    assign_activity( activity_id( "ACT_PULP" ), time_duration::from_turns( calendar::INDEFINITELY_LONG ), 0 );
+    assign_activity( activity_id( "ACT_PULP" ), calendar::INDEFINITELY_LONG, 0 );
     activity.placement = *pulp_location;
     activity.do_turn( *this );
     return moves != old_moves;
