@@ -4,6 +4,7 @@
 #include "json.h"
 #include "translations.h"
 #include "requirements.h"
+#include "assign.h"
 
 static std::map<fault_id, fault> faults_all;
 
@@ -35,7 +36,7 @@ void fault::load_fault( JsonObject &jo )
     f.name_ = _( jo.get_string( "name" ).c_str() );
     f.description_ = _( jo.get_string( "description" ).c_str() );
 
-    f.time_ = jo.get_int( "time" );
+    assign( jo, "time", f.time_, 1_moves );
 
     auto sk = jo.get_array( "skills" );
     while( sk.has_more() ) {
@@ -73,7 +74,7 @@ void fault::reset()
 void fault::check_consistency()
 {
     for( const auto &f : faults_all ) {
-        if( f.second.time_ < 0 ) {
+        if( f.second.time_ < 0_turns ) {
             debugmsg( "fault %s has negative time requirement", f.second.id_.c_str() );
         }
         for( auto &e : f.second.skills_ ) {

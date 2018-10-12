@@ -3,6 +3,7 @@
 #define FAULT_H
 
 #include "string_id.h"
+#include "calendar.h"
 
 #include <string>
 #include <map>
@@ -39,7 +40,7 @@ class fault
             return description_;
         }
 
-        int time() const {
+        time_duration time() const {
             return time_;
         }
 
@@ -67,7 +68,7 @@ class fault
         fault_id id_;
         std::string name_;
         std::string description_;
-        int time_;
+        time_duration time_;
         std::map<skill_id, int> skills_;
         requirement_id requirements_;
 };
