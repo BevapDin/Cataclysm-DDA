@@ -137,8 +137,8 @@ class recipe
 
         std::set<std::string> flags;
 
-        /** If set (zero or positive) set charges of output result for items counted by charges */
-        int charges = -1;
+        /** Sets charges of output result for items counted by charges */
+        cata::optional<int> charges;
 
         // maximum achievable time reduction, as percentage of the original time.
         // if zero then the recipe has no batch crafting time reduction.
