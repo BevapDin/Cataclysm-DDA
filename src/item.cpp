@@ -1283,8 +1283,8 @@ std::string item::info( std::vector<iteminfo> &info, const iteminfo_query *parts
                 info.emplace_back( "GUN", _( "Even chance of good hit at range: " ),
                                    _( "<num>" ), range );
                 int aim_mv = g->u.gun_engagement_moves( *mod, type.threshold );
-                info.emplace_back( "GUN", _( "Time to reach aim level: " ), _( "<num> seconds" ),
-                                   TICKS_TO_SECONDS( aim_mv ), false, "", true, true );
+                info.emplace_back( "GUN", _( "Time to reach aim level: " ), _( "<num> moves" ),
+                                   aim_mv, false, "", true, true );
             }
         }
 
