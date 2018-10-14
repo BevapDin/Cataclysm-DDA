@@ -38,6 +38,12 @@ function sorted_keys(t, condition)
     return res;
 end
 
+-- All values from `types`, but sorted by their name. Useful for deterministic iteration.
+local sorted_types = {}
+for _, name in ipairs(sorted_keys(types)) do
+    table.insert(sorted_types, types[name])
+end
+
 function id_to_simple_string(id)
     return id:gsub("[^a-z0-9A-Z_]", "_")
 end
@@ -606,8 +612,7 @@ function Class:generate_constants()
     local metatable_name = self.name .. "_metatable"
     -- The children must be complete types, so include their header.
     -- @todo only include that child specific header
-    for _, child in ipairs(sorted_keys(types)) do
-        local class = get_type(child)
+    for _, class in ipairs(sorted_types) do
         if class.parent == self.name then
             cpp_output = cpp_output .. class:get_code_prepend() .. br
         end
@@ -616,9 +621,8 @@ function Class:generate_constants()
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
-    for _, child in ipairs(sorted_keys(types)) do
-        local class = get_type(child)
-        local cpp_child_name = member_type_to_cpp_type(child);
+    for _, class in ipairs(sorted_types) do
+        local cpp_child_name = member_type_to_cpp_type(class.name);
         if class.parent == self.name then
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
             cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
@@ -789,14 +793,14 @@ function generate_main_init_function()
     cpp_output = cpp_output .. global_functions_code_prepend .. br
     cpp_output = cpp_output .. "#include \"string_id.h\"" .. br
     cpp_output = cpp_output .. "#include \"int_id.h\"" .. br
-    for _, name in ipairs(sorted_keys(types)) do
-        cpp_output = cpp_output .. get_type(name):get_forward_declaration() .. br
+    for _, t in ipairs(sorted_types) do
+        cpp_output = cpp_output .. t:get_forward_declaration() .. br
     end
 
     -- Create a function that calls load_metatable on all the registered LuaValue's
     cpp_output = cpp_output .. "void load_metatables(lua_State* const L) {" .. br
-    for _, name in ipairs(sorted_keys(types)) do
-        cpp_output = cpp_output .. tab .. get_type(name):load_metatable_call() .. br
+    for _, t in ipairs(sorted_types) do
+        cpp_output = cpp_output .. tab .. t:load_metatable_call() .. br
     end
     cpp_output = cpp_output .. "}" .. br
 
@@ -841,8 +845,7 @@ function generate_code_for_output_path(path)
     local result = ""
     -- @todo the common prefix (includes and the like) should only be contained
     -- once, but currently each invocation of generate_code_for creates it.
-    for _, name in ipairs(sorted_keys(types)) do
-        local t = get_type(name)
+    for _, t in ipairs(sorted_types) do
         if path == t:get_output_path() then
             result = result .. t:generate_code()
         end
@@ -859,8 +862,8 @@ function generate_and_write_for_path(path)
     writeFile(path, generate_code_for_output_path(path))
 end
 
-for _, name in ipairs(sorted_keys(types)) do
-    generate_and_write_for_path(get_type(name):get_output_path())
+for _, t in ipairs(sorted_types) do
+    generate_and_write_for_path(t:get_output_path())
 end
 
 writeFile("catabindings.gen.cpp", generate_main_init_function())
