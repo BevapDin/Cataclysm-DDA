@@ -638,7 +638,7 @@ function Class:generate_functions_static(cpp_type)
     end
     local class = self
     while class do
-        for _, name in ipairs(sorted_keys(class.functions)) do
+        for _, name in ipairs(sorted_keys(self.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. id_to_simple_string(class_name) .. "_" .. name, name)
         end
         class = class:get_parent()
@@ -709,7 +709,7 @@ function Class:generate_constants()
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
-    cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
+    cpp_output = cpp_output .. cpp_class_name .. " *" .. cpp_name .. "::get_subclass( lua_State* const S, int const i) {"..br
     for _, class in ipairs(self:get_children()) do
         local cpp_child_name = "LuaValue<" .. class:get_cpp_name() .. ">";
         cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
