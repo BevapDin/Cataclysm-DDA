@@ -150,14 +150,6 @@ function code_prepend_of(name)
     if enums[name] then
         return enums[name]:get_code_prepend()
     end
-    for k,v in pairs(classes) do
-        if v.string_id == name then
-            return ""
-        end
-        if v.in_id == name then
-            return ""
-        end
-    end
     error(name .. " is not a class/enum name")
 end
 
