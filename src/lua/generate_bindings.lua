@@ -445,6 +445,20 @@ function Class:generate_operator(operator_id, cppname)
     return text
 end
 
+function Enum:get_parent()
+    return nil
+end
+
+function Class:get_parent()
+    if self.parent == nil then
+        return nil
+    end
+    if type(self.parent) == "string" then
+        self.parent = get_type(self.parent)
+    end
+    return self.parent
+end
+
 generate_overload_tree(types)
 
 function Class:generate_accessors(attributes, class_name)
@@ -520,11 +534,9 @@ exporting `Child::func`.
 for class_name, class in pairs(types) do
     if class.functions then
         local derived_functions = class.functions
-        local parent_name = class.parent
-        while parent_name do
-            local parent_class = get_type(parent_name)
-            merge_parent_class_functions(derived_functions, parent_class.functions)
-            parent_name = parent_class.parent
+        while class:get_parent() do
+            merge_parent_class_functions(derived_functions, class:get_parent().functions)
+            class = class:get_parent()
         end
     end
 end
@@ -550,7 +562,7 @@ function Class:generate_functions_static(cpp_type)
         for _, name in ipairs(sorted_keys(class.functions)) do
             cpp_output = cpp_output .. luaL_Reg("func_" .. id_to_simple_string(class_name) .. "_" .. name, name)
         end
-        class = get_type(class.parent)
+        class = class:get_parent()
     end
     cpp_output = cpp_output .. tab .. "{NULL, NULL}" .. br -- sentinel to indicate end of array
     cpp_output = cpp_output .. "};" .. br
@@ -613,7 +625,7 @@ function Class:generate_constants()
     -- The children must be complete types, so include their header.
     -- @todo only include that child specific header
     for _, class in ipairs(sorted_types) do
-        if class.parent == self.name then
+        if class:get_parent() == self then
             cpp_output = cpp_output .. class:get_code_prepend() .. br
         end
     end
@@ -622,8 +634,8 @@ function Class:generate_constants()
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
     for _, class in ipairs(sorted_types) do
-        local cpp_child_name = member_type_to_cpp_type(class.name);
-        if class.parent == self.name then
+        if class:get_parent() == self then
+            local cpp_child_name = "LuaValue<" .. class:get_cpp_name() .. ">";
             cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
             cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
             cpp_output = cpp_output .. tab .. "}" .. br
@@ -641,14 +653,13 @@ function Class:generate_functions()
     local cpp_class_name = self:get_cpp_name()
     local cpp_output = ""
     cpp_output = cpp_output .. self:generate_destructor()
-    local attributes = self.attributes
-    local parent_class = self.parent
-    while parent_class do
-        local class = get_type(parent_class)
+    local attributes = {}
+    local class = self
+    while class do
         for k,v in pairs(class.attributes) do
             attributes[k] = v
         end
-        parent_class = class.parent
+        class = class:get_parent()
     end
     cpp_output = cpp_output .. self:generate_accessors("get_member", attributes, generate_getter_code)
     cpp_output = cpp_output .. self:generate_accessors("set_member", attributes, generate_setter_code)
