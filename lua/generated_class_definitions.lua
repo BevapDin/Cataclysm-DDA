@@ -38,7 +38,6 @@ register_class("Character", {
             { name = "can_pickWeight", rval = "bool", args = { "item", "bool" } },
             { name = "can_use", rval = "bool", args = { "item" } },
             { name = "can_use", rval = "bool", args = { "item", "item" } },
-            { name = "drop_inventory_overflow", rval = nil, args = { } },
             { name = "effective_dispersion", rval = "int", args = { "int" } },
             { name = "empty_skills", rval = nil, args = { } },
             { name = "empty_traits", rval = nil, args = { } },
@@ -76,7 +75,6 @@ register_class("Character", {
             { name = "has_active_item", rval = "bool", args = { "string" } },
             { name = "has_active_mutation", rval = "bool", args = { "trait_id" } },
             { name = "has_base_trait", rval = "bool", args = { "trait_id" } },
-            { name = "has_bionic_flag", rval = "bool", args = { "string" } },
             { name = "has_nv", rval = "bool", args = { } },
             { name = "has_trait_flag", rval = "bool", args = { "string" } },
             { name = "healing_rate", rval = "float", args = { "float" } },
@@ -477,7 +475,7 @@ register_class("damage_instance", {
             { name = "total_damage", rval = "float", args = { } },
             { name = "type_damage", rval = "float", args = { "damage_type" } },
     }
-}
+} )
 
 register_class("effect_type", {
     forward_declaration = "class effect_type;\n",
@@ -790,7 +788,7 @@ register_class("game", {
 
 register_class("gun_mode", {
     forward_declaration = "class gun_mode;\n",
-    code_prepend = "#include \"gun_mode.h\"\n",
+    code_prepend = "#include \"gun_mode.h\"\n#include \"item.h\"\n",
     new = {
             { },
     },
@@ -810,7 +808,6 @@ register_class("islot_ammo", {
     forward_declaration = "struct islot_ammo;\n",
         code_prepend = "#include \"itype.h\"\n",
     attributes = {
-            casing = { type = "string", writable = true },
             cookoff = { type = "bool", writable = true },
             damage = { type = "damage_instance", writable = true },
             def_charges = { type = "int", writable = true },
@@ -1041,7 +1038,6 @@ register_class("islot_tool", {
             def_charges = { type = "int", writable = true },
             max_charges = { type = "int", writable = true },
             revert_msg = { type = "string", writable = true },
-            revert_to = { type = "string", writable = true },
             subtype = { type = "string", writable = true },
             turns_per_charge = { type = "int", writable = true },
     },
@@ -1060,7 +1056,7 @@ register_class("islot_wheel", {
 } )
 register_class("item", {
     forward_declaration = "class item;\n",
-    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
+    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n#include \"gun_mode.h\"\n",
     new = {
             { "item" },
             { "itype*" },
@@ -1077,9 +1073,7 @@ register_class("item", {
             charges = { type = "int", writable = true },
             components = { type = "std::vector<item>", writable = true },
             contents = { type = "std::list<item>", writable = true },
-            freezer = { type = "time_point", writable = true },
             frequency = { type = "int", writable = true },
-            fridge = { type = "time_point", writable = true },
             invlet = { type = "int", writable = true },
             irridation = { type = "int", writable = true },
             item_counter = { type = "int", writable = true },
@@ -1498,7 +1492,6 @@ register_class("ma_buff", {
             { name = "is_throw_immune", rval = "bool", args = { } },
             { name = "is_valid_player", rval = "bool", args = { "player" } },
             { name = "speed_bonus", rval = "int", args = { "player" } },
-            { name = "stamina_mult", rval = "float", args = { } },
     }
 } )
 
@@ -1584,8 +1577,6 @@ register_class("map", {
             { name = "allow_camp", rval = "bool", args = { "tripoint" } },
             { name = "allow_camp", rval = "bool", args = { "tripoint", "int" } },
             { name = "ambient_light_at", rval = "float", args = { "tripoint" } },
-            { name = "apply_in_fridge", rval = nil, args = { "item", "int" } },
-            { name = "apply_in_fridge", rval = nil, args = { "item", "int", "bool" } },
             { name = "bash_rating", rval = "int", args = { "int", "int", "int" } },
             { name = "bash_rating", rval = "int", args = { "int", "tripoint" } },
             { name = "bash_rating", rval = "int", args = { "int", "tripoint", "bool" } },
@@ -1936,7 +1927,6 @@ register_class("material_type", {
             { name = "ident", rval = "material_id", args = { } },
             { name = "name", rval = "string", args = { } },
             { name = "repaired_with", rval = "string", args = { } },
-            { name = "salvaged_into", rval = "string", args = { } },
             { name = "soft", rval = "bool", args = { } },
     }
 } )
@@ -2184,7 +2174,6 @@ register_class("mutation_branch", {
             initial_ma_styles = { type = "std::vector<matype_id>", writable = true },
             metabolism_modifier = { type = "float", writable = true },
             mixed_effect = { type = "bool", writable = true },
-            name = { type = "string", writable = true },
             points = { type = "int", writable = true },
             prereqs = { type = "std::vector<trait_id>", writable = true },
             prereqs2 = { type = "std::vector<trait_id>", writable = true },
@@ -2193,7 +2182,6 @@ register_class("mutation_branch", {
             replacements = { type = "std::vector<trait_id>", writable = true },
             restricts_gear = { type = "std::set<body_part>", writable = true },
             spawn_item = { type = "string", writable = true },
-            spawn_item_message = { type = "string", writable = true },
             stamina_regen_modifier = { type = "float", writable = true },
             startingtrait = { type = "bool", writable = true },
             starts_active = { type = "bool", writable = true },
@@ -2231,11 +2219,7 @@ register_class("nc_color", {
             { name = "from_color_pair_index", static = true, rval = "nc_color", args = { "int" } },
             { name = "is_blink", rval = "bool", args = { } },
             { name = "is_bold", rval = "bool", args = { } },
-            { name = "is_italic", rval = "bool", args = { } },
-            { name = "is_underline", rval = "bool", args = { } },
-            { name = "italic", rval = "nc_color", args = { } },
             { name = "to_color_pair_index", rval = "int", args = { } },
-            { name = "underline", rval = "nc_color", args = { } },
     }
 } )
 
