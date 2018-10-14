@@ -123,20 +123,19 @@ function retrieve_lua_value(value_type, stack_position)
 end
 function retrieve_lua_value_to_variable(var_name, value_type, stack_position)
     function type_to_cpp_type(t)
-        if t == "bool" then return "bool"
-        elseif t == "cstring" then return "const char *"
-        elseif t == "string" then return "std::string"
-        elseif t == "int" then return "int"
-        elseif t == "float" then return "float"
-        elseif t:sub(-1) == "*" and has_type(t:sub(1, -2)) then
-            return get_type(t:sub(1, -2)):get_cpp_name() .. " *"
-        elseif has_type(t) then
-            local t = get_type(t)
+        if value_type:sub(-1) == "*" then
+            t = get_type(value_type:sub(1, -2))
             if getmetatable(t) == Class then
-                return t:get_cpp_name() .. " &"
+                return t:get_cpp_name() .. " *"
             else
                 return t:get_cpp_name()
             end
+        end
+        t = get_type(t)
+        if getmetatable(t) == Class then
+            return t:get_cpp_name() .. " &"
+        else
+            return t:get_cpp_name()
         end
         error("'"..t.."' is not a build-in type and is not defined in class_definitions.lua")
     end
