@@ -94,6 +94,13 @@ function Class:get_code_prepend()
     return ""
 end
 
+function Class:get_cpp_name()
+    if self.cpp_name then
+        return self.cpp_name
+    end
+    return self.name
+end
+
 Enum = {
 }
 Enum.__index = Enum
@@ -115,6 +122,13 @@ function Enum:get_code_prepend()
         return self.code_prepend
     end
     return ""
+end
+
+function Enum:get_cpp_name()
+    if self.cpp_name then
+        return self.cpp_name
+    end
+    return self.name
 end
 
 -- Yields the `output_path` of the entity (class/enum) of the given name.
@@ -143,6 +157,17 @@ function code_prepend_of(name)
         if v.in_id == name then
             return ""
         end
+    end
+    error(name .. " is not a class/enum name")
+end
+
+-- Yields the `code_prepend` of the entity (class/enum) of the given name.
+function cpp_name_of(name)
+    if classes[name] then
+        return classes[name]:get_cpp_name()
+    end
+    if enums[name] then
+        return enums[name]:get_cpp_name()
     end
     error(name .. " is not a class/enum name")
 end
@@ -271,7 +296,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     if int_id_name and not classes[int_id_name] then
         -- This is the common int_id<T> interface:
         local t = {
-            forward_declaration = (class.forward_declaration or "") .. "using " .. int_id_name .. " = int_id<" .. (class.cpp_name or class.name) .. ">;",
+            forward_declaration = (class.forward_declaration or "") .. "using " .. int_id_name .. " = int_id<" .. class:get_cpp_name() .. ">;",
             code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
@@ -297,7 +322,7 @@ function make_id_classes(class_name, int_id_name, string_id_name)
     -- Very similar to make_int_id above
     if string_id_name and not classes[string_id_name] then
         local t = {
-            forward_declaration = (class.forward_declaration or "") .. "using " .. string_id_name .. " = string_id<" .. (class.cpp_name or class.name) .. ">;",
+            forward_declaration = (class.forward_declaration or "") .. "using " .. string_id_name .. " = string_id<" .. class:get_cpp_name() .. ">;",
             code_prepend = class:get_code_prepend(),
             output_path = class:get_output_path(),
             has_equal = true,
@@ -531,17 +556,11 @@ for class_name, value in pairs(classes) do
         -- @todo could be a struct!
         value.forward_declaration = "class " .. class_name .. ";"
     end
-    if not value.cpp_name then
-        value.cpp_name = class_name
-    end
 end
 -- same for enumerations
 for enum_name, value in pairs(enums) do
     if not value.forward_declaration then
         -- @todo could be different underlying type
         value.forward_declaration = "enum " .. enum_name .. " : int;"
-    end
-    if not value.cpp_name then
-        value.cpp_name = enum_name
     end
 end

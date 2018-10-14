@@ -56,7 +56,7 @@ function member_type_to_cpp_type(member_type)
     else
         for class_name, class in pairs(classes) do
             if class_name == member_type then
-                return "LuaValueOrReference<" .. class.cpp_name .. ">"
+                return "LuaValueOrReference<" .. class:get_cpp_name() .. ">"
             end
         end
         for enum_name, _ in pairs(enums) do
@@ -89,15 +89,15 @@ function push_lua_value(in_variable, value_type)
         -- be a reference to a global game object).
         local t = value_type:sub(1, -2)
         if classes[t] then
-            return "LuaValue<" .. classes[t].cpp_name .. ">::push_ref( L, " .. in_variable .. " );"
+            return "LuaValue<" .. classes[t]:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
         end
         value_type = t
     end
     if classes[value_type] then
-        return "LuaValue<" .. value_type .. ">::push( L, " .. in_variable .. " );"
+        return "LuaValue<" .. classes[value_type]:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
     end
     if enums[value_type] then
-        return "LuaEnum<" .. enums[value_type].cpp_name .. ">::push( L, " .. in_variable .. " );"
+        return "LuaEnum<" .. enums[value_type]:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
     end
     -- A native Lua type.
     return member_type_to_cpp_type(value_type) .. "::push( L, " .. in_variable .. " );"
@@ -235,7 +235,7 @@ function generate_overload_tree(classes)
             local new_root = {}
             for _, func in ipairs(value.new) do
                 local leaf = generate_overload_path(new_root, func)
-                leaf.r = { rval = nil, cpp_name = class_name .. "::" .. class_name, class_name = class_name }
+                leaf.r = { rval = nil, cpp_name = value:get_cpp_name() .. "::" .. value:get_cpp_name(), class_name = class_name }
             end
             value.new = new_root
         end
@@ -339,10 +339,10 @@ function generate_class_function_wrapper(class_name, function_name, func)
         -- Non-static: `parameter0.func(parameter1, parameter2, ...)`
         local start_index
         if data.static then
-            func_invoc = classes[data.class_name].cpp_name .. '::' .. data.cpp_name .. '('
+            func_invoc = classes[data.class_name]:get_cpp_name() .. '::' .. data.cpp_name .. '('
             start_index = 0
         else
-            func_invoc = "static_cast<"..classes[data.class_name].cpp_name.."&>( parameter0 )"
+            func_invoc = "static_cast<"..classes[data.class_name]:get_cpp_name().."&>( parameter0 )"
             func_invoc = func_invoc .. "."..data.cpp_name .. "("
             start_index = 1
         end
@@ -372,7 +372,7 @@ function generate_class_function_wrapper(class_name, function_name, func)
 end
 
 function generate_constructor(class_name, args)
-    local cpp_name = classes[class_name].cpp_name
+    local cpp_name = classes[class_name]:get_cpp_name()
     local text = "static int new_" .. id_to_simple_string(class_name) .. "(lua_State *L) {"..br
 
     local cbc = function(indentation, stack_index, data)
@@ -398,7 +398,7 @@ end
 
 function generate_destructor(class_name, class)
     local cpp_output = ""
-    local cpp_class_name = class.cpp_name
+    local cpp_class_name = class:get_cpp_name()
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "void LuaValue<" .. cpp_class_name .. ">::call_destructor( " .. cpp_class_name .. " &object ) {" .. br
     -- This avoids problems where cpp_class_name is actually "foo::bar<some>" and the destructor call
@@ -415,7 +415,7 @@ function generate_destructor(class_name, class)
 end
 
 function generate_operator(class_name, operator_id, cppname)
-    local cpp_class_name = classes[class_name].cpp_name
+    local cpp_class_name = classes[class_name]:get_cpp_name()
     local text = "static int op_" .. id_to_simple_string(class_name) .. "_" .. operator_id .. "(lua_State *L) {"..br
 
     text = text .. tab .. "const " .. cpp_class_name .. " &lhs = " .. retrieve_lua_value(class_name, 1) .. ";"..br
@@ -568,9 +568,9 @@ end
 function generate_accessors(class_name, value_type_name, function_name, attributes, cbc)
     local names = sorted_keys(attributes, function(name) return function_name == "get_member" or attributes[name].writable; end)
     local cpp_output = ""
-    local instance_type = "const " .. classes[class_name].cpp_name
+    local instance_type = "const " .. classes[class_name]:get_cpp_name()
     if function_name == "set_member" then
-        instance_type = classes[class_name].cpp_name
+        instance_type = classes[class_name]:get_cpp_name()
     end
 
     cpp_output = cpp_output .. "template<>" .. br
@@ -589,7 +589,7 @@ end
 
 function generate_LuaValue_constants(class_name, class)
     local cpp_output = ""
-    local cpp_class_name = class.cpp_name
+    local cpp_class_name = class:get_cpp_name()
     local cpp_name = "LuaValue<" .. cpp_class_name .. ">"
     local metatable_name = class_name .. "_metatable"
     cpp_output = cpp_output .. "template<>" .. br
@@ -614,6 +614,7 @@ end
 
 function generate_functions_for_class(class_name, class)
     local cur_class_name = class_name
+    local cpp_class_name = class:get_cpp_name()
     local cpp_output = ""
     cpp_output = cpp_output .. generate_destructor(class_name, class)
     local attributes = class.attributes
@@ -625,8 +626,8 @@ function generate_functions_for_class(class_name, class)
         end
         parent_class = class.parent
     end
-    cpp_output = cpp_output .. generate_accessors(class_name, class_name, "get_member", attributes, generate_getter_code)
-    cpp_output = cpp_output .. generate_accessors(class_name, class_name, "set_member", attributes, generate_setter_code)
+    cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "get_member", attributes, generate_getter_code)
+    cpp_output = cpp_output .. generate_accessors(class_name, cpp_class_name, "set_member", attributes, generate_setter_code)
     if class.new then
         cpp_output = cpp_output .. generate_constructor(class_name, class.new)
     end
@@ -639,6 +640,7 @@ end
 
 function generate_code_for(class_name, class)
     local cpp_output = "// This file was automatically generated by lua/generate_bindings.lua"..br
+    local cpp_class_name = class:get_cpp_name()
     cpp_output = cpp_output .. "extern \"C\" {"..br
     cpp_output = cpp_output .. "#include <lua.h>"..br
     cpp_output = cpp_output .. "}"..br
@@ -676,31 +678,31 @@ function generate_code_for(class_name, class)
     end
 
     if can_copy() then
-        cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const " .. class_name .. " &val ) {" .. br
-        cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push( get_lua_state( engine ), val );" .. br
+        cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const " .. cpp_class_name .. " &val ) {" .. br
+        cpp_output = cpp_output .. "    LuaValue<" .. cpp_class_name .. ">::push( get_lua_state( engine ), val );" .. br
         cpp_output = cpp_output .. "}" .. br
 
-        cpp_output = cpp_output .. "template<> " .. class_name .. " get_wrapped_from_stack<" .. class_name .. ">( const lua_engine &engine, const int index ) {" .. br
-        cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-        cpp_output = cpp_output .. "        return LuaValueOrReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+        cpp_output = cpp_output .. "template<> " .. cpp_class_name .. " get_wrapped_from_stack<" .. cpp_class_name .. ">( const lua_engine &engine, const int index ) {" .. br
+        cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. cpp_class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+        cpp_output = cpp_output .. "        return LuaValueOrReference<" .. cpp_class_name .. ">::get( get_lua_state( engine ), index );" .. br
         cpp_output = cpp_output .. "    }" .. br
         cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
         cpp_output = cpp_output .. "}" .. br
     end
 
     -- Allow pushing references to const and to non-const values alike (Lua doesn't have the concept of "const").
-    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. class_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<const " .. cpp_class_name .. "> &val ) {" .. br
+    cpp_output = cpp_output .. "    LuaValue<" .. cpp_class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. class_name .. "> &val ) {" .. br
-    cpp_output = cpp_output .. "    LuaValue<" .. class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
+    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const std::reference_wrapper<" .. cpp_class_name .. "> &val ) {" .. br
+    cpp_output = cpp_output .. "    LuaValue<" .. cpp_class_name .. ">::push_ref( get_lua_state( engine ), val );" .. br
     cpp_output = cpp_output .. "}" .. br
 
     -- Don't return a reference to an object managed by Lua (created by value) as we can't know its
     -- lifetime from within the calling C++ code.
-    cpp_output = cpp_output .. "template<> " .. class_name .. " &get_wrapped_from_stack<" .. class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
-    cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
-    cpp_output = cpp_output .. "        return LuaValueOrReference<" .. class_name .. ">::get( get_lua_state( engine ), index );" .. br
+    cpp_output = cpp_output .. "template<> " .. cpp_class_name .. " &get_wrapped_from_stack<" .. cpp_class_name .. "&>( const lua_engine &engine, const int index ) {" .. br
+    cpp_output = cpp_output .. "    if( LuaValueOrReference<" .. cpp_class_name .. ">::has( get_lua_state( engine ), index ) ) {" .. br
+    cpp_output = cpp_output .. "        return LuaValueOrReference<" .. cpp_class_name .. ">::get( get_lua_state( engine ), index );" .. br
     cpp_output = cpp_output .. "    }" .. br
     cpp_output = cpp_output .. "    throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
     cpp_output = cpp_output .. "}" .. br
@@ -709,7 +711,7 @@ function generate_code_for(class_name, class)
 end
 
 function generate_code_for_enum(enum_name, enum)
-    local cpp_name = "LuaEnum<" .. enum.cpp_name .. ">"
+    local cpp_name = "LuaEnum<" .. enum:get_cpp_name() .. ">"
     local cpp_output = "// This file was automatically generated by lua/generate_bindings.lua"..br
     cpp_output = cpp_output .. "extern \"C\" {"..br
     cpp_output = cpp_output .. "#include <lua.h>"..br
@@ -728,10 +730,10 @@ function generate_code_for_enum(enum_name, enum)
         cpp_output = cpp_output .. tab.."{\""..name.."\", "..enum_name.."::"..name.."},"..br
     end
     cpp_output = cpp_output .. "};" .. br
-    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const " .. enum.cpp_name .. " &val ) {" .. br
+    cpp_output = cpp_output .. "template<> void push_wrapped_onto_stack( const lua_engine &engine, const " .. enum:get_cpp_name() .. " &val ) {" .. br
     cpp_output = cpp_output .. "    " .. cpp_name .. "::push( get_lua_state( engine ), val );" .. br
     cpp_output = cpp_output .. "}" .. br
-    cpp_output = cpp_output .. "template<> " .. enum.cpp_name .. " get_wrapped_from_stack<" .. enum.cpp_name .. ">( const lua_engine &engine, const int index ) {" .. br
+    cpp_output = cpp_output .. "template<> " .. enum:get_cpp_name() .. " get_wrapped_from_stack<" .. enum:get_cpp_name() .. ">( const lua_engine &engine, const int index ) {" .. br
     cpp_output = cpp_output .. "    if( !" .. cpp_name .. "::has( get_lua_state( engine ), index ) ) {" .. br
     cpp_output = cpp_output .. "        throw std::runtime_error( \"unexpected value on Lua stack\" );" .. br
     cpp_output = cpp_output .. "    }" .. br
@@ -765,10 +767,10 @@ function generate_main_init_function()
     cpp_output = cpp_output .. "void load_metatables(lua_State* const L) {" .. br
     for _, class_name in ipairs(sorted_keys(classes)) do
         local class = classes[class_name]
-        local cpp_name = "LuaValue<" .. class_name .. ">"
+        local cpp_name = "LuaValue<" .. class:get_cpp_name() .. ">"
         -- If the class has a constructor, it should be exposed via a global name (which is the class name)
         if class.new then
-            cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, \"" .. class_name .. "\" );" .. br
+            cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, \"" .. class:get_cpp_name() .. "\" );" .. br
         else
             cpp_output = cpp_output .. tab .. cpp_name .. "::load_metatable( L, nullptr );" .. br
         end
@@ -776,7 +778,7 @@ function generate_main_init_function()
     for _, enum_name in ipairs(sorted_keys(enums)) do
         local enum = enums[enum_name]
         -- Enumerations are always exported globally
-        cpp_output = cpp_output .. tab .. "LuaEnum<" .. enum.cpp_name .. ">::export_global( L, \"" .. enum_name .. "\" );" .. br
+        cpp_output = cpp_output .. tab .. "LuaEnum<" .. enum:get_cpp_name() .. ">::export_global( L, \"" .. enum_name .. "\" );" .. br
     end
     cpp_output = cpp_output .. "}" .. br
 
