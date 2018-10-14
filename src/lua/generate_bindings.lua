@@ -459,6 +459,21 @@ function Class:get_parent()
     return self.parent
 end
 
+function Class:get_children()
+    if not self.children then
+        self.children = { }
+        for _, t in ipairs(sorted_types) do
+            if t:get_parent() == self then
+                for _, c in ipairs(t:get_children()) do
+                    table.insert(self.children, c)
+                end
+                table.insert(self.children, t)
+            end
+        end
+    end
+    return self.children
+end
+
 generate_overload_tree(types)
 
 function Class:generate_accessors(attributes, class_name)
@@ -624,22 +639,18 @@ function Class:generate_constants()
     local metatable_name = self.name .. "_metatable"
     -- The children must be complete types, so include their header.
     -- @todo only include that child specific header
-    for _, class in ipairs(sorted_types) do
-        if class:get_parent() == self then
-            cpp_output = cpp_output .. class:get_code_prepend() .. br
-        end
+    for _, class in ipairs(self:get_children()) do
+        cpp_output = cpp_output .. class:get_code_prepend() .. br
     end
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. "const char * const " .. cpp_name .. "::METATABLE_NAME = \"" .. metatable_name .. "\";" .. br
     cpp_output = cpp_output .. "template<>" .. br
     cpp_output = cpp_output .. cpp_name.."::Type *"..cpp_name.."::get_subclass( lua_State* const S, int const i) {"..br
-    for _, class in ipairs(sorted_types) do
-        if class:get_parent() == self then
-            local cpp_child_name = "LuaValue<" .. class:get_cpp_name() .. ">";
-            cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
-            cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
-            cpp_output = cpp_output .. tab .. "}" .. br
-        end
+    for _, class in ipairs(self:get_children()) do
+        local cpp_child_name = "LuaValue<" .. class:get_cpp_name() .. ">";
+        cpp_output = cpp_output .. tab .. "if("..cpp_child_name.."::has(S, i)) {" .. br
+        cpp_output = cpp_output .. tab .. tab .. "return &"..cpp_child_name.."::get( S, i );" .. br
+        cpp_output = cpp_output .. tab .. "}" .. br
     end
     cpp_output = cpp_output .. tab .. "(void)S; (void)i;" .. br -- just in case to prevent warnings
     cpp_output = cpp_output .. tab .. "return nullptr;" .. br
