@@ -91,34 +91,49 @@ function get_type(name)
     return types[name]
 end
 
-Class = {
-}
-Class.__index = Class
-function register_class(name, data)
-    setmetatable(data, Class)
-    data.name = name
-    types[name] = data
+TypeBase = {}
+function TypeBase:create(o)
+    o = o or {}
+    setmetatable(o, self)
+    self.__index = self
+    return o
 end
 
-function Class:get_output_path()
+function TypeBase:get_cpp_name()
+    if self.cpp_name then
+        return self.cpp_name
+    end
+    return self.name
+end
+
+UserDefinedBase = TypeBase:create()
+
+function UserDefinedBase:get_output_path()
     if self.output_path then
         return self.output_path
     end
     return output_path_for_id(self.name)
 end
 
-function Class:get_code_prepend()
+function UserDefinedBase:get_code_prepend()
     if self.code_prepend then
         return self.code_prepend
     end
     return ""
 end
 
-function Class:get_cpp_name()
-    if self.cpp_name then
-        return self.cpp_name
+Class = UserDefinedBase:create()
+
+function Class:enable_copy_operator()
+    if not self.new then
+        self.new = { }
     end
-    return self.name
+    table.insert(self.new, { self.name })
+end
+
+function register_class(name, data)
+    data.name = name
+    types[name] = Class:create(data)
 end
 
 function Class:get_forward_declaration()
@@ -129,34 +144,10 @@ function Class:get_forward_declaration()
     return "class " .. self:get_cpp_name() .. ";"
 end
 
-Enum = {
-}
-Enum.__index = Enum
+Enum = UserDefinedBase:create()
 function register_enum(name, data)
-    setmetatable(data, Enum)
     data.name = name
-    types[name] = data
-end
-
-function Enum:get_output_path()
-    if self.output_path then
-        return self.output_path
-    end
-    return output_path_for_id(self.name)
-end
-
-function Enum:get_code_prepend()
-    if self.code_prepend then
-        return self.code_prepend
-    end
-    return ""
-end
-
-function Enum:get_cpp_name()
-    if self.cpp_name then
-        return self.cpp_name
-    end
-    return self.name
+    types[name] = Enum:create(data)
 end
 
 function Enum:get_forward_declaration()

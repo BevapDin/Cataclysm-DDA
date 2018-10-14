@@ -38,6 +38,29 @@ function sorted_keys(t, condition)
     return res;
 end
 
+BuildInTypeBase = TypeBase:create()
+
+function BuildInTypeBase:create(cpp_name)
+    o = { cpp_name = cpp_name }
+    setmetatable(o, self)
+    self.__index = self
+    return o
+end
+function BuildInTypeBase:get_output_path()
+    return nil
+end
+function BuildInTypeBase:get_forward_declaration()
+    return ""
+end
+function BuildInTypeBase:load_metatable_call()
+    return ""
+end
+
+types['bool'] = BuildInTypeBase:create('bool')
+types['string'] = BuildInTypeBase:create('std::string')
+types['int'] = BuildInTypeBase:create('int')
+types['float'] = BuildInTypeBase:create('float')
+
 -- All values from `types`, but sorted by their name. Useful for deterministic iteration.
 local sorted_types = {}
 for _, name in ipairs(sorted_keys(types)) do
@@ -63,27 +86,33 @@ end
 function Enum:member_type_to_cpp_type()
     return "LuaEnum<" .. self:get_cpp_name() .. ">"
 end
-function member_type_to_cpp_type(member_type)
-    if member_type == "bool" then return "LuaType<bool>"
-    elseif member_type == "cstring" then return "LuaType<const char*>"
-    elseif member_type == "string" then return "LuaType<std::string>"
-    elseif member_type == "int" then return "LuaType<int>"
-    elseif member_type == "float" then return "LuaType<float>"
-    else
-        return get_type(member_type):member_type_to_cpp_type()
+function BuildInTypeBase:member_type_to_cpp_type()
+    return "LuaType<" .. self.cpp_name .. ">"
+end
+
+function TypeBase:retrieve_lua_value(stack_position)
+    return self:member_type_to_cpp_type() .. "::get(L, " .. stack_position .. ")"
+end
+function Class:retrieve_lua_value(stack_position)
+    if self.is_script then
+        return "catalua::script_reference::from_stack( " .. stack_position .. " );"
     end
+    return TypeBase.retrieve_lua_value(self, stack_position)
 end
 
 -- Returns an expression that evaluates to `true` if the stack has an object of the given type
 -- at the given position.
 function has_lua_value(value_type, stack_position)
-    return member_type_to_cpp_type(value_type) .. "::has(L, " .. stack_position .. ")"
+    return get_type(value_type):member_type_to_cpp_type() .. "::has(L, " .. stack_position .. ")"
 end
 
 -- Returns code to retrieve a lua value from the stack and store it into
 -- a C++ variable
 function retrieve_lua_value(value_type, stack_position)
-    return member_type_to_cpp_type(value_type) .. "::get(L, " .. stack_position .. ")"
+    if value_type:sub(-1) == "*" then
+        return get_type(value_type:sub(1, -2)):member_type_to_cpp_type() .. "::get_pointer(L, " .. stack_position .. ")"
+    end
+    return get_type(value_type):retrieve_lua_value(stack_position)
 end
 
 -- Returns code to take a C++ variable of the given type and push a lua version
@@ -97,18 +126,21 @@ end
 function Enum:push_lua_value(in_variable)
     return "LuaEnum<" .. self:get_cpp_name() .. ">::push( L, " .. in_variable .. " );"
 end
-function Enum:push_ref_lua_value(in_variable)
-    return "LuaEnum<" .. self:get_cpp_name() .. ">::push_ref( L, " .. in_variable .. " );"
+function BuildInTypeBase:push_lua_value(in_variable)
+    return "LuaType<" .. self.cpp_name .. ">::push( L, " .. in_variable .. " );"
 end
 function push_lua_value(in_variable, value_type)
     if value_type:sub(-1) == "&" then
         -- A reference is to be pushed. Copying the referred to object may not be allowed  (it may
         -- be a reference to a global game object).
-        local t = value_type:sub(1, -2)
-        if has_type(t) then
-            return get_type(t):push_ref_lua_value(in_variable)
+        local t = get_type(value_type:sub(1, -2))
+        if t.is_script then
+            return "catalua::script_reference::push_on_stack( " .. in_variable .. " );"
+        elseif getmetatable(t) == Class then
+            return t:push_ref_lua_value(in_variable)
+        else
+            return t:push_lua_value(in_variable)
         end
-        value_type = t
     end
     if has_type(value_type) then
         return get_type(value_type):push_lua_value(in_variable)
@@ -463,11 +495,13 @@ function Class:get_children()
     if not self.children then
         self.children = { }
         for _, t in ipairs(sorted_types) do
-            if t:get_parent() == self then
-                for _, c in ipairs(t:get_children()) do
-                    table.insert(self.children, c)
+            if getmetatable(t) == Class then
+                if t:get_parent() == self then
+                    for _, c in ipairs(t:get_children()) do
+                        table.insert(self.children, c)
+                    end
+                    table.insert(self.children, t)
                 end
-                table.insert(self.children, t)
             end
         end
     end
@@ -877,6 +911,9 @@ end
 
 local generated_files = { }
 function generate_and_write_for_path(path)
+    if not path then
+        return
+    end
     if generated_files[path] then
         return
     end
