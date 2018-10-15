@@ -682,10 +682,9 @@ static void wait()
             return time > calendar::turn ? time : time + 1_days;
         };
 
-        add_menu_item( 7,  'd', _( "Wait till dawn" ),
-                       diurnal_time_before( calendar::turn.sunrise() ) );
+        add_menu_item( 7,  'd', _( "Wait till dawn" ), diurnal_time_before( sunrise( calendar::turn ) ) );
         add_menu_item( 8,  'n', _( "Wait till noon" ),     diurnal_time_before( last_midnight + 12_hours ) );
-        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( calendar::turn.sunset() ) );
+        add_menu_item( 9,  'k', _( "Wait till dusk" ),     diurnal_time_before( sunset( calendar::turn ) ) );
         add_menu_item( 10, 'm', _( "Wait till midnight" ), diurnal_time_before( last_midnight ) );
         add_menu_item( 11, 'w', _( "Wait till weather changes" ) );
     }

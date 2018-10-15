@@ -162,13 +162,11 @@ moon_phase get_moon_phase( const time_point &p )
     return static_cast<moon_phase>( current_phase );
 }
 
-calendar calendar::sunrise() const
+time_point sunrise( const time_point &p )
 {
-    int start_hour = 0;
-    int end_hour = 0;
-    int newhour = 0;
-    int newminute = 0;
-    switch( season ) {
+    double start_hour = 0;
+    double end_hour = 0;
+    switch( season_of_year( p ) ) {
         case SPRING:
             start_hour = SUNRISE_EQUINOX;
             end_hour   = SUNRISE_SUMMER;
@@ -186,23 +184,18 @@ calendar calendar::sunrise() const
             end_hour   = SUNRISE_EQUINOX;
             break;
     }
-    double percent = double( double( day ) / to_days<int>( season_length() ) );
-    double time = double( start_hour ) * ( 1. - percent ) + double( end_hour ) * percent;
+    const time_duration time_into_season = ( p - calendar::time_of_cataclysm ) % calendar::season_length();
+    const double percent = time_into_season / calendar::season_length();
+    const double hours = start_hour * ( 1. - percent ) + end_hour * percent;
 
-    newhour = int( time );
-    time -= int( time );
-    newminute = int( time * 60 );
-
-    return calendar( newminute, newhour, day, season, year );
+    return p - time_past_midnight( p ) + time_duration::from_hours( hours );
 }
 
-calendar calendar::sunset() const
+time_point sunset( const time_point &p )
 {
-    int start_hour = 0;
-    int end_hour = 0;
-    int newhour = 0;
-    int newminute = 0;
-    switch( season ) {
+    double start_hour = 0;
+    double end_hour = 0;
+    switch( season_of_year( p ) ) {
         case SPRING:
             start_hour = SUNSET_EQUINOX;
             end_hour   = SUNSET_SUMMER;
@@ -220,14 +213,11 @@ calendar calendar::sunset() const
             end_hour   = SUNSET_EQUINOX;
             break;
     }
-    double percent = double( double( day ) / to_days<int>( season_length() ) );
-    double time = double( start_hour ) * ( 1. - percent ) + double( end_hour ) * percent;
+    const time_duration time_into_season = ( p - calendar::time_of_cataclysm ) % calendar::season_length();
+    const double percent = time_into_season / calendar::season_length();
+    const double hours = start_hour * ( 1. - percent ) + end_hour * percent;
 
-    newhour = int( time );
-    time -= int( time );
-    newminute = int( time * 60 );
-
-    return calendar( newminute, newhour, day, season, year );
+    return p - time_past_midnight( p ) + time_duration::from_hours( hours );
 }
 
 bool is_night( const time_point &p )
@@ -267,8 +257,8 @@ double calendar::current_daylight_level() const
 float calendar::sunlight() const
 {
     const time_duration now = time_past_midnight( *this );
-    const time_duration sunrise = time_past_midnight( this->sunrise() );
-    const time_duration sunset = time_past_midnight( this->sunset() );
+    const time_duration sunrise = time_past_midnight( ::sunrise( *this ) );
+    const time_duration sunset = time_past_midnight( ::sunset( *this ) );
 
     double daylight_level = current_daylight_level();
 
