@@ -132,8 +132,6 @@ class calendar
         void increment();
 
         // Sunlight and day/night calculations
-        /** Returns the current seasonally-adjusted maximum daylight level */
-        double current_daylight_level() const;
         /** Returns the current sunlight or moonlight level through the preceding functions. */
         float sunlight() const;
         /**
@@ -580,6 +578,8 @@ bool is_night( const time_point &p );
 time_point sunrise( const time_point &p );
 /** Returns the current sunset time based on the time of year. */
 time_point sunset( const time_point &p );
+/** Returns the current seasonally-adjusted maximum daylight level */
+double current_daylight_level( const time_point &p );
 
 enum class weekdays : int {
     SUNDAY = 0,
