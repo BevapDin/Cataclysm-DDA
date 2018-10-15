@@ -1518,7 +1518,7 @@ bool game::do_turn()
 
     if( calendar::once_every( 1_days ) ) {
         overmap_buffer.process_mongroups();
-        if( calendar::turn.day_of_year() == 0 ) {
+        if( time_past_new_year( calendar::turn ) == 0 ) {
             lua_callback( "on_year_passed" );
         }
         lua_callback( "on_day_passed" );
