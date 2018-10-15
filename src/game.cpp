@@ -1242,7 +1242,7 @@ bool game::cleanup_at_end()
 
         int turns = calendar::turn - calendar::start;
         int minutes = ( turns / MINUTES( 1 ) ) % 60;
-        int hours = ( turns / HOURS( 1 ) ) % 24;
+        int hours = ( turns / to_turns<int>( 1_hours ) ) % 24;
         int days = to_turns<int>(time_duration::from_turns(turns) );
 
         if( days > 0 ) {
@@ -12838,7 +12838,7 @@ bool check_art_charge_req( item &it )
 
 void game::start_calendar()
 {
-    calendar::start = HOURS( get_option<int>( "INITIAL_TIME" ) );
+    calendar::start = to_turns<int>( time_duration::from_hours( get_option<int>( "INITIAL_TIME" ) ) );
     const bool scen_season = scen->has_flag( "SPR_START" ) || scen->has_flag( "SUM_START" ) ||
                              scen->has_flag( "AUT_START" ) || scen->has_flag( "WIN_START" ) ||
                              scen->has_flag( "SUM_ADV_START" );

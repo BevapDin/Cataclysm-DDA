@@ -5841,7 +5841,7 @@ void player::suffer()
 
     // Spread less radiation when sleeping (slower metabolism etc.)
     // Otherwise it can quickly get to the point where you simply can't sleep at all
-    const bool rad_mut_proc = rad_mut > 0 && x_in_y( rad_mut, in_sleep_state() ? HOURS(3) : MINUTES(30) );
+    const bool rad_mut_proc = rad_mut > 0 && x_in_y( rad_mut, in_sleep_state() ? to_turns<int>( 3_hours ) : MINUTES(30) );
 
     // Used to control vomiting from radiation to make it not-annoying
     bool radiation_increasing = false;
@@ -6644,7 +6644,7 @@ void player::update_body_wetness( const w_point &weather )
 {
     // Average number of turns to go from completely soaked to fully dry
     // assuming average temperature and humidity
-    constexpr int average_drying = HOURS(2);
+    constexpr int average_drying = to_turns<int>( 2_hours );
 
     // A modifier on drying time
     double delay = 1.0;

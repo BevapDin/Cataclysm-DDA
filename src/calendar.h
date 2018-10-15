@@ -25,17 +25,6 @@ constexpr int MINUTES( int n )
     return n * 10;
 }
 
-/**
- * Convert hours to six-second turns
- *
- * @param n Time in hours
- * @returns Time in six-second turns
- */
-constexpr int HOURS( int n )
-{
-    return n * MINUTES( 60 );
-}
-
 /** How much light moon provides per lit-up quarter (Full-moon light is four times this value) */
 #define MOONLIGHT_PER_QUARTER 2.25
 
