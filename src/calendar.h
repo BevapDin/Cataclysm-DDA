@@ -131,9 +131,6 @@ class calendar
         /** Increases turn_number by 1. (6 seconds) */
         void increment();
 
-        // Sunlight and day/night calculations
-        /** Returns the current sunlight or moonlight level through the preceding functions. */
-        float sunlight() const;
         /**
          * Predicate to handle rate-limiting. Returns `true` after every @p event_frequency duration.
          */
@@ -580,6 +577,8 @@ time_point sunrise( const time_point &p );
 time_point sunset( const time_point &p );
 /** Returns the current seasonally-adjusted maximum daylight level */
 double current_daylight_level( const time_point &p );
+/** Returns the current sunlight or moonlight level through the preceding functions. */
+float sunlight( const time_point &p );
 
 enum class weekdays : int {
     SUNDAY = 0,
