@@ -227,14 +227,16 @@ bool is_night( const time_point &p )
     return now > sunset + twilight_duration || now < sunrise;
 }
 
-double calendar::current_daylight_level() const
+double current_daylight_level( const time_point &p )
 {
-    double percent = double( double( day ) / to_days<int>( season_length() ) );
+    const time_duration time_into_season = ( p - calendar::time_of_cataclysm ) %
+                                           calendar::season_length();
+    const double percent = time_into_season / calendar::season_length();
     double modifier = 1.0;
     // For ~Boston: solstices are +/- 25% sunlight intensity from equinoxes
     static double deviation = 0.25;
 
-    switch( season ) {
+    switch( season_of_year( p ) ) {
         case SPRING:
             modifier = 1. + ( percent * deviation );
             break;
@@ -249,7 +251,7 @@ double calendar::current_daylight_level() const
             break;
     }
 
-    return double( modifier * DAYLIGHT_LEVEL );
+    return modifier * DAYLIGHT_LEVEL;
 }
 
 float calendar::sunlight() const
@@ -258,7 +260,7 @@ float calendar::sunlight() const
     const time_duration sunrise = time_past_midnight( ::sunrise( *this ) );
     const time_duration sunset = time_past_midnight( ::sunset( *this ) );
 
-    double daylight_level = current_daylight_level();
+    double daylight_level = current_daylight_level( *this );
 
     int current_phase = static_cast<int>( get_moon_phase( *this ) );
     if( current_phase > int( MOON_PHASE_MAX ) / 2 ) {
