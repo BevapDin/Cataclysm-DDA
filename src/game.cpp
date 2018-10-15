@@ -1847,7 +1847,7 @@ void game::update_weather()
         weather = weather_override == WEATHER_NULL ?
                   weather_gen.get_weather_conditions( w )
                   : weather_override;
-        if( weather == WEATHER_SUNNY && calendar::turn.is_night() ) {
+        if( weather == WEATHER_SUNNY && is_night( calendar::turn ) ) {
             weather = WEATHER_CLEAR;
         }
         sfx::do_ambient();

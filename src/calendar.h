@@ -136,8 +136,6 @@ class calendar
         calendar sunrise() const;
         /** Returns the current sunset time based on the time of year. */
         calendar sunset() const;
-        /** Returns true if it's currently after sunset + TWILIGHT_SECONDS or before sunrise - TWILIGHT_SECONDS. */
-        bool is_night() const;
         /** Returns the current seasonally-adjusted maximum daylight level */
         double current_daylight_level() const;
         /** Returns the current sunlight or moonlight level through the preceding functions. */
@@ -580,6 +578,8 @@ std::string to_string( const time_point &p );
 std::string to_string_time_of_day( const time_point &p );
 /** Returns the current light level of the moon. */
 moon_phase get_moon_phase( const time_point &p );
+/** Returns whether it's after sunset + TWILIGHT_SECONDS or before sunrise - TWILIGHT_SECONDS. */
+bool is_night( const time_point &p );
 
 enum class weekdays : int {
     SUNDAY = 0,

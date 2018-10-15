@@ -230,11 +230,11 @@ calendar calendar::sunset() const
     return calendar( newminute, newhour, day, season, year );
 }
 
-bool calendar::is_night() const
+bool is_night( const time_point &p )
 {
-    const time_duration now = time_past_midnight( *this );
-    const time_duration sunrise = time_past_midnight( this->sunrise() );
-    const time_duration sunset = time_past_midnight( this->sunset() );
+    const time_duration now = time_past_midnight( p );
+    const time_duration sunrise = time_past_midnight( ::sunrise( p ) );
+    const time_duration sunset = time_past_midnight( ::sunset( p ) );
 
     return now > sunset + twilight_duration || now < sunrise;
 }
