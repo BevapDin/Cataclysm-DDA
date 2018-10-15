@@ -1275,7 +1275,7 @@ void player::update_bodytemp()
             // Morale bonus for comfiness - only if actually comfy (not too warm/cold)
             // Spread the morale bonus in time.
             if( comfortable_warmth > 0 &&
-                calendar::turn % MINUTES( 1 ) == ( MINUTES( bp ) / MINUTES( num_bp ) ) &&
+                calendar::turn % to_turns<int>( 1_minutes ) == ( to_turns<int>( time_duration::from_minutes( bp ) ) / to_turns<int>( time_duration::from_minutes( num_bp ) ) ) &&
                 get_effect_int( effect_cold, num_bp ) == 0 &&
                 get_effect_int( effect_hot, num_bp ) == 0 &&
                 temp_cur[bp] > BODYTEMP_COLD && temp_cur[bp] <= BODYTEMP_NORM ) {
@@ -4042,7 +4042,7 @@ void player::update_body( const time_point &from, const time_point &to )
         update_needs( five_mins );
         regen( five_mins );
         // Note: mend ticks once per 5 minutes, but wants rate in TURNS, not 5 minute intervals
-        mend( five_mins * MINUTES( 5 ) );
+        mend( five_mins * to_turns<int>( 5_minutes ) );
     }
 
     const int thirty_mins = ticks_between( from, to, 30_minutes );
@@ -4535,7 +4535,7 @@ void player::regen( int rate_multiplier )
     }
 
     float rest = rest_quality();
-    float heal_rate = healing_rate( rest ) * MINUTES(5);
+    float heal_rate = healing_rate( rest ) * to_turns<int>( 5_minutes );
     if( heal_rate > 0.0f ) {
         healall( roll_remainder( rate_multiplier * heal_rate ) );
     } else if( heal_rate < 0.0f ) {
@@ -4549,7 +4549,7 @@ void player::regen( int rate_multiplier )
     // include healing effects
     for( int i = 0; i < num_hp_parts; i++ ) {
         body_part bp = hp_to_bp( static_cast<hp_part>( i ) );
-        float healing = healing_rate_medicine( rest, bp ) * MINUTES( 5 ) ;
+        float healing = healing_rate_medicine( rest, bp ) * to_turns<int>( 5_minutes );
 
         int healing_apply = roll_remainder( healing );
         heal( bp, healing_apply );
@@ -5841,7 +5841,7 @@ void player::suffer()
 
     // Spread less radiation when sleeping (slower metabolism etc.)
     // Otherwise it can quickly get to the point where you simply can't sleep at all
-    const bool rad_mut_proc = rad_mut > 0 && x_in_y( rad_mut, in_sleep_state() ? to_turns<int>( 3_hours ) : MINUTES(30) );
+    const bool rad_mut_proc = rad_mut > 0 && x_in_y( rad_mut, to_turns<int>( in_sleep_state() ? 3_hours : 30_minutes ) );
 
     // Used to control vomiting from radiation to make it not-annoying
     bool radiation_increasing = false;

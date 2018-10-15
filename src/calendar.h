@@ -13,18 +13,6 @@ class time_point;
 class JsonOut;
 class JsonIn;
 
-/**
- * Convert minutes to six-second turns
- *
- * @param n Time in minutes
- * @returns Time in six-second turns
- *
- */
-constexpr int MINUTES( int n )
-{
-    return n * 10;
-}
-
 /** How much light moon provides per lit-up quarter (Full-moon light is four times this value) */
 #define MOONLIGHT_PER_QUARTER 2.25
 

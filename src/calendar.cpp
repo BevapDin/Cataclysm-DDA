@@ -56,7 +56,7 @@ calendar::calendar()
 
 calendar::calendar( int Minute, int Hour, int Day, season_type Season, int Year )
 {
-    turn_number = MINUTES( Minute ) + to_turns<int>( time_duration::from_hours( Hour ) ) + to_turns<int>( time_duration::from_days( Day ) ) + Season * to_days<int>
+    turn_number = to_turns<int>( time_duration::from_minutes( Minute ) ) + to_turns<int>( time_duration::from_hours( Hour ) ) + to_turns<int>( time_duration::from_days( Day ) ) + Season * to_days<int>
                   ( season_length() ) + Year * to_turns<int>( year_length() );
     sync();
 }
@@ -571,7 +571,7 @@ void calendar::sync()
 
     day = turn_number / to_turns<int>( time_duration::from_days( 1 ) ) % sl;
     hour = turn_number / to_turns<int>( 1_hours ) % 24;
-    minute = turn_number / MINUTES( 1 ) % 60;
+    minute = turn_number / to_turns<int>( 1_minutes ) % 60;
     second = ( turn_number * 6 ) % 60;
 }
 
