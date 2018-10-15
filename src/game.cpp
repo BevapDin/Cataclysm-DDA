@@ -3259,7 +3259,7 @@ void game::debug()
             do {
                 const int iSel = smenu.ret;
                 smenu.reset();
-                smenu.addentry( 0, true, 'y', "%s: %d", _( "year" ), calendar::turn.years() );
+                smenu.addentry( 0, true, 'y', "%s: %d", _( "year" ), static_cast<int>( calendar::turn / calendar::year_length() ) );
                 smenu.addentry( 1, !calendar::eternal_season(), 's', "%s: %d",
                                 _( "season" ), int( season_of_year( calendar::turn ) ) );
                 smenu.addentry( 2, true, 'd', "%s: %d", _( "day" ), day_of_season<int>( calendar::turn ) );

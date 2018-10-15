@@ -142,12 +142,6 @@ class calendar
         double current_daylight_level() const;
         /** Returns the current sunlight or moonlight level through the preceding functions. */
         float sunlight() const;
-
-        /** Current year, with default game start as year 0 */
-        int years() const {
-            return year;
-        }
-
         /**
          * Predicate to handle rate-limiting. Returns `true` after every @p event_frequency duration.
          */
