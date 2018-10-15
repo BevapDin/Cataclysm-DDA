@@ -1229,7 +1229,7 @@ bool game::cleanup_at_end()
         center_print( w_rip, iInfoLine++, c_white, _( "Survived:" ) );
 
         int turns = calendar::turn - calendar::start;
-        int minutes = ( turns / MINUTES( 1 ) ) % 60;
+        int minutes = to_minutes<int>( time_duration::from_turns( turns ) % 1_hours );
         int hours = to_hours<int>( time_duration::from_turns( turns ) % 1_days );
         int days = to_days<int>( time_duration::from_turns( turns ) );
 
