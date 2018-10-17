@@ -84,7 +84,7 @@ defense_game::defense_game()
 
 bool defense_game::init()
 {
-    calendar::turn = to_turns<int>( 12_hours ); // Start at noon
+    calendar::turn = calendar::time_of_cataclysm + 12_hours; // Start at noon
     g->temperature = 65;
     if( !g->u.create( PLTYPE_CUSTOM ) ) {
         return false;

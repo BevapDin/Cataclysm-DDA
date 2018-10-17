@@ -92,7 +92,6 @@ struct MOD_INFORMATION;
 using mod_id = string_id<MOD_INFORMATION>;
 class vehicle;
 class Creature_tracker;
-class calendar;
 class scenario;
 class DynamicDataLoader;
 class salvage_actor;

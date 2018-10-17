@@ -2158,7 +2158,7 @@ int iuse::radio_on( player *p, item *it, bool t, const tripoint &pos )
             } );
 
             std::vector<std::string> segments = foldstring( message, RADIO_PER_TURN );
-            int index = calendar::turn % segments.size();
+            int index = to_turn<int>( calendar::turn ) % segments.size();
             std::stringstream messtream;
             messtream << string_format( _( "radio: %s" ), segments[index].c_str() );
             message = messtream.str();
@@ -6245,7 +6245,7 @@ int iuse::camera( player *p, item *it, bool, const tripoint & )
                     npc_photo_def npc_photo;
                     npc_photo.quality = photo_quality;
                     npc_photo.name = guy->name;
-                    std::string timestamp = to_string( time_point( calendar::turn ) );
+                    std::string timestamp = to_string( calendar::turn );
                     //~ 1s - name of the photographed NPC, 2s - timestamp of the photo, for example Year 1, Spring, day 0 08:01:54.
                     npc_photo.description = string_format( _( "This is a photo of %1$s. It was taken on %2$s." ),
                                                            npc_photo.name, timestamp );

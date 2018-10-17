@@ -251,7 +251,7 @@ double funnel_charges_per_turn( const double surface_area_mm2, const double rain
     }
 
     // Calculate once, because that part is expensive
-    static const item water( "water", 0 );
+    static const item water( "water" );
     static const double charge_ml = ( double ) to_gram( water.weight() ) / water.charges; // 250ml
 
     const double vol_mm3_per_hour = surface_area_mm2 * rain_depth_mm_per_hour;
@@ -296,7 +296,6 @@ void fill_funnels( int rain_depth_mm_per_hour, bool acid, const trap &tr )
     for( auto loc : funnel_locs ) {
         units::volume maxcontains = 0;
         if( one_in( turns_per_charge ) ) { // @todo: fixme
-            //add_msg("%d mm/h %d tps %.4f: fill",int(calendar::turn),rain_depth_mm_per_hour,turns_per_charge);
             // This funnel has collected some rain! Put the rain in the largest
             // container here which is either empty or contains some mixture of
             // impure water and acid.

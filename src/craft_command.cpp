@@ -82,7 +82,7 @@ void craft_command::execute()
     auto activity = player_activity( type, crafter->base_time_to_craft( *rec, batch_size ), -1, INT_MIN,
                                      rec->ident().str() );
     activity.values.push_back( batch_size );
-    activity.values.push_back( calendar::turn );
+    activity.values.push_back( to_turn<int>( calendar::turn ) );
     activity.coords.push_back( crafter->pos() );
 
     crafter->assign_activity( activity );

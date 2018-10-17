@@ -12,12 +12,12 @@
 // time_duration stores int64_t, but max of int is enough.
 const time_duration calendar::INDEFINITELY_LONG = time_duration::from_moves( std::numeric_limits<int>::max() / 100 );
 
-calendar calendar::start;
-calendar calendar::turn;
-season_type calendar::initial_season;
+season_type calendar::initial_season = SPRING;
 
 const time_point calendar::before_time_starts = time_point::from_turn( -1 );
 const time_point calendar::time_of_cataclysm = time_point::from_turn( 0 );
+time_point calendar::start = calendar::time_of_cataclysm;
+time_point calendar::turn = calendar::time_of_cataclysm;
 
 // Internal constants, not part of the calendar interface.
 // Times for sunrise, sunset at equinoxes
@@ -42,113 +42,6 @@ const time_point calendar::time_of_cataclysm = time_point::from_turn( 0 );
 
 // How long, does sunrise/sunset last?
 static const time_duration twilight_duration = 1_hours;
-
-calendar::calendar()
-{
-    turn_number = 0;
-    second = 0;
-    minute = 0;
-    hour = 0;
-    day = 0;
-    season = SPRING;
-    year = 0;
-}
-
-calendar::calendar( int Minute, int Hour, int Day, season_type Season, int Year )
-{
-    turn_number = to_turns<int>( time_duration::from_minutes( Minute ) ) + to_turns<int>( time_duration::from_hours( Hour ) ) + to_turns<int>( time_duration::from_days( Day ) ) + Season * to_days<int>
-                  ( season_length() ) + Year * to_turns<int>( year_length() );
-    sync();
-}
-
-calendar::calendar( int turn )
-{
-    turn_number = turn;
-    sync();
-}
-
-calendar::operator int() const
-{
-    return turn_number;
-}
-
-calendar &calendar::operator =( int rhs )
-{
-    turn_number = rhs;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator -=( const calendar &rhs )
-{
-    turn_number -= rhs.turn_number;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator -=( int rhs )
-{
-    turn_number -= rhs;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator +=( const calendar &rhs )
-{
-    turn_number += rhs.turn_number;
-    sync();
-    return *this;
-}
-
-calendar &calendar::operator +=( int rhs )
-{
-    turn_number += rhs;
-    sync();
-    return *this;
-}
-
-bool calendar::operator ==( int rhs ) const
-{
-    return int( *this ) == rhs;
-}
-bool calendar::operator ==( const calendar &rhs ) const
-{
-    return turn_number == rhs.turn_number;
-}
-
-/*
-calendar& calendar::operator ++()
-{
- *this += 1;
- return *this;
-}
-*/
-
-calendar calendar::operator -( const calendar &rhs ) const
-{
-    return calendar( *this ) -= rhs;
-}
-
-calendar calendar::operator -( int rhs ) const
-{
-    return calendar( *this ) -= rhs;
-}
-
-calendar calendar::operator +( const calendar &rhs ) const
-{
-    return calendar( *this ) += rhs;
-}
-
-calendar calendar::operator +( int rhs ) const
-{
-    return calendar( *this ) += rhs;
-}
-
-void calendar::increment()
-{
-    turn_number++;
-    sync();
-}
 
 moon_phase get_moon_phase( const time_point &p )
 {
@@ -542,28 +435,9 @@ float calendar::season_from_default_ratio()
     return to_days<float>( season_length() ) / default_season_length;
 }
 
-void calendar::sync()
-{
-    const int sl = to_days<int>( season_length() );
-    year = turn_number / to_turns<int>( time_duration::from_days( sl * 4 ) );
-
-    if( eternal_season() ) {
-        // If we use calendar::start to determine the initial season, and the user shortens the season length
-        // mid-game, the result could be the wrong season!
-        season = initial_season;
-    } else {
-        season = season_type( turn_number / to_turns<int>( time_duration::from_days( sl ) ) % 4 );
-    }
-
-    day = turn_number / to_turns<int>( time_duration::from_days( 1 ) ) % sl;
-    hour = turn_number / to_turns<int>( 1_hours ) % 24;
-    minute = turn_number / to_turns<int>( 1_minutes ) % 60;
-    second = ( turn_number * 6 ) % 60;
-}
-
 bool calendar::once_every( const time_duration &event_frequency )
 {
-    return ( calendar::turn % to_turns<int>( event_frequency ) ) == 0;
+    return ( calendar::turn - calendar::time_of_cataclysm ) % event_frequency == 0;
 }
 
 const std::string calendar::name_season( season_type s )

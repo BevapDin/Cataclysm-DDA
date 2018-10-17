@@ -6789,7 +6789,7 @@ bool item::process_wet( player * /*carrier*/, const tripoint & /*pos*/ )
 bool item::process_tool( player *carrier, const tripoint &pos )
 {
     if( type->tool->turns_per_charge > 0 &&
-        int( calendar::turn ) % type->tool->turns_per_charge == 0 ) {
+        to_turn<int>( calendar::turn ) % type->tool->turns_per_charge == 0 ) {
         auto qty = std::max( ammo_required(), 1L );
         qty -= ammo_consume( qty, pos );
 
@@ -7189,7 +7189,7 @@ time_duration item::age() const
 
 void item::set_age( const time_duration age )
 {
-    set_birthday( time_point( calendar::turn ) - age );
+    set_birthday( calendar::turn - age );
 }
 
 time_point item::birthday() const

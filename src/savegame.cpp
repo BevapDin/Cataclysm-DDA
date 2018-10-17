@@ -73,8 +73,8 @@ void game::serialize( std::ostream &fout )
 
     json.start_object();
     // basic game state information.
-    json.member( "turn", static_cast<int>( calendar::turn ) );
-    json.member( "calendar_start", static_cast<int>( calendar::start ) );
+    json.member( "turn", calendar::turn );
+    json.member( "calendar_start", calendar::start );
     json.member( "initial_season", static_cast<int>( calendar::initial_season ) );
     if( const auto lt_ptr = last_target.lock() ) {
         if( const npc *const guy = dynamic_cast<const npc *>( lt_ptr.get() ) ) {
@@ -210,8 +210,8 @@ void game::unserialize( std::istream &fin )
         data.read( "om_x", comx );
         data.read( "om_y", comy );
 
-        calendar::turn = tmpturn;
-        calendar::start = tmpcalstart;
+        calendar::turn = time_point::from_turn( tmpturn );
+        calendar::start = time_point::from_turn( tmpcalstart );
 
         load_map( tripoint( levx + comx * OMAPX * 2, levy + comy * OMAPY * 2, levz ) );
 

@@ -1240,10 +1240,10 @@ bool game::cleanup_at_end()
 
         center_print( w_rip, iInfoLine++, c_white, _( "Survived:" ) );
 
-        int turns = calendar::turn - calendar::start;
-        int minutes = ( turns / to_turns<int>( 1_minutes ) ) % 60;
-        int hours = ( turns / to_turns<int>( 1_hours ) ) % 24;
-        int days = to_turns<int>(time_duration::from_turns(turns) );
+        const time_duration age = calendar::turn - calendar::start;
+        const int minutes = to_minutes<int>( age % 1_hours );
+        const int hours = to_hours<int>( age % 1_days );
+        const int days = to_days<int>( age );
 
         if( days > 0 ) {
             sTemp = string_format( "%dd %dh %dm", days, hours, minutes );
@@ -1503,7 +1503,7 @@ bool game::do_turn()
         new_game = false;
     } else {
         gamemode->per_turn();
-        calendar::turn.increment();
+        calendar::turn += 1_turns;
     }
 
     // starting a new turn, clear out temperature cache
@@ -3046,7 +3046,7 @@ void game::debug()
                 s.c_str(),
                 u.posx(), u.posy(), get_levx(), get_levy(),
                 overmap_buffer.ter( u.global_omt_location() )->get_name().c_str(),
-                int( calendar::turn ),
+                to_turn<int>( calendar::turn ),
                 ( get_option<bool>( "RANDOM_NPC" ) ? _( "NPCs are going to spawn." ) :
                   _( "NPCs are NOT going to spawn." ) ),
                 num_creatures() );
@@ -3265,7 +3265,7 @@ void game::debug()
                 smenu.addentry( 2, true, 'd', "%s: %d", _( "day" ), day_of_season<int>( calendar::turn ) );
                 smenu.addentry( 3, true, 'h', "%s: %d", _( "hour" ), hour_of_day<int>( calendar::turn ) );
                 smenu.addentry( 4, true, 'm', "%s: %d", _( "minute" ), minute_of_hour<int>( calendar::turn ) );
-                smenu.addentry( 5, true, 't', "%s: %d", _( "turn" ), static_cast<int>( calendar::turn ) );
+                smenu.addentry( 5, true, 't', "%s: %d", _( "turn" ), to_turn<int>( calendar::turn ) );
                 smenu.selected = iSel;
                 smenu.query();
 

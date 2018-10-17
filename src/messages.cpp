@@ -28,7 +28,7 @@ namespace
 
 struct game_message : public JsonDeserializer, public JsonSerializer {
     std::string       message;
-    time_point timestamp_in_turns  = 0;
+    time_point time = calendar::before_time_starts;
     int               timestamp_in_user_actions = 0;
     int               count = 1;
     game_message_type type  = m_neutral;
@@ -36,13 +36,13 @@ struct game_message : public JsonDeserializer, public JsonSerializer {
     game_message() = default;
     game_message( std::string &&msg, game_message_type const t ) :
         message( std::move( msg ) ),
-        timestamp_in_turns( calendar::turn ),
+        time( calendar::turn ),
         timestamp_in_user_actions( g->get_user_action_counter() ),
         type( t ) {
     }
 
     const time_point &turn() const {
-        return timestamp_in_turns;
+        return time;
     }
 
     std::string get_with_count() const {
@@ -77,7 +77,7 @@ struct game_message : public JsonDeserializer, public JsonSerializer {
 
     void deserialize( JsonIn &jsin ) override {
         JsonObject obj = jsin.get_object();
-        obj.read( "turn", timestamp_in_turns );
+        obj.read( "turn", time );
         message = obj.get_string( "message" );
         count = obj.get_int( "count" );
         type = static_cast<game_message_type>( obj.get_int( "type" ) );
@@ -85,7 +85,7 @@ struct game_message : public JsonDeserializer, public JsonSerializer {
 
     void serialize( JsonOut &jsout ) const override {
         jsout.start_object();
-        jsout.member( "turn", timestamp_in_turns );
+        jsout.member( "turn", time );
         jsout.member( "message", message );
         jsout.member( "count", count );
         jsout.member( "type", static_cast<int>( type ) );
@@ -97,7 +97,7 @@ class messages_impl
 {
     public:
         std::deque<game_message> messages;   // Messages to be printed
-        time_point curmes = 0; // The last-seen message.
+        time_point curmes = calendar::before_time_starts; // The last-seen message.
         bool active = true;
 
         bool has_undisplayed_messages() const {
@@ -124,7 +124,7 @@ class messages_impl
             }
 
             last_msg.count++;
-            last_msg.timestamp_in_turns = calendar::turn;
+            last_msg.time = calendar::turn;
             last_msg.timestamp_in_user_actions = g->get_user_action_counter();
             last_msg.type = type;
 
@@ -165,7 +165,7 @@ class messages_impl
 
             std::transform( begin( messages ) + offset, end( messages ), back_inserter( result ),
             []( game_message const & msg ) {
-                return std::make_pair( to_string_time_of_day( msg.timestamp_in_turns ),
+                return std::make_pair( to_string_time_of_day( msg.time ),
                                        msg.count ? msg.message + to_string( msg.count ) : msg.message );
             }
                           );
@@ -449,7 +449,7 @@ void Messages::dialog::show()
                             col, col, folded_all[folded_filtered[folded_ind]].second );
 
         // Generate aligned time string
-        const time_point msg_time = msg.timestamp_in_turns;
+        const time_point msg_time = msg.time;
         const std::string time_str = to_string_clipped( calendar::turn - msg_time, clipped_align::right );
 
         if( time_str != prev_time_str ) {
