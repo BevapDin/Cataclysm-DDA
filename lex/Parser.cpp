@@ -147,7 +147,7 @@ void Parser::parse( const std::vector<std::string> &headers )
         text += "#include \"" + header + "\"\n";
     }
     // @todo the include path should not be fixed!
-    const std::vector<const char *> args = { {
+    std::vector<const char *> args = { {
             "-std=c++11",
             "-fsyntax-only",
             "-Wno-pragma-once-outside-header",
