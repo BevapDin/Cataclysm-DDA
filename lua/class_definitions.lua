@@ -133,29 +133,27 @@ end
 
 function register_class(name, data)
     data.name = name
+    if not data.forward_declaration then
+        error("class definition must contain `forward_declaration`")
+    end
     types[name] = Class:create(data)
 end
 
 function Class:get_forward_declaration()
-    if self.forward_declaration then
-        return self.forward_declaration
-    end
-    -- @todo could be a struct!
-    return "class " .. self:get_cpp_name() .. ";"
+    return self.forward_declaration
 end
 
 Enum = UserDefinedBase:create()
 function register_enum(name, data)
     data.name = name
+    if not data.forward_declaration then
+        error("enum definition must contain `forward_declaration`")
+    end
     types[name] = Enum:create(data)
 end
 
 function Enum:get_forward_declaration()
-    if self.forward_declaration then
-        return self.forward_declaration
-    end
-    -- @todo could be different underlying type
-    return "enum " .. self:get_cpp_name() .. " : int;"
+    return self.forward_declaration
 end
 
 function ref_or_val(t)
