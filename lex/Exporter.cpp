@@ -438,7 +438,8 @@ cata::optional<std::string> Exporter::register_std_iterator( const std::string &
         return {};
     }
 
-    generic_types[sp] = "make_std_iterator_class(\"" + element_type + "\")";
+    // Generating the container wrapper also generates the iterator wrapper
+    generic_types[sp] = "make_std_" + name + "_class(\"" + element_type + "\")";
     return "\"std::" + name + "<" + element_type + ">::iterator\"";
 }
 
