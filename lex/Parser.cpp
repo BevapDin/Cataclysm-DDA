@@ -153,7 +153,6 @@ void Parser::parse( const std::vector<std::string> &headers )
             "-Wno-pragma-once-outside-header",
             "-stdlib=libc++",
             "-x", "c++",
-            "foo.h",
         }
     };
     for( const std::string &arg : additional_args ) {
