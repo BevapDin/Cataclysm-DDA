@@ -211,7 +211,7 @@ static std::string print_set( const std::set<std::string> &lines, const std::str
 {
     std::string r = prefix;
     for( const std::string &l : lines ) {
-        r = r + std::string( 12, ' ' ) + l + ",\n";
+        r = r + std::string( 8, ' ' ) + l + ",\n";
     }
     r = r + postfix;
     return r;
