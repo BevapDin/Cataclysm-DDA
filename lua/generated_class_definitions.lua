@@ -1,6 +1,6 @@
 register_class("Character", {
     forward_declaration = "class Character;\n",
-    code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"creature.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
+    code_prepend = "#include \"character.h\"\n#include \"string_id.h\"\n#include \"color.h\"\n#include \"item.h\"\n#include \"calendar.h\"\n#include <vector>\n",
     parent = "Creature",
     new = {
     },
@@ -38,6 +38,7 @@ register_class("Character", {
             { name = "can_pickWeight", rval = "bool", args = { "item", "bool" } },
             { name = "can_use", rval = "bool", args = { "item" } },
             { name = "can_use", rval = "bool", args = { "item", "item" } },
+            { name = "drop_invalid_inventory", rval = nil, args = { } },
             { name = "effective_dispersion", rval = "int", args = { "int" } },
             { name = "empty_skills", rval = nil, args = { } },
             { name = "empty_traits", rval = nil, args = { } },
@@ -63,6 +64,7 @@ register_class("Character", {
             { name = "get_per_bonus", rval = "int", args = { } },
             { name = "get_skill_level", rval = "int", args = { "skill_id" } },
             { name = "get_skill_level", rval = "int", args = { "skill_id", "item" } },
+            { name = "get_sleep_deprivation", rval = "int", args = { } },
             { name = "get_starvation", rval = "int", args = { } },
             { name = "get_stomach_food", rval = "int", args = { } },
             { name = "get_stomach_water", rval = "int", args = { } },
@@ -106,6 +108,7 @@ register_class("Character", {
             { name = "mod_int_bonus", rval = nil, args = { "int" } },
             { name = "mod_per_bonus", rval = nil, args = { "int" } },
             { name = "mod_skill_level", rval = nil, args = { "skill_id", "int" } },
+            { name = "mod_sleep_deprivation", rval = nil, args = { "int" } },
             { name = "mod_starvation", rval = nil, args = { "int" } },
             { name = "mod_stomach_food", rval = nil, args = { "int" } },
             { name = "mod_stomach_water", rval = nil, args = { "int" } },
@@ -117,6 +120,7 @@ register_class("Character", {
             { name = "mutation_value", rval = "float", args = { "string" } },
             { name = "on_item_takeoff", rval = nil, args = { "item" } },
             { name = "on_item_wear", rval = nil, args = { "item" } },
+            { name = "on_worn_item_washed", rval = nil, args = { "item" } },
             { name = "pick_name", rval = nil, args = { "bool" } },
             { name = "pick_name", rval = nil, args = { } },
             { name = "pour_into", rval = "bool", args = { "item", "item" } },
@@ -140,6 +144,7 @@ register_class("Character", {
             { name = "set_mutation", rval = nil, args = { "trait_id" } },
             { name = "set_per_bonus", rval = nil, args = { "int" } },
             { name = "set_skill_level", rval = nil, args = { "skill_id", "int" } },
+            { name = "set_sleep_deprivation", rval = nil, args = { "int" } },
             { name = "set_starvation", rval = nil, args = { "int" } },
             { name = "set_stomach_food", rval = nil, args = { "int" } },
             { name = "set_stomach_water", rval = nil, args = { "int" } },
@@ -169,7 +174,7 @@ register_class("Character", {
 
 register_class("Creature", {
     forward_declaration = "class Creature;\n",
-    code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n",
+    code_prepend = "#include \"creature.h\"\n#include \"calendar.h\"\n#include <vector>\n#include <set>\n#include \"color.h\"\n",
     new = {
     },
     attributes = {
@@ -195,6 +200,7 @@ register_class("Creature", {
             { name = "add_msg_player_or_npc", rval = nil, args = { "string", "string" } },
             { name = "add_msg_player_or_say", rval = nil, args = { "string", "string" } },
             { name = "apply_damage", rval = nil, args = { "Creature*", "body_part", "int" } },
+            { name = "apply_damage", rval = nil, args = { "Creature*", "body_part", "int", "bool" } },
             { name = "avoid_trap", rval = "bool", args = { "tripoint", "trap" } },
             { name = "basic_symbol_color", rval = "nc_color", args = { } },
             { name = "bleed", rval = nil, args = { } },
@@ -290,6 +296,7 @@ register_class("Creature", {
             { name = "is_warm", rval = "bool", args = { } },
             { name = "knock_back_from", rval = nil, args = { "tripoint" } },
             { name = "made_of", rval = "bool", args = { "material_id" } },
+            { name = "made_of_any", rval = "bool", args = { "std::set<material_id>" } },
             { name = "mod_bash_bonus", rval = nil, args = { "int" } },
             { name = "mod_block_bonus", rval = nil, args = { "int" } },
             { name = "mod_cut_bonus", rval = nil, args = { "int" } },
@@ -645,6 +652,7 @@ register_class("game", {
             { name = "draw", rval = nil, args = { } },
             { name = "draw_bullet", rval = nil, args = { "tripoint", "int", "std::vector<tripoint>", "int" } },
             { name = "draw_critter", rval = nil, args = { "Creature", "tripoint" } },
+            { name = "draw_cursor", rval = nil, args = { "tripoint" } },
             { name = "draw_explosion", rval = nil, args = { "tripoint", "int", "nc_color" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster" } },
             { name = "draw_hit_mon", rval = nil, args = { "tripoint", "monster", "bool" } },
@@ -652,6 +660,7 @@ register_class("game", {
             { name = "draw_line", rval = nil, args = { "tripoint", "std::vector<tripoint>" } },
             { name = "draw_line", rval = nil, args = { "tripoint", "tripoint", "std::vector<tripoint>" } },
             { name = "draw_sct", rval = nil, args = { } },
+            { name = "draw_sidebar_messages", rval = nil, args = { } },
             { name = "draw_ter", rval = nil, args = { "bool" } },
             { name = "draw_ter", rval = nil, args = { "tripoint" } },
             { name = "draw_ter", rval = nil, args = { "tripoint", "bool" } },
@@ -713,7 +722,7 @@ register_class("game", {
             { name = "is_in_viewport", rval = "bool", args = { "tripoint" } },
             { name = "is_in_viewport", rval = "bool", args = { "tripoint", "int" } },
             { name = "is_sheltered", rval = "bool", args = { "tripoint" } },
-            { name = "is_zone_manager_open", rval = "bool", args = { } },
+            { name = "is_zones_manager_open", rval = "bool", args = { } },
             { name = "kill_count", rval = "int", args = { "mtype_id" } },
             { name = "kill_count", rval = "int", args = { "species_id" } },
             { name = "knockback", rval = nil, args = { "std::vector<tripoint>", "int", "int", "int" } },
@@ -739,9 +748,11 @@ register_class("game", {
             { name = "plfire", rval = "bool", args = { } },
             { name = "plswim", rval = nil, args = { "tripoint" } },
             { name = "process_artifact", rval = nil, args = { "item", "player" } },
+            { name = "quicksave", rval = nil, args = { } },
             { name = "reenter_fullscreen", rval = nil, args = { } },
             { name = "refresh_all", rval = nil, args = { } },
             { name = "reload_npcs", rval = nil, args = { } },
+            { name = "reload_tileset", rval = nil, args = { } },
             { name = "remove_zombie", rval = nil, args = { "monster" } },
             { name = "reset_light_level", rval = nil, args = { } },
             { name = "reset_zoom", rval = nil, args = { } },
@@ -788,7 +799,7 @@ register_class("game", {
 
 register_class("gun_mode", {
     forward_declaration = "class gun_mode;\n",
-    code_prepend = "#include \"gun_mode.h\"\n#include \"item.h\"\n",
+    code_prepend = "#include \"gun_mode.h\"\n",
     new = {
             { },
     },
@@ -806,7 +817,9 @@ make_id_classes("gun_mode", nil, "gun_mode_id")
 
 register_class("islot_ammo", {
     forward_declaration = "struct islot_ammo;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             cookoff = { type = "bool", writable = true },
             damage = { type = "damage_instance", writable = true },
@@ -826,9 +839,12 @@ register_class("islot_ammo", {
     functions = {
     }
 } )
+
 register_class("islot_armor", {
     forward_declaration = "struct islot_armor;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             coverage = { type = "int", writable = true },
             encumber = { type = "int", writable = true },
@@ -843,9 +859,12 @@ register_class("islot_armor", {
     functions = {
     }
 } )
+
 register_class("islot_artifact", {
     forward_declaration = "struct islot_artifact;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             dream_freq_met = { type = "int", writable = true },
             dream_freq_unmet = { type = "int", writable = true },
@@ -853,18 +872,24 @@ register_class("islot_artifact", {
     functions = {
     }
 } )
+
 register_class("islot_bionic", {
     forward_declaration = "struct islot_bionic;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             difficulty = { type = "int", writable = true },
     },
     functions = {
     }
 } )
+
 register_class("islot_book", {
     forward_declaration = "struct islot_book;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             chapters = { type = "int", writable = true },
             fun = { type = "int", writable = true },
@@ -877,23 +902,30 @@ register_class("islot_book", {
     functions = {
     }
 } )
+
 register_class("islot_brewable", {
     forward_declaration = "struct islot_brewable;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             time = { type = "time_duration", writable = true },
     },
     functions = {
     }
 } )
+
 register_class("islot_comestible", {
     forward_declaration = "struct islot_comestible;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             add = { type = "add_type", writable = true },
             addict = { type = "int", writable = true },
             comesttype = { type = "string", writable = true },
             def_charges = { type = "int", writable = true },
+            freeze_point = { type = "int", writable = true },
             fun = { type = "int", writable = true },
             healthy = { type = "int", writable = true },
             nutr = { type = "int", writable = true },
@@ -909,9 +941,12 @@ register_class("islot_comestible", {
             { name = "get_calories", rval = "int", args = { } },
     }
 } )
+
 register_class("islot_container", {
     forward_declaration = "struct islot_container;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             contains = { type = "volume", writable = true },
             preserves = { type = "bool", writable = true },
@@ -922,27 +957,38 @@ register_class("islot_container", {
     functions = {
     }
 } )
+
 register_class("islot_engine", {
     forward_declaration = "struct islot_engine;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             displacement = { type = "int", writable = true },
     },
     functions = {
     }
 } )
+
 register_class("islot_fuel", {
     forward_declaration = "struct islot_fuel;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             energy = { type = "float", writable = true },
+            has_explode_data = { type = "bool", writable = true },
+            pump_terrain = { type = "string", writable = true },
     },
     functions = {
     }
 } )
+
 register_class("islot_gun", {
     forward_declaration = "struct islot_gun;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             ammo = { type = "ammotype", writable = true },
             barrel_length = { type = "volume", writable = true },
@@ -967,9 +1013,12 @@ register_class("islot_gun", {
     functions = {
     }
 } )
+
 register_class("islot_gunmod", {
     forward_declaration = "struct islot_gunmod;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             aim_speed = { type = "int", writable = true },
             damage = { type = "damage_instance", writable = true },
@@ -986,14 +1035,16 @@ register_class("islot_gunmod", {
     functions = {
     }
 } )
+
 register_class("islot_magazine", {
     forward_declaration = "struct islot_magazine;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             capacity = { type = "int", writable = true },
             count = { type = "int", writable = true },
             default_ammo = { type = "string", writable = true },
-            linkage = { type = "string", writable = true },
             protects_contents = { type = "bool", writable = true },
             reliability = { type = "int", writable = true },
             reload_time = { type = "int", writable = true },
@@ -1002,9 +1053,12 @@ register_class("islot_magazine", {
     functions = {
     }
 } )
+
 register_class("islot_mod", {
     forward_declaration = "struct islot_mod;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             acceptable_ammo = { type = "std::set<ammotype>", writable = true },
             ammo_modifier = { type = "ammotype", writable = true },
@@ -1013,9 +1067,10 @@ register_class("islot_mod", {
     functions = {
     }
 } )
+
 register_class("islot_seed", {
     forward_declaration = "struct islot_seed;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
     new = {
             { },
     },
@@ -1029,9 +1084,12 @@ register_class("islot_seed", {
     functions = {
     }
 } )
+
 register_class("islot_tool", {
     forward_declaration = "struct islot_tool;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             ammo_id = { type = "ammotype", writable = true },
             charges_per_use = { type = "int", writable = true },
@@ -1044,9 +1102,12 @@ register_class("islot_tool", {
     functions = {
     }
 } )
+
 register_class("islot_wheel", {
     forward_declaration = "struct islot_wheel;\n",
-        code_prepend = "#include \"itype.h\"\n",
+    code_prepend = "#include \"itype.h\"\n",
+    new = {
+    },
     attributes = {
             diameter = { type = "int", writable = true },
             width = { type = "int", writable = true },
@@ -1054,9 +1115,10 @@ register_class("islot_wheel", {
     functions = {
     }
 } )
+
 register_class("item", {
     forward_declaration = "class item;\n",
-    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"creature.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n#include \"gun_mode.h\"\n",
+    code_prepend = "#include \"item.h\"\n#include \"calendar.h\"\n#include \"color.h\"\n#include \"damage.h\"\n#include \"string_id.h\"\n#include \"enums.h\"\n#include <set>\n#include \"int_id.h\"\n#include <vector>\n",
     new = {
             { "item" },
             { "itype*" },
@@ -1108,6 +1170,7 @@ register_class("item", {
             { name = "ammo_type", rval = "ammotype", args = { "bool" } },
             { name = "ammo_type", rval = "ammotype", args = { } },
             { name = "ammo_unset", rval = "item&", args = { } },
+            { name = "apply_freezerburn", rval = nil, args = { } },
             { name = "attack_time", rval = "int", args = { } },
             { name = "base_damage_melee", rval = "damage_instance", args = { } },
             { name = "base_damage_thrown", rval = "damage_instance", args = { } },
@@ -1123,6 +1186,7 @@ register_class("item", {
             { name = "can_holster", rval = "bool", args = { "item", "bool" } },
             { name = "can_reload_with", rval = "bool", args = { "string" } },
             { name = "can_revive", rval = "bool", args = { } },
+            { name = "can_unload_liquid", rval = "bool", args = { } },
             { name = "casings_count", rval = "int", args = { } },
             { name = "charges_per_volume", rval = "int", args = { "volume" } },
             { name = "chip_resistance", rval = "int", args = { "bool" } },
@@ -1133,6 +1197,7 @@ register_class("item", {
             { name = "components_to_string", rval = "string", args = { } },
             { name = "conductive", rval = "bool", args = { } },
             { name = "contain_monster", rval = "int", args = { "tripoint" } },
+            { name = "contents_made_of", rval = "bool", args = { "phase_id" } },
             { name = "contextualize_skill", rval = "skill_id", args = { "skill_id" } },
             { name = "convert", rval = "item&", args = { "string" } },
             { name = "corpse_volume", rval = "volume", args = { "m_size" } },
@@ -1176,10 +1241,10 @@ register_class("item", {
             { name = "get_container_capacity", rval = "volume", args = { } },
             { name = "get_coverage", rval = "int", args = { } },
             { name = "get_encumber", rval = "int", args = { } },
+            { name = "get_encumber_when_containing", rval = "int", args = { "volume" } },
             { name = "get_env_resist", rval = "int", args = { } },
             { name = "get_env_resist_w_filter", rval = "int", args = { } },
             { name = "get_gun_ups_drain", rval = "int", args = { } },
-            { name = "get_layer", rval = "int", args = { } },
             { name = "get_mtype", rval = "mtype&", args = { } },
             { name = "get_plant_epoch", rval = "time_duration", args = { } },
             { name = "get_plant_name", rval = "string", args = { } },
@@ -1232,6 +1297,7 @@ register_class("item", {
             { name = "has_rotten_away", rval = "bool", args = { } },
             { name = "has_technique", rval = "bool", args = { "matec_id" } },
             { name = "has_var", rval = "bool", args = { "string" } },
+            { name = "heat_up", rval = nil, args = { } },
             { name = "in_container", rval = "item", args = { "string" } },
             { name = "in_its_container", rval = "item", args = { } },
             { name = "inc_damage", rval = "bool", args = { "damage_type" } },
@@ -1271,6 +1337,7 @@ register_class("item", {
             { name = "is_gunmod", rval = "bool", args = { } },
             { name = "is_irremovable", rval = "bool", args = { } },
             { name = "is_magazine", rval = "bool", args = { } },
+            { name = "is_med_container", rval = "bool", args = { } },
             { name = "is_medication", rval = "bool", args = { } },
             { name = "is_melee", rval = "bool", args = { "damage_type" } },
             { name = "is_melee", rval = "bool", args = { } },
@@ -1301,6 +1368,7 @@ register_class("item", {
             { name = "made_of", rval = "bool", args = { "phase_id" } },
             { name = "made_of", rval = "std::vector<material_id>", args = { } },
             { name = "made_of_any", rval = "bool", args = { "std::set<material_id>" } },
+            { name = "made_of_from_type", rval = "bool", args = { "phase_id" } },
             { name = "magazine_convert", rval = "std::vector<item>", args = { } },
             { name = "magazine_current", rval = "item&", args = { } },
             { name = "magazine_default", rval = "string", args = { "bool" } },
@@ -1319,12 +1387,14 @@ register_class("item", {
             { name = "mod_charges", rval = nil, args = { "int" } },
             { name = "mod_damage", rval = "bool", args = { "int" } },
             { name = "mod_damage", rval = "bool", args = { "int", "damage_type" } },
+            { name = "mod_rot", rval = nil, args = { "time_duration" } },
             { name = "needs_processing", rval = "bool", args = { } },
             { name = "nname", static = true, rval = "string", args = { "string" } },
             { name = "nname", static = true, rval = "string", args = { "string", "int" } },
             { name = "on_contents_changed", rval = nil, args = { } },
             { name = "on_damage", rval = nil, args = { "int", "damage_type" } },
             { name = "on_drop", rval = "bool", args = { "tripoint" } },
+            { name = "on_drop", rval = "bool", args = { "tripoint", "map" } },
             { name = "on_pickup", rval = nil, args = { "Character" } },
             { name = "on_takeoff", rval = nil, args = { "Character" } },
             { name = "on_wear", rval = nil, args = { "Character" } },
@@ -1333,6 +1403,7 @@ register_class("item", {
             { name = "only_made_of", rval = "bool", args = { "std::set<material_id>" } },
             { name = "price", rval = "int", args = { "bool" } },
             { name = "process", rval = "bool", args = { "player*", "tripoint", "bool" } },
+            { name = "process", rval = "bool", args = { "player*", "tripoint", "bool", "int", "float" } },
             { name = "process_artifact", rval = nil, args = { "player*", "tripoint" } },
             { name = "processing_speed", rval = "int", args = { } },
             { name = "put_in", rval = nil, args = { "item" } },
@@ -1341,6 +1412,7 @@ register_class("item", {
             { name = "release_monster", rval = "int", args = { "tripoint" } },
             { name = "release_monster", rval = "int", args = { "tripoint", "bool" } },
             { name = "reset_cable", rval = nil, args = { "player*" } },
+            { name = "reset_temp_check", rval = nil, args = { } },
             { name = "rotten", rval = "bool", args = { } },
             { name = "set_age", rval = nil, args = { "time_duration" } },
             { name = "set_birthday", rval = nil, args = { "time_point" } },
@@ -1377,6 +1449,7 @@ register_class("item", {
             { name = "units_sufficient", rval = "bool", args = { "Character", "int" } },
             { name = "unset_flag", rval = "item&", args = { "string" } },
             { name = "unset_flags", rval = nil, args = { } },
+            { name = "update_temp", rval = nil, args = { "int", "float" } },
             { name = "volume", rval = "volume", args = { "bool" } },
             { name = "volume", rval = "volume", args = { } },
             { name = "weight", rval = "mass", args = { "bool" } },
@@ -1406,13 +1479,13 @@ register_class("itype", {
             countdown_interval = { type = "int", writable = true },
             damage_max = { type = "int", writable = true },
             damage_min = { type = "int", writable = true },
-            default_container = { type = "string", writable = true },
             description = { type = "string", writable = true },
             engine = { type = "cata::optional<islot_engine>", writable = true },
             explode_in_fire = { type = "bool", writable = true },
             fuel = { type = "cata::optional<islot_fuel>", writable = true },
             gun = { type = "cata::optional<islot_gun>", writable = true },
             gunmod = { type = "cata::optional<islot_gunmod>", writable = true },
+            insulation_factor = { type = "float", writable = true },
             integral_volume = { type = "volume", writable = true },
             light_emission = { type = "int", writable = true },
             looks_like = { type = "string", writable = true },
@@ -1482,7 +1555,6 @@ register_class("ma_buff", {
             { name = "armor_bonus", rval = "int", args = { "player", "damage_type" } },
             { name = "block_bonus", rval = "int", args = { "player" } },
             { name = "can_melee", rval = "bool", args = { } },
-            { name = "can_unarmed_weapon", rval = "bool", args = { } },
             { name = "damage_bonus", rval = "float", args = { "player", "damage_type" } },
             { name = "damage_mult", rval = "float", args = { "player", "damage_type" } },
             { name = "dodge_bonus", rval = "int", args = { "player" } },
@@ -1809,8 +1881,8 @@ register_class("map", {
             { name = "supports_above", rval = "bool", args = { "tripoint" } },
             { name = "ter", rval = "ter_id", args = { "int", "int" } },
             { name = "ter", rval = "ter_id", args = { "tripoint" } },
-            { name = "ter_set", rval = nil, args = { "int", "int", "ter_id" } },
-            { name = "ter_set", rval = nil, args = { "tripoint", "ter_id" } },
+            { name = "ter_set", rval = "bool", args = { "int", "int", "ter_id" } },
+            { name = "ter_set", rval = "bool", args = { "tripoint", "ter_id" } },
             { name = "tername", rval = "string", args = { "int", "int" } },
             { name = "tername", rval = "string", args = { "tripoint" } },
             { name = "tr_at", rval = "trap&", args = { "tripoint" } },
@@ -2137,6 +2209,7 @@ register_class("mtype", {
             { name = "in_species", rval = "bool", args = { "species_id" } },
             { name = "in_species", rval = "bool", args = { "species_type" } },
             { name = "made_of", rval = "bool", args = { "material_id" } },
+            { name = "made_of_any", rval = "bool", args = { "std::set<material_id>" } },
             { name = "nname", rval = "string", args = { "int" } },
             { name = "nname", rval = "string", args = { } },
             { name = "same_species", rval = "bool", args = { "mtype" } },
@@ -2161,6 +2234,7 @@ register_class("mutation_branch", {
             cancels = { type = "std::vector<trait_id>", writable = true },
             cooldown = { type = "int", writable = true },
             cost = { type = "int", writable = true },
+            debug = { type = "bool", writable = true },
             destroys_gear = { type = "bool", writable = true },
             fatigue = { type = "bool", writable = true },
             fatigue_modifier = { type = "float", writable = true },
@@ -2195,10 +2269,13 @@ register_class("mutation_branch", {
     },
     functions = {
             { name = "conflicts_with_item", rval = "bool", args = { "item" } },
+            { name = "desc", rval = "string", args = { "player" } },
             { name = "finalize_trait_blacklist", static = true, rval = nil, args = { } },
             { name = "get_display_color", rval = "nc_color", args = { } },
             { name = "get_name", static = true, rval = "string", args = { "trait_id" } },
+            { name = "name", rval = "string", args = { } },
             { name = "reset_all", static = true, rval = nil, args = { } },
+            { name = "spawn_item_message", rval = "string", args = { } },
             { name = "trait_is_blacklisted", static = true, rval = "bool", args = { "trait_id" } },
     }
 } )
@@ -2268,7 +2345,7 @@ register_class("overmap", {
 
 register_class("player", {
     forward_declaration = "class player;\n",
-    code_prepend = "#include \"player.h\"\n#include \"creature.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
+    code_prepend = "#include \"player.h\"\n#include \"color.h\"\n#include \"int_id.h\"\n#include <vector>\n#include \"enums.h\"\n#include \"item.h\"\n#include <list>\n",
     parent = "Character",
     new = {
             { "player" },
@@ -2282,6 +2359,7 @@ register_class("player", {
             dodges_left = { type = "int", writable = true },
             focus_pool = { type = "int", writable = true },
             grab_point = { type = "tripoint", writable = true },
+            hauling = { type = "bool", writable = true },
             in_vehicle = { type = "bool", writable = true },
             keep_hands_free = { type = "bool", writable = true },
             last_batch = { type = "int", writable = true },
@@ -2330,8 +2408,8 @@ register_class("player", {
             { name = "base_time_to_craft", rval = "int", args = { "recipe", "int" } },
             { name = "best_shield", rval = "item&", args = { } },
             { name = "bionic_armor_bonus", rval = "float", args = { "body_part", "damage_type" } },
-            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id", "bool" } },
-            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id", "bool", "int" } },
+            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id" } },
+            { name = "bionics_adjusted_skill", rval = "float", args = { "skill_id", "skill_id", "skill_id", "int" } },
             { name = "bionics_install_failure", rval = nil, args = { "player", "int", "int", "float" } },
             { name = "bionics_uninstall_failure", rval = nil, args = { "player" } },
             { name = "blossoms", rval = nil, args = { } },
@@ -2408,6 +2486,9 @@ register_class("player", {
             { name = "expected_time_to_craft", rval = "int", args = { "recipe" } },
             { name = "expected_time_to_craft", rval = "int", args = { "recipe", "int" } },
             { name = "fall_asleep", rval = nil, args = { "time_duration" } },
+            { name = "fall_asleep", rval = nil, args = { } },
+            { name = "finalize_terrain_memory_curses", rval = nil, args = { } },
+            { name = "finalize_tile_memory", rval = nil, args = { } },
             { name = "fine_detail_vision_mod", rval = "float", args = { } },
             { name = "fire_gun", rval = "int", args = { "tripoint" } },
             { name = "fire_gun", rval = "int", args = { "tripoint", "int" } },
@@ -2427,6 +2508,7 @@ register_class("player", {
             { name = "get_free_bionics_slots", rval = "int", args = { "body_part" } },
             { name = "get_highest_category", rval = "string", args = { } },
             { name = "get_hit_weapon", rval = "float", args = { "item" } },
+            { name = "get_memorized_terrain_curses", rval = "int", args = { "tripoint" } },
             { name = "get_miss_reason", rval = "string", args = { } },
             { name = "get_morale_level", rval = "int", args = { } },
             { name = "get_painkiller", rval = "int", args = { } },
@@ -2455,6 +2537,7 @@ register_class("player", {
             { name = "has_child_flag", rval = "bool", args = { "trait_id" } },
             { name = "has_conflicting_trait", rval = "bool", args = { "trait_id" } },
             { name = "has_destination", rval = "bool", args = { } },
+            { name = "has_destination_activity", rval = "bool", args = { } },
             { name = "has_enough_charges", rval = "bool", args = { "item", "bool" } },
             { name = "has_gun_for_ammo", rval = "bool", args = { "ammotype" } },
             { name = "has_higher_trait", rval = "bool", args = { "trait_id" } },
@@ -2470,6 +2553,7 @@ register_class("player", {
             { name = "has_morale_to_read", rval = "bool", args = { } },
             { name = "has_opposite_trait", rval = "bool", args = { "trait_id" } },
             { name = "has_recipe_requirements", rval = "bool", args = { "recipe" } },
+            { name = "has_same_type_trait", rval = "bool", args = { "trait_id" } },
             { name = "has_technique", rval = "bool", args = { "matec_id", "item" } },
             { name = "has_two_arms", rval = "bool", args = { } },
             { name = "has_watch", rval = "bool", args = { } },
@@ -2495,6 +2579,7 @@ register_class("player", {
             { name = "invoke_item", rval = "bool", args = { "item*", "string", "tripoint" } },
             { name = "invoke_item", rval = "bool", args = { "item*", "tripoint" } },
             { name = "is_deaf", rval = "bool", args = { } },
+            { name = "is_hauling", rval = "bool", args = { } },
             { name = "is_hibernating", rval = "bool", args = { } },
             { name = "is_invisible", rval = "bool", args = { } },
             { name = "is_quiet", rval = "bool", args = { } },
@@ -2520,7 +2605,6 @@ register_class("player", {
             { name = "learn_recipe", rval = nil, args = { "recipe*" } },
             { name = "lighting_craft_speed_multiplier", rval = "float", args = { "recipe" } },
             { name = "load_info", rval = nil, args = { "string" } },
-            { name = "load_template", rval = "bool", args = { "string" } },
             { name = "long_craft", rval = nil, args = { } },
             { name = "ma_onattack_effects", rval = nil, args = { } },
             { name = "ma_onblock_effects", rval = nil, args = { } },
@@ -2543,11 +2627,14 @@ register_class("player", {
             { name = "make_craft_with_command", rval = nil, args = { "recipe_id", "int" } },
             { name = "make_craft_with_command", rval = nil, args = { "recipe_id", "int", "bool" } },
             { name = "making_would_work", rval = "bool", args = { "recipe_id", "int" } },
+            { name = "max_memorized_submaps", rval = "int", args = { } },
             { name = "melee_attack", rval = nil, args = { "Creature", "bool" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "bool", "matec_id" } },
             { name = "melee_attack", rval = nil, args = { "Creature", "bool", "matec_id", "bool" } },
             { name = "melee_special_effects", rval = "string", args = { "Creature", "damage_instance", "item" } },
             { name = "melee_value", rval = "float", args = { "item" } },
+            { name = "memorize_terrain_curses", rval = nil, args = { "tripoint", "int" } },
+            { name = "memorize_tile", rval = nil, args = { "tripoint", "string", "int", "int" } },
             { name = "mend", rval = nil, args = { "int" } },
             { name = "metabolic_rate", rval = "float", args = { } },
             { name = "metabolic_rate_base", rval = "float", args = { } },
@@ -2620,6 +2707,7 @@ register_class("player", {
             { name = "setz", rval = nil, args = { "int" } },
             { name = "shift_destination", rval = nil, args = { "int", "int" } },
             { name = "shoe_type_count", rval = "int", args = { "string" } },
+            { name = "should_show_map_memory", rval = "bool", args = { } },
             { name = "shout", rval = nil, args = { "string" } },
             { name = "shout", rval = nil, args = { } },
             { name = "sight_impaired", rval = "bool", args = { } },
@@ -2627,7 +2715,10 @@ register_class("player", {
             { name = "sort_armor", rval = nil, args = { } },
             { name = "sound_hallu", rval = nil, args = { } },
             { name = "spores", rval = nil, args = { } },
+            { name = "start_destination_activity", rval = nil, args = { } },
+            { name = "start_hauling", rval = nil, args = { } },
             { name = "stomach_capacity", rval = "int", args = { } },
+            { name = "stop_hauling", rval = nil, args = { } },
             { name = "store", rval = nil, args = { "item", "item" } },
             { name = "store", rval = nil, args = { "item", "item", "bool" } },
             { name = "store", rval = nil, args = { "item", "item", "bool", "int" } },
@@ -2642,10 +2733,11 @@ register_class("player", {
             { name = "thirst_speed_penalty", static = true, rval = "int", args = { "int" } },
             { name = "time_to_read", rval = "int", args = { "item", "player" } },
             { name = "time_to_read", rval = "int", args = { "item", "player", "player*" } },
+            { name = "toggle_map_memory", rval = nil, args = { } },
             { name = "toggle_move_mode", rval = nil, args = { } },
+            { name = "try_to_sleep", rval = nil, args = { "time_duration" } },
             { name = "try_to_sleep", rval = nil, args = { } },
             { name = "unarmed_attack", rval = "bool", args = { } },
-            { name = "unarmed_override", rval = "bool", args = { } },
             { name = "unarmed_value", rval = "float", args = { } },
             { name = "unimpaired_range", rval = "int", args = { } },
             { name = "unwield", rval = "bool", args = { } },
@@ -2928,6 +3020,9 @@ register_class("uimenu", {
             { },
     },
     attributes = {
+            allow_anykey = { type = "bool", writable = true },
+            allow_cancel = { type = "bool", writable = true },
+            allow_disabled = { type = "bool", writable = true },
             border = { type = "bool", writable = true },
             border_color = { type = "nc_color", writable = true },
             centered_scroll = { type = "bool", writable = true },
@@ -2979,6 +3074,7 @@ register_class("uimenu", {
             { name = "init", rval = nil, args = { } },
             { name = "inputfilter", rval = "string", args = { } },
             { name = "query", rval = nil, args = { "bool" } },
+            { name = "query", rval = nil, args = { "bool", "int" } },
             { name = "query", rval = nil, args = { } },
             { name = "redraw", rval = nil, args = { "bool" } },
             { name = "redraw", rval = nil, args = { } },
@@ -3012,6 +3108,7 @@ register_class("w_point", {
 
 
 register_enum("add_type", {
+    forward_declaration = "enum add_type : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
         "ADD_NULL",
@@ -3032,6 +3129,7 @@ register_enum("add_type", {
 } )
 
 register_enum("body_part", {
+    forward_declaration = "enum body_part : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
         "bp_torso",
@@ -3051,6 +3149,7 @@ register_enum("body_part", {
 } )
 
 register_enum("damage_type", {
+    forward_declaration = "enum damage_type : int;\n",
     code_prepend = "#include \"damage.h\"",
     values = {
         "DT_NULL",
@@ -3068,6 +3167,7 @@ register_enum("damage_type", {
 } )
 
 register_enum("field_id", {
+    forward_declaration = "enum field_id : int;\n",
     code_prepend = "#include \"field.h\"",
     values = {
         "fd_null",
@@ -3122,6 +3222,7 @@ register_enum("field_id", {
 } )
 
 register_enum("hp_part", {
+    forward_declaration = "enum hp_part : int;\n",
     code_prepend = "#include \"pldata.h\"",
     values = {
         "hp_head",
@@ -3135,6 +3236,7 @@ register_enum("hp_part", {
 } )
 
 register_enum("m_size", {
+    forward_declaration = "enum m_size : int;\n",
     code_prepend = "#include \"creature.h\"",
     values = {
         "MS_TINY",
@@ -3146,6 +3248,7 @@ register_enum("m_size", {
 } )
 
 register_enum("phase_id", {
+    forward_declaration = "enum phase_id : int;\n",
     code_prepend = "#include \"enums.h\"",
     values = {
         "PNULL",
@@ -3157,6 +3260,7 @@ register_enum("phase_id", {
 } )
 
 register_enum("season_type", {
+    forward_declaration = "enum season_type;\n",
     code_prepend = "#include \"calendar.h\"",
     values = {
         "SPRING",
@@ -3167,6 +3271,7 @@ register_enum("season_type", {
 } )
 
 register_enum("side", {
+    forward_declaration = "enum class side : int;\n",
     code_prepend = "#include \"bodypart.h\"",
     values = {
         "BOTH",
@@ -3190,13 +3295,24 @@ MENU_ALIGN_LEFT = { type = "int" },
 MENU_ALIGN_RIGHT = { type = "int" },
 MENU_AUTOASSIGN = { type = "int" },
 MENU_WIDTH_ENTRIES = { type = "int" },
+UIMENU_CANCEL = { type = "int" },
+UIMENU_ERROR = { type = "int" },
 UIMENU_INVALID = { type = "int" },
+UIMENU_TIMEOUT = { type = "int" },
+UIMENU_UNBOUND = { type = "int" },
+UIMENU_WAIT_INPUT = { type = "int" },
 accuracy_critical = { type = "float" },
 accuracy_goodhit = { type = "float" },
 accuracy_grazing = { type = "float" },
 accuracy_headshot = { type = "float" },
 accuracy_standard = { type = "float" },
 bits = { cpp_name = "om_direction::bits", type = "int" },
+cold = { cpp_name = "temperatures::cold", type = "int" },
+freezer = { cpp_name = "temperatures::freezer", type = "int" },
+freezing = { cpp_name = "temperatures::freezing", type = "int" },
+fridge = { cpp_name = "temperatures::fridge", type = "int" },
+hot = { cpp_name = "temperatures::hot", type = "int" },
+normal = { cpp_name = "temperatures::normal", type = "int" },
 size = { cpp_name = "om_direction::size", type = "int" },
 tripoint_min = { type = "tripoint" },
 tripoint_zero = { type = "tripoint" },
