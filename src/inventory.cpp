@@ -643,18 +643,6 @@ int inventory::position_by_item( const item *it ) const
     return INT_MIN;
 }
 
-int inventory::position_by_type( const itype_id &type )
-{
-    int i = 0;
-    for( auto &elem : items ) {
-        if( elem.front().typeId() == type ) {
-            return i;
-        }
-        ++i;
-    }
-    return INT_MIN;
-}
-
 std::list<item> inventory::use_amount( itype_id it, int _quantity )
 {
     long quantity = _quantity; // Don't want to change the function signature right now
