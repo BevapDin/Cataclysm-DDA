@@ -372,26 +372,40 @@ int iuse::smoking( player *p, item *it, bool, const tripoint & )
         return 0;
     }
 
-    item cig;
+    // Returns a single item by splitting the stack of `it`.
+    // Consider `it` being a stack of 10 cigarettes, this reduces the stack by
+    // 1 and returns a new stack containing only 1 cigarette (which will be lit).
+    item &cig = [&]() -> item & {
+        if( !it->count_by_charges() || it->charges == 1 ) {
+            return *it;
+        }
+        item new_item = *it;
+        it->charges -= 1;
+        new_item.charges = 1;
+        // Making it active, so it does *not* merge into the existing stack upon adding.
+        new_item.active = true;
+        return p->i_add( new_item );
+    }();
+
     if( it->typeId() == "cig" ) {
-        cig = item( "cig_lit", calendar::turn );
+        cig.convert( "cig_lit" );
         cig.item_counter = 40;
         p->mod_hunger( -3 );
         p->mod_thirst( 2 );
     } else if( it->typeId() == "handrolled_cig" ) {
         // This transforms the hand-rolled into a normal cig, which isn't exactly
         // what I want, but leaving it for now.
-        cig = item( "cig_lit", calendar::turn );
+        cig.convert( "cig_lit" );
         cig.item_counter = 40;
         p->mod_thirst( 2 );
         p->mod_hunger( -3 );
     } else if( it->typeId() == "cigar" ) {
-        cig = item( "cigar_lit", calendar::turn );
+        cig.convert( "cigar_lit" );
         cig.item_counter = 120;
         p->mod_thirst( 3 );
         p->mod_hunger( -4 );
     } else if( it->typeId() == "joint" ) {
-        cig = item( "joint_lit", calendar::turn );
+        cig.convert( "joint_lit" );
         cig.item_counter = 40;
         p->mod_hunger( 4 );
         p->mod_thirst( 6 );
@@ -402,12 +416,13 @@ int iuse::smoking( player *p, item *it, bool, const tripoint & )
         p->add_msg_if_player( m_bad,
                               _( "Please let the devs know you should be able to smoke a %s but the smoking code does not know how." ),
                               it->tname().c_str() );
+        cig.active = false;
+        // triggers re-stacking the separated item later.
+        p->inv.unsort();
         return 0;
     }
     // If we're here, we better have a cig to light.
     p->use_charges_if_avail( "fire", 1 );
-    cig.active = true;
-    p->inv.add_item( cig, false, true );
     p->add_msg_if_player( m_neutral, _( "You light a %s." ), cig.tname().c_str() );
 
     // Parting messages
