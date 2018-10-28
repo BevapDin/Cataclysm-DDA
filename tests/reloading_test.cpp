@@ -93,13 +93,17 @@ TEST_CASE( "reload_gun_with_swappable_magazine", "[reload],[gun]" )
 
     gun.put_in( mag );
 
-    int gun_pos = dummy.inv.position_by_type( "glock_19" );
-    REQUIRE( gun_pos != INT_MIN );
+    const auto guns = dummy.items_with( []( const item &i ) {
+        return i.typeId() == "glock_19";
+    } );
+    REQUIRE( !guns.empty() );
     // We're expecting the magazine to end up in the inventory.
-    g->unload( gun_pos );
-    int magazine_pos = dummy.inv.position_by_type( "glockmag" );
-    REQUIRE( magazine_pos != INT_MIN );
-    item &magazine = dummy.inv.find_item( magazine_pos );
+    g->unload( *guns.front() );
+    const auto magazines = dummy.items_with( []( const item &i ) {
+        return i.typeId() == "glockmag";
+    } );
+    REQUIRE( !magazines.empty() );
+    item &magazine = *magazines.front();
     REQUIRE( magazine.ammo_remaining() == 0 );
 
     int ammo_pos = dummy.inv.position_by_item( &ammo );

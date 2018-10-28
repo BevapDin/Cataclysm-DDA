@@ -237,19 +237,21 @@ TEST_CASE( "npc_talk_test" )
     CHECK( d.responses[1].text == "This is a complex nested test response." );
 
     const auto has_beer_bottle = [&]() {
-        int bottle_pos = g->u.inv.position_by_type( itype_id( "bottle_glass" ) );
-        if( bottle_pos == INT_MIN ) {
-            return false;
-        }
-        item &bottle = g->u.inv.find_item( bottle_pos );
-        if( bottle.is_container_empty() ) {
-            return false;
-        }
-        const item &beer = bottle.get_contained();
-        return beer.typeId() == itype_id( "beer" ) && beer.charges == 2;
+        return g->u.has_item_with( []( const item &bottle ) {
+            if( bottle.typeId() != itype_id( "bottle_glass" ) ) {
+                return false;
+            }
+            if( bottle.is_container_empty() ) {
+                return false;
+            }
+            const item &beer = bottle.get_contained();
+            return beer.typeId() == itype_id( "beer" ) && beer.charges == 2;
+        } );
     };
     const auto has_plastic_bottle = [&]() {
-        return g->u.inv.position_by_type( itype_id( "bottle_plastic" ) ) != INT_MIN;
+        return g->u.has_item_with( []( const item &bottle ) {
+            return bottle.typeId() == itype_id( "bottle_plastic" );
+        } );
     };
     g->u.cash = 1000;
     g->u.int_cur = 8;
