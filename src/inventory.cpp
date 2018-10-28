@@ -224,7 +224,7 @@ item &inventory::add_item( item newit, bool keep_invlet, bool assign_invlet )
             return elem.back();
         } else if( keep_invlet && assign_invlet && it_ref->invlet == newit.invlet ) {
             // If keep_invlet is true, we'll be forcing other items out of their current invlet.
-            assign_empty_invlet( *it_ref, g->u );
+            g->u.assign_empty_invlet( *it_ref );
         }
     }
 
@@ -270,7 +270,7 @@ void inventory::restack( player &p )
 
         const int ipos = p.invlet_to_position( topmost.invlet );
         if( !inv_chars.valid( topmost.invlet ) || ( ipos != INT_MIN && ipos != idx ) ) {
-            assign_empty_invlet( topmost, p );
+            p.assign_empty_invlet( topmost );
             for( std::list<item>::iterator stack_iter = stack.begin();
                  stack_iter != stack.end(); ++stack_iter ) {
                 stack_iter->invlet = topmost.invlet;
@@ -938,15 +938,15 @@ std::vector<item *> inventory::active_items()
     return ret;
 }
 
-void inventory::assign_empty_invlet( item &it, const Character &p, const bool force )
+void Character::assign_empty_invlet( item &it, const bool force )
 {
     if( !get_option<bool>( "AUTO_INV_ASSIGN" ) ) {
         return;
     }
 
-    std::set<char> cur_inv = p.allocated_invlets();
+    std::set<char> cur_inv = allocated_invlets();
     itype_id target_type = it.typeId();
-    for( auto iter : assigned_invlet ) {
+    for( auto iter : inv.assigned_invlet ) {
         if( iter.second == target_type && !cur_inv.count( iter.first ) ) {
             it.invlet = iter.first;
             return;
@@ -954,7 +954,7 @@ void inventory::assign_empty_invlet( item &it, const Character &p, const bool fo
     }
     if( cur_inv.size() < inv_chars.size() ) {
         for( const auto &inv_char : inv_chars ) {
-            if( assigned_invlet.count( inv_char ) ) {
+            if( inv.assigned_invlet.count( inv_char ) ) {
                 // don't overwrite assigned keys
                 continue;
             }
@@ -969,8 +969,8 @@ void inventory::assign_empty_invlet( item &it, const Character &p, const bool fo
         return;
     }
     // No free hotkey exist, re-use some of the existing ones
-    for( auto &elem : items ) {
-        item &o = elem.front();
+    for( auto &elem : inv.slice() ) {
+        item &o = elem->front();
         if( o.invlet != 0 ) {
             it.invlet = o.invlet;
             o.invlet = 0;
@@ -1037,7 +1037,7 @@ void inventory::update_invlet( item &newit, bool assign_invlet )
 
         // Give the item an invlet if it has none
         if( !newit.invlet ) {
-            assign_empty_invlet( newit, g->u );
+            g->u.assign_empty_invlet( newit );
         }
     }
 }

@@ -457,7 +457,7 @@ static void set_item_inventory( item &newit )
     if( newit.made_of( LIQUID ) ) {
         g->handle_all_liquid( newit, PICKUP_RANGE );
     } else {
-        g->u.inv.assign_empty_invlet( newit, g->u );
+        g->u.assign_empty_invlet( newit );
         // We might not have space for the item
         if( !g->u.can_pickVolume( newit ) ) { //Accounts for result_mult
             put_into_vehicle_or_drop( g->u, item_drop_reason::too_large, { newit } );

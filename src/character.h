@@ -600,6 +600,11 @@ class Character : public Creature, public visitable<Character>
         bool is_armed() const;
 
         void drop_invalid_inventory();
+        /**
+         * Assigns an invlet if any remain.  If none do, will assign ` if force is
+         * true, empty invlet ('\0') otherwise.
+         */
+        void assign_empty_invlet( item &it, bool force = false );
 
         bool has_artifact_with( const art_effect_passive effect ) const;
 
