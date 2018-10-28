@@ -329,10 +329,16 @@ private:
         return true;
     }
 
+    item &get_cash_card() {
+        const auto items = u.items_with( []( const item &i ) {
+            return i.typeId() == "cash_card";
+        } );
+        return items.empty() ? *items.front() : null_item_reference();
+    }
+
     //!Move money from bank account onto cash card.
     bool do_withdraw_money() {
-        int pos = u.inv.position_by_type( "cash_card" );
-        item *dst = &u.i_at( pos );
+        item *dst = &get_cash_card();
 
         const int amount = prompt_for_amount(ngettext(
             "Withdraw how much? Max: %d cent. (0 to cancel) ",
@@ -360,12 +366,10 @@ private:
                 return false;
             }
         } else {
-            const int pos = u.inv.position_by_type( "cash_card" );
-
-            if( pos == INT_MIN ) {
+            dst = &get_cash_card();
+            if( dst->is_null() ) {
                 return false;
             }
-            dst = &u.i_at( pos );
         }
 
         for (auto &i : u.inv_dump()) {
