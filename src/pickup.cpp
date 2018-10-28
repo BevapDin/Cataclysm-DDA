@@ -443,7 +443,7 @@ bool pick_one_up( const tripoint &pickup_target, item &newit, vehicle *veh,
     const auto wield_check = u.can_wield( newit );
 
     if( newit.invlet != '\0' &&
-        u.invlet_to_position( newit.invlet ) != INT_MIN ) {
+        !u.item_by_invlet( newit.invlet ).is_null() ) {
         // Existing invlet is not re-usable, remove it and let the code in player.cpp/inventory.cpp
         // add a new invlet, otherwise keep the (usable) invlet.
         newit.invlet = '\0';

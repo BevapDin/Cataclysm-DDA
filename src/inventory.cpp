@@ -191,7 +191,7 @@ char inventory::find_usable_cached_invlet( const std::string &item_type )
             continue;
         }
         // Check if anything is using this invlet.
-        if( g->u.invlet_to_position( invlet ) != INT_MIN ) {
+        if( !g->u.item_by_invlet( invlet ).is_null() ) {
             continue;
         }
         return invlet;
@@ -263,13 +263,12 @@ void inventory::restack( player &p )
 
     binned = false;
     std::list<item> to_restack;
-    int idx = 0;
-    for( invstack::iterator iter = items.begin(); iter != items.end(); ++iter, ++idx ) {
+    for( invstack::iterator iter = items.begin(); iter != items.end(); ++iter ) {
         std::list<item> &stack = *iter;
         item &topmost = stack.front();
 
-        const int ipos = p.invlet_to_position( topmost.invlet );
-        if( !inv_chars.valid( topmost.invlet ) || ( ipos != INT_MIN && ipos != idx ) ) {
+        const item &itx = p.item_by_invlet( topmost.invlet );
+        if( !inv_chars.valid( topmost.invlet ) || ( !itx.is_null() && &itx != &topmost ) ) {
             p.assign_empty_invlet( topmost );
             for( std::list<item>::iterator stack_iter = stack.begin();
                  stack_iter != stack.end(); ++stack_iter ) {
@@ -615,18 +614,6 @@ const item &inventory::find_item( int position ) const
 item &inventory::find_item( int position )
 {
     return const_cast<item &>( const_cast<const inventory *>( this )->find_item( position ) );
-}
-
-int inventory::invlet_to_position( char invlet ) const
-{
-    int i = 0;
-    for( const auto &elem : items ) {
-        if( elem.begin()->invlet == invlet ) {
-            return i;
-        }
-        ++i;
-    }
-    return INT_MIN;
 }
 
 int inventory::position_by_item( const item *it ) const
@@ -1012,7 +999,7 @@ void inventory::update_invlet( item &newit, bool assign_invlet )
     if( newit.invlet ) {
         char tmp_invlet = newit.invlet;
         newit.invlet = '\0';
-        if( g->u.invlet_to_position( tmp_invlet ) == INT_MIN ) {
+        if( g->u.item_by_invlet( tmp_invlet ).is_null() ) {
             newit.invlet = tmp_invlet;
         }
     }

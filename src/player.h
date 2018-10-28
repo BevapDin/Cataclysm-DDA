@@ -1227,10 +1227,11 @@ class player : public Character
          * @param quantity How many charges to remove
          */
         item reduce_charges( item *it, long quantity );
-        /** Return the item position of the item with given invlet, return INT_MIN if
-         * the player does not have such an item with that invlet. Don't use this on npcs.
+        /** Returns the item with the given invlet. Returns a null item if
+         * the player does not have an item with that invlet. Don't use this on npcs.
          * Only use the invlet in the user interface, otherwise always use the item position. */
-        int invlet_to_position( long invlet ) const;
+        item &item_by_invlet( long invlet );
+        const item &item_by_invlet( long invlet ) const;
 
         /**
         * Check whether player has a bionic power armor interface.

@@ -1808,30 +1808,10 @@ void remove_stale_inventory_quick_shortcuts() {
     if (get_option<bool>("ANDROID_INVENTORY_AUTOADD")) {
         quick_shortcuts_t& qsl = quick_shortcuts_map["INVENTORY"];
         quick_shortcuts_t::iterator it = qsl.begin();
-        bool in_inventory;
-        long key;
-        bool valid;
         while (it != qsl.end()) {
-            key = (*it).get_first_input();
-            valid = inv_chars.valid(key);
-            in_inventory = false;
-            if (valid) {
-                in_inventory = g->u.inv.invlet_to_position(key) != INT_MIN;
-                if (!in_inventory) {
-                    // We couldn't find this item in the inventory, let's check worn items
-                    for (const auto& item : g->u.worn) {
-                        if (item.invlet == key) {
-                            in_inventory = true;
-                            break;
-                        }
-                    }
-                }
-                if (!in_inventory) {
-                    // We couldn't find it in worn items either, check weapon held
-                    if (g->u.weapon.invlet == key)
-                        in_inventory = true;
-                }
-            }
+            const long key = (*it).get_first_input();
+            const bool valid = inv_chars.valid(key);
+            const bool in_inventory = valid && !g->u.item_by_invlet( key ).is_null();
             if (valid && !in_inventory) {
                 it = qsl.erase(it);
             }
@@ -1935,20 +1915,9 @@ void draw_quick_shortcuts() {
         if (show_hint) {
             if (touch_input_context.get_category() == "INVENTORY" && inv_chars.valid(key)) {
                 // Special case for inventory items - show the inventory item name as help text
-                hint_text = g->u.inv.find_item(g->u.inv.invlet_to_position(key)).display_name();
-                if (hint_text == "none") {
-                    // We couldn't find this item in the inventory, let's check worn items
-                    for (const auto& item : g->u.worn) {
-                        if (item.invlet == key) {
-                            hint_text = item.display_name();
-                            break;
-                        }
-                    }
-                }
-                if (hint_text == "none") {
-                    // We couldn't find it in worn items either, must be weapon held
-                    if (g->u.weapon.invlet == key)
-                        hint_text = g->u.weapon.display_name();
+                const item &it = g->u.item_by_invlet( key );
+                if( !it.is_null() ) {
+                    hint_text = it.display_name();
                 }
             }
             else {
@@ -1958,7 +1927,7 @@ void draw_quick_shortcuts() {
                     hint_text = touch_input_context.get_action_name_for_manual_key(key);
                 }
             }
-            if (hint_text == "ERROR" || hint_text == "none" || hint_text.empty())
+            if (hint_text == "ERROR" || hint_text.empty())
                 show_hint = false;
         }
         if (shortcut_right)
