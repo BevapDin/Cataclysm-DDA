@@ -3365,8 +3365,7 @@ void iexamine::pay_gas( player &p, const tripoint &examp )
     if( refund == choice ) {
         item *cashcard;
 
-        const int pos = p.inv.position_by_type( itype_id( "cash_card" ) );;
-
+        const int pos = g->inv_for_id( itype_id( "cash_card" ), _( "Choose cash card:" ) );
         if( pos == INT_MIN ) {
             add_msg( _( "Never mind." ) );
             return;
