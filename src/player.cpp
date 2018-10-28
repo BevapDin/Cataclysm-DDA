@@ -6842,34 +6842,14 @@ void player::process_active_items()
     // The tool is not really useful if its charges are below charges_to_use
     ch_UPS = charges_of( "UPS" ); // might have been changed by cloak
     long ch_UPS_used = 0;
-    for( size_t i = 0; i < inv.size() && ch_UPS_used < ch_UPS; i++ ) {
-        item &it = inv.find_item(i);
-        if( !it.has_flag( "USE_UPS" ) ) {
-            continue;
-        }
-        if( it.charges < it.type->maximum_charges() ) {
+    visit_items( [&]( item *it_, item * ) {
+        item &it = *it_;
+        if( it.has_flag( "USE_UPS" ) && it.charges < it.type->maximum_charges() ) {
             ch_UPS_used++;
             it.charges++;
         }
-    }
-    if( weapon.has_flag( "USE_UPS" ) &&  ch_UPS_used < ch_UPS &&
-        weapon.charges < weapon.type->maximum_charges() ) {
-        ch_UPS_used++;
-        weapon.charges++;
-    }
-
-    for( item& worn_item : worn ) {
-        if( ch_UPS_used >= ch_UPS ) {
-            break;
-        }
-        if( !worn_item.has_flag( "USE_UPS" ) ) {
-            continue;
-        }
-        if( worn_item.charges < worn_item.type->maximum_charges() ) {
-            ch_UPS_used++;
-            worn_item.charges++;
-        }
-    }
+        return ch_UPS_used < ch_UPS ? VisitResponse::NEXT : VisitResponse::ABORT;
+    } );
     if( ch_UPS_used > 0 ) {
         use_charges( "UPS", ch_UPS_used );
     }

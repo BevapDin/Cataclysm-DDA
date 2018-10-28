@@ -3063,21 +3063,15 @@ static int getGasDiscountCardQuality( const item &it )
     return 0;
 }
 
-static int findBestGasDiscount(player &p)
+static int findBestGasDiscount( const player &p )
 {
     int discount = 0;
-
-    for (size_t i = 0; i < p.inv.size(); i++) {
-        item &it = p.inv.find_item(i);
-
-        if (it.has_flag("GAS_DISCOUNT")) {
-
-            int q = getGasDiscountCardQuality(it);
-            if (q > discount) {
-                discount = q;
-            }
+    p.visit_items( [&]( const item * it, const item * ) {
+        if( it->has_flag( "GAS_DISCOUNT" ) ) {
+            discount = std::max( discount, getGasDiscountCardQuality( *it ) );
         }
-    }
+        return VisitResponse::NEXT;
+    } );
 
     return discount;
 }
