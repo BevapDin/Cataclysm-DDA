@@ -63,7 +63,7 @@ bool tutorial_game::init()
     g->u.toggle_trait( trait_id( "QUICK" ) );
     item lighter( "lighter", 0 );
     lighter.invlet = 'e';
-    g->u.inv.add_item( lighter, true, false );
+    g->u.weapon = lighter;
     g->u.set_skill_level( skill_id( "gun" ), 5 );
     g->u.set_skill_level( skill_id( "melee" ), 5 );
     g->load_map( omt_to_sm_copy( tripoint( lx, ly, 0 ) ) );
