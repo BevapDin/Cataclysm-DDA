@@ -176,10 +176,15 @@ struct islot_comestible {
 struct islot_spoilable {
     /** Time until becomes rotten at standard temperature, or zero if never spoils */
     time_duration spoils = 0;
-    /** The monster group that is drawn from when the item rots away */
-    mongroup_id rot_spawn = mongroup_id::NULL_ID();
-    /** Chance the above monster group spawns*/
-    int rot_spawn_chance = 10;
+    class rot_spawn_data
+    {
+        public:
+            /** The monster group that is drawn from when the item rots away */
+            mongroup_id group;
+            /** Chance the above monster group spawns*/
+            int chance = 10;
+    };
+    cata::optional<rot_spawn_data> rot_spawn;
 };
 
 struct islot_brewable {

@@ -1577,9 +1577,12 @@ void Item_factory::load( islot_spoilable &slot, JsonObject &jo, const std::strin
 {
     assign( jo, "spoils_in", slot.spoils, strict, 1_hours );
     if( jo.has_string( "rot_spawn" ) ) {
-        slot.rot_spawn = mongroup_id( jo.get_string( "rot_spawn" ) );
+        if( !slot.rot_spawn ) {
+            slot.rot_spawn.emplace();
+        }
+        assign( jo, "rot_spawn", slot.rot_spawn->group, strict );
+        assign( jo, "rot_spawn_chance", slot.rot_spawn->chance, strict, 0 );
     }
-    assign( jo, "rot_spawn_chance", slot.rot_spawn_chance, strict, 0 );
 }
 
 void Item_factory::load( islot_brewable &slot, JsonObject &jo, const std::string & )

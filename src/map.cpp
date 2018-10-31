@@ -6563,12 +6563,12 @@ void map::rotten_item_spawn( const item &item, const tripoint &pnt )
     if( !item.type->spoilable ) {
         return;
     }
-    auto &comest = item.type->spoilable;
-    mongroup_id mgroup = comest->rot_spawn;
-    if( mgroup == "GROUP_NULL" ) {
+    const islot_spoilable &spoilable = *item.type->spoilable;
+    if( !spoilable.rot_spawn ) {
         return;
     }
-    const int chance = ( comest->rot_spawn_chance * get_option<int>( "CARRION_SPAWNRATE" ) ) / 100;
+    const mongroup_id &mgroup = spoilable.rot_spawn->group;
+    const int chance = spoilable.rot_spawn->chance * get_option<int>( "CARRION_SPAWNRATE" ) / 100;
     if( rng( 0, 100 ) < chance ) {
         MonsterGroupResult spawn_details = MonsterGroupManager::GetResultFromGroup( mgroup );
         add_spawn( spawn_details.name, 1, pnt.x, pnt.y, false );
