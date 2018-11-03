@@ -1234,9 +1234,6 @@ class vehicle
         // Update the set of occupied points and return a reference to it
         std::set<tripoint> &get_points( bool force_refresh = false );
 
-        // returns whether the door is open or not
-        bool is_open( int part_index ) const;
-
         // Consists only of parts with the FOLDABLE tag.
         bool is_foldable() const;
         // Restore parts of a folded vehicle.

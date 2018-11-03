@@ -1089,9 +1089,9 @@ void vpart_reference::close() const
     }
 }
 
-bool vehicle::is_open( int part_index ) const
+bool vpart_reference::is_open() const
 {
-    return parts[part_index].open;
+    return part().open;
 }
 
 void vehicle::open_all_at( int p )
