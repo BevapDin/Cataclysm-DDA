@@ -252,18 +252,17 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
     if( optional_vpart_position vp = m.veh_at( closep ) ) {
         vehicle *const veh = &vp->vehicle();
         const int vpart = vp->part_index();
-        const int closable = veh->next_part_to_close( vpart,
-                             veh_pointer_or_null( m.veh_at( who.pos() ) ) != veh );
-        const int inside_closable = veh->next_part_to_close( vpart );
-        if( closable >= 0 ) {
-            veh->close( closable );
+        if( const cata::optional<vpart_reference> closable = vp.next_part_to_close( veh_pointer_or_null(
+                    m.veh_at( who.pos() ) ) != &vp->vehicle() ) ) {
+            closable->vehicle().close( closable->part_index() );
             didit = true;
-        } else if( inside_closable >= 0 ) {
+        } else if( const cata::optional<vpart_reference> inside_closable = vp.next_part_to_close(
+                       false ) ) {
             who.add_msg_if_player( m_info, _( "That %s can only be closed from the inside." ),
-                                   veh->parts[inside_closable].name().c_str() );
+                                   inside_closable->part().name() );
         } else if( const cata::optional<vpart_reference> openable = vp.next_part_to_open( false ) ) {
             who.add_msg_if_player( m_info, _( "That %s is already closed." ),
-                                   openable.part().name().c_str() );
+                                   openable->part().name() );
         } else {
             who.add_msg_if_player( m_info, _( "You cannot close the %s." ), veh->parts[vpart].name().c_str() );
         }

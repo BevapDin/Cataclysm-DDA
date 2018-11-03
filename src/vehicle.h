@@ -813,18 +813,6 @@ class vehicle
 
         /** Test if part can be enabled (unbroken, sufficient fuel etc), optionally displaying failures to user */
         bool can_enable( const vehicle_part &pt, bool alert = false ) const;
-        /**
-         *  Return the index of the next part to close at `p`
-         *
-         *  The next part to open is the first opened part in the list of
-         *  parts at part `p`'s coordinates. Returns -1 for no more to close.
-         *
-         *  @param p Part who's coordinates provide the location to check
-         *  @param outside If true, give parts that can be closed from outside only
-         *  @return part index or -1 if no part
-         */
-        int next_part_to_close( int p, bool outside = false ) const;
-
         // returns indices of all parts in the given location slot
         std::vector<int> all_parts_at_location( const std::string &location ) const;
 
