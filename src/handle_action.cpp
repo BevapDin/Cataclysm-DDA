@@ -420,7 +420,7 @@ static void open()
                     add_msg( m_info, _( "That %s can only opened from the inside." ), openable->info().name() );
                     u.moves += 100;
                 } else {
-                    openable->vehicle().open_all_at( openable->part_index() );
+                    openable->open_all();
                 }
             }
         } else {

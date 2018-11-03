@@ -3637,7 +3637,7 @@ bool map::open_door( const tripoint &p, const bool inside, const bool check_only
     } else if( const cata::optional<vpart_reference> openable = veh_at( p ).next_part_to_open(
                    true ) ) {
         if( !check_only ) {
-            openable->vehicle().open_all_at( openable->part_index() );
+            openable->open_all();
         }
 
         return true;

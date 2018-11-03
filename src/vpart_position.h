@@ -99,6 +99,10 @@ class vpart_position
          *  @param outside If true, give parts that can be closed from outside only
          */
         cata::optional<vpart_reference> next_part_to_close( bool outside ) const;
+        /**
+         *  Opens everything that can be opened on this tile.
+         */
+        void open_all() const;
 };
 
 /**

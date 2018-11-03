@@ -10378,7 +10378,7 @@ bool game::plmove( int dx, int dy, int dz )
     const bool outside_vehicle = !veh0 || veh0 != veh1;
     if( const cata::optional<vpart_reference> dpart = vp1.next_part_to_open( outside_vehicle ) ) {
         if( outside_vehicle ) {
-            dpart->vehicle().open_all_at( dpart->part_index() );
+            dpart->open_all();
         } else {
             dpart->open();
             add_msg( _( "You open the %1$s's %2$s." ), veh1->name.c_str(),

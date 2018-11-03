@@ -1094,11 +1094,10 @@ bool vpart_reference::is_open() const
     return part().open && has_feature( VPFLAG_OPENABLE );
 }
 
-void vehicle::open_all_at( int p )
+void vpart_position::open_all() const
 {
     // Can't use vpart_position::parts_here as this relies on the specific order.
-    std::vector<int> parts_here = parts_at_relative( parts[p].mount, true );
-    for( auto &elem : parts_here ) {
+    for( const int elem : vehicle().parts_at_relative( mount(), true ) ) {
         if( part_flag( elem, VPFLAG_OPENABLE ) ) {
             // Note that this will open multi-square and non-multipart parts in the tile. This
             // means that adjacent open multi-square openables can still have closed stuff

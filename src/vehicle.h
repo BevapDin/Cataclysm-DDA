@@ -1245,10 +1245,6 @@ class vehicle
         bool interact_vehicle_locked();
         //true if an alarm part is installed on the vehicle
         bool has_security_working() const;
-        /**
-         *  Opens everything that can be opened on the same tile as `p`
-         */
-        void open_all_at( int p );
 
         // Honk the vehicle's horn, if there are any
         void honk_horn();
