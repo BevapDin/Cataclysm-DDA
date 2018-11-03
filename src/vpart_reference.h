@@ -11,6 +11,11 @@ struct vehicle_part;
 class vpart_info;
 enum vpart_bitflags : int;
 
+enum class OpenOrClosed {
+    Open,
+    Closed,
+};
+
 /**
  * This is a wrapper over a vehicle pointer and a reference to a part of it.
  *
@@ -53,6 +58,7 @@ class vpart_reference : public vpart_position
         /**@{*/
         void open() const;
         void close() const;
+        void open_or_close( OpenOrClosed what ) const;
         /**@}*/
 };
 
