@@ -63,7 +63,6 @@ class editmap
         int mapgen_preview( real_coords &tc, uilist &gmenu );
         bool mapgen_set( std::string om_name, tripoint omt_tgt, int r = 0, bool change_sensitive = true );
         bool mapgen_veh_has( const tripoint &omt_tgt );
-        bool mapgen_veh_destroy( const tripoint &omt_tgt, vehicle *car_target );
         int mapgen_retarget();
         int select_shape( shapetype shape, int mode = -1 );
 

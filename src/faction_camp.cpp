@@ -1533,6 +1533,7 @@ void talk_function::camp_craft_construction( npc &p, const mission_entry &cur_ke
 
 // For unknown reasons defined in editmap.cpp
 vehicle *mapgen_veh_query( const tripoint &omt_tgt );
+void mapgen_veh_destroy( const tripoint &omt_tgt, vehicle &car_target );
 
 bool talk_function::camp_garage_chop_start( npc &p, const std::string &task )
 {
@@ -1608,7 +1609,7 @@ bool talk_function::camp_garage_chop_start( npc &p, const std::string &task )
         p_all.erase( p_all.begin() + 0 );
     }
     companion_skill_trainer( *comp, skill_mechanics, 5_days, 2 );
-    edit.mapgen_veh_destroy( omt_trg, car );
+    mapgen_veh_destroy( omt_trg, *car );
     return true;
 }
 

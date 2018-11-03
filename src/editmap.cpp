@@ -1989,27 +1989,26 @@ bool editmap::mapgen_veh_has( const tripoint &omt_tgt )
     return false;
 }
 
-bool editmap::mapgen_veh_destroy( const tripoint &omt_tgt, vehicle *car_target )
+void mapgen_veh_destroy( const tripoint &omt_tgt, vehicle &car_target )
 {
     tinymap target_bay;
     target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
     for( int x = 0; x < 2; x++ ) {
         for( int y = 0; y < 2; y++ ) {
-            submap *destsm = target_bay.get_submap_at_grid( x, y, target.z );
+            submap *destsm = target_bay.get_submap_at_grid( x, y, omt_tgt.z );
             for( size_t z = 0; z < destsm->vehicles.size(); z++ ) {
-                if( destsm->vehicles[z] == car_target ) {
+                if( destsm->vehicles[z] == &car_target ) {
                     auto veh = destsm->vehicles[z];
                     std::unique_ptr<vehicle> old_veh = target_bay.detach_vehicle( veh );
                     g->m.clear_vehicle_cache( omt_tgt.z );
                     g->m.reset_vehicle_cache( omt_tgt.z );
                     g->m.clear_vehicle_list( omt_tgt.z );
                     //Rebuild vehicle_list?
-                    return true;
+                    return;
                 }
             }
         }
     }
-    return false;
 }
 
 /*
