@@ -171,7 +171,7 @@ void vehicle::add_missing_frames()
         }
         if( !found ) {
             // Install missing frame
-            parts.emplace_back( frame_id, i.mount.x, i.mount.y, item( frame_id->item ) );
+            parts.emplace_back( frame_id, i.mount, item( frame_id->item ) );
         }
     }
 }
@@ -1199,7 +1199,7 @@ int vehicle::install_part( const point dp, const vpart_id &id, bool force )
     if( !( force || can_mount( dp, id ) ) ) {
         return -1;
     }
-    return install_part( dp, vehicle_part( id, dp.x, dp.y, item( id.obj().item ) ) );
+    return install_part( dp, vehicle_part( id, dp, item( id.obj().item ) ) );
 }
 
 int vehicle::install_part( const point dp, const vpart_id &id, item &&obj, bool force )
@@ -1207,7 +1207,7 @@ int vehicle::install_part( const point dp, const vpart_id &id, item &&obj, bool 
     if( !( force || can_mount( dp, id ) ) ) {
         return -1;
     }
-    return install_part( dp, vehicle_part( id, dp.x, dp.y, std::move( obj ) ) );
+    return install_part( dp, vehicle_part( id, dp, std::move( obj ) ) );
 }
 
 int vehicle::install_part( const point dp, const vehicle_part &new_part )
