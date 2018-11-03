@@ -10377,7 +10377,7 @@ bool game::plmove( int dx, int dy, int dz )
 
     const bool outside_vehicle = !veh0 || veh0 != veh1;
     const int dpart = veh1 ? veh1->next_part_to_open( vp1->part_index(), outside_vehicle ) : -1;
-    if( dpart >= 0 && !veh1->parts[dpart].open ) {
+    if( dpart >= 0 ) {
         if( outside_vehicle ) {
             veh1->open_all_at( dpart );
         } else {
