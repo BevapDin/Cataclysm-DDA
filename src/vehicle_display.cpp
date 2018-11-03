@@ -144,6 +144,7 @@ int vehicle::print_part_list( const catacurses::window &win, int y1, const int m
     if( p < 0 || p >= ( int )parts.size() ) {
         return y1;
     }
+    // Can't use vpart_position::parts_here as this relies on the specific order.
     std::vector<int> pl = this->parts_at_relative( parts[p].mount, true );
     int y = y1;
     for( size_t i = 0; i < pl.size(); i++ ) {
@@ -225,6 +226,7 @@ void vehicle::print_vparts_descs( const catacurses::window &win, int max_y, int 
         return;
     }
 
+    // Can't use vpart_position::parts_here as this relies on the specific order.
     std::vector<int> pl = this->parts_at_relative( parts[p].mount, true );
     std::ostringstream msg;
 

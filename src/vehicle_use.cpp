@@ -1111,6 +1111,7 @@ bool vehicle::is_open( int part_index ) const
 
 void vehicle::open_all_at( int p )
 {
+    // Can't use vpart_position::parts_here as this relies on the specific order.
     std::vector<int> parts_here = parts_at_relative( parts[p].mount, true );
     for( auto &elem : parts_here ) {
         if( part_flag( elem, VPFLAG_OPENABLE ) ) {

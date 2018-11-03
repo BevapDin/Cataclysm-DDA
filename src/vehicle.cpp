@@ -4815,3 +4815,12 @@ bool vehicle_part_with_feature_range<vpart_bitflags>::contained( const size_t pa
            ( !unbroken_ || !vp.is_broken() ) &&
            ( !enabled_ || vp.enabled );
 }
+
+vehicle_part_with_condition_range vpart_position::parts_here() const
+{
+    const point mount = this->mount();
+    return vehicle_part_with_condition_range( this->vehicle(),
+    [mount]( const ::vehicle & veh, const size_t part ) {
+        return !veh.parts[part].removed && veh.parts[part].mount == mount;
+    } );
+}

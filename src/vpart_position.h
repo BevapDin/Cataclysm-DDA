@@ -11,6 +11,7 @@ class vehicle;
 enum vpart_bitflags : int;
 class vpart_reference;
 struct tripoint;
+class vehicle_part_with_condition_range;
 
 /**
  * Reference to a position (a point) of the @ref vehicle.
@@ -79,6 +80,12 @@ class vpart_position
          */
         // @todo change to return tripoint.
         point mount() const;
+        /**
+         * Yields a range that contains all vehicle parts at this position.
+         * In other words: all parts that have the same mount point.
+         * Removed parts are not included.
+         */
+        vehicle_part_with_condition_range parts_here() const;
 };
 
 /**
