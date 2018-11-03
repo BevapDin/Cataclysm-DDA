@@ -61,10 +61,15 @@ class vpart_reference : public vpart_position
         void open_or_close( OpenOrClosed what ) const;
         /**@}*/
         /**
-         * Returns whether this part is considered open.
-         * Returns `false` for parts that can not be opended at all.
+         * Returns whether this part is considered open/closed.
+         * Parts that can not be opened at all are considered closed.
          */
+        /**@{*/
         bool is_open() const;
+        bool is_closed() const {
+            return !is_open();
+        }
+        /**@}*/
 };
 
 #endif

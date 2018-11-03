@@ -101,6 +101,12 @@ char keybind( const std::string &opt, const std::string &context = "VEHICLE" );
  * Structure, describing vehicle part (ie, wheel, seat)
  */
 struct vehicle_part {
+    private:
+        /** door is open */
+        bool open = false;
+
+    public:
+        friend class vpart_reference;
         friend vehicle;
         friend class veh_interact;
         friend visitable<vehicle_cursor>;
@@ -310,9 +316,6 @@ struct vehicle_part {
 
         /** ID of player passenger */
         int passenger_id = 0;
-
-        /** door is open */
-        bool open = false;
 
         /** direction the part is facing */
         int direction = 0;

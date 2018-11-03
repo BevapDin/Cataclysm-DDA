@@ -7496,7 +7496,7 @@ void map::build_map_cache( const int zlev, bool skip_lightmap )
 
             if( vp.has_feature( VPFLAG_OPAQUE ) && !vp.part().is_broken() ) {
                 int dpart = v.v->part_with_feature( part, VPFLAG_OPENABLE, true );
-                if( dpart < 0 || !v.v->parts[dpart].open ) {
+                if( dpart < 0 || vpart_reference( *v.v, dpart ).is_closed() ) {
                     transparency_cache[px][py] = LIGHT_TRANSPARENCY_SOLID;
                 }
             }
@@ -7981,7 +7981,7 @@ void map::scent_blockers( std::array<std::array<bool, SEEX *MAPSIZE>, SEEY *MAPS
 
         // Doors, but only the closed ones
         for( const vpart_reference &vp : veh.get_parts( VPFLAG_OPENABLE ) ) {
-            if( vp.part().open ) {
+            if( vp.is_open() ) {
                 continue;
             }
 

@@ -389,10 +389,8 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
             pt.ammo_set( type->parts[ p ].fuel, qty );
         }
 
-        if( vp.has_feature( "OPENABLE" ) ) { // doors are closed
-            if( !pt.open && one_in( 4 ) ) {
-                vpart_reference( *this, p ).open();
-            }
+        if( vp.has_feature( "OPENABLE" ) && vp.is_closed() && one_in( 4 ) ) { // doors are closed
+            vp.open();
         }
         if( vp.has_feature( "BOARDABLE" ) ) {   // no passengers
             pt.remove_flag( vehicle_part::passenger_flag );
@@ -1931,7 +1929,7 @@ cata::optional<vpart_reference> vpart_position::obstacle_at_part() const
         return cata::nullopt; // No obstacle here
     }
 
-    if( part->has_feature( VPFLAG_OPENABLE ) && part->part().open ) {
+    if( part->has_feature( VPFLAG_OPENABLE ) && part->is_open() ) {
         return cata::nullopt; // Open door here
     }
 
@@ -2127,7 +2125,7 @@ cata::optional<vpart_reference> vpart_position::next_part_to_close( const bool o
         if( !vp.part().is_available() ) {
             continue;
         }
-        if( vp.part().open != 1 ) {
+        if( !vp.is_open() ) {
             continue;
         }
         if( !vp.has_feature( VPFLAG_OPENABLE ) ) {
@@ -2155,7 +2153,7 @@ cata::optional<vpart_reference> vpart_position::next_part_to_open( const bool ou
         if( !vp.part().is_available() ) {
             continue;
         }
-        if( vp.part().open != 0 ) {
+        if( !vp.is_closed() ) {
             continue;
         }
         if( !vp.has_feature( VPFLAG_OPENABLE ) ) {
@@ -4133,7 +4131,7 @@ void vehicle::refresh_insides()
                     break;
                 } else if( part_flag( j, "OBSTACLE" ) && parts[ j ].is_available() ) {
                     // found an obstacle, like board or windshield or door
-                    if( parts[j].inside || ( part_flag( j, "OPENABLE" ) && parts[j].open ) ) {
+                    if( parts[j].inside || ( part_flag( j, "OPENABLE" ) && vpart_reference( *this, j ).is_open() ) ) {
                         continue; // door and it's open -- can't cover
                     }
                     cover = true;
@@ -4183,7 +4181,7 @@ int vehicle::damage( int p, int dmg, damage_type type, bool aimed )
         bool found_obs = false;
         for( auto &i : pl ) {
             if( part_flag( i, "OBSTACLE" ) &&
-                ( !part_flag( i, "OPENABLE" ) || !parts[i].open ) ) {
+                ( !part_flag( i, "OPENABLE" ) || vpart_reference( *this, i ).is_closed() ) ) {
                 found_obs = true;
                 break;
             }
@@ -4202,7 +4200,7 @@ int vehicle::damage( int p, int dmg, damage_type type, bool aimed )
         int strongest_door_part = -1;
         int strongest_door_durability = INT_MIN;
         for( int part : pl ) {
-            if( part_flag( part, "OPENABLE" ) && !parts[part].open ) {
+            if( part_flag( part, "OPENABLE" ) && vpart_reference( *this, part ).is_closed() ) {
                 int door_durability = part_info( part ).durability;
                 if( door_durability > strongest_door_durability ) {
                     strongest_door_part = part;

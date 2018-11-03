@@ -137,7 +137,7 @@ void vehicle::control_doors()
         doors_with_motors.push_back( *door );
         locations.push_back( door->pos() );
         //~ close/open a vehicle door/curtain
-        pmenu.addentry( val, true, MENU_AUTOASSIGN, door->part().open ? _( "Close %s" ) : _( "Open %" ),
+        pmenu.addentry( val, true, MENU_AUTOASSIGN, door->is_open() ? _( "Close %s" ) : _( "Open %" ),
                         door->part().name() );
     };
     for( const vpart_reference &vp : door_motors ) {
@@ -165,7 +165,7 @@ void vehicle::control_doors()
     if( pmenu.ret >= 0 ) {
         if( pmenu.ret < ( int )doors_with_motors.size() ) {
             const vpart_reference vp = doors_with_motors[pmenu.ret];
-            vp.open_or_close( vp.part().open ? OpenOrClosed::Open : OpenOrClosed::Closed );
+            vp.open_or_close( vp.is_open() ? OpenOrClosed::Open : OpenOrClosed::Closed );
         } else if( pmenu.ret < ( ( int )doors_with_motors.size() + CANCEL ) ) {
             const int option = pmenu.ret - ( int )doors_with_motors.size();
             const bool open = option == OPENBOTH || option == OPENCURTAINS;
@@ -1091,7 +1091,7 @@ void vpart_reference::close() const
 
 bool vpart_reference::is_open() const
 {
-    return part().open;
+    return part().open && has_feature( VPFLAG_OPENABLE );
 }
 
 void vehicle::open_all_at( int p )
@@ -1129,7 +1129,7 @@ void vpart_reference::open_or_close( const OpenOrClosed what ) const
         if( vp.info().get_id() != info().get_id() ) {
             continue;
         }
-        const OpenOrClosed vp_open_state = vp.part().open ? OpenOrClosed::Open : OpenOrClosed::Closed;
+        const OpenOrClosed vp_open_state = vp.is_open() ? OpenOrClosed::Open : OpenOrClosed::Closed;
         // @todo consider changing vehicle_part::open into this enum type as well.
         if( vp_open_state == what ) {
             // already in the state we want it to be, so skip it

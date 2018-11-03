@@ -43,7 +43,8 @@ char vehicle::part_sym( const int p, const bool exact ) const
 
     const int displayed_part = exact ? p : part_displayed_at( parts[p].mount );
 
-    if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
+    if( part_flag( displayed_part, VPFLAG_OPENABLE ) &&
+        vpart_reference( const_cast<vehicle &>( *this ), displayed_part ).is_open() ) {
         return '\''; // open door
     } else {
         return parts[ displayed_part ].is_broken() ?
@@ -63,7 +64,8 @@ vpart_id vehicle::part_id_string( int const p, char &part_mod ) const
     int displayed_part = part_displayed_at( parts[p].mount );
     const vpart_id idinfo = parts[displayed_part].id;
 
-    if( part_flag( displayed_part, VPFLAG_OPENABLE ) && parts[displayed_part].open ) {
+    if( part_flag( displayed_part, VPFLAG_OPENABLE ) &&
+        vpart_reference( const_cast<vehicle &>( *this ), displayed_part ).is_open() ) {
         part_mod = 1; // open
     } else if( parts[ displayed_part ].is_broken() ) {
         part_mod = 2; // broken
@@ -114,7 +116,8 @@ nc_color vehicle::part_color( const int p, const bool exact ) const
     // curtains turn windshields gray
     int curtains = part_with_feature( p, VPFLAG_CURTAIN, false );
     if( curtains >= 0 ) {
-        if( part_with_feature( p, VPFLAG_WINDOW, true ) >= 0 && !parts[curtains].open ) {
+        if( part_with_feature( p, VPFLAG_WINDOW, true ) >= 0 &&
+            vpart_reference( const_cast<vehicle &>( *this ), curtains ).is_closed() ) {
             col = part_info( curtains ).color;
         }
     }
