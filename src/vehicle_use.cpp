@@ -1072,18 +1072,13 @@ void vehicle::alarm()
     }
 }
 
-/**
- * Opens an openable part at the specified index. If it's a multipart, opens
- * all attached parts as well.
- * @param part_index The index in the parts list of the part to open.
- */
-void vehicle::open( int part_index )
+void vpart_reference::open() const
 {
-    if( !part_info( part_index ).has_flag( "OPENABLE" ) ) {
-        debugmsg( "Attempted to open non-openable part %d (%s) on a %s!", part_index,
-                  parts[ part_index ].name().c_str(), name.c_str() );
+    if( !has_feature( VPFLAG_OPENABLE ) ) {
+        debugmsg( "Attempted to open non-openable part %d (%s) on a %s!", part_index(),
+                  part().name(), vehicle().name );
     } else {
-        open_or_close( part_index, true );
+        vehicle().open_or_close( part_index(), true );
     }
 }
 
@@ -1116,7 +1111,7 @@ void vehicle::open_all_at( int p )
             // Note that this will open multi-square and non-multipart parts in the tile. This
             // means that adjacent open multi-square openables can still have closed stuff
             // on same tile after this function returns
-            open( elem );
+            vpart_reference( *this, elem ).open();
         }
     }
 }

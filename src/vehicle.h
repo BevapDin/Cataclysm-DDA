@@ -1236,7 +1236,6 @@ class vehicle
         std::set<tripoint> &get_points( bool force_refresh = false );
 
         // opens/closes doors or multipart doors
-        void open( int part_index );
         void close( int part_index );
         // returns whether the door is open or not
         bool is_open( int part_index ) const;

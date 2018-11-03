@@ -43,6 +43,16 @@ class vpart_reference : public vpart_position
         bool has_feature( const std::string &f ) const;
         bool has_feature( vpart_bitflags f ) const;
         /**@}*/
+        /**
+         * Opens/closes this part. If it's a multipart, opens/closes all
+         * attached parts as well.
+         * `this` must refer to a suitable part, see
+         * @ref vpart_position::next_part_to_close /
+         * @ref vpart_position::next_part_to_open.
+         */
+        /**@{*/
+        void open() const;
+        /**@}*/
 };
 
 #endif

@@ -391,7 +391,7 @@ void vehicle::init_state( int init_veh_fuel, int init_veh_status )
 
         if( vp.has_feature( "OPENABLE" ) ) { // doors are closed
             if( !pt.open && one_in( 4 ) ) {
-                open( p );
+                vpart_reference( *this, p ).open();
             }
         }
         if( vp.has_feature( "BOARDABLE" ) ) {   // no passengers

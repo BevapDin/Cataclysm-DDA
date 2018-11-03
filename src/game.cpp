@@ -10380,7 +10380,7 @@ bool game::plmove( int dx, int dy, int dz )
         if( outside_vehicle ) {
             dpart->vehicle().open_all_at( dpart->part_index() );
         } else {
-            dpart->vehicle().open( dpart->part_index() );
+            dpart->open();
             add_msg( _( "You open the %1$s's %2$s." ), veh1->name.c_str(),
                      dpart->info().name() );
         }
