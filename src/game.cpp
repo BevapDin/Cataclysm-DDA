@@ -10325,18 +10325,10 @@ bool game::plmove( int dx, int dy, int dz )
     }
 
     // GRAB: pre-action checking.
-    int dpart = -1;
     const optional_vpart_position vp0 = m.veh_at( u.pos() );
     vehicle *const veh0 = veh_pointer_or_null( vp0 );
     const optional_vpart_position vp1 = m.veh_at( dest_loc );
     vehicle *const veh1 = veh_pointer_or_null( vp1 );
-
-    bool veh_closed_door = false;
-    bool outside_vehicle = ( veh0 == nullptr || veh0 != veh1 );
-    if( veh1 != nullptr ) {
-        dpart = veh1->next_part_to_open( vp1->part_index(), outside_vehicle );
-        veh_closed_door = dpart >= 0 && !veh1->parts[dpart].open;
-    }
 
     if( veh0 != nullptr && abs( veh0->velocity ) > 100 ) {
         if( veh1 == nullptr ) {
@@ -10383,7 +10375,9 @@ bool game::plmove( int dx, int dy, int dz )
         return true;
     }
 
-    if( veh_closed_door ) {
+    const bool outside_vehicle = !veh0 || veh0 != veh1;
+    const int dpart = veh1 ? veh1->next_part_to_open( vp1->part_index(), outside_vehicle ) : -1;
+    if( dpart >= 0 && !veh1->parts[dpart].open ) {
         if( outside_vehicle ) {
             veh1->open_all_at( dpart );
         } else {
