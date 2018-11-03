@@ -115,7 +115,7 @@ struct vehicle_part {
 
         vehicle_part(); /** DefaultConstructible */
 
-        vehicle_part( const vpart_id &vp, int dx, int dy, item &&it );
+        vehicle_part( const vpart_id &vp, point dp, item &&it );
 
         /** Check this instance is non-null (not default constructed) */
         explicit operator bool() const;
