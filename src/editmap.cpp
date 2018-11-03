@@ -1943,16 +1943,10 @@ bool editmap::mapgen_set( std::string om_name, tripoint omt_tgt, int r, bool cha
 
 vehicle *mapgen_veh_query( const tripoint &omt_tgt )
 {
-    tinymap target_bay;
-    target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
-
     std::vector<vehicle *> possible_vehicles;
-    for( int x = 0; x < 2; x++ ) {
-        for( int y = 0; y < 2; y++ ) {
-            submap *destsm = target_bay.get_submap_at_grid( x, y, omt_tgt.z );
-            for( size_t z = 0; z < destsm->vehicles.size(); z++ ) {
-                possible_vehicles.push_back( destsm->vehicles[z] );
-            }
+    for( submap &sm : map::submaps_at_omt( omt_tgt ) ) {
+        for( vehicle *const veh : sm.vehicles ) {
+            possible_vehicles.push_back( veh );
         }
     }
     if( possible_vehicles.empty() ) {
@@ -1976,14 +1970,9 @@ vehicle *mapgen_veh_query( const tripoint &omt_tgt )
 
 bool mapgen_veh_has( const tripoint &omt_tgt )
 {
-    tinymap target_bay;
-    target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
-    for( int x = 0; x < 2; x++ ) {
-        for( int y = 0; y < 2; y++ ) {
-            submap *destsm = target_bay.get_submap_at_grid( x, y, omt_tgt.z );
-            if( !destsm->vehicles.empty() ) {
-                return true;
-            }
+    for( const submap &sm : map::submaps_at_omt( omt_tgt ) ) {
+        if( !sm.vehicles.empty() ) {
+            return true;
         }
     }
     return false;
@@ -1991,21 +1980,19 @@ bool mapgen_veh_has( const tripoint &omt_tgt )
 
 void mapgen_veh_destroy( const tripoint &omt_tgt, vehicle &car_target )
 {
-    tinymap target_bay;
-    target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
-    for( int x = 0; x < 2; x++ ) {
-        for( int y = 0; y < 2; y++ ) {
-            submap *destsm = target_bay.get_submap_at_grid( x, y, omt_tgt.z );
-            for( size_t z = 0; z < destsm->vehicles.size(); z++ ) {
-                if( destsm->vehicles[z] == &car_target ) {
-                    auto veh = destsm->vehicles[z];
-                    std::unique_ptr<vehicle> old_veh = target_bay.detach_vehicle( veh );
-                    g->m.clear_vehicle_cache( omt_tgt.z );
-                    g->m.reset_vehicle_cache( omt_tgt.z );
-                    g->m.clear_vehicle_list( omt_tgt.z );
-                    //Rebuild vehicle_list?
-                    return;
-                }
+    // Special handling for the main game map because it must keep its
+    // internal caches valid. For vehicles outside of the reality bubble, we can
+    // simply remove them, as they are not referenced anywhere else.
+    if( g->m.get_cache_ref( omt_tgt.z ).vehicle_list.count( &car_target ) != 0 ) {
+        g->m.destroy_vehicle( &car_target );
+        return;
+    }
+    for( submap &sm : map::submaps_at_omt( omt_tgt ) ) {
+        for( auto iter = sm.vehicles.begin(); iter != sm.vehicles.end(); ++iter  ) {
+            if( *iter == &car_target ) {
+                sm.vehicles.erase( iter );
+                delete &car_target;
+                return;
             }
         }
     }

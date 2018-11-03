@@ -8224,3 +8224,17 @@ void map::clip_to_bounds( int &x, int &y, int &z ) const
         z = OVERMAP_HEIGHT;
     }
 }
+
+std::array<std::reference_wrapper<submap>, 4> map::submaps_at_omt( const tripoint &omt )
+{
+    const auto lookup = [&]( const int dx, const int dy ) {
+        return MAPBUFFER.lookup_submap( omt.x * 2 + dx, omt.y * 2 + dy, omt.z );
+    };
+    const std::array<submap *, 4> tmp = { { lookup( 0, 0 ), lookup( 1, 0 ), lookup( 0, 1 ), lookup( 1, 1 ) } };
+    if( std::find( tmp.begin(), tmp.end(), nullptr ) != tmp.end() ) {
+        // The buffer does not have the submap, so generate it.
+        tinymap tmpmap;
+        tmpmap.load( omt.x * 2, omt.y * 2, omt.z, false );
+    }
+    return { { *lookup( 0, 0 ), *lookup( 1, 0 ), *lookup( 0, 1 ), *lookup( 1, 1 ) } };
+}

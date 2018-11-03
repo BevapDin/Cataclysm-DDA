@@ -1576,6 +1576,14 @@ class map
         level_cache &access_cache( int zlev );
         const level_cache &access_cache( int zlev ) const;
         bool need_draw_lower_floor( const tripoint &p );
+        /**
+         * Returns the 4 submaps that make up the overmap terrain at given point.
+         * The submaps are automatically generated if they don't yet exists.
+         * Note that the submaps may be part of the main game map `game::m`,
+         * or not. They may get unloaded when the game is saved, so don't store
+         * references to the returned submaps.
+         */
+        static std::array<std::reference_wrapper<submap>, 4> submaps_at_omt( const tripoint &omt );
 };
 
 std::vector<point> closest_points_first( int radius, point p );
