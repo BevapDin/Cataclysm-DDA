@@ -10376,14 +10376,13 @@ bool game::plmove( int dx, int dy, int dz )
     }
 
     const bool outside_vehicle = !veh0 || veh0 != veh1;
-    const int dpart = veh1 ? veh1->next_part_to_open( vp1->part_index(), outside_vehicle ) : -1;
-    if( dpart >= 0 ) {
+    if( const cata::optional<vpart_reference> dpart = vp1.next_part_to_open( outside_vehicle ) ) {
         if( outside_vehicle ) {
-            veh1->open_all_at( dpart );
+            dpart->vehicle().open_all_at( dpart->part_index() );
         } else {
-            veh1->open( dpart );
+            dpart->vehicle().open( dpart->part_index() );
             add_msg( _( "You open the %1$s's %2$s." ), veh1->name.c_str(),
-                     veh1->part_info( dpart ).name().c_str() );
+                     dpart->info().name() );
         }
         u.moves -= 100;
         // if auto-move is on, continue moving next turn

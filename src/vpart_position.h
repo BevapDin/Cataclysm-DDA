@@ -86,6 +86,12 @@ class vpart_position
          * Removed parts are not included.
          */
         vehicle_part_with_condition_range parts_here() const;
+        /**
+         *  The next part to open is the first unopened part in the reversed list of
+         *  the parts at this position.
+         *  @param outside If true, give parts that can be opened from outside only.
+         */
+        cata::optional<vpart_reference> next_part_to_open( bool outside ) const;
 };
 
 /**
@@ -105,6 +111,7 @@ class optional_vpart_position : public cata::optional<vpart_position>
         cata::optional<vpart_reference> part_with_feature( const std::string &f, bool unbroken ) const;
         cata::optional<vpart_reference> part_with_feature( vpart_bitflags f, bool unbroken ) const;
         cata::optional<vpart_reference> obstacle_at_part() const;
+        cata::optional<vpart_reference> next_part_to_open( bool outside ) const;
 };
 
 // For legacy code, phase out, don't use in new code.

@@ -6,6 +6,7 @@
 #include "vpart_position.h"
 #include "generic_factory.h"
 #include "player.h"
+#include "vpart_reference.h"
 #include "output.h"
 #include "messages.h"
 #include "json.h"
@@ -254,16 +255,15 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const int closable = veh->next_part_to_close( vpart,
                              veh_pointer_or_null( m.veh_at( who.pos() ) ) != veh );
         const int inside_closable = veh->next_part_to_close( vpart );
-        const int openable = veh->next_part_to_open( vpart );
         if( closable >= 0 ) {
             veh->close( closable );
             didit = true;
         } else if( inside_closable >= 0 ) {
             who.add_msg_if_player( m_info, _( "That %s can only be closed from the inside." ),
                                    veh->parts[inside_closable].name().c_str() );
-        } else if( openable >= 0 ) {
+        } else if( const cata::optional<vpart_reference> openable = vp.next_part_to_open( false ) ) {
             who.add_msg_if_player( m_info, _( "That %s is already closed." ),
-                                   veh->parts[openable].name().c_str() );
+                                   openable.part().name().c_str() );
         } else {
             who.add_msg_if_player( m_info, _( "You cannot close the %s." ), veh->parts[vpart].name().c_str() );
         }
@@ -318,4 +318,3 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         who.mod_moves( -90 ); // TODO: Vary this? Based on strength, broken legs, and so on.
     }
 }
-
