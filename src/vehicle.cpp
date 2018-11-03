@@ -766,11 +766,9 @@ int vehicle::power_to_epower( int const power )
     return power * conversion_factor;
 }
 
-bool vehicle::has_structural_part( int const dx, int const dy ) const
+bool vehicle::has_structural_part( const point dp ) const
 {
-    std::vector<int> parts_here = parts_at_relative( point( dx, dy ), false );
-
-    for( auto &elem : parts_here ) {
+    for( const int elem : parts_at_relative( dp, false ) ) {
         if( part_info( elem ).location == part_location_structure &&
             !part_info( elem ).has_flag( "PROTRUSION" ) ) {
             return true;
@@ -846,11 +844,11 @@ bool vehicle::can_mount( const point dp, const vpart_id &id ) const
     // the exception is when a single tile only structural object is being repaired
     if( !parts.empty() ) {
         if( !is_structural_part_removed() &&
-            !has_structural_part( dp.x, dp.y ) &&
-            !has_structural_part( dp.x + 1, dp.y ) &&
-            !has_structural_part( dp.x, dp.y + 1 ) &&
-            !has_structural_part( dp.x - 1, dp.y ) &&
-            !has_structural_part( dp.x, dp.y - 1 ) ) {
+            !has_structural_part( dp ) &&
+            !has_structural_part( dp + point( +1,  0 ) ) &&
+            !has_structural_part( dp + point( 0, +1 ) ) &&
+            !has_structural_part( dp + point( -1,  0 ) ) &&
+            !has_structural_part( dp + point( 0, -1 ) ) ) {
             return false;
         }
     }
