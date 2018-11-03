@@ -119,7 +119,7 @@ void vehicle::add_toggle_to_opts( std::vector<uimenu_entry> &options,
 void vehicle::control_doors()
 {
     const auto door_motors = get_parts( "DOOR_MOTOR" );
-    std::vector< int > doors_with_motors; // Indices of doors
+    std::vector<vpart_reference> doors_with_motors; // Indices of doors
     std::vector< tripoint > locations; // Locations used to display the doors
     // it is possible to have one door to open and one to close for single motor
     if( empty( door_motors ) ) {
@@ -129,25 +129,23 @@ void vehicle::control_doors()
 
     uilist pmenu;
     pmenu.title = _( "Select door to toggle" );
+    const auto add_entry = [&]( const cata::optional<vpart_reference> &door ) {
+        if( !door ) {
+            return;
+        }
+        const size_t val = doors_with_motors.size();
+        doors_with_motors.push_back( *door );
+        locations.push_back( door->pos() );
+        //~ close/open a vehicle door/curtain
+        pmenu.addentry( val, true, MENU_AUTOASSIGN, door->part().open ? _( "Close %s" ) : _( "Open %" ),
+                        door->part().name() );
+    };
     for( const vpart_reference &vp : door_motors ) {
-        const size_t p = vp.part_index();
         if( vp.part().is_unavailable() ) {
             continue;
         }
-        const auto to_open = vp.next_part_to_open( false );
-        const auto to_close = vp.next_part_to_close( false );
-        const std::array<int, 2> doors = { { to_open ? to_open->part_index() : -1, to_close ? to_close->part_index() : -1 } };
-        for( int door : doors ) {
-            if( door == -1 ) {
-                continue;
-            }
-
-            int val = doors_with_motors.size();
-            doors_with_motors.push_back( door );
-            locations.push_back( global_part_pos3( p ) );
-            const char *actname = parts[door].open ? _( "Close" ) : _( "Open" );
-            pmenu.addentry( val, true, MENU_AUTOASSIGN, "%s %s", actname, parts[ door ].name().c_str() );
-        }
+        add_entry( vp.next_part_to_open( false ) );
+        add_entry( vp.next_part_to_close( false ) );
     }
 
     pmenu.addentry( doors_with_motors.size() + OPENCURTAINS, true, MENU_AUTOASSIGN,
@@ -166,9 +164,8 @@ void vehicle::control_doors()
 
     if( pmenu.ret >= 0 ) {
         if( pmenu.ret < ( int )doors_with_motors.size() ) {
-            int part = doors_with_motors[pmenu.ret];
-            vpart_reference( *this, part ).open_or_close( parts[part].open ? OpenOrClosed::Open :
-                    OpenOrClosed::Closed );
+            const vpart_reference vp = doors_with_motors[pmenu.ret];
+            vp.open_or_close( vp.part().open ? OpenOrClosed::Open : OpenOrClosed::Closed );
         } else if( pmenu.ret < ( ( int )doors_with_motors.size() + CANCEL ) ) {
             const int option = pmenu.ret - ( int )doors_with_motors.size();
             const bool open = option == OPENBOTH || option == OPENCURTAINS;
