@@ -843,7 +843,9 @@ void map::board_vehicle( const tripoint &pos, player *p )
         player *psg = vp->vehicle().get_passenger( vp->part_index() );
         debugmsg( "map::board_vehicle: passenger (%s) is already there",
                   psg ? psg->name.c_str() : "<null>" );
-        unboard_vehicle( pos );
+        if( psg ) {
+            unboard_vehicle( *psg );
+        }
     }
     vp->part().set_flag( vehicle_part::passenger_flag );
     vp->part().passenger_id = p->getID();
@@ -856,27 +858,24 @@ void map::board_vehicle( const tripoint &pos, player *p )
     }
 }
 
-void map::unboard_vehicle( const tripoint &p )
+void map::unboard_vehicle( player &u )
 {
-    const cata::optional<vpart_reference> vp = veh_at( p ).part_with_feature( VPFLAG_BOARDABLE, false );
-    player *passenger = nullptr;
+    if( !u.in_vehicle ) {
+        return;
+    }
+    // Consider broken seats because they might still contain the creature,
+    // as the passenger flag is not removed upon breaking.
+    const cata::optional<vpart_reference> vp = veh_at( u.pos() ).part_with_feature( VPFLAG_BOARDABLE, false );
     if( !vp ) {
+        // debug message because `in_vehicle` above indicates that the creature
+        // is actually boarded, so it's an inconsistent game state.
         debugmsg( "map::unboard_vehicle: vehicle not found" );
-        // Try and force unboard the player anyway.
-        passenger = g->critter_at<player>( p );
-        if( passenger ) {
-            passenger->in_vehicle = false;
-            passenger->controlling_vehicle = false;
-        }
+        u.in_vehicle = false;
+        u.controlling_vehicle = false;
         return;
     }
-    passenger = vp->vehicle().get_passenger( vp->part_index() );
-    if( !passenger ) {
-        debugmsg( "map::unboard_vehicle: passenger not found" );
-        return;
-    }
-    passenger->in_vehicle = false;
-    passenger->controlling_vehicle = false;
+    u.in_vehicle = false;
+    u.controlling_vehicle = false;
     vp->part().remove_flag( vehicle_part::passenger_flag );
     vp->vehicle().skidding = true;
     vp->vehicle().invalidate_mass();

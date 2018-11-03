@@ -1444,11 +1444,8 @@ bool vehicle::remove_part( int p )
 
     // Unboard any entities standing on removed boardable parts
     if( part_flag( p, "BOARDABLE" ) ) {
-        std::vector<int> bp = boarded_parts();
-        for( auto &elem : bp ) {
-            if( elem == p ) {
-                g->m.unboard_vehicle( part_loc );
-            }
+        if( player *const psg = get_passenger( p ) ) {
+            g->m.unboard_vehicle( *psg );
         }
     }
 
@@ -4155,7 +4152,9 @@ void vehicle::unboard_all()
 {
     std::vector<int> bp = boarded_parts();
     for( auto &i : bp ) {
-        g->m.unboard_vehicle( global_part_pos3( i ) );
+        if( player *const psg = get_passenger( i ) ) {
+            g->m.unboard_vehicle( *psg );
+        }
     }
 }
 

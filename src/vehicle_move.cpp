@@ -1285,7 +1285,7 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
                                         _( "You are hurled from the %s's seat by the power of the impact!" ),
                                         _( "<npcname> is hurled from the %s's seat by the power of the impact!" ),
                                         veh.name );
-            unboard_vehicle( part_pos );
+            g->m.unboard_vehicle( *psg );
             ///\EFFECT_STR reduces distance thrown from seat in a vehicle impact
             g->fling_creature( psg, direction + rng( 0, 60 ) - 30,
                                ( d_vel - psg->str_cur < 10 ) ? 10 : d_vel - psg->str_cur );

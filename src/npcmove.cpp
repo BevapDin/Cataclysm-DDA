@@ -1631,6 +1631,8 @@ void npc::move_to( const tripoint &pt, bool no_bashing, std::set<tripoint> *nomo
     }
 
     if( moved ) {
+        g->m.unboard_vehicle( *this );
+
         const tripoint old_pos = pos();
         setpos( p );
 
@@ -1638,10 +1640,6 @@ void npc::move_to( const tripoint &pt, bool no_bashing, std::set<tripoint> *nomo
             add_effect( effect_bouldering, 1_turns, num_bp, true );
         } else if( has_effect( effect_bouldering ) ) {
             remove_effect( effect_bouldering );
-        }
-
-        if( in_vehicle ) {
-            g->m.unboard_vehicle( old_pos );
         }
 
         // Close doors behind self (if you can)
