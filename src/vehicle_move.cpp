@@ -1068,10 +1068,10 @@ bool vehicle::act_on_map()
     if( one_in( 10 ) ) {
         bool controlled = false;
         // It can even be a NPC, but must be at the controls
-        for( int boarded : boarded_parts() ) {
-            if( part_with_feature( boarded, VPFLAG_CONTROLS, true ) >= 0 ) {
+        for( const vpart_reference boarded : boarded_parts() ) {
+            if( boarded.part_with_feature( VPFLAG_CONTROLS, true ) ) {
                 controlled = true;
-                player *passenger = get_passenger( boarded );
+                player *passenger = get_passenger( boarded.part_index() );
                 if( passenger != nullptr ) {
                     passenger->practice( skill_driving, 1 );
                 }
@@ -1226,17 +1226,16 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
     const tripoint &pt = veh.global_pos3();
     const int d_vel = abs( veh.velocity - velocity_before ) / 100;
 
-    const std::vector<int> boarded = veh.boarded_parts();
-
     int coll_turn = 0;
-    for( const auto &ps : boarded ) {
+    for( const tripoint boarded : veh.boarded_parts() ) {
+        const size_t ps = boarded.part_index();
         player *psg = veh.get_passenger( ps );
         if( psg == nullptr ) {
             debugmsg( "throw passenger: empty passenger at part %d", ps );
             continue;
         }
 
-        const tripoint part_pos = pt + veh.parts[ps].precalc[0];
+        const tripoint part_pos = boarded.position();
         if( psg->pos() != part_pos ) {
             debugmsg( "throw passenger: passenger at %d,%d,%d, part at %d,%d,%d",
                       psg->posx(), psg->posy(), psg->posz(), part_pos.x, part_pos.y, part_pos.z );

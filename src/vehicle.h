@@ -771,6 +771,11 @@ class vehicle
         vehicle_part_with_feature_range<std::string> get_enabled_parts( std::string feature ) const;
         vehicle_part_with_feature_range<vpart_bitflags> get_enabled_parts( vpart_bitflags f ) const;
         /**@}*/
+        /**
+         * Contains all parts that are currently boarded by a character. Ignores
+         * all other properties of the parts (e.g. broken). Does not return removed parts.
+         */
+        vehicle_part_with_condition_range boarded_parts() const;
 
         // returns the list of indices of parts at certain position (not accounting frame direction)
         std::vector<int> parts_at_relative( const point &dp, bool use_cache ) const;
@@ -891,9 +896,6 @@ class vehicle
 
         // Pre-calculate mount points for (idir=0) - current direction or (idir=1) - next turn direction
         void precalc_mounts( int idir, int dir, const point &pivot );
-
-        // get a list of part indices where is a passenger inside
-        std::vector<int> boarded_parts() const;
 
         // get passenger at part p
         player *get_passenger( int p ) const;
