@@ -1728,7 +1728,7 @@ void vehicle::relocate_passengers( const std::vector<player *> &passengers )
     const auto boardables = get_parts( "BOARDABLE" );
     for( player *passenger : passengers ) {
         for( const vpart_reference &vp : boardables ) {
-            if( vp.part().passenger_id == passenger->getID() ) {
+            if( vp.is_passenger( *passenger ) ) {
                 passenger->setpos( vp.pos() );
             }
         }
@@ -1802,13 +1802,10 @@ bool vehicle::split_vehicles( const std::vector<std::vector <int>> &new_vehs,
             int mov_part = split_parts[ new_part ];
             point cur_mount = parts[ mov_part ].mount;
             point new_mount = cur_mount;
-            player *passenger = nullptr;
+            player *const passenger = vpart_reference( *this, mov_part ).get_passenger();
             // Unboard any entities standing on any transferred part
-            if( part_flag( mov_part, "BOARDABLE" ) ) {
-                passenger = get_passenger( mov_part );
-                if( passenger ) {
-                    passengers.push_back( passenger );
-                }
+            if( passenger ) {
+                passengers.push_back( passenger );
             }
             // transfer the vehicle_part to the new vehicle
             new_vehicle->parts.emplace_back( parts[ mov_part ] );
@@ -1825,8 +1822,7 @@ bool vehicle::split_vehicles( const std::vector<std::vector <int>> &new_vehs,
             }
             // remove the passenger from the old new vehicle
             if( passenger ) {
-                parts[ mov_part ].remove_flag( vehicle_part::passenger_flag );
-                parts[ mov_part ].passenger_id = 0;
+                vpart_reference( *this, mov_part ).unset_passenger();
             }
             // indicate the part needs to be removed from the old vehicle
             parts[ mov_part].removed = true;
@@ -2404,7 +2400,7 @@ int vehicle::part_displayed_at( int const local_x, int const local_y ) const
         // They're in a vehicle, but are they in /this/ vehicle?
         const auto parts = boarded_parts();
         in_vehicle = std::find_if( parts.begin(), parts.end(), [&]( const vpart_reference &vp ) {
-            return get_passenger( vp.part_index() ) == &g->u;
+            return vp.is_passenger( g->u );
         } ) != parts.end();
     }
 
@@ -2510,13 +2506,47 @@ vehicle_part_with_condition_range vehicle::boarded_parts() const
     } );
 }
 
-player *vehicle::get_passenger( int p ) const
+player *vpart_reference::get_passenger() const
 {
-    p = part_with_feature( p, VPFLAG_BOARDABLE, false );
-    if( p >= 0 && parts[p].has_flag( vehicle_part::passenger_flag ) ) {
-        return g->critter_by_id<player>( parts[p].passenger_id );
+    if( part().has_flag( vehicle_part::passenger_flag ) ) {
+        return g->critter_by_id<player>( part().passenger_id );
     }
     return 0;
+}
+
+void vpart_reference::set_passenger( player &passenger ) const
+{
+    if( const player *const psg = get_passenger() ) {
+        if( psg == &passenger ) {
+            return;
+        }
+        debugmsg( "While trying to board %s: another passenger (%s) is already there", passenger.name, psg->name );
+        unset_passenger();
+    }
+
+    part().set_flag( vehicle_part::passenger_flag );
+    part().passenger_id = passenger.getID();
+    passenger.in_vehicle = true;
+    vehicle().invalidate_mass();
+}
+
+void vpart_reference::unset_passenger() const
+{
+    player *const psg = get_passenger();
+    part().remove_flag( vehicle_part::passenger_flag );
+    if( psg ) {
+        psg->in_vehicle = false;
+        psg->controlling_vehicle = false;
+    } else {
+        debugmsg( "Unboarding from vehicle is impossible: passenger not found" );
+    }
+    vehicle().skidding = true;
+    vehicle().invalidate_mass();
+}
+
+bool vpart_reference::is_passenger( const player &p ) const
+{
+    return part().has_flag( vehicle_part::passenger_flag ) && p.getID() == part().passenger_id;
 }
 
 tripoint vehicle::global_pos3() const
@@ -4702,10 +4732,8 @@ void vehicle::calc_mass_center( bool use_precalc ) const
             m_part += j.weight();
         }
 
-        if( vp.has_feature( VPFLAG_BOARDABLE ) && vp.part().has_flag( vehicle_part::passenger_flag ) ) {
-            const player *p = get_passenger( i );
-            // Sometimes flag is wrongly set, don't crash!
-            m_part += p != nullptr ? p->get_weight() : units::mass( 0 );
+        if( const player *const p = vp.get_passenger() ) {
+            m_part += p->get_weight();
         }
 
         if( vp.part().has_flag( vehicle_part::animal_flag ) ) {

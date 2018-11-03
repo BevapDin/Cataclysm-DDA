@@ -832,7 +832,7 @@ void map::board_vehicle( player &u )
     if( !vp ) {
         return;
     }
-    if( player *const psg = vp->vehicle().get_passenger( vp->part_index() ) ) {
+    if( player *const psg = vp->get_passenger() ) {
         if( psg == &u ) {
             return;
         }
@@ -840,10 +840,7 @@ void map::board_vehicle( player &u )
                   vp->vehicle().name, psg->name );
         unboard_vehicle( *psg );
     }
-    vp->part().set_flag( vehicle_part::passenger_flag );
-    vp->part().passenger_id = u.getID();
-    vp->vehicle().invalidate_mass();
-    u.in_vehicle = true;
+    vp->set_passenger( *p );
 }
 
 void map::unboard_vehicle( player &u )
@@ -862,11 +859,7 @@ void map::unboard_vehicle( player &u )
         u.controlling_vehicle = false;
         return;
     }
-    u.in_vehicle = false;
-    u.controlling_vehicle = false;
-    vp->part().remove_flag( vehicle_part::passenger_flag );
-    vp->vehicle().skidding = true;
-    vp->vehicle().invalidate_mass();
+    vp->unset_passenger();
 }
 
 vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
@@ -931,22 +924,19 @@ vehicle *map::displace_vehicle( tripoint &p, const tripoint &dp )
     int z_change = 0;
     // Move passengers
     for( const vpart_reference seat : veh->boarded_parts() ) {
-        const size_t prt = seat.part_index();
-        player *const psg = veh->get_passenger( prt );
+        player *const psg = seat.get_passenger();
         const tripoint part_pos = seat.position();
         if( psg == nullptr ) {
-            debugmsg( "Empty passenger part %d pcoord=%d,%d,%d u=%d,%d,%d?",
-                      prt,
+            debugmsg( "Empty passenger part pcoord=%d,%d,%d u=%d,%d,%d?",
                       part_pos.x, part_pos.y, part_pos.z,
                       g->u.posx(), g->u.posy(), g->u.posz() );
-            veh->parts[prt].remove_flag( vehicle_part::passenger_flag );
+            seat.unset_passenger();
             continue;
         }
 
         if( psg->pos() != part_pos ) {
-            add_msg( m_debug, "Passenger/part position mismatch: passenger %d,%d,%d, part %d %d,%d,%d",
+            add_msg( m_debug, "Passenger/part position mismatch: passenger %d,%d,%d, part %d,%d,%d",
                      g->u.posx(), g->u.posy(), g->u.posz(),
-                     prt,
                      part_pos.x, part_pos.y, part_pos.z );
         }
 

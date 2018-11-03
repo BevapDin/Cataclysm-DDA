@@ -1071,8 +1071,7 @@ bool vehicle::act_on_map()
         for( const vpart_reference boarded : boarded_parts() ) {
             if( boarded.part_with_feature( VPFLAG_CONTROLS, true ) ) {
                 controlled = true;
-                player *passenger = get_passenger( boarded.part_index() );
-                if( passenger != nullptr ) {
+                if( player *const passenger = boarded.get_passenger() ) {
                     passenger->practice( skill_driving, 1 );
                 }
             }
@@ -1228,10 +1227,9 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
 
     int coll_turn = 0;
     for( const tripoint boarded : veh.boarded_parts() ) {
-        const size_t ps = boarded.part_index();
-        player *psg = veh.get_passenger( ps );
+        player *const psg = boarded.get_passenger();
         if( psg == nullptr ) {
-            debugmsg( "throw passenger: empty passenger at part %d", ps );
+            debugmsg( "throw passenger: empty passenger at part %d", boarded.part_index() );
             continue;
         }
 
@@ -1239,7 +1237,7 @@ int map::shake_vehicle( vehicle &veh, const int velocity_before, const int direc
         if( psg->pos() != part_pos ) {
             debugmsg( "throw passenger: passenger at %d,%d,%d, part at %d,%d,%d",
                       psg->posx(), psg->posy(), psg->posz(), part_pos.x, part_pos.y, part_pos.z );
-            veh.parts[ps].remove_flag( vehicle_part::passenger_flag );
+            boarded.unset_passenger();
             continue;
         }
 
