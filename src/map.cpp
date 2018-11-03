@@ -824,38 +824,26 @@ vehicle *map::veh_at_internal( const tripoint &p, int &part_num )
     return const_cast<vehicle *>( const_cast<const map *>( this )->veh_at_internal( p, part_num ) );
 }
 
-void map::board_vehicle( const tripoint &pos, player *p )
+void map::board_vehicle( player &u )
 {
-    if( p == nullptr ) {
-        debugmsg( "map::board_vehicle: null player" );
-        return;
-    }
-
-    const cata::optional<vpart_reference> vp = veh_at( pos ).part_with_feature( VPFLAG_BOARDABLE,
+    // One can only board unbroken seats.
+    const cata::optional<vpart_reference> vp = veh_at( u.pos() ).part_with_feature( VPFLAG_BOARDABLE,
             true );
     if( !vp ) {
-        if( p->grab_point.x == 0 && p->grab_point.y == 0 ) {
-            debugmsg( "map::board_vehicle: vehicle not found" );
-        }
         return;
     }
-    if( vp->part().has_flag( vehicle_part::passenger_flag ) ) {
-        player *psg = vp->vehicle().get_passenger( vp->part_index() );
-        debugmsg( "map::board_vehicle: passenger (%s) is already there",
-                  psg ? psg->name.c_str() : "<null>" );
-        if( psg ) {
-            unboard_vehicle( *psg );
+    if( player *const psg = vp->vehicle().get_passenger( vp->part_index() ) ) {
+        if( psg == &u ) {
+            return;
         }
+        debugmsg( "Attempt to board %s onto vehicle %s, but passenger (%s) is there", u.name,
+                  vp->vehicle().name, psg->name );
+        unboard_vehicle( *psg );
     }
     vp->part().set_flag( vehicle_part::passenger_flag );
-    vp->part().passenger_id = p->getID();
+    vp->part().passenger_id = u.getID();
     vp->vehicle().invalidate_mass();
-
-    p->setpos( pos );
-    p->in_vehicle = true;
-    if( p == &g->u ) {
-        g->update_map( g->u );
-    }
+    u.in_vehicle = true;
 }
 
 void map::unboard_vehicle( player &u )
