@@ -1941,7 +1941,7 @@ bool editmap::mapgen_set( std::string om_name, tripoint omt_tgt, int r, bool cha
     return true;
 }
 
-vehicle *editmap::mapgen_veh_query( const tripoint &omt_tgt )
+vehicle *mapgen_veh_query( const tripoint &omt_tgt )
 {
     tinymap target_bay;
     target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
@@ -1949,7 +1949,7 @@ vehicle *editmap::mapgen_veh_query( const tripoint &omt_tgt )
     std::vector<vehicle *> possible_vehicles;
     for( int x = 0; x < 2; x++ ) {
         for( int y = 0; y < 2; y++ ) {
-            submap *destsm = target_bay.get_submap_at_grid( x, y, target.z );
+            submap *destsm = target_bay.get_submap_at_grid( x, y, omt_tgt.z );
             for( size_t z = 0; z < destsm->vehicles.size(); z++ ) {
                 possible_vehicles.push_back( destsm->vehicles[z] );
             }

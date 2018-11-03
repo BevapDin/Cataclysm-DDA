@@ -1531,6 +1531,9 @@ void talk_function::camp_craft_construction( npc &p, const mission_entry &cur_ke
     }
 }
 
+// For unknown reasons defined in editmap.cpp
+vehicle *mapgen_veh_query( const tripoint &omt_tgt );
+
 bool talk_function::camp_garage_chop_start( npc &p, const std::string &task )
 {
     std::string dir = camp_direction( task );
@@ -1546,7 +1549,7 @@ bool talk_function::camp_garage_chop_start( npc &p, const std::string &task )
     oter_id &omt_ref = overmap_buffer.ter( omt_trg );
     omt_ref = oter_id( omt_ref.id().c_str() );
     editmap edit;
-    vehicle *car = edit.mapgen_veh_query( omt_trg );
+    vehicle *car = mapgen_veh_query( omt_trg );
     if( car == nullptr ) {
         return false;
     }
