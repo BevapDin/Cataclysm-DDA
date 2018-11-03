@@ -254,7 +254,7 @@ void doors::close_door( map &m, Character &who, const tripoint &closep )
         const int vpart = vp->part_index();
         if( const cata::optional<vpart_reference> closable = vp.next_part_to_close( veh_pointer_or_null(
                     m.veh_at( who.pos() ) ) != &vp->vehicle() ) ) {
-            closable->vehicle().close( closable->part_index() );
+            closable->close();
             didit = true;
         } else if( const cata::optional<vpart_reference> inside_closable = vp.next_part_to_close(
                        false ) ) {

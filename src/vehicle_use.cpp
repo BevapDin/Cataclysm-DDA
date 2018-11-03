@@ -1082,18 +1082,13 @@ void vpart_reference::open() const
     }
 }
 
-/**
- * Opens an openable part at the specified index. If it's a multipart, opens
- * all attached parts as well.
- * @param part_index The index in the parts list of the part to open.
- */
-void vehicle::close( int part_index )
+void vpart_reference::close() const
 {
-    if( !part_info( part_index ).has_flag( "OPENABLE" ) ) {
-        debugmsg( "Attempted to close non-closeable part %d (%s) on a %s!", part_index,
-                  parts[ part_index ].name().c_str(), name.c_str() );
+    if( !has_feature( VPFLAG_OPENABLE ) ) {
+        debugmsg( "Attempted to close non-openable part %d (%s) on a %s!", part_index(),
+                  part().name(), vehicle().name );
     } else {
-        open_or_close( part_index, false );
+        vehicle().open_or_close( part_index(), false );
     }
 }
 

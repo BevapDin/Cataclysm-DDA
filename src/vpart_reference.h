@@ -52,6 +52,7 @@ class vpart_reference : public vpart_position
          */
         /**@{*/
         void open() const;
+        void close() const;
         /**@}*/
 };
 
