@@ -1534,6 +1534,7 @@ void talk_function::camp_craft_construction( npc &p, const mission_entry &cur_ke
 // For unknown reasons defined in editmap.cpp
 vehicle *mapgen_veh_query( const tripoint &omt_tgt );
 void mapgen_veh_destroy( const tripoint &omt_tgt, vehicle &car_target );
+bool mapgen_veh_has( const tripoint &omt_tgt );
 
 bool talk_function::camp_garage_chop_start( npc &p, const std::string &task )
 {
@@ -1634,8 +1635,7 @@ void talk_function::camp_companion_return( npc &comp )
 bool talk_function::upgrade_return( npc &p, const tripoint &omt_pos, const std::string &miss )
 {
     //Ensure there are no vehicles before we update
-    editmap edit;
-    if( edit.mapgen_veh_has( omt_pos ) ) {
+    if( mapgen_veh_has( omt_pos ) ) {
         popup( _( "Engine cannot support merging vehicles from two overmaps, please remove them from the OM tile." ) );
         return false;
     }

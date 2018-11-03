@@ -1974,7 +1974,7 @@ vehicle *mapgen_veh_query( const tripoint &omt_tgt )
     return nullptr;
 }
 
-bool editmap::mapgen_veh_has( const tripoint &omt_tgt )
+bool mapgen_veh_has( const tripoint &omt_tgt )
 {
     tinymap target_bay;
     target_bay.load( omt_tgt.x * 2, omt_tgt.y * 2, omt_tgt.z, false );
