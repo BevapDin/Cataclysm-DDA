@@ -185,23 +185,10 @@ int vpart_position::print_part_list( const catacurses::window &win, const int y1
     return y;
 }
 
-/**
- * Prints a list of descriptions for all parts to the screen inside of a boxed window
- * @param win The window to draw in.
- * @param max_y Draw no further than this y-coordinate.
- * @param width The width of the window.
- * @param &p The index of the part being examined.
- * @param start_at Which vehicle part to start printing at.
- * @param start_limit the part index beyond which the display is full
- */
-void vehicle::print_vparts_descs( const catacurses::window &win, int max_y, int width, int &p,
-                                  int &start_at, int &start_limit ) const
+void vpart_position::print_vparts_descs( const catacurses::window &win, const int max_y,
+        const int width, int &start_at, int &start_limit ) const
 {
-    if( p < 0 || p >= static_cast<int>( parts.size() ) ) {
-        return;
-    }
-
-    std::vector<int> pl = this->parts_at_relative( parts[p].mount, true );
+    std::vector<int> pl = vehicle().parts_at_relative( mount(), true );
     std::ostringstream msg;
 
     int lines = 0;
@@ -227,7 +214,7 @@ void vehicle::print_vparts_descs( const catacurses::window &win, int max_y, int 
         lines += 1;
     }
     for( size_t i = start_at; i < pl.size(); i++ ) {
-        const vehicle_part &vp = parts[ pl [ i ] ];
+        const vehicle_part &vp = vehicle().parts[ pl [ i ] ];
         std::ostringstream possible_msg;
         std::string name_color = string_format( "<color_%1$s>",
                                                 string_from_color( vp.is_broken() ? c_dark_gray : c_light_green ) );

@@ -647,9 +647,6 @@ class vehicle
 
         void serialize( JsonOut &jsout ) const;
         void deserialize( JsonIn &jsin );
-        // Vehicle parts descriptions - descriptions for all the parts on a single tile
-        void print_vparts_descs( const catacurses::window &win, int max_y, int width, int &p,
-                                 int &start_at, int &start_limit ) const;
 
         /**
          *  Operate vehicle controls

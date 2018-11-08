@@ -94,6 +94,16 @@ class vpart_position
          * @param hl The index of the part to highlight (if any).
          */
         int print_part_list( const catacurses::window &win, int y1, int max_y, int width, int hl = -1 ) const;
+        /**
+         * Prints a list of descriptions for all parts to the screen inside of a boxed window
+         * @param win The window to draw in.
+         * @param max_y Draw no further than this y-coordinate.
+         * @param width The width of the window.
+         * @param start_at Which vehicle part to start printing at.
+         * @param start_limit the part index beyond which the display is full
+         */
+        void print_vparts_descs( const catacurses::window &win, int max_y, int width,
+                                 int &start_at, int &start_limit ) const;
 };
 
 /**

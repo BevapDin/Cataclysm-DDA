@@ -1769,7 +1769,9 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     wrefresh( w_parts );
 
     werase( w_msg );
-    veh->print_vparts_descs( w_msg, getmaxy( w_msg ), getmaxx( w_msg ), cpart, start_at, start_limit );
+    if( cpart >= 0 ) {
+        vpart_position( *veh, cpart ).print_vparts_descs( w_msg, getmaxy( w_msg ), getmaxx( w_msg ), start_at, start_limit );
+    }
     wrefresh( w_msg );
 
     can_mount.clear();
