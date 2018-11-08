@@ -434,7 +434,7 @@ task_reason veh_interact::cant_do (char mode)
         break;
     case 'r': // repair mode
         enough_morale = g->u.has_morale_to_craft();
-        valid_target = !need_repair.empty() && cpart >= 0;
+        valid_target = !need_repair.empty() && cpart;
         has_tools = true; // checked later
         break;
 
@@ -457,8 +457,8 @@ task_reason veh_interact::cant_do (char mode)
 
     case 'o': // remove mode
         enough_morale = g->u.has_morale_to_craft();
-        valid_target = cpart >= 0 && 0 == veh->tags.count("convertible");
-        part_free = parts_here.size() > 1 || (cpart >= 0 && veh->can_unmount(cpart));
+        valid_target = cpart && 0 == veh->tags.count("convertible");
+        part_free = parts_here.size() > 1 || (cpart && veh->can_unmount(cpart->part_index()));
         //tool and skill checks processed later
         has_tools = true;
         has_skill = true;
@@ -498,7 +498,7 @@ task_reason veh_interact::cant_do (char mode)
         } ) ? CAN_DO : INVALID_TARGET;
 
     case 'a': // relabel
-        valid_target = cpart >= 0;
+        valid_target = cpart.has_value();
         has_tools = true;
         break;
     default:
@@ -981,8 +981,7 @@ bool veh_interact::do_repair( std::string &msg )
         wrefresh (w_msg);
 
         werase( w_parts );
-        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ),
-                              need_repair[pos] );
+        cpart->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), need_repair[pos] );
         wrefresh( w_parts );
 
         const std::string action = main_context.handle_input();
@@ -994,7 +993,7 @@ bool veh_interact::do_repair( std::string &msg )
 
         } else if( action == "QUIT" ) {
             werase( w_parts );
-            vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
+            cpart->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh( w_parts );
             werase( w_msg );
             wrefresh( w_msg );
@@ -1503,7 +1502,7 @@ bool veh_interact::do_remove( std::string &msg )
     while (true) {
         //redraw list of parts
         werase (w_parts);
-        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), pos );
+        cpart->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), pos );
         wrefresh (w_parts);
         int part = parts_here[ pos ];
 
@@ -1519,7 +1518,7 @@ bool veh_interact::do_remove( std::string &msg )
             break;
         } else if( action == "QUIT" ) {
             werase( w_parts );
-            vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
+            cpart->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh( w_parts );
             werase( w_msg );
             wrefresh( w_msg );
@@ -1702,13 +1701,12 @@ bool veh_interact::do_relabel( std::string &msg )
         return false;
     }
 
-    const vpart_position vp( *veh, cpart );
     std::string text = string_input_popup()
                        .title( _( "New label:" ) )
                        .width( 20 )
-                       .text( vp.get_label().value_or( "" ) )
+                       .text( cpart->get_label().value_or( "" ) )
                        .query_string();
-    vp.set_label( text ); // empty input removes the label
+    cpart->set_label( text ); // empty input removes the label
     // refresh w_disp & w_part windows:
     move_cursor( 0, 0 );
 
@@ -1746,7 +1744,14 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
 
     display_veh();
     // Update the current active component index to the new position.
-    cpart = veh->part_displayed_at( point( -ddx, -ddy ) );
+    {
+        const int p = veh->part_displayed_at( point( -ddx, -ddy ) );
+        if( p >= 0 ) {
+            cpart.emplace( *veh, p );
+        } else {
+            cpart.reset();
+        }
+    }
     int vdx = -ddx;
     int vdy = -ddy;
     point q = veh->coord_translate( point( vdx, vdy ) );
@@ -1757,20 +1762,20 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     if( ovp && &ovp->vehicle() != veh ) {
         obstruct = true;
     }
-    nc_color col = cpart >= 0 ? veh->part_color( cpart ) : c_black;
-    long sym = cpart >= 0 ? veh->part_sym( cpart ) : ' ';
+    nc_color col = cpart ? veh->part_color( cpart->part_index() ) : c_black;
+    long sym = cpart ? veh->part_sym( cpart->part_index() ) : ' ';
     mvwputch( w_disp, hh, hw, obstruct ? red_background( col ) : hilite( col ),
               special_symbol( sym ) );
     wrefresh( w_disp );
     werase( w_parts );
-    if( cpart >= 0 ) {
-        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
+    if( cpart ) {
+        cpart->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
     }
     wrefresh( w_parts );
 
     werase( w_msg );
-    if( cpart >= 0 ) {
-        vpart_position( *veh, cpart ).print_vparts_descs( w_msg, getmaxy( w_msg ), getmaxx( w_msg ), start_at, start_limit );
+    if( cpart ) {
+        cpart->print_vparts_descs( w_msg, getmaxy( w_msg ), getmaxx( w_msg ), start_at, start_limit );
     }
     wrefresh( w_msg );
 
@@ -1798,8 +1803,8 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
     need_repair.clear();
     parts_here.clear();
     wheel = NULL;
-    if( cpart >= 0 ) {
-        parts_here = veh->parts_at_relative( veh->parts[cpart].mount, true );
+    if( cpart ) {
+        parts_here = veh->parts_at_relative( cpart->mount(), true );
         for( size_t i = 0; i < parts_here.size(); i++ ) {
             auto &pt = veh->parts[parts_here[i]];
 
@@ -1909,7 +1914,6 @@ void veh_interact::display_veh ()
 
         if (x == 0 && y == 0) {
             col = hilite(col);
-            cpart = p;
         }
         mvwputch (w_disp, hh + y, hw + x, col, special_symbol(sym));
     }

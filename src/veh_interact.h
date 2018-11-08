@@ -7,8 +7,10 @@
 #include "input.h"
 #include "inventory.h"
 #include "player_activity.h"
+#include "vpart_position.h"
 #include "requirements.h"
 #include "string_id.h"
+#include "optional.h"
 
 #include <map>
 #include <sstream>
@@ -65,7 +67,7 @@ class veh_interact
 
         const vehicle_part *sel_vehicle_part = nullptr;
 
-        int cpart = -1;
+        cata::optional<vpart_position> cpart;
         int page_size;
         int fuel_index = 0; /** Starting index of where to start printing fuels from */
         catacurses::window w_grid;
