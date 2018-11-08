@@ -96,7 +96,6 @@ class veh_interact
         bool format_reqs( std::ostringstream &msg, const requirement_data &reqs,
                           const std::map<skill_id, int> &skills, int moves ) const;
 
-        int part_at( int dx, int dy );
         void move_cursor( int dx, int dy, int dstart_at = 0 );
         task_reason cant_do( char mode );
         bool can_potentially_install( const vpart_info &vpart );

@@ -1716,19 +1716,6 @@ bool veh_interact::do_relabel( std::string &msg )
 }
 
 /**
- * Returns the first part on the vehicle at the given position.
- * @param dx The x-coordinate, relative to the viewport's 0-point (?)
- * @param dy The y-coordinate, relative to the viewport's 0-point (?)
- * @return The first vehicle part at the specified coordinates.
- */
-int veh_interact::part_at( int dx, int dy )
-{
-    int vdx = -ddx - dy;
-    int vdy = dx - ddy;
-    return veh->part_displayed_at( point( vdx, vdy ) );
-}
-
-/**
  * Checks to see if you can potentially install this part at current position.
  * Affects coloring in display_list() and is also used to
  * sort can_mount so potentially installable parts come first.
@@ -1759,7 +1746,7 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
 
     display_veh();
     // Update the current active component index to the new position.
-    cpart = part_at( 0, 0 );
+    cpart = veh->part_displayed_at( point( -ddx, -ddy ) );
     int vdx = -ddx;
     int vdy = -ddy;
     point q = veh->coord_translate( point( vdx, vdy ) );
