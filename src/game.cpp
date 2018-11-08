@@ -6561,7 +6561,7 @@ void game::print_vehicle_info( const vehicle *veh, int veh_part, const catacurse
 {
     if( veh ) {
         mvwprintw( w_look, ++line, column, _( "There is a %s there. Parts:" ), veh->name.c_str() );
-        line = veh->print_part_list( w_look, ++line, last_line, getmaxx( w_look ), veh_part );
+        line = vpart_position( *veh, veh_part ).print_part_list( w_look, ++line, last_line, getmaxx( w_look ) );
     }
 }
 

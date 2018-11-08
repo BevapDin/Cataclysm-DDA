@@ -981,7 +981,7 @@ bool veh_interact::do_repair( std::string &msg )
         wrefresh (w_msg);
 
         werase( w_parts );
-        veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart,
+        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ),
                               need_repair[pos] );
         wrefresh( w_parts );
 
@@ -994,7 +994,7 @@ bool veh_interact::do_repair( std::string &msg )
 
         } else if( action == "QUIT" ) {
             werase( w_parts );
-            veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1 );
+            vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh( w_parts );
             werase( w_msg );
             wrefresh( w_msg );
@@ -1503,7 +1503,7 @@ bool veh_interact::do_remove( std::string &msg )
     while (true) {
         //redraw list of parts
         werase (w_parts);
-        veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, pos );
+        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), pos );
         wrefresh (w_parts);
         int part = parts_here[ pos ];
 
@@ -1519,7 +1519,7 @@ bool veh_interact::do_remove( std::string &msg )
             break;
         } else if( action == "QUIT" ) {
             werase( w_parts );
-            veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1 );
+            vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
             wrefresh( w_parts );
             werase( w_msg );
             wrefresh( w_msg );
@@ -1763,7 +1763,9 @@ void veh_interact::move_cursor( int dx, int dy, int dstart_at )
               special_symbol( sym ) );
     wrefresh( w_disp );
     werase( w_parts );
-    veh->print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), cpart, -1 );
+    if( cpart >= 0 ) {
+        vpart_position( *veh, cpart ).print_part_list( w_parts, 0, getmaxy( w_parts ) - 1, getmaxx( w_parts ), -1 );
+    }
     wrefresh( w_parts );
 
     werase( w_msg );

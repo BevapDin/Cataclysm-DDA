@@ -12,6 +12,10 @@ enum vpart_bitflags : int;
 class vpart_reference;
 struct tripoint;
 struct point;
+namespace catacurses
+{
+class window;
+} // namespace catacurses
 
 /**
  * Reference to a position (a point) of the @ref vehicle.
@@ -80,6 +84,16 @@ class vpart_position
          */
         // @todo change to return tripoint.
         point mount() const;
+        /**
+         * Prints a list of all parts to the screen inside of a boxed window, possibly
+         * highlighting a selected one.
+         * @param win The window to draw in.
+         * @param y1 The y-coordinate to start drawing at.
+         * @param max_y Draw no further than this y-coordinate.
+         * @param width The width of the window.
+         * @param hl The index of the part to highlight (if any).
+         */
+        int print_part_list( const catacurses::window &win, int y1, int max_y, int width, int hl = -1 ) const;
 };
 
 /**

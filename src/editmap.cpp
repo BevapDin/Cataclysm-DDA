@@ -643,7 +643,7 @@ void editmap::update_view( bool update_info )
         } else if( vp ) {
             mvwprintw( w_info, off, 1, _( "There is a %s there. Parts:" ), vp->vehicle().name );
             off++;
-            vp->vehicle().print_part_list( w_info, off, getmaxy( w_info ) - 1, width, vp->part_index() );
+            vp->print_part_list( w_info, off, getmaxy( w_info ) - 1, width );
             off += 6;
         }
         map_stack target_stack = g->m.i_at( target );
