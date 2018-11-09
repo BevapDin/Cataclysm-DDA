@@ -112,7 +112,7 @@ void overmapbuffer::fix_mongroups( overmap &new_overmap )
         point smabs( mg.pos.x + new_overmap.pos().x * OMAPX * 2,
                      mg.pos.y + new_overmap.pos().y * OMAPY * 2 );
         point omp = sm_to_om_remain( smabs );
-        if( !has( omp.x, omp.y ) ) {
+        if( !has( omp ) ) {
             // Don't generate new overmaps, as this can be called from the
             // overmap-generating code.
             ++it;
@@ -156,7 +156,7 @@ void overmapbuffer::fix_npcs( overmap &new_overmap )
         const tripoint npc_omt_pos = np.global_omt_location();
         const point npc_om_pos = omt_to_om_copy( npc_omt_pos.x, npc_omt_pos.y );
         const point &loc = new_overmap.pos();
-        if( !has( npc_om_pos.x, npc_om_pos.y ) ) {
+        if( !has( npc_om_pos ) ) {
             // This can't really happen without save editing
             // We have no sane option here, just place the NPC on the edge
             debugmsg( "NPC %s is out of bounds, on non-generated overmap %d,%d",
@@ -243,9 +243,9 @@ overmap *overmapbuffer::get_existing( int x, int y )
     return nullptr;
 }
 
-bool overmapbuffer::has( int x, int y )
+bool overmapbuffer::has( const point p )
 {
-    return get_existing( x, y ) != nullptr;
+    return get_existing( p.x, p.y ) != nullptr;
 }
 
 overmap &overmapbuffer::get_om_global( int &x, int &y )
@@ -431,7 +431,7 @@ std::vector<mongroup *> overmapbuffer::groups_at( int x, int y, int z )
 {
     std::vector<mongroup *> result;
     const point omp = sm_to_om_remain( x, y );
-    if( !has( omp.x, omp.y ) ) {
+    if( !has( omp ) ) {
         return result;
     }
     const tripoint dpos( x, y, z );

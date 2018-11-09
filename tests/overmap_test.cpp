@@ -26,9 +26,9 @@ TEST_CASE( "set_and_get_overmap_scents" )
 TEST_CASE( "default_overmap_generation_always_succeeds" )
 {
     int overmaps_to_construct = 10;
-    for( point candidate_addr : closest_points_first( 10, { 0, 0 } ) ) {
+    for( const point &candidate_addr : closest_points_first( 10, { 0, 0 } ) ) {
         // Skip populated overmaps.
-        if( overmap_buffer.has( candidate_addr.x, candidate_addr.y ) ) {
+        if( overmap_buffer.has( candidate_addr ) ) {
             continue;
         }
         overmap_special_batch test_specials = overmap_specials::get_default_batch( candidate_addr );

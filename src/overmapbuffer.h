@@ -274,11 +274,11 @@ class overmapbuffer
         overmap &get_om_global( const point &p );
         overmap &get_om_global( const tripoint &p );
         /**
-         * (x,y) are global overmap coordinates (same as @ref get).
+         * @param p Global overmap coordinates (same as @ref get).
          * @returns true if the buffer has a overmap with
          * the given coordinates.
          */
-        bool has( int x, int y );
+        bool has( point p );
         /**
          * Get an existing overmap, does not create a new one
          * and may return NULL if the requested overmap does not
