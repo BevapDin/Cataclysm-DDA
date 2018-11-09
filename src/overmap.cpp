@@ -3242,9 +3242,7 @@ void overmap::place_specials( overmap_special_batch &enabled_specials )
             }
         }
         if( !nearest_candidates.empty() ) {
-            std::random_shuffle( nearest_candidates.begin(), nearest_candidates.end() );
-            point new_om_addr = nearest_candidates.front();
-            overmap_buffer.create_custom_overmap( new_om_addr, custom_overmap_specials );
+            overmap_buffer.create_custom_overmap( random_entry( nearest_candidates ), custom_overmap_specials );
         } else {
             add_msg( _( "Unable to place all configured specials, some missions may fail to initialize." ) );
         }
