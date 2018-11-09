@@ -12,6 +12,7 @@
 #include "options.h"
 #include "output.h"
 #include "player.h"
+#include "line.h"
 #include "string_formatter.h"
 #include "string_input_popup.h"
 #include "translations.h"

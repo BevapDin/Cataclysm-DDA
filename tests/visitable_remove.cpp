@@ -3,6 +3,7 @@
 #include "game.h"
 #include "itype.h"
 #include "map.h"
+#include "line.h"
 #include "map_selector.h"
 #include "player.h"
 #include "rng.h"

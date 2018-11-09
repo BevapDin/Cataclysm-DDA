@@ -15,6 +15,7 @@
 #include "mapdata.h"
 #include "messages.h"
 #include "output.h"
+#include "line.h"
 #include "overmapbuffer.h"
 #include "sounds.h"
 #include "string_formatter.h"

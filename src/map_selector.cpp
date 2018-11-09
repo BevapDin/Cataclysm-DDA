@@ -2,6 +2,7 @@
 
 #include "game.h"
 #include "map.h"
+#include "line.h"
 #include "map_iterator.h"
 #include "optional.h"
 #include "rng.h"

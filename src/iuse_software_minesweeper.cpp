@@ -1,6 +1,7 @@
 #include "iuse_software_minesweeper.h"
 
 #include "catacharset.h"
+#include "line.h"
 #include "input.h"
 #include "output.h"
 #include "rng.h"
@@ -326,4 +327,3 @@ int minesweeper_game::start_game()
 
     return iScore;
 }
-

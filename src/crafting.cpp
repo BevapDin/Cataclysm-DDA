@@ -10,6 +10,7 @@
 #include "game_inventory.h"
 #include "inventory.h"
 #include "item.h"
+#include "line.h"
 #include "itype.h"
 #include "map.h"
 #include "messages.h"

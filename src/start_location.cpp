@@ -10,6 +10,7 @@
 #include "map.h"
 #include "map_extras.h"
 #include "mapdata.h"
+#include "line.h"
 #include "output.h"
 #include "overmap.h"
 #include "overmapbuffer.h"

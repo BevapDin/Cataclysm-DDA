@@ -2,6 +2,7 @@
 
 #include "ballistics.h"
 #include "bodypart.h"
+#include "line.h"
 #include "creature.h"
 #include "damage.h"
 #include "dispersion.h"

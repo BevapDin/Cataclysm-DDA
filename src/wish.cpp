@@ -14,6 +14,7 @@
 #include "string_formatter.h"
 #include "string_input_popup.h"
 #include "translations.h"
+#include "line.h"
 #include "ui.h"
 #include "uistate.h"
 

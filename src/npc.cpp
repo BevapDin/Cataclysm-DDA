@@ -17,6 +17,7 @@
 #include "mtype.h"
 #include "mutation.h"
 #include "npc_class.h"
+#include "line.h"
 #include "output.h"
 #include "overmap.h"
 #include "overmapbuffer.h"

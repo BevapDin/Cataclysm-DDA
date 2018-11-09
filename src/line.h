@@ -125,6 +125,10 @@ std::vector<point> squares_in_direction( int x1, int y1, int x2, int y2 );
 // Currently limited to the same z-level as @from.
 std::vector<tripoint> squares_closer_to( const tripoint &from, const tripoint &to );
 void calc_ray_end( int angle, int range, const tripoint &p, tripoint &out );
+std::vector<point> closest_points_first( int radius, point p );
+std::vector<point> closest_points_first( int radius, int x, int y );
+// Does not build "piles" - does the same as above functions, except in tripoints
+std::vector<tripoint> closest_tripoints_first( int radius, const tripoint &p );
 
 // weird class for 2d vectors where dist is derived from rl_dist
 struct rl_vec2d {

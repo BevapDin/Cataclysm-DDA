@@ -1,6 +1,6 @@
 #include "catch/catch.hpp"
 
-#include "map.h"
+#include "line.h"
 #include "overmap.h"
 #include "overmapbuffer.h"
 
@@ -93,4 +93,3 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
     INFO( "Failed to place optional special on origin " );
     CHECK( found_optional == true );
 }
-
