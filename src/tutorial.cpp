@@ -48,7 +48,7 @@ bool tutorial_game::init()
     g->u.name = _( "John Smith" );
     g->u.prof = profession::generic();
     int lx = 50, ly = 50; // overmap terrain coordinates
-    auto &starting_om = overmap_buffer.get( 0, 0 );
+    auto &starting_om = overmap_buffer.get( point( 0, 0 ) );
     for( int i = 0; i < OMAPX; i++ ) {
         for( int j = 0; j < OMAPY; j++ ) {
             starting_om.ter( i, j, -1 ) = rock;

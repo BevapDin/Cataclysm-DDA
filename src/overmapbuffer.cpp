@@ -56,10 +56,8 @@ std::string overmapbuffer::player_filename( int const x, int const y )
     return filename.str();
 }
 
-overmap &overmapbuffer::get( const int x, const int y )
+overmap &overmapbuffer::get( const point p )
 {
-    point const p { x, y };
-
     if( last_requested_overmap != nullptr && last_requested_overmap->pos() == p ) {
         return *last_requested_overmap;
     }
@@ -70,11 +68,11 @@ overmap &overmapbuffer::get( const int x, const int y )
     }
 
     // That constructor loads an existing overmap or creates a new one.
-    overmap *new_om = new overmap( x, y );
+    overmap *new_om = new overmap( p.x, p.y );
     overmaps[ p ] = std::unique_ptr<overmap>( new_om );
     new_om->populate();
     // Note: fix_mongroups might load other overmaps, so overmaps.back() is not
-    // necessarily the overmap at (x,y)
+    // necessarily the overmap at p
     fix_mongroups( *new_om );
     fix_npcs( *new_om );
 
@@ -120,7 +118,7 @@ void overmapbuffer::fix_mongroups( overmap &new_overmap )
             ++it;
             continue;
         }
-        overmap &om = get( omp.x, omp.y );
+        overmap &om = get( omp );
         mg.pos.x = smabs.x;
         mg.pos.y = smabs.y;
         om.add_mon_group( mg );
@@ -174,7 +172,7 @@ void overmapbuffer::fix_npcs( overmap &new_overmap )
         }
 
         // Simplest case: just move the pointer
-        get( npc_om_pos.x, npc_om_pos.y ).insert_npc( ptr );
+        get( npc_om_pos ).insert_npc( ptr );
     }
 }
 
@@ -233,7 +231,7 @@ overmap *overmapbuffer::get_existing( int x, int y )
     if( file_exist( terrain_filename( x, y ) ) ) {
         // File exists, load it normally (the get function
         // indirectly call overmap::open to do so).
-        return &get( x, y );
+        return &get( point( x, y ) );
     }
     // File does not exist (or not readable which is essentially
     // the same for our usage). A second call of this function with
@@ -252,20 +250,17 @@ bool overmapbuffer::has( int x, int y )
 
 overmap &overmapbuffer::get_om_global( int &x, int &y )
 {
-    const point om_pos = omt_to_om_remain( x, y );
-    return get( om_pos.x, om_pos.y );
+    return get( omt_to_om_remain( x, y ) );
 }
 
 overmap &overmapbuffer::get_om_global( const point &p )
 {
-    const point om_pos = omt_to_om_copy( p );
-    return get( om_pos.x, om_pos.y );
+    return get( omt_to_om_copy( p ) );
 }
 
 overmap &overmapbuffer::get_om_global( const tripoint &p )
 {
-    const point om_pos = omt_to_om_copy( { p.x, p.y } );
-    return get( om_pos.x, om_pos.y );
+    return get( omt_to_om_copy( point( p.x, p.y ) ) );
 }
 
 overmap *overmapbuffer::get_existing_om_global( int &x, int &y )
@@ -440,7 +435,7 @@ std::vector<mongroup *> overmapbuffer::groups_at( int x, int y, int z )
         return result;
     }
     const tripoint dpos( x, y, z );
-    overmap &om = get( omp.x, omp.y );
+    overmap &om = get( omp );
     for( auto it = om.zg.lower_bound( dpos ), end = om.zg.upper_bound( dpos ); it != end; ++it ) {
         auto &mg = it->second;
         if( mg.empty() ) {
@@ -756,7 +751,7 @@ void overmapbuffer::insert_npc( const std::shared_ptr<npc> who )
     assert( who );
     const tripoint npc_omt_pos = who->global_omt_location();
     const point npc_om_pos = omt_to_om_copy( npc_omt_pos.x, npc_omt_pos.y );
-    get( npc_om_pos.x, npc_om_pos.y ).insert_npc( who );
+    get( npc_om_pos ).insert_npc( who );
 }
 
 std::shared_ptr<npc> overmapbuffer::remove_npc( const int id )
@@ -1017,8 +1012,7 @@ void overmapbuffer::spawn_monster( const int x, const int y, const int z )
 {
     // Create a copy, so we can reuse x and y later
     point sm( x, y );
-    const point omp = sm_to_om_remain( sm );
-    overmap &om = get( omp.x, omp.y );
+    overmap &om = get( sm_to_om_remain( sm ) );
     const tripoint current_submap_loc( sm.x, sm.y, z );
     auto monster_bucket = om.monster_map.equal_range( current_submap_loc );
     std::for_each( monster_bucket.first, monster_bucket.second,
@@ -1048,8 +1042,7 @@ void overmapbuffer::despawn_monster( const monster &critter )
     // Get absolute coordinates of the monster in map squares, translate to submap position
     tripoint sm = ms_to_sm_copy( g->m.getabs( critter.pos() ) );
     // Get the overmap coordinates and get the overmap, sm is now local to that overmap
-    const point omp = sm_to_om_remain( sm.x, sm.y );
-    overmap &om = get( omp.x, omp.y );
+    overmap &om = get( sm_to_om_remain( sm.x, sm.y ) );
     // Store the monster using coordinates local to the overmap.
     om.monster_map.insert( std::make_pair( sm, critter ) );
 }

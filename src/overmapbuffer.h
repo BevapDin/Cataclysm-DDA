@@ -63,10 +63,10 @@ class overmapbuffer
         static std::string player_filename( int const x, int const y );
 
         /**
-         * Uses overmap coordinates, that means x and y are directly
+         * Uses overmap coordinates, that means \p p is directly
          * compared with the position of the overmap.
          */
-        overmap &get( const int x, const int y );
+        overmap &get( point p );
         void save();
         void clear();
         void create_custom_overmap( int const x, int const y, overmap_special_batch &specials );

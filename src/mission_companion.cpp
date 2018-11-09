@@ -1413,7 +1413,7 @@ bool talk_function::companion_om_combat_check( const std::vector<std::shared_ptr
         for( int y = 0; y < 2; y++ ) {
             point sm( ( om_tgt.x * 2 ) + x, ( om_tgt.x * 2 ) + y );
             const point omp = sm_to_om_remain( sm );
-            overmap &omi = overmap_buffer.get( omp.x, omp.y );
+            overmap &omi = overmap_buffer.get( omp );
 
             const tripoint current_submap_loc( om_tgt.x * 2 + x, om_tgt.y * 2 + y, om_tgt.z );
             auto monster_bucket = omi.monster_map.equal_range( current_submap_loc );
