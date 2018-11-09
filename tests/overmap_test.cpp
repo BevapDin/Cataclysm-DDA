@@ -32,7 +32,7 @@ TEST_CASE( "default_overmap_generation_always_succeeds" )
             continue;
         }
         overmap_special_batch test_specials = overmap_specials::get_default_batch( candidate_addr );
-        overmap_buffer.create_custom_overmap( candidate_addr.x, candidate_addr.y, test_specials );
+        overmap_buffer.create_custom_overmap( candidate_addr, test_specials );
         for( const auto &special_placement : test_specials ) {
             auto special = special_placement.special_details;
             INFO( "In attempt #" << overmaps_to_construct
@@ -74,7 +74,7 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
     overmap_special_batch test_specials = overmap_special_batch( origin, specials );
 
     // Run the overmap creation, which will try to place our specials.
-    overmap_buffer.create_custom_overmap( origin.x, origin.y, test_specials );
+    overmap_buffer.create_custom_overmap( origin, test_specials );
 
     // Get the origin overmap...
     overmap &test_overmap = overmap_buffer.get( origin );

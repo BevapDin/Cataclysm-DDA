@@ -69,7 +69,7 @@ class overmapbuffer
         overmap &get( point p );
         void save();
         void clear();
-        void create_custom_overmap( int const x, int const y, overmap_special_batch &specials );
+        void create_custom_overmap( point p, overmap_special_batch &specials );
 
         /**
          * Uses global overmap terrain coordinates, creates the

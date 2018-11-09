@@ -71,10 +71,9 @@ overmap &overmapbuffer::get( const point p )
     return *new_om;
 }
 
-void overmapbuffer::create_custom_overmap( int const x, int const y,
-        overmap_special_batch &specials )
+void overmapbuffer::create_custom_overmap( const point p, overmap_special_batch &specials )
 {
-    overmap *new_om = new overmap( x, y );
+    overmap *new_om = new overmap( p.x, p.y );
     if( last_requested_overmap != nullptr ) {
         auto om_iter = overmaps.find( new_om->pos() );
         if( om_iter != overmaps.end() && om_iter->second.get() == last_requested_overmap ) {
