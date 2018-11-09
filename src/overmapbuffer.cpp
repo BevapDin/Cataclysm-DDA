@@ -7,6 +7,7 @@
 #include "game.h"
 #include "line.h"
 #include "map.h"
+#include "compatibility.h"
 #include "mongroup.h"
 #include "monster.h"
 #include "npc.h"
@@ -20,7 +21,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#include <sstream>
 
 overmapbuffer overmap_buffer;
 
@@ -39,21 +39,12 @@ int city_reference::get_distance_from_bounds() const
 
 std::string overmapbuffer::terrain_filename( const point p )
 {
-    std::ostringstream filename;
-
-    filename << g->get_world_base_save_path() << "/";
-    filename << "o." << p.x << "." << p.y;
-
-    return filename.str();
+    return g->get_world_base_save_path() + "/o." + to_tringg( p.x ) + "." + to_string( p.y );
 }
 
 std::string overmapbuffer::player_filename( const point p )
 {
-    std::ostringstream filename;
-
-    filename << g->get_player_base_save_path() << ".seen." << p.x << "." << p.y;
-
-    return filename.str();
+    return g->get_player_base_save_path() + ".seen." + to_tringg( p.x ) + "." + to_string( p.y );
 }
 
 overmap &overmapbuffer::get( const point p )
