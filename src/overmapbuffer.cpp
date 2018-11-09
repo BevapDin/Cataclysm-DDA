@@ -212,10 +212,8 @@ void overmapbuffer::delete_note( int x, int y, int z )
     }
 }
 
-overmap *overmapbuffer::get_existing( int x, int y )
+overmap *overmapbuffer::get_existing( const point p )
 {
-    point const p {x, y};
-
     if( last_requested_overmap && last_requested_overmap->pos() == p ) {
         return last_requested_overmap;
     }
@@ -228,10 +226,10 @@ overmap *overmapbuffer::get_existing( int x, int y )
         // checked in a previous call of this function).
         return nullptr;
     }
-    if( file_exist( terrain_filename( x, y ) ) ) {
+    if( file_exist( terrain_filename( p.x, p.y ) ) ) {
         // File exists, load it normally (the get function
-        // indirectly call overmap::open to do so).
-        return &get( point( x, y ) );
+        // indirectly calls overmap::open to do so).
+        return &get( p );
     }
     // File does not exist (or not readable which is essentially
     // the same for our usage). A second call of this function with
@@ -245,7 +243,7 @@ overmap *overmapbuffer::get_existing( int x, int y )
 
 bool overmapbuffer::has( const point p )
 {
-    return get_existing( p.x, p.y ) != nullptr;
+    return get_existing( p ) != nullptr;
 }
 
 overmap &overmapbuffer::get_om_global( int &x, int &y )
@@ -265,20 +263,17 @@ overmap &overmapbuffer::get_om_global( const tripoint &p )
 
 overmap *overmapbuffer::get_existing_om_global( int &x, int &y )
 {
-    const point om_pos = omt_to_om_remain( x, y );
-    return get_existing( om_pos.x, om_pos.y );
+    return get_existing( omt_to_om_remain( x, y ) );
 }
 
 overmap *overmapbuffer::get_existing_om_global( const point &p )
 {
-    const point om_pos = omt_to_om_copy( p );
-    return get_existing( om_pos.x, om_pos.y );
+    return get_existing( omt_to_om_copy( p ) );
 }
 
 overmap *overmapbuffer::get_existing_om_global( const tripoint &p )
 {
-    const tripoint om_pos = omt_to_om_copy( p );
-    return get_existing( om_pos.x, om_pos.y );
+    return get_existing( omt_to_om_copy( p ) );
 }
 
 bool overmapbuffer::has_note( int x, int y, int z )
@@ -789,7 +784,7 @@ std::vector<overmap *> overmapbuffer::get_overmaps_near( tripoint const &locatio
 
     for( int x = start.x; x <= end.x; ++x ) {
         for( int y = start.y; y <= end.y; ++y ) {
-            if( auto const existing_om = get_existing( x, y ) ) {
+            if( auto const existing_om = get_existing( point( x, y ) ) ) {
                 result.emplace_back( existing_om );
             }
         }

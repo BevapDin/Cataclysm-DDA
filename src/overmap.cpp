@@ -3413,11 +3413,11 @@ void overmap::open( overmap_special_batch &enabled_specials )
         std::vector<const overmap *> pointers;
         // Fetch south and north
         for( int i = -1; i <= 1; i += 2 ) {
-            pointers.push_back( overmap_buffer.get_existing( loc.x, loc.y + i ) );
+            pointers.push_back( overmap_buffer.get_existing( loc + point( 0, i ) ) );
         }
         // Fetch east and west
         for( int i = -1; i <= 1; i += 2 ) {
-            pointers.push_back( overmap_buffer.get_existing( loc.x + i, loc.y ) );
+            pointers.push_back( overmap_buffer.get_existing( loc + point( 1, i ) ) );
         }
 
         // pointers looks like (north, south, west, east)

@@ -283,9 +283,9 @@ class overmapbuffer
          * Get an existing overmap, does not create a new one
          * and may return NULL if the requested overmap does not
          * exist.
-         * (x,y) are global overmap coordinates (same as @ref get).
+         * @param p Global overmap coordinates (same as @ref get).
          */
-        overmap *get_existing( int x, int y );
+        overmap *get_existing( point p );
 
         typedef std::pair<point, std::string> t_point_with_note;
         typedef std::vector<t_point_with_note> t_notes_vector;
