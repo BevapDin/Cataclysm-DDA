@@ -3403,8 +3403,8 @@ void overmap::place_radios()
 
 void overmap::open( overmap_special_batch &enabled_specials )
 {
-    std::string const plrfilename = overmapbuffer::player_filename( loc.x, loc.y );
-    std::string const terfilename = overmapbuffer::terrain_filename( loc.x, loc.y );
+    std::string const plrfilename = overmapbuffer::player_filename( loc );
+    std::string const terfilename = overmapbuffer::terrain_filename( loc );
 
     using namespace std::placeholders;
     if( read_from_file_optional( terfilename, std::bind( &overmap::unserialize, this, _1 ) ) ) {
@@ -3428,8 +3428,8 @@ void overmap::open( overmap_special_batch &enabled_specials )
 // Note: this may throw io errors from std::ofstream
 void overmap::save() const
 {
-    std::string const plrfilename = overmapbuffer::player_filename( loc.x, loc.y );
-    std::string const terfilename = overmapbuffer::terrain_filename( loc.x, loc.y );
+    std::string const plrfilename = overmapbuffer::player_filename( loc );
+    std::string const terfilename = overmapbuffer::terrain_filename( loc );
 
     ofstream_wrapper fout_player( plrfilename );
     serialize_view( fout_player );

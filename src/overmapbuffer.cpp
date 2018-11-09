@@ -37,21 +37,21 @@ int city_reference::get_distance_from_bounds() const
     return distance - omt_to_sm_copy( city->s );
 }
 
-std::string overmapbuffer::terrain_filename( int const x, int const y )
+std::string overmapbuffer::terrain_filename( const point p )
 {
     std::ostringstream filename;
 
     filename << g->get_world_base_save_path() << "/";
-    filename << "o." << x << "." << y;
+    filename << "o." << p.x << "." << p.y;
 
     return filename.str();
 }
 
-std::string overmapbuffer::player_filename( int const x, int const y )
+std::string overmapbuffer::player_filename( const point p )
 {
     std::ostringstream filename;
 
-    filename << g->get_player_base_save_path() << ".seen." << x << "." << y;
+    filename << g->get_player_base_save_path() << ".seen." << p.x << "." << p.y;
 
     return filename.str();
 }
@@ -226,7 +226,7 @@ overmap *overmapbuffer::get_existing( const point p )
         // checked in a previous call of this function).
         return nullptr;
     }
-    if( file_exist( terrain_filename( p.x, p.y ) ) ) {
+    if( file_exist( terrain_filename( p ) ) ) {
         // File exists, load it normally (the get function
         // indirectly calls overmap::open to do so).
         return &get( p );

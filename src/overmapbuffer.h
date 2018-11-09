@@ -59,8 +59,8 @@ class overmapbuffer
     public:
         overmapbuffer();
 
-        static std::string terrain_filename( int const x, int const y );
-        static std::string player_filename( int const x, int const y );
+        static std::string terrain_filename( point p );
+        static std::string player_filename( point p );
 
         /**
          * Uses overmap coordinates, that means \p p is directly
