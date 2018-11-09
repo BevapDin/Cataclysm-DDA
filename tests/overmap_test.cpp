@@ -77,13 +77,13 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
     overmap_buffer.create_custom_overmap( origin.x, origin.y, test_specials );
 
     // Get the origin overmap...
-    overmap *test_overmap = overmap_buffer.get_existing( origin.x, origin.y );
+    overmap &test_overmap = overmap_buffer.get( origin );
 
     // ...and assert that the optional special exists on this map.
     bool found_optional = false;
     for( int x = 0; x < 180; ++x ) {
         for( int y = 0; y < 180; ++y ) {
-            auto t = test_overmap->get_ter( x, y, 0 );
+            auto t = test_overmap.get_ter( x, y, 0 );
             if( t->id == "cabin" ) {
                 found_optional = true;
             }
