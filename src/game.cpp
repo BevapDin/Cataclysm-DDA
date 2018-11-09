@@ -4013,7 +4013,7 @@ void game::draw_minimap()
                 ter_color = c_cyan;
                 ter_sym = 'c';
             } else {
-                const oter_id &cur_ter = overmap_buffer.ter( omx, omy, get_levz() );
+                const oter_id &cur_ter = overmap_buffer.ter( tripoint( omx, omy, get_levz() ) );
                 ter_sym = cur_ter->get_sym();
                 if( overmap_buffer.is_explored( omx, omy, get_levz() ) ) {
                     ter_color = c_dark_gray;
@@ -11898,8 +11898,8 @@ void game::vertical_notes( int z_before, int z_after )
                 // Already has a note -> never add an AUTO-note
                 continue;
             }
-            const oter_id &ter = overmap_buffer.ter( cursx, cursy, z_before );
-            const oter_id &ter2 = overmap_buffer.ter( cursx, cursy, z_after );
+            const oter_id &ter = overmap_buffer.ter( tripoint( cursx, cursy, z_before ) );
+            const oter_id &ter2 = overmap_buffer.ter( tripoint( cursx, cursy, z_after ) );
             if( z_after > z_before && ter->has_flag( known_up ) &&
                 !ter2->has_flag( known_down ) ) {
                 overmap_buffer.set_seen( cursx, cursy, z_after, true );
@@ -12005,7 +12005,7 @@ void game::update_overmap_seen()
             int sight_points = dist;
             for( auto it = line.begin();
                  it != line.end() && sight_points >= 0; ++it ) {
-                const oter_id &ter = overmap_buffer.ter( it->x, it->y, ompos.z );
+                const oter_id &ter = overmap_buffer.ter( tripoint( it->x, it->y, ompos.z ) );
                 sight_points -= int( ter->get_see_cost() );
             }
             if( sight_points >= 0 ) {

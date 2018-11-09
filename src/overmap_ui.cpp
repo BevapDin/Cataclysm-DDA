@@ -407,7 +407,7 @@ void draw( const catacurses::window &w, const catacurses::window &wbar, const tr
             const bool see = has_debug_vision || overmap_buffer.seen( omx, omy, z );
             if( see ) {
                 // Only load terrain if we can actually see it
-                cur_ter = overmap_buffer.ter( omx, omy, z );
+                cur_ter = overmap_buffer.ter( tripoint( omx, omy, z ) );
             }
 
             tripoint const cur_pos {omx, omy, z};

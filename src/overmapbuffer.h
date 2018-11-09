@@ -75,10 +75,7 @@ class overmapbuffer
          * Uses global overmap terrain coordinates, creates the
          * overmap if needed.
          */
-        oter_id &ter( int x, int y, int z );
-        oter_id &ter( const tripoint &p ) {
-            return ter( p.x, p.y, p.z );
-        }
+        oter_id &ter( const tripoint &p );
         /**
          * Uses global overmap terrain coordinates.
          */

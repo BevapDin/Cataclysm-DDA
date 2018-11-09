@@ -1979,7 +1979,7 @@ std::vector<item *> talk_function::loot_building( const tripoint site )
         }
     }
     bay.save();
-    overmap_buffer.ter( site.x, site.y, site.z ) = oter_id( "looted_building" );
+    overmap_buffer.ter( site ) = oter_id( "looted_building" );
     return items_found;
 }
 

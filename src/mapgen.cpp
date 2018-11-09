@@ -136,24 +136,24 @@ void map::generate( const int x, const int y, const int z, const time_point &whe
     int overy = y;
     sm_to_omt( overx, overy );
     const regional_settings *rsettings = &overmap_buffer.get_settings( overx, overy, z );
-    oter_id terrain_type = overmap_buffer.ter( overx, overy, z );
-    oter_id t_above = overmap_buffer.ter( overx, overy, z + 1 );
-    oter_id t_below = overmap_buffer.ter( overx, overy, z - 1 );
-    oter_id t_north = overmap_buffer.ter( overx, overy - 1, z );
-    oter_id t_neast = overmap_buffer.ter( overx + 1, overy - 1, z );
-    oter_id t_east  = overmap_buffer.ter( overx + 1, overy, z );
-    oter_id t_seast = overmap_buffer.ter( overx + 1, overy + 1, z );
-    oter_id t_south = overmap_buffer.ter( overx, overy + 1, z );
-    oter_id t_swest = overmap_buffer.ter( overx - 1, overy + 1, z );
-    oter_id t_west  = overmap_buffer.ter( overx - 1, overy, z );
-    oter_id t_nwest = overmap_buffer.ter( overx - 1, overy - 1, z );
+    oter_id terrain_type = overmap_buffer.ter( tripoint( overx, overy, z ) );
+    oter_id t_above = overmap_buffer.ter( tripoint( overx, overy, z + 1 ) );
+    oter_id t_below = overmap_buffer.ter( tripoint( overx, overy, z - 1 ) );
+    oter_id t_north = overmap_buffer.ter( tripoint( overx, overy - 1, z ) );
+    oter_id t_neast = overmap_buffer.ter( tripoint( overx + 1, overy - 1, z ) );
+    oter_id t_east  = overmap_buffer.ter( tripoint( overx + 1, overy, z ) );
+    oter_id t_seast = overmap_buffer.ter( tripoint( overx + 1, overy + 1, z ) );
+    oter_id t_south = overmap_buffer.ter( tripoint( overx, overy + 1, z ) );
+    oter_id t_swest = overmap_buffer.ter( tripoint( overx - 1, overy + 1, z ) );
+    oter_id t_west  = overmap_buffer.ter( tripoint( overx - 1, overy, z ) );
+    oter_id t_nwest = overmap_buffer.ter( tripoint( overx - 1, overy - 1, z ) );
 
     // This attempts to scale density of zombies inversely with distance from the nearest city.
     // In other words, make city centers dense and perimeters sparse.
     float density = 0.0;
     for( int i = overx - MON_RADIUS; i <= overx + MON_RADIUS; i++ ) {
         for( int j = overy - MON_RADIUS; j <= overy + MON_RADIUS; j++ ) {
-            density += overmap_buffer.ter( i, j, z )->get_mondensity();
+            density += overmap_buffer.ter( tripoint( i, j, z ) )->get_mondensity();
         }
     }
     density = density / 100;
@@ -6674,8 +6674,7 @@ void map::place_spawns( const mongroup_id &group, const int chance,
                         const int x1, const int y1, const int x2, const int y2, const float density )
 {
     if( !group.is_valid() ) {
-        const point omt = sm_to_omt_copy( get_abs_sub().x, get_abs_sub().y );
-        const oter_id &oid = overmap_buffer.ter( omt.x, omt.y, get_abs_sub().z );
+        const oter_id &oid = overmap_buffer.ter( sm_to_omt_copy( get_abs_sub() ) );
         debugmsg( "place_spawns: invalid mongroup '%s', om_terrain = '%s' (%s)", group.c_str(),
                   oid.id().c_str(), oid->get_mapgen_id().c_str() );
         return;
@@ -6787,8 +6786,7 @@ std::vector<item *> map::place_items( const items_location &loc, int chance, int
         return res;
     }
     if( !item_group::group_is_defined( loc ) ) {
-        const point omt = sm_to_omt_copy( get_abs_sub().x, get_abs_sub().y );
-        const oter_id &oid = overmap_buffer.ter( omt.x, omt.y, get_abs_sub().z );
+        const oter_id &oid = overmap_buffer.ter( sm_to_omt_copy( get_abs_sub() ) );
         debugmsg( "place_items: invalid item group '%s', om_terrain = '%s' (%s)",
                   loc.c_str(), oid.id().c_str(), oid->get_mapgen_id().c_str() );
         return res;

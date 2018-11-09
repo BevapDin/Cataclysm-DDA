@@ -555,7 +555,7 @@ void computer::activate_function( computer_action action )
             const tripoint center = g->u.global_omt_location();
             for( int i = -60; i <= 60; i++ ) {
                 for( int j = -60; j <= 60; j++ ) {
-                    const oter_id &oter = overmap_buffer.ter( center.x + i, center.y + j, center.z );
+                    const oter_id &oter = overmap_buffer.ter( center + tripoint( i, j, 0 ) );
                     if( is_ot_type( "sewer", oter ) || is_ot_type( "sewage", oter ) ) {
                         overmap_buffer.set_seen( center.x + i, center.y + j, center.z, true );
                     }
@@ -571,7 +571,7 @@ void computer::activate_function( computer_action action )
             const tripoint center = g->u.global_omt_location();
             for( int i = -60; i <= 60; i++ ) {
                 for( int j = -60; j <= 60; j++ ) {
-                    const oter_id &oter = overmap_buffer.ter( center.x + i, center.y + j, center.z );
+                    const oter_id &oter = overmap_buffer.ter( center + tripoint( i, j, 0 ) );
                     if( is_ot_type( "subway", oter ) || is_ot_subtype( "lab_train_depot", oter ) ) {
                         overmap_buffer.set_seen( center.x + i, center.y + j, center.z, true );
                     }
@@ -624,7 +624,7 @@ void computer::activate_function( computer_action action )
                 tmpmap.save();
             }
 
-            const oter_id oter = overmap_buffer.ter( target.x, target.y, 0 );
+            const oter_id oter = overmap_buffer.ter( tripoint( target.x, target.y, 0 ) );
             //~ %s is terrain name
             g->u.add_memorial_log( pgettext( "memorial_male", "Launched a nuke at a %s." ),
                                    pgettext( "memorial_female", "Launched a nuke at a %s." ),

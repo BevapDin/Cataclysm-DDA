@@ -528,7 +528,7 @@ void mission_start::place_npc_software( mission *miss )
     compmap.load( place.x * 2, place.y * 2, place.z, false );
     tripoint comppoint;
 
-    oter_id oter = overmap_buffer.ter( place.x, place.y, place.z );
+    oter_id oter = overmap_buffer.ter( place );
     if( is_ot_type( "house", oter ) || is_ot_type( "s_pharm", oter ) || oter == "" ) {
         comppoint = find_potential_computer_point( compmap, place.z );
     }
@@ -852,7 +852,6 @@ void mission_start::ranch_construct_3( mission *miss )
     bay.draw_square_ter( t_dirtmound, 8, 5, 9, 22 );
     bay.draw_square_ter( t_dirtmound, 11, 5, 12, 22 );
     bay.save();
-    //overmap_buffer.ter(site.x, site.y, 0) = "farm_field";
     site = target_om_ter_random( "ranch_camp_55", 1, miss, false, RANCH_SIZE );
     bay.load( site.x * 2, site.y * 2, site.z, false );
     bay.translate( t_underbrush, t_dirt );
@@ -860,7 +859,6 @@ void mission_start::ranch_construct_3( mission *miss )
     bay.draw_square_ter( t_dirtmound, 8, 2, 9, 17 );
     bay.draw_square_ter( t_dirtmound, 11, 2, 12, 17 );
     bay.save();
-    //overmap_buffer.ter(site.x, site.y, 0) = "farm_field";
     site = target_om_ter_random( "ranch_camp_66", 1, miss, false, RANCH_SIZE );
     bay.load( site.x * 2, site.y * 2, site.z, false );
     bay.place_npc( 4, 11, string_id<npc_template>( "ranch_woodcutter_1" ) );

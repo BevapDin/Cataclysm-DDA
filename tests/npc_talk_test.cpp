@@ -44,9 +44,7 @@ npc &create_test_talker()
 
 void change_om_type( const std::string &new_type )
 {
-    const point omt_pos = ms_to_omt_copy( g->m.getabs( g->u.posx(), g->u.posy() ) );
-    oter_id &omt_ref = overmap_buffer.ter( omt_pos.x, omt_pos.y, g->u.posz() );
-    omt_ref = oter_id( new_type );
+    overmap_buffer.ter( ms_to_omt_copy( g->m.getabs( g->u.pos() ) ) ) = oter_id( new_type );
 }
 
 TEST_CASE( "npc_talk_test" )
