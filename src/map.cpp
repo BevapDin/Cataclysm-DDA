@@ -6114,7 +6114,7 @@ std::vector<tripoint> map::get_dir_circle( const tripoint &f, const tripoint &t 
     const std::vector<tripoint> spiral = closest_tripoints_first( 1, f );
     const std::vector<int> pos_index {1, 2, 4, 6, 8, 7, 5, 3};
 
-    //  All possible constellations (closest_points_first goes clockwise)
+    //  All possible constellations (closest_tripoints_first goes clockwise)
     //  753  531  312  124  246  468  687  875
     //  8 1  7 2  5 4  3 6  1 8  2 7  4 5  6 3
     //  642  864  786  578  357  135  213  421

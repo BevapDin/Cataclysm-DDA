@@ -741,15 +741,9 @@ void calc_ray_end( const int angle, const int range, const tripoint &p, tripoint
     }
 }
 
-
-std::vector<point> closest_points_first( int radius, point p )
-{
-    return closest_points_first( radius, p.x, p.y );
-}
-
-//this returns points in a spiral pattern starting at center_x/center_y until it hits the radius. clockwise fashion
+//this returns points in a spiral pattern starting at center until it hits the radius. clockwise fashion
 //credit to Tom J Nowell; http://stackoverflow.com/a/1555236/1269969
-std::vector<point> closest_points_first( int radius, int center_x, int center_y )
+std::vector<point> closest_points_first( const int radius, const point center )
 {
     std::vector<point> points;
     int X = ( radius * 2 ) + 1;
@@ -762,7 +756,7 @@ std::vector<point> closest_points_first( int radius, int center_x, int center_y 
     int maxI = t * t;
     for( int i = 0; i < maxI; i++ ) {
         if( ( -X / 2 <= x ) && ( x <= X / 2 ) && ( -Y / 2 <= y ) && ( y <= Y / 2 ) ) {
-            points.push_back( point( x + center_x, y + center_y ) );
+            points.push_back( point( x, y ) + center );
         }
         if( ( x == y ) || ( ( x < 0 ) && ( x == -y ) ) || ( ( x > 0 ) && ( x == 1 - y ) ) ) {
             t = dx;
