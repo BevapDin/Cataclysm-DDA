@@ -2155,7 +2155,11 @@ void vehicle::deserialize( JsonIn &jsin )
     }
 
     for( const vpart_reference &vp : get_parts( "TURRET" ) ) {
-        install_part( vp.mount().x, vp.mount().y, vpart_id( "turret_mount" ), false );
+        // Legacy code had only the turret (a gun), the turret mount part has
+        // been introduced later.
+        if( !vp.part_with_feature( "TURRET_MOUNT", true ) ) {
+            install_part( vp.mount().x, vp.mount().y, vpart_id( "turret_mount" ) );
+        }
     }
 
     /* After loading, check if the vehicle is from the old rules and is missing

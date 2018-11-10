@@ -691,14 +691,20 @@ class vehicle
         bool can_unmount( int p ) const;
         bool can_unmount( int p, std::string &reason ) const;
 
-        // install a new part to vehicle
-        int install_part( int dx, int dy, const vpart_id &id, bool force = false );
-
-        // Install a copy of the given part, skips possibility check
-        int install_part( int dx, int dy, const vehicle_part &part );
-
-        /** install item specified item to vehicle as a vehicle part */
-        int install_part( int dx, int dy, const vpart_id &id, item &&obj, bool force = false );
+        /**
+         * Installs a part into this vehicle. Call @ref can_mount before to check
+         * that it can actually be mounted here. These function install the part
+         * unconditionally.
+         * @param dx The x coordinate of where to install the part.
+         * @param dy The y coordinate of where to install the part.
+         * @param id The string ID of the part to install. (see vehicle_parts.json)
+         * @return The installed part.
+         */
+        /**@{*/
+        vehicle_part &install_part( int dx, int dy, const vpart_id &id );
+        vehicle_part &install_part( int dx, int dy, const vehicle_part &part );
+        vehicle_part &install_part( int dx, int dy, const vpart_id &id, item &&obj );
+        /**@}*/
 
         // find a single tile wide vehicle adjacent to a list of part indices
         bool find_rackable_vehicle( const std::vector<std::vector<int>> &list_of_racks );

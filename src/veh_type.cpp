@@ -878,11 +878,13 @@ void vehicle_prototype::finalize()
                 continue;
             }
 
-            if( blueprint.install_part( pt.pos.x, pt.pos.y, pt.part ) < 0 ) {
-                debugmsg( "init_vehicles: '%s' part '%s'(%d) can't be installed to %d,%d",
-                          blueprint.name.c_str(), pt.part.c_str(),
-                          blueprint.parts.size(), pt.pos.x, pt.pos.y );
+            const ret_val<bool> can_mount = blueprint.can_mount( pt.pos.x, pt.pos.y, pt.part );
+            if( !can_mount.success() ) {
+                debugmsg( "Can not install part '%s' into '%s' at %d,%d: %s",
+                          pt.part.str(), blueprint.name,
+                          pt.pos.x, pt.pos.y, can_mount.str() );
             }
+            blueprint.install_part( pt.pos.x, pt.pos.y, pt.part );
 
             if( !base->gun ) {
                 if( pt.with_ammo ) {

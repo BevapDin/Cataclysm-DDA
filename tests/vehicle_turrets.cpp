@@ -53,11 +53,14 @@ TEST_CASE( "vehicle_turret", "[vehicle] [gun] [magazine] [.]" )
         SECTION( e->name() ) {
             vehicle *veh = g->m.add_vehicle( vproto_id( "none" ), 65, 65, 270, 0, 0 );
             REQUIRE( veh );
+            REQUIRE( veh->parts.size() == 0 );
 
-            const int idx = veh->install_part( 0, 0, e->get_id(), true );
-            REQUIRE( idx >= 0 );
+            REQUIRE( veh->can_mount( 0, 0, e->get_id() ).success() );
+            const int idx = veh->index_of_part( veh->install_part( 0, 0, e->get_id() ) );
 
-            REQUIRE( veh->install_part( 0,  0, vpart_id( "storage_battery" ), true ) >= 0 );
+            REQUIRE( veh->can_mount( 0, 0, vpart_id( "storage_battery" ) ).success() );
+            veh->install_part( 0,  0, vpart_id( "storage_battery" ) );
+            REQUIRE( veh->parts.size() == 2 );
             veh->charge_battery( 10000 );
 
             auto ammo = veh->turret_query( veh->parts[idx] ).base()->ammo_type();
@@ -67,9 +70,9 @@ TEST_CASE( "vehicle_turret", "[vehicle] [gun] [magazine] [.]" )
                 REQUIRE( tank );
                 INFO( tank->get_id().str() );
 
-                auto tank_idx = veh->install_part( 0, 0, tank->get_id(), true );
-                REQUIRE( tank_idx >= 0 );
-                REQUIRE( veh->parts[ tank_idx ].ammo_set( ammo->default_ammotype() ) );
+                REQUIRE( veh->can_mount( 0, 0, tank->get_id() ).success() );
+                vehicle_part &tank_part = veh->install_part( 0, 0, tank->get_id() );
+                REQUIRE( tank_part.ammo_set( ammo->default_ammotype() ) );
 
             } else if( ammo ) {
                 veh->parts[ idx].ammo_set( ammo->default_ammotype() );

@@ -2589,11 +2589,7 @@ void veh_interact::complete_vehicle()
 
         g->u.invalidate_crafting_inventory();
 
-        int partnum = !base.is_null() ? veh->install_part( dx, dy, part_id, std::move( base ) ) : -1;
-        if(partnum < 0) {
-            debugmsg( "complete_vehicle install part fails dx=%d dy=%d id=%s", dx, dy, part_id.c_str() );
-            break;
-        }
+        vehicle_part &new_part = veh->install_part( dx, dy, part_id, std::move( base ) );
 
         // Need map-relative coordinates to compare to output of look_around.
         // Need to call coord_translate() directly since it's a new part.
@@ -2627,7 +2623,7 @@ void veh_interact::complete_vehicle()
                 }
             }
 
-            veh->parts[partnum].direction = dir;
+            new_part.direction = dir;
         }
 
         const tripoint vehp = veh->global_pos3() + tripoint( q.x, q.y, 0 );
@@ -2637,7 +2633,7 @@ void veh_interact::complete_vehicle()
             g->m.board_vehicle( vehp, pl );
         }
 
-        add_msg( m_good, _("You install a %1$s into the %2$s." ), veh->parts[ partnum ].name().c_str(), veh->name.c_str() );
+        add_msg( m_good, _("You install a %1$s into the %2$s." ), new_part.name().c_str(), veh->name.c_str() );
 
         for( const auto &sk : vpinfo.install_skills ) {
             g->u.practice( sk.first, veh_utils::calc_xp_gain( vpinfo, sk.first ) );
@@ -2778,16 +2774,13 @@ void veh_interact::complete_vehicle()
             item removed_wheel = veh->parts[replaced_wheel].properties_to_item();
             veh->remove_part( replaced_wheel );
             veh->part_removal_cleanup();
-            int partnum = veh->install_part( dx, dy, part_id, consume_vpart_item( part_id ) );
-            if( partnum < 0 ) {
-                debugmsg( "complete_vehicle tire change fails dx=%d dy=%d id=%s", dx, dy, part_id.c_str() );
-            }
+            vehicle_part &new_part = veh->install_part( dx, dy, part_id, consume_vpart_item( part_id ) );
             // Place the removed wheel on the map last so consume_vpart_item() doesn't pick it.
             if ( !broken ) {
                 g->m.add_item_or_charges( g->u.posx(), g->u.posy(), removed_wheel );
             }
             add_msg( _( "You replace one of the %1$s's tires with a %2$s." ),
-                     veh->name.c_str(), veh->parts[ partnum ].name().c_str() );
+                     veh->name, new_part.name() );
         }
         break;
     }

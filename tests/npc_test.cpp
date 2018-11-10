@@ -339,8 +339,13 @@ TEST_CASE( "npc-movement" )
             if( type == 'V' || type == 'W' || type == 'M' ) {
                 vehicle *veh = g->m.add_vehicle( vproto_id( "none" ), p, 270, 0, 0 );
                 REQUIRE( veh != nullptr );
+                REQUIRE( veh->parts.size() == 0 );
+                REQUIRE( veh->can_mount( 0, 0, vpart_frame_vertical ).success() );
                 veh->install_part( 0, 0, vpart_frame_vertical );
+                REQUIRE( veh->parts.size() == 1 );
+                REQUIRE( veh->can_mount( 0, 0, vpart_seat ).success() );
                 veh->install_part( 0, 0, vpart_seat );
+                REQUIRE( veh->parts.size() == 2 );
                 g->m.add_vehicle_to_cache( veh );
             }
             // spawn npcs

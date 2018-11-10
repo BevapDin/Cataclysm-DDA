@@ -142,8 +142,8 @@ bool repair_part( vehicle &veh, vehicle_part &pt, Character &who_c )
         auto replacement_id = pt.info().get_id();
         veh.break_part_into_pieces( part_index, who.posx(), who.posy() );
         veh.remove_part( part_index );
-        const int partnum = veh.install_part( loc.x, loc.y, replacement_id, std::move( base ) );
-        veh.parts[partnum].direction = dir;
+        vehicle_part &new_part = veh.install_part( loc.x, loc.y, replacement_id, std::move( base ) );
+        new_part.direction = dir;
         veh.part_removal_cleanup();
     } else {
         veh.set_hp( pt, pt.info().durability );
