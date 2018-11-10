@@ -729,8 +729,7 @@ const vehicle_prototype &string_id<vehicle_prototype>::obj() const
         static const vehicle_prototype dummy = {
             "",
             std::vector<vehicle_prototype::part_def>{},
-            std::vector<vehicle_item_spawn>{},
-            nullptr
+            std::vector<vehicle_item_spawn>{}
         };
         return dummy;
     }
@@ -865,10 +864,7 @@ void vehicle_prototype::finalize()
         // Calls the default constructor to create an empty vehicle. Calling the constructor with
         // the type as parameter would make it look up the type in the map and copy the
         // (non-existing) blueprint.
-        proto.blueprint.reset( new vehicle() );
-        vehicle &blueprint = *proto.blueprint;
-        blueprint.type = id;
-        blueprint.name = _( proto.name.c_str() );
+        vehicle blueprint;
 
         for( auto &pt : proto.parts ) {
             auto base = item::find_type( pt.part->item );
@@ -881,7 +877,7 @@ void vehicle_prototype::finalize()
             const ret_val<bool> can_mount = blueprint.can_mount( pt.pos.x, pt.pos.y, pt.part );
             if( !can_mount.success() ) {
                 debugmsg( "Can not install part '%s' into '%s' at %d,%d: %s",
-                          pt.part.str(), blueprint.name,
+                          pt.part.str(), proto.name,
                           pt.pos.x, pt.pos.y, can_mount.str() );
             }
             blueprint.install_part( pt.pos.x, pt.pos.y, pt.part );

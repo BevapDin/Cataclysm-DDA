@@ -292,8 +292,7 @@ struct vehicle_item_spawn {
 };
 
 /**
- * Prototype of a vehicle. The blueprint member is filled in during the finalizing, before that it
- * is a nullptr. Creating a new vehicle copies the blueprint vehicle.
+ * Prototype of a vehicle.
  */
 struct vehicle_prototype {
     struct part_def {
@@ -308,8 +307,6 @@ struct vehicle_prototype {
     std::string name;
     std::vector<part_def> parts;
     std::vector<vehicle_item_spawn> item_spawns;
-
-    std::unique_ptr<vehicle> blueprint;
 
     static void load( JsonObject &jo );
     static void reset();
