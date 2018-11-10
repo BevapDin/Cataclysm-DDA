@@ -867,8 +867,6 @@ void vehicle_prototype::finalize()
         vehicle blueprint;
 
         for( auto &pt : proto.parts ) {
-            auto base = item::find_type( pt.part->item );
-
             if( !pt.part.is_valid() ) {
                 debugmsg( "unknown vehicle part %s in %s", pt.part.c_str(), id.c_str() );
                 continue;
@@ -880,9 +878,10 @@ void vehicle_prototype::finalize()
                           pt.part.str(), proto.name,
                           pt.pos.x, pt.pos.y, can_mount.str() );
             }
-            blueprint.install_part( pt.pos.x, pt.pos.y, pt.part );
+            const vehicle_part &new_part = blueprint.install_part( pt.pos.x, pt.pos.y, pt.part );
+            const item &base = new_part.get_base();
 
-            if( !base->gun ) {
+            if( !base.is_gun() ) {
                 if( pt.with_ammo ) {
                     debugmsg( "init_vehicles: non-turret %s with ammo in %s", pt.part.c_str(), id.c_str() );
                 }
@@ -896,17 +895,17 @@ void vehicle_prototype::finalize()
             } else {
                 for( const auto &e : pt.ammo_types ) {
                     auto ammo = item::find_type( e );
-                    if( !ammo->ammo && ammo->ammo->type.count( base->gun->ammo ) ) {
+                    if( !ammo->ammo && ammo->ammo->type.count( base.type->gun->ammo ) ) {
                         debugmsg( "init_vehicles: turret %s has invalid ammo_type %s in %s",
                                   pt.part.c_str(), e.c_str(), id.c_str() );
                     }
                 }
                 if( pt.ammo_types.empty() ) {
-                    pt.ammo_types.insert( base->gun->ammo->default_ammotype() );
+                    pt.ammo_types.insert( base.type->gun->ammo->default_ammotype() );
                 }
             }
 
-            if( base->container || base->magazine ) {
+            if( base.is_container() || base.is_magazine() ) {
                 if( !item::type_is_defined( pt.fuel ) ) {
                     debugmsg( "init_vehicles: tank %s specified invalid fuel in %s", pt.part.c_str(), id.c_str() );
                 }
