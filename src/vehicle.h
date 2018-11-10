@@ -23,6 +23,8 @@
 class nc_color;
 class map;
 class player;
+template<typename T>
+class ret_val;
 class npc;
 class vehicle;
 class vpart_info;
@@ -678,8 +680,12 @@ class vehicle
         // get vpart type info for part number (part at given vector index)
         const vpart_info &part_info( int index, bool include_removed = false ) const;
 
-        // check if certain part can be mounted at certain position (not accounting frame direction)
-        bool can_mount( int dx, int dy, const vpart_id &id ) const;
+        /**
+         * Returns whether the vehicle part can be installed in
+         * the specified square (local coordinates).
+         * Returns a translated message indicating why the installation is not possible.
+         */
+        ret_val<bool> can_mount( int dx, int dy, const vpart_id &id ) const;
 
         // check if certain part can be unmounted
         bool can_unmount( int p ) const;
