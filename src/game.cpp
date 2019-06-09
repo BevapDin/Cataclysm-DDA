@@ -8934,6 +8934,7 @@ bool game::walk_move( const tripoint &dest_loc )
     // Max out recoil
     u.recoil = MAX_RECOIL;
 
+#if 0
     // Print a message if movement is slow
     const int mcost_to = m.move_cost( dest_loc ); //calculate this _after_ calling grabbed_move
     const bool fungus = m.has_flag_ter_or_furn( "FUNGUS", u.pos() ) ||
@@ -8964,6 +8965,9 @@ bool game::walk_move( const tripoint &dest_loc )
             }
         }
     }
+#else
+    ( void ) mcost_from;
+#endif
     if( !u.is_mounted() && u.has_trait( trait_id( "LEG_TENT_BRACE" ) ) &&
         ( !u.footwear_factor() ||
           ( u.footwear_factor() == .5 && one_in( 2 ) ) ) ) {
