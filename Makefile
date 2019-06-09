@@ -636,11 +636,7 @@ ifdef TILES
     ODIR = $(ODIRTILES)
   endif
 else
-  ifeq ($(LOCALIZE),1)
-    NCURSES_PREFIX = ncursesw
-  else
-    NCURSES_PREFIX = ncurses
-  endif
+  NCURSES_PREFIX = ncursesw
   ifdef OSXCROSS
     NCURSES_PREFIX = ncurses
   endif
