@@ -1078,6 +1078,7 @@ bool Pickup::handle_spillable_contents( Character &c, item &it, map &m )
 
 int Pickup::cost_to_move_item( const Character &who, const item &it )
 {
+    return 0;
     // Do not involve inventory capacity, it's not like you put it in backpack
     int ret = 50;
     if( who.is_armed() ) {
