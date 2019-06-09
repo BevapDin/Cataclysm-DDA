@@ -1,0 +1,76 @@
+[
+  {
+    "id": "canobarin powder",
+    "type": "COMESTIBLE",
+    "comestible_type": "FOOD",
+    "name": "canobarin powder",
+    "name_plural": "canobarin powder",
+    "description": "canobarin powder",
+    "flags": "NUTRIENT_OVERRIDE",
+    "weight": 1,
+    "volume": "1 ml",
+    "price": 0,
+    "material": "powder",
+    "symbol": "%",
+    "color": "white",
+    "stackable": true
+  },
+  {
+    "id": "canobarin powder base",
+    "type": "COMESTIBLE",
+    "comestible_type": "GENERIC",
+    "name": "canobarin powder base",
+    "name_plural": "canobarin powder base",
+    "description": "canobarin powder base",
+    "weight": 1,
+    "volume": "1 ml",
+    "price": 0,
+    "material": "powder",
+    "symbol": "%",
+    "color": "white",
+    "stackable": true
+  },
+
+
+
+
+
+
+{
+        "result": "canobarin powder base",
+        "category": "CC_OTHER",
+	"type":"recipe",
+        "subcategory": "CCS_OTHER",
+        "difficulty": 5,
+        "skill": "fabrication",
+        "time": 1,
+    "batch_time_factors": [ 99, 1 ],
+        "reversible": false,
+        "autolearn": true,
+    "qualities": [ { "id": "CONTAIN", "level": 1 } ],
+        "components": [
+                            [ ["rag", 1] ],
+                            [ ["charcoal", 1] ],
+                            [ ["material_soil", 1] ],
+                            [ ["scrap", 1] ]
+                        ]
+    },
+{
+        "result": "canobarin powder",
+        "category": "CC_OTHER",
+	"type":"recipe",
+        "subcategory": "CCS_OTHER",
+        "difficulty": 5,
+        "skill": "fabrication",
+        "time": 1,
+    "batch_time_factors": [ 99, 1 ],
+    "result_mult": 10,
+        "reversible": false,
+        "autolearn": true,
+    "qualities": [ { "id": "CONTAIN", "level": 1 } ],
+        "components": [
+                            [ ["canobarin powder base", 10] ],
+                            [ ["ruined_chunks", 10], ["meat_tainted", 1] ]
+                        ]
+    }
+]
