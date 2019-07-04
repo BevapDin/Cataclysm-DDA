@@ -64,7 +64,7 @@ advanced_inv_area::advanced_inv_area( aim_location id, int hscreenx, int hscreen
     id( id ), hscreen( hscreenx, hscreeny ),
     off( off ), name( name ), shortname( shortname ),
     canputitemsloc( false ), veh( nullptr ), vstor( -1 ), volume( 0_ml ),
-    weight( 0_gram ), max_size( 0 ), minimapname( minimapname ), actionname( actionname ),
+    weight( 0_gram ), minimapname( minimapname ), actionname( actionname ),
     relative_location( relative_location )
 {
 }
@@ -104,7 +104,6 @@ void advanced_inv_area::init()
             if( vstor >= 0 ) {
                 desc[0] = veh->name;
                 canputitemsloc = true;
-                max_size = MAX_ITEM_IN_VEHICLE_STORAGE;
             } else {
                 veh = nullptr;
                 canputitemsloc = false;
@@ -144,7 +143,6 @@ void advanced_inv_area::init()
                 vstor = -1;
             }
             canputitemsloc = can_store_in_vehicle() || g->m.can_put_items_ter_furn( pos );
-            max_size = MAX_ITEM_IN_SQUARE;
             if( can_store_in_vehicle() ) {
                 std::string part_name = vp->info().name();
                 desc[1] = vp->get_label().value_or( part_name );

@@ -69,8 +69,6 @@ class advanced_inv_area
         // total volume and weight of items currently there
         units::volume volume;
         units::mass weight;
-        // maximal count / volume of items there.
-        int max_size = 0;
         // appears as part of the legend at the top right
         const std::string minimapname;
         // user commant that corresponds to this location

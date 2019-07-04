@@ -8108,7 +8108,7 @@ void game::butcher()
 
     // Magic indices for special butcher options
     enum : int {
-        MULTISALVAGE = MAX_ITEM_IN_SQUARE + 1,
+        MULTISALVAGE = 4096 + 1,
         MULTIBUTCHER,
         MULTIDISASSEMBLE_ONE,
         MULTIDISASSEMBLE_ALL,

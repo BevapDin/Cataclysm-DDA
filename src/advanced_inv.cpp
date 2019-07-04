@@ -725,13 +725,9 @@ void advanced_inventory::redraw_pane( side p )
     draw_border( w, active ? BORDER_COLOR : c_dark_gray );
     mvwprintw( w, point( 3, 0 ), _( "< [%s] Sort: %s >" ), ctxt.get_desc( "SORT" ),
                get_sortname( pane.sortby ) );
-    int max = square.max_size;
-    if( max > 0 ) {
-        int itemcount = square.get_item_count();
-        int fmtw = 7 + ( itemcount > 99 ? 3 : itemcount > 9 ? 2 : 1 ) +
-                   ( max > 99 ? 3 : max > 9 ? 2 : 1 );
-        mvwprintw( w, point( w_width / 2 - fmtw, 0 ), "< %d/%d >", itemcount, max );
-    }
+    int itemcount = square.get_item_count();
+    int fmtw = 7 + ( itemcount > 99 ? 3 : itemcount > 9 ? 2 : 1 );
+    mvwprintw( w, point( w_width / 2 - fmtw, 0 ), "< %d >", itemcount );
 
     std::string fprefix = string_format( _( "[%s] Filter" ), ctxt.get_desc( "FILTER" ) );
     std::string fsuffix = string_format( _( "[%s] Reset" ), ctxt.get_desc( "RESET_FILTER" ) );
@@ -1564,10 +1560,7 @@ bool advanced_inventory::query_destination( aim_location &def )
         for( auto &ordered_loc : ordered_locs ) {
             auto &s = squares[ordered_loc];
             const int size = s.get_item_count();
-            std::string prefix = string_format( "%2d/%d", size, MAX_ITEM_IN_SQUARE );
-            if( size >= MAX_ITEM_IN_SQUARE ) {
-                prefix += _( " (FULL)" );
-            }
+            std::string prefix = string_format( "%d", size );
             menu.addentry( ordered_loc,
                            s.canputitems() && s.id != panes[src].get_area(),
                            get_location_key( ordered_loc )[0],
@@ -1671,27 +1664,6 @@ bool advanced_inventory::query_charges( aim_location destarea, const advanced_in
             return false;
         }
         amount = std::min( room_for, amount );
-    }
-    // Map and vehicles have a maximal item count, check that. Inventory does not have this.
-    if( destarea != AIM_INVENTORY &&
-        destarea != AIM_WORN &&
-        destarea != AIM_CONTAINER ) {
-        const int cntmax = p.max_size - p.get_item_count();
-        // For items counted by charges, adding it adds 0 items if something there stacks with it.
-        const bool adds0 = by_charges && std::any_of( panes[dest].items.begin(), panes[dest].items.end(),
-        [&it]( const advanced_inv_listitem & li ) {
-            return li.is_item_entry() && li.items.front()->stacks_with( it );
-        } );
-        if( cntmax <= 0 && !adds0 ) {
-            popup( _( "Destination area has too many items.  Remove some first." ) );
-            redraw = true;
-            return false;
-        }
-        // Items by charge count as a single item, regardless of the charges. As long as the
-        // destination can hold another item, one can move all charges.
-        if( !by_charges ) {
-            amount = std::min( cntmax, amount );
-        }
     }
     // Inventory has a weight capacity, map and vehicle don't have that
     if( destarea == AIM_INVENTORY  || destarea == AIM_WORN ) {
