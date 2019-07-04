@@ -3981,6 +3981,45 @@ void player::use( item_location loc )
         } else {
             add_msg( m_info, need_splint.str() );
         }
+
+    } else if( used.is_container_empty() ) {
+        const auto validate = [&]( const item & obj ) {
+            if( used.typeId() == obj.typeId() ) {
+                return false;
+            }
+            const item &i = obj.is_container_empty() ? obj : obj.contents.front();
+            if( !i.type->default_container || *i.type->default_container != used.typeId() ) {
+                return false;
+            }
+            if( !i.count_by_charges() ) {
+                return false;
+            }
+            return i.charges_per_volume( used.get_container_capacity() ) > 0;
+        };
+        if( auto target = g->inv_map_splice( validate, string_format( _( "What to put into the %s?" ),
+                                             used.tname() ), 1 ) ) {
+            item &obj = *target.get_item();
+            item &i = obj.is_container_empty() ? obj : obj.contents.front();
+            const int capacity = i.charges_per_volume( used.get_container_capacity() );
+            const int amount_moved = std::min( capacity, i.count() );
+
+            used.contents.emplace_back( [&]() {
+                if( i.count() > amount_moved ) {
+                    return i.split( amount_moved );
+                }
+                item result = i;
+                if( &i == &obj ) {
+                    target.remove_item();
+                } else {
+                    obj.contents.erase( obj.contents.begin() );
+                }
+                return result;
+            }
+            () );
+
+            mod_moves( -100 );
+        }
+
     } else {
         add_msg( m_info, _( "You can't do anything interesting with your %s." ),
                  used.tname() );
