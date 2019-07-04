@@ -582,11 +582,13 @@ const recipe *select_crafting_recipe( int &batch_size )
                                                   current[ line ]->difficulty );
                 print_colored_text(
                     w_data, point( xpos, ypos++ ), col, col,
-                    string_format( _( "Primary skill: <color_cyan>%s</color> <color_%s>%s</color>" ),
+                    string_format( _( "Primary skill: <color_cyan>%s</color> <color_%s>%s</color>   (have %d)" ),
                                    ( !current[line]->skill_used ? _( "N/A" ) :
                                      current[line]->skill_used.obj().name() ),
                                    difficulty_color,
                                    ( !current[line]->skill_used ? "" : primary_skill_level )
+                                   , item::count_by_charges( current[line]->result() ) ? crafting_inv.charges_of(
+                                       current[line]->result() ) : crafting_inv.amount_of( current[line]->result(), false )
                                  ) );
 
                 ypos += fold_and_print( w_data, point( xpos, ypos ), width, col,
