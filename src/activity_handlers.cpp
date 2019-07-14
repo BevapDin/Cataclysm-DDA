@@ -2308,6 +2308,7 @@ enum repeat_type : int {
     // REPEAT_INIT should be zero. In some scenarios (veh welder), activity value default to zero.
     REPEAT_INIT = 0,    // Haven't found repeat value yet.
     REPEAT_ONCE,        // Repeat just once
+    REPEAT_ALL,        // Repair all items on the ground
     REPEAT_FOREVER,     // Repeat for as long as possible
     REPEAT_FULL,        // Repeat until damage==0
     REPEAT_EVENT,       // Repeat until something interesting happens
@@ -2320,6 +2321,7 @@ static repeat_type repeat_menu( const std::string &title, repeat_type last_selec
     rmenu.text = title;
 
     rmenu.addentry( REPEAT_ONCE, true, '1', _( "Repeat once" ) );
+    rmenu.addentry( REPEAT_ALL, true, 'a', _( "Repair all items on the ground" ) );
     rmenu.addentry( REPEAT_FOREVER, true, '2', _( "Repeat until reinforced" ) );
     rmenu.addentry( REPEAT_FULL, true, '3', _( "Repeat until fully repaired, but don't reinforce" ) );
     rmenu.addentry( REPEAT_EVENT, true, '4', _( "Repeat until success/failure/level up" ) );
@@ -2439,6 +2441,30 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
         // TODO: Allow setting this in the actor
         // TODO: Don't use charges_to_use: welder has 50 charges per use, soldering iron has 1
         if( !used_tool->units_sufficient( *p ) ) {
+            item_location loc;
+            if( used_tool == &w_hack.pseudo ) {
+                // skipped - can't ever reload this one
+            } else if( ploc ) {
+                loc = *ploc;
+            } else {
+                loc = item_location( *p, used_tool );
+            }
+            if( loc && query_yn( _( "Reload your %s?" ), used_tool->tname() ) ) {
+                item::reload_option opt = p->ammo_location &&
+                                          used_tool->can_reload_with( p->ammo_location->typeId() ) ?
+                                          item::reload_option( p, used_tool, used_tool, p->ammo_location ) :
+                                          p->select_ammo( *used_tool, false, true );
+
+                if( opt ) {
+                    act->auto_resume = true;
+
+                    p->assign_activity( activity_id( "ACT_RELOAD" ), opt.moves(), opt.qty() );
+                    p->activity.targets.emplace_back( loc );
+                    p->activity.targets.push_back( std::move( opt.ammo ) );
+
+                    return;
+                }
+            }
             p->add_msg_if_player( _( "Your %s ran out of charges" ), used_tool->tname() );
             act->set_to_null();
             return;
@@ -2448,6 +2474,7 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
         // But only if we didn't destroy the item (because then it's obvious)
         const bool destroyed = attempt == repair_item_actor::AS_DESTROYED;
         const bool cannot_continue_repair = attempt == repair_item_actor::AS_CANT ||
+                                            destroyed || ( repeat == REPEAT_ALL && fix_location->damage() <= 0 ) ||
                                             destroyed || !actor->can_repair_target( *p, *fix_location, !destroyed );
         if( cannot_continue_repair ) {
             // Cannot continue to repair target, select another target.
@@ -2475,17 +2502,32 @@ void activity_handlers::repair_item_finish( player_activity *act, player *p )
 
     // target selection and validation.
     while( act->targets.size() < 2 ) {
-        g->draw();
-        auto item_loc = game_menus::inv::repair( *p, actor, &main_tool );
+        item_location item_loc;
 
-        if( item_loc == item_location::nowhere ) {
-            p->add_msg_if_player( m_info, _( "Never mind." ) );
-            act->set_to_null();
-            return;
+        if( repeat == REPEAT_ALL ) {
+            for( item &it : g->m.i_at( p->pos() ) ) {
+                if( it.damage() > 0 && actor->can_repair_target( *p, it, false ) ) {
+                    item_loc = item_location( map_cursor( p->pos() ), &it );
+                    break;
+                }
+            }
+            if( item_loc ) {
+                act->targets.emplace_back( item_loc );
+            }
         }
-        if( actor->can_repair_target( *p, *item_loc, true ) ) {
-            act->targets.emplace_back( item_loc );
-            repeat = REPEAT_INIT;
+
+        if( !item_loc ) {
+            item_loc = game_menus::inv::repair( *p, actor, &main_tool );
+            if( item_loc == item_location::nowhere ) {
+                p->add_msg_if_player( m_info, _( "Never mind." ) );
+                act->set_to_null();
+                return;
+            }
+
+            if( actor->can_repair_target( *p, *item_loc, true ) ) {
+                act->targets.emplace_back( item_loc );
+                repeat = REPEAT_INIT;
+            }
         }
     }
 
