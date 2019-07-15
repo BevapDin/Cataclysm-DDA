@@ -1399,6 +1399,10 @@ void item::food_info( const item *food_item, std::vector<iteminfo> &info,
     if( fun_for_food_item.first != 0 && parts->test( iteminfo_parts::FOOD_JOY ) ) {
         info.push_back( iteminfo( "FOOD", _( "Enjoyability: " ), fun_for_food_item.first ) );
     }
+    if( !food_item->get_comestible()->smoking_result.empty() ) {
+        info.push_back( iteminfo( "FOOD", string_format( _( "Smokable into %s" ),
+                                  nname( food_item->get_comestible()->smoking_result ) ) ) );
+    }
 
     if( parts->test( iteminfo_parts::FOOD_PORTIONS ) ) {
         info.push_back( iteminfo( "FOOD", _( "Portions: " ),
