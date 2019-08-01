@@ -58,6 +58,31 @@ static constexpr box editmap_boundaries( editmap_boundary_min, editmap_boundary_
 
 static const ter_id undefined_ter_id( -1 );
 
+std::map<ter_id, int> ter_removed_from_map;
+std::map<furn_id, int> furn_removed_from_map;
+
+template<typename MapType>
+static std::string map_to_string( const MapType &m )
+{
+    std::string result;
+    for( const auto &pair : m ) {
+        if( pair.second == 0 ) {
+            continue;
+        }
+        result += string_format( "%4d %s\n", pair.second, pair.first->name() );
+    }
+    return result;
+}
+
+static void show_changes()
+{
+    std::string msg;
+    msg += "(Positive: removed from map, Negative: added to map)\n";
+    msg += map_to_string( ter_removed_from_map );
+    msg += map_to_string( furn_removed_from_map );
+    popup( "%s", msg );
+}
+
 static std::vector<std::string> fld_string( const std::string &str, int width )
 {
     std::vector<std::string> lines;
@@ -291,6 +316,9 @@ cata::optional<tripoint> editmap::edit()
     input_context ctxt( "EDITMAP" );
     ctxt.set_iso( true );
     ctxt.register_directions();
+    ctxt.register_action( "SHOW_CHANGES" );
+    ctxt.register_action( "RESET_CHANGES" );
+    ctxt.register_action( "SET_FURNITURE_TO_NULL" );
     ctxt.register_action( "LEFT_WIDE" );
     ctxt.register_action( "RIGHT_WIDE" );
     ctxt.register_action( "UP_WIDE" );
@@ -357,6 +385,13 @@ cata::optional<tripoint> editmap::edit()
             } else if( g->m.veh_at( target ) ) {
                 edit_veh();
             }
+        } else if( action == "SHOW_CHANGES" ) {
+            show_changes();
+        } else if( action == "RESET_CHANGES" ) {
+            ter_removed_from_map.clear();
+            furn_removed_from_map.clear();
+        } else if( action == "SET_FURNITURE_TO_NULL" ) {
+            set_furn_to_null();
         } else if( action == "EDIT_OVERMAP" ) {
             edit_mapgen();
             target_list.clear();
@@ -878,7 +913,9 @@ void apply<ter_t>( const ter_t &t, const shapetype editshape, const tripoint &ta
                 wter = teralt;
             }
         }
+        ter_removed_from_map[g->m.ter( elem )]++;
         g->m.ter_set( elem, wter );
+        ter_removed_from_map[g->m.ter( elem )]--;
     }
 }
 
@@ -888,7 +925,9 @@ void apply<furn_t>( const furn_t &t, const shapetype, const tripoint &,
 {
     const furn_id sel_frn = t.id.id();
     for( auto &elem : target_list ) {
+        furn_removed_from_map[g->m.furn( elem )]++;
         g->m.furn_set( elem, sel_frn );
+        furn_removed_from_map[g->m.furn( elem )]--;
     }
 }
 
@@ -1940,6 +1979,10 @@ void editmap::edit_mapgen()
         }
     } while( gmenu.ret != UILIST_CANCEL );
     blink = false;
+}
+
+void editmap::set_furn_to_null() {
+    apply( f_null.obj(), editshape, target, origin, target_list );
 }
 
 /*

@@ -59,6 +59,7 @@ class editmap
         void edit_critter( Creature &critter );
         void edit_veh();
         void edit_mapgen();
+	void set_furn_to_null();
         void cleartmpmap( tinymap &tmpmap );
         void mapgen_preview( const real_coords &tc, uilist &gmenu );
         vehicle *mapgen_veh_query( const tripoint &omt_tgt );
