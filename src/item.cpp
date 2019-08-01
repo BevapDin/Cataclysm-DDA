@@ -1190,16 +1190,20 @@ void item::basic_info( std::vector<iteminfo> &info, const iteminfo_query *parts,
     int dmg_stab = damage_melee( DT_STAB );
     if( parts->test( iteminfo_parts::BASE_DAMAGE ) ) {
         std::string sep;
+	const int moves = attack_time();
         if( dmg_bash ) {
             info.emplace_back( "BASE", _( "Bash: " ), "", iteminfo::no_newline, dmg_bash );
+            info.emplace_back( "BASE", _( "pT: " ), "", iteminfo::no_newline, dmg_bash * 100 / moves );
             sep = space;
         }
         if( dmg_cut ) {
             info.emplace_back( "BASE", sep + _( "Cut: " ), "", iteminfo::no_newline, dmg_cut );
+            info.emplace_back( "BASE", _( "pT: " ), "", iteminfo::no_newline, dmg_cut * 100 / moves );
             sep = space;
         }
         if( dmg_stab ) {
             info.emplace_back( "BASE", sep + _( "Pierce: " ), "", iteminfo::no_newline, dmg_stab );
+            info.emplace_back( "BASE", _( "pT: " ), "", iteminfo::no_newline, dmg_stab * 100 / moves );
         }
     }
 
