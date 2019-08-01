@@ -44,7 +44,7 @@ class veh_interact
         using part_selector = std::function<bool( const vehicle_part &pt )>;
 
     public:
-        static player_activity run( vehicle &veh, const point &p );
+        static player_activity run( vehicle &veh, const point &p, bool remove_all );
 
         /** Prompt for a part matching the selector function */
         static vehicle_part &select_part( const vehicle &veh, const part_selector &sel,
@@ -53,8 +53,10 @@ class veh_interact
         static void complete_vehicle( player &p );
 
     private:
-        veh_interact( vehicle &veh, const point &p = point_zero );
+        veh_interact( vehicle &veh, const point &p, bool remove_all );
         ~veh_interact();
+
+        bool remove_all;
 
         item_location target;
 
@@ -136,6 +138,7 @@ class veh_interact
         bool do_refill( std::string &msg );
         bool do_remove( std::string &msg );
         bool do_rename( std::string &msg );
+        bool do_remove_all();
         bool do_siphon( std::string &msg );
         bool do_unload( std::string &msg );
         bool do_assign_crew( std::string &msg );

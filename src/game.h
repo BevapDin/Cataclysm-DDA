@@ -677,7 +677,7 @@ class game
         void set_safe_mode( safe_mode_type mode );
 
         /** open vehicle interaction screen */
-        void exam_vehicle( vehicle &veh, const point &cp = point_zero );
+        void exam_vehicle( vehicle &veh, const point &cp = point_zero, const bool remove_all = false );
 
         // Forcefully close a door at p.
         // The function checks for creatures/items/vehicles at that point and

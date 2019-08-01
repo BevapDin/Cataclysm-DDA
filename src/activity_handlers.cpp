@@ -2078,7 +2078,7 @@ void activity_handlers::vehicle_finish( player_activity *act, player *p )
                 if( resume_for_multi_activities( *p ) ) {
                     return;
                 }
-                g->exam_vehicle( vp->vehicle(), point( act->values[ 2 ], act->values[ 3 ] ) );
+                g->exam_vehicle( vp->vehicle(), point( act->values[ 2 ], act->values[ 3 ] ), act->get_value( 7 ) );
                 return;
             } else {
                 dbg( D_ERROR ) << "game:process_activity: ACT_VEHICLE: vehicle not found";

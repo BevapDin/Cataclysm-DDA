@@ -4938,9 +4938,9 @@ void game::save_cyborg( item *cyborg, const tripoint &couch_pos, player &install
 
 }
 
-void game::exam_vehicle( vehicle &veh, const point &c )
+void game::exam_vehicle( vehicle &veh, const point &c, const bool remove_all )
 {
-    auto act = veh_interact::run( veh, c );
+    auto act = veh_interact::run( veh, c, remove_all );
     if( act ) {
         u.moves = 0;
         u.assign_activity( act );

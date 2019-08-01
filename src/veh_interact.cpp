@@ -135,15 +135,16 @@ player_activity veh_interact::serialize_activity()
     res.values.push_back( -dd.x );   // values[4]
     res.values.push_back( -dd.y );   // values[5]
     res.values.push_back( veh->index_of_part( vpt ) ); // values[6]
+    res.values.push_back( remove_all ); // values[7]
     res.str_values.push_back( vp->get_id().str() );
     res.targets.emplace_back( std::move( target ) );
 
     return res;
 }
 
-player_activity veh_interact::run( vehicle &veh, const point &p )
+player_activity veh_interact::run( vehicle &veh, const point &p, const bool remove_all )
 {
-    veh_interact vehint( veh, p );
+    veh_interact vehint( veh, p, remove_all );
     vehint.do_main_loop();
     g->refresh_all();
     return vehint.serialize_activity();
@@ -166,7 +167,7 @@ vehicle_part &veh_interact::select_part( const vehicle &veh, const part_selector
         act( *std::find_if( veh.parts.cbegin(), veh.parts.cend(), sel ) );
 
     } else if( opts != 0 ) {
-        veh_interact vehint( const_cast<vehicle &>( veh ) );
+        veh_interact vehint( const_cast<vehicle &>( veh ), point( 0, 0 ), false );
         vehint.set_title( title.empty() ? _( "Select part" ) : title );
         vehint.overview( sel, act );
         g->refresh_all();
@@ -178,8 +179,8 @@ vehicle_part &veh_interact::select_part( const vehicle &veh, const part_selector
 /**
  * Creates a blank veh_interact window.
  */
-veh_interact::veh_interact( vehicle &veh, const point &p )
-    : dd( p ), veh( &veh ), main_context( "VEH_INTERACT" )
+veh_interact::veh_interact( vehicle &veh, const point &p, const bool r )
+    : remove_all( r ), dd( p ), veh( &veh ), main_context( "VEH_INTERACT" )
 {
     // Only build the shapes map and the wheel list once
     for( const auto &e : vpart_info::all() ) {
@@ -197,6 +198,7 @@ veh_interact::veh_interact( vehicle &veh, const point &p )
     main_context.register_action( "MEND" );
     main_context.register_action( "REFILL" );
     main_context.register_action( "REMOVE" );
+    main_context.register_action( "REMOVE_ALL" );
     main_context.register_action( "RENAME" );
     main_context.register_action( "SIPHON" );
     main_context.register_action( "UNLOAD" );
@@ -313,8 +315,33 @@ bool veh_interact::format_reqs( std::string &msg, const requirement_data &reqs,
     return ok;
 }
 
+bool veh_interact::do_remove_all()
+{
+    for( size_t i = 0; i < veh->parts.size(); ++i ) {
+        move_cursor( point( veh->parts[i].mount.y + dd.y, -veh->parts[i].mount.x - dd.x ) );
+
+        if( !can_remove_part( i, g->u ) ) {
+            continue;
+        } else if( cant_do( 'o' ) != CAN_DO ) {
+            continue;
+        }
+
+        sel_cmd = 'o';
+        remove_all = true;
+
+        return true;
+    }
+    return false;
+}
+
 void veh_interact::do_main_loop()
 {
+    if( remove_all ) {
+        if( do_remove_all() ) {
+            return;
+        }
+        remove_all = false;
+    }
     bool finish = false;
     const bool owned_by_player = veh->handle_potential_theft( dynamic_cast<player &>( g->u ), true );
     faction *owner_fac;
@@ -366,6 +393,15 @@ void veh_interact::do_main_loop()
                 redraw = true;
             } else {
                 redraw = do_remove( msg );
+            }
+        } else if( action == "REMOVE_ALL" ) {
+            if( !veh->handle_potential_theft( dynamic_cast<player &>( g->u ) ) ) {
+                redraw = true;
+            } else {
+                if( do_remove_all() ) {
+                    break;
+                }
+                redraw = true;
             }
         } else if( action == "RENAME" ) {
             if( owned_by_player ) {
