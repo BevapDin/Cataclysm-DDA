@@ -282,6 +282,8 @@ input_event::input_event( const JsonObject &keybinding )
         type = CATA_INPUT_GAMEPAD;
     } else if( input_method == "mouse" ) {
         type = CATA_INPUT_MOUSE;
+    } else if( input_method == "timeout" ) {
+        type = CATA_INPUT_TIMEOUT;
     } else {
         keybinding.throw_error( "invalid type", "input_method" );
     }
@@ -312,6 +314,9 @@ void input_event::serialize( JsonOut &jsout ) const
         case CATA_INPUT_MOUSE:
             jsout.member( "input_method", "mouse" );
             break;
+        case CATA_INPUT_TIMEOUT:
+            jsout.member( "input_method", "timeout" );
+		break;
         default:
             throw std::runtime_error( "unknown input_event_t: " + std::to_string( type ) );
     }
@@ -1378,6 +1383,18 @@ class macro_controller
         macro current;
         state_type state = state_type::NONE;
 
+        void run_while_disabled( const std::function<void()> &callback ) {
+            const auto old_state = state;
+            state = state_type::DISABLED;
+            try {
+                callback();
+                state = old_state;
+            } catch( ... ) {
+                state = old_state;
+                throw;
+            }
+        }
+
     public:
         void toogle_record() {
             switch( state ) {
@@ -1428,14 +1445,13 @@ class macro_controller
             if( state != state_type::NONE ) {
                 return;
             }
-            state = state_type::DISABLED;
-            try {
-                save_impl();
-            } catch( const std::exception &err ) {
-                state = state_type::NONE;
-                report_error( err );
-            }
-            state = state_type::NONE;
+            run_while_disabled( [&]() {
+                try {
+                    save_impl();
+                } catch( const std::exception &err ) {
+                    report_error( err );
+                }
+            } );
         }
         void save_impl() {
             const std::string name = string_input_popup().title( _( "Enter name for macro" ) ).query_string();
@@ -1456,14 +1472,13 @@ class macro_controller
             if( state != state_type::NONE ) {
                 return;
             }
-            state = state_type::DISABLED;
-            try {
-                load_impl();
-            } catch( const std::exception &err ) {
-                state = state_type::NONE;
-                report_error( err );
-            }
-            state = state_type::NONE;
+            run_while_disabled( [&]() {
+                try {
+                    load_impl();
+                } catch( const std::exception &err ) {
+                    report_error( err );
+                }
+            } );
         }
         void load_impl() {
             uilist menu;
@@ -1487,6 +1502,11 @@ class macro_controller
             popup( _( "Error: %s" ), err.what() );
         }
         bool on_input( const std::string &category, const input_event &event ) {
+            // Those input events are always ignored by the macro system,
+            // they don't stem from actual user input.
+            if( event.type == CATA_INPUT_ERROR ) {
+                return true;
+            }
             if( state == state_type::DISABLED ) {
                 return true;
             } else if( is_toogle_record( event ) ) {
@@ -1519,8 +1539,10 @@ class macro_controller
             const auto &next = playing.front();
             if( next.category != category ) {
                 state = state_type::NONE;
-                popup( string_format( _( "Category mismatch in macro: %s vs %s" ), category, next.category ),
-                       PF_ON_TOP );
+                run_while_disabled( [&]() {
+                    popup( string_format( _( "Category mismatch in macro: %s vs %s" ), category, next.category ),
+                           PF_ON_TOP );
+                } );
                 return false;
             }
             event = next.event;
