@@ -76,7 +76,6 @@ class OptionMetadataBase
         mutable std::vector<std::string> sPrerequisiteAllowedValues;
 
         copt_hide_t hide;
-        int iSortPos;
 
     protected:
         OptionMetadataBase( const std::string &sNameIn, const std::string &sPageIn,
@@ -84,10 +83,6 @@ class OptionMetadataBase
 
     public:
         virtual ~OptionMetadataBase();
-
-        void setSortPos( const std::string &sPageIn );
-
-        int getSortPos() const;
 
         /**
          * Option should be hidden in current build.
@@ -437,10 +432,35 @@ class options_manager
     private:
         options_container options;
         cata::optional<options_container *> world_options;
-        // first is page id, second is untranslated page name
-        std::vector<std::pair<std::string, std::string>> vPages;
-        std::map<int, std::vector<std::string>> mPageItems;
-        int iWorldOptPage;
+
+        /**
+         * A page (or tab) to be displayed in the options UI.
+         * It contains a @ref id that is used to detect what options should go into this
+         * page (see @ref OptionMetadataBase::getPage).
+         * It also has a name that will be translated and displayed.
+         * And it has items, each item is either nothing (will be represented as empty line
+         * in the UI) or the name of an option.
+         */
+        class Page {
+        public:
+            std::string id_;
+            std::string name_;
+
+            std::vector<cata::optional<std::string>> items_;
+
+            void removeDoubleEmptyLines();
+
+            Page( const std::string &id, const std::string &name ) : id_(id), name_(name) { }
+        };
+
+        Page general_page_;
+        Page interface_page_;
+        Page graphics_page_;
+        Page debug_page_;
+        Page world_default_page_;
+        Page android_page_;
+
+        std::vector<std::reference_wrapper<Page>> pages_;
 };
 
 bool use_narrow_sidebar(); // short-circuits to on if terminal is too small
