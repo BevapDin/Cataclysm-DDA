@@ -100,11 +100,16 @@ const char *npgettext( const char *const context, const char *const msgid,
 
 bool isValidLanguage( const std::string &lang )
 {
+    // @TODO
+    (void)lang;
+#if 0
     const auto languages = get_options().get_option( "USE_LANG" ).getItems();
     return std::find_if( languages.begin(),
     languages.end(), [&lang]( const options_manager::id_and_option & pair ) {
         return pair.first == lang || pair.first == lang.substr( 0, pair.first.length() );
     } ) != languages.end();
+#endif
+return true;
 }
 
 /* "Useful" links:
@@ -141,6 +146,8 @@ std::string getLangFromLCID( const int &lcid )
 
 void select_language()
 {
+    // @TODO
+#if 0
     auto languages = get_options().get_option( "USE_LANG" ).getItems();
 
     languages.erase( std::remove_if( languages.begin(),
@@ -160,6 +167,7 @@ void select_language()
 
     get_options().get_option( "USE_LANG" ).setValue( languages[sm.ret].first );
     get_options().save();
+#endif
 }
 
 void set_language()

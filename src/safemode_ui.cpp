@@ -359,10 +359,7 @@ void safemode::show( const std::string &custom_name_in, bool is_safemode_in )
                 if( text.empty() ) {
                     current_tab[line].proximity = get_option<int>( "SAFEMODEPROXIMITY" );
                 } else {
-                    //Let the options class handle the validity of the new value
-                    auto temp_option = get_options().get_option( "SAFEMODEPROXIMITY" );
-                    temp_option.setValue( text );
-                    current_tab[line].proximity = atoi( temp_option.getValue().c_str() );
+                    current_tab[line].proximity = clamp( std::atoi( text.c_str() ), 0, MAX_VIEW_DISTANCE );
                 }
             }
         } else if( action == "ENABLE_RULE" && !current_tab.empty() ) {

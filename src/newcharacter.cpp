@@ -165,7 +165,7 @@ void avatar::randomize( const bool random_scenario, points_left &points, bool pl
     } else {
         name = MAP_SHARING::getUsername();
     }
-    bool cities_enabled = world_generator->active_world->WORLD_OPTIONS["CITY_SIZE"].getValue() != "0";
+    const bool cities_enabled = get_option<int>( "CITY_SIZE" ) != 0;
     if( random_scenario ) {
         std::vector<const scenario *> scenarios;
         for( const auto &scen : scenario::get_all() ) {
@@ -1859,7 +1859,6 @@ tab_direction set_scenario( const catacurses::window &w, avatar &u, points_left 
     do {
         if( recalc_scens ) {
             sorted_scens.clear();
-            auto &wopts = world_generator->active_world->WORLD_OPTIONS;
             for( const auto &scen : scenario::get_all() ) {
                 if( !lcmatch( scen.gender_appropriate_name( u.male ), filterstring ) ) {
                     continue;
@@ -1876,7 +1875,7 @@ tab_direction set_scenario( const catacurses::window &w, avatar &u, points_left 
             // Sort scenarios by points.
             // scenario_display_sort() keeps "Evacuee" at the top.
             scenario_sorter.male = u.male;
-            scenario_sorter.cities_enabled = wopts["CITY_SIZE"].getValue() != "0";
+            scenario_sorter.cities_enabled = get_option<int>( "CITY_SIZE" ) != 0;
             std::stable_sort( sorted_scens.begin(), sorted_scens.end(), scenario_sorter );
 
             // If city size is 0 but the current scenario requires cities reset the scenario

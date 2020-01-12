@@ -2128,10 +2128,9 @@ bool game::handle_action()
                 break;
 
             case ACTION_TOGGLE_AUTOSAFE: {
-                auto &autosafemode_option = get_options().get_option( "AUTOSAFEMODE" );
-                add_msg( m_info, autosafemode_option.value_as<bool>()
+                add_msg( m_info, get_option<bool>( "AUTOSAFEMODE" )
                          ? _( "Auto safe mode OFF!" ) : _( "Auto safe mode ON!" ) );
-                autosafemode_option.setNext();
+                get_options().get_option( "AUTOSAFEMODE" ).setNext();
                 break;
             }
 
@@ -2302,7 +2301,7 @@ bool game::handle_action()
                 get_options().save();
                 //~ Auto Features are now ON/OFF
                 add_msg( _( "%s are now %s." ),
-                         get_options().get_option( "AUTO_FEATURES" ).getMenuText(),
+                         get_options().get_option( "AUTO_FEATURES" ).metadata().getMenuText(),
                          get_option<bool>( "AUTO_FEATURES" ) ? _( "ON" ) : _( "OFF" ) );
                 break;
 
@@ -2311,7 +2310,7 @@ bool game::handle_action()
                 get_options().save();
                 //~ Auto Pulp/Pulp Adjacent/Butcher is now set to x
                 add_msg( _( "%s is now set to %s." ),
-                         get_options().get_option( "AUTO_PULP_BUTCHER" ).getMenuText(),
+                         get_options().get_option( "AUTO_PULP_BUTCHER" ).metadata().getMenuText(),
                          get_options().get_option( "AUTO_PULP_BUTCHER" ).getValueName() );
                 break;
 
@@ -2320,7 +2319,7 @@ bool game::handle_action()
                 get_options().save();
                 //~ Auto Mining is now ON/OFF
                 add_msg( _( "%s is now %s." ),
-                         get_options().get_option( "AUTO_MINING" ).getMenuText(),
+                         get_options().get_option( "AUTO_MINING" ).metadata().getMenuText(),
                          get_option<bool>( "AUTO_MINING" ) ? _( "ON" ) : _( "OFF" ) );
                 break;
 
@@ -2351,7 +2350,7 @@ bool game::handle_action()
                 get_options().save();
                 //~ Auto Foraging is now set to x
                 add_msg( _( "%s is now set to %s." ),
-                         get_options().get_option( "AUTO_FORAGING" ).getMenuText(),
+                         get_options().get_option( "AUTO_FORAGING" ).metadata().getMenuText(),
                          get_options().get_option( "AUTO_FORAGING" ).getValueName() );
                 break;
 
@@ -2360,7 +2359,7 @@ bool game::handle_action()
                 get_options().save();
                 //~ Auto pickup is now set to x
                 add_msg( _( "%s is now set to %s." ),
-                         get_options().get_option( "AUTO_PICKUP" ).getMenuText(),
+                         get_options().get_option( "AUTO_PICKUP" ).metadata().getMenuText(),
                          get_options().get_option( "AUTO_PICKUP" ).getValueName() );
                 break;
 

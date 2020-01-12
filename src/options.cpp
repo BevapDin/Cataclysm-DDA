@@ -863,6 +863,10 @@ bool OptionMetadataBase::is_hidden() const
     return false;
 }
 
+OptionValueBase::OptionValueBase() = default;
+
+OptionValueBase::~OptionValueBase() = default;
+
 std::string OptionMetadataBase::getName() const
 {
     return sName;
