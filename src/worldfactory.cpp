@@ -194,7 +194,7 @@ WORLDPTR worldfactory::make_new_world( special_game_id special_type )
     std::unique_ptr<WORLD> special_world = std::make_unique<WORLD>();
     special_world->world_name = worldname;
 
-    special_world->WORLD_OPTIONS["WORLD_END"].setValue( "delete" );
+    special_world->WORLD_OPTIONS["WORLD_END"].setValueDirect( std::string( "delete" ) );
 
     if( !special_world->save() ) {
         return nullptr;
@@ -230,15 +230,8 @@ bool WORLD::save( const bool is_conversion ) const
 
             for( auto &elem : WORLD_OPTIONS ) {
                 // Skip hidden option because it is set by mod and should not be saved
-                if( !elem.second.getDefaultText().empty() ) {
-                    jout.start_object();
-
-                    jout.member( "info", elem.second.getTooltip() );
-                    jout.member( "default", elem.second.getDefaultText( false ) );
-                    jout.member( "name", elem.first );
-                    jout.member( "value", elem.second.getValue( true ) );
-
-                    jout.end_object();
+                if( !elem.second->getDefaultText().empty() ) {
+                    elem.second.serialize( jout );
                 }
             }
 
@@ -294,7 +287,7 @@ void worldfactory::init()
         // load options into the world
         if( !all_worlds[worldname]->load_options() ) {
             all_worlds[worldname]->WORLD_OPTIONS = get_options().get_world_defaults();
-            all_worlds[worldname]->WORLD_OPTIONS["WORLD_END"].setValue( "delete" );
+            all_worlds[worldname]->WORLD_OPTIONS["WORLD_END"].setValueDirect( std::string( "delete" ) );
             all_worlds[worldname]->save();
         }
     }
@@ -580,7 +573,7 @@ std::string worldfactory::pick_random_name()
     return get_next_valid_worldname();
 }
 
-int worldfactory::show_worldgen_tab_options( const catacurses::window &win, WORLDPTR world )
+int worldfactory::show_worldgen_tab_options( const catacurses::window &/*win*/, WORLDPTR world )
 {
     get_options().set_world_options( &world->WORLD_OPTIONS );
     const std::string action = get_options().show( false, true );
@@ -590,10 +583,6 @@ int worldfactory::show_worldgen_tab_options( const catacurses::window &win, WORL
 
     } else if( action == "NEXT_TAB" ) {
         return 1;
-
-    } else if( action == "HELP_KEYBINDINGS" ) {
-        draw_worldgen_tabs( win, 1 );
-        catacurses::refresh();
 
     } else if( action == "QUIT" ) {
         return -999;
@@ -1198,8 +1187,6 @@ int worldfactory::show_worldgen_tab_confirm( const catacurses::window &win, WORL
         } else if( action == "PICK_RANDOM_WORLDNAME" ) {
             mvwprintz( w_confirmation, point( namebar_x, namebar_y ), c_light_gray, line_of_32_underscores );
             world->world_name = worldname = pick_random_name();
-        } else if( action == "HELP_KEYBINDINGS" ) {
-            draw_worldgen_tabs( win, 2 );
         } else if( action == "QUIT" ) {
             // Cache the current name just in case they say No to the exit query.
             world->world_name = worldname;
@@ -1330,6 +1317,7 @@ bool worldfactory::valid_worldname( const std::string &name, bool automated )
 
 void WORLD::load_options( JsonIn &jsin )
 {
+    bool had_CITY_SPACING = false;
     // if core data version isn't specified then assume version 1
     int version = 1;
 
@@ -1348,16 +1336,20 @@ void WORLD::load_options( JsonIn &jsin )
             continue;
         }
 
-        if( opts.has_option( name ) && opts.get_option( name ).getPage() == "world_default" ) {
-            WORLD_OPTIONS[ name ].setValue( value );
+        if( name == "CITY_SPACING" ) {
+            had_CITY_SPACING = true;
+        }
+
+        if( opts.has_option( name ) && opts.get_option( name ).metadata().getPage() == "world_default" ) {
+            WORLD_OPTIONS[ name ].setValueLegacy( value );
         }
     }
     // for legacy saves, try to simulate old city_size based density
-    if( WORLD_OPTIONS.count( "CITY_SPACING" ) == 0 ) {
-        WORLD_OPTIONS["CITY_SPACING"].setValue( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
+    if( !had_CITY_SPACING ) {
+        WORLD_OPTIONS[ "CITY_SPACING" ].setValueDirect( 5 - get_option<int>( "CITY_SIZE" ) / 3 );
     }
 
-    WORLD_OPTIONS[ "CORE_VERSION" ].setValue( version );
+    WORLD_OPTIONS[ "CORE_VERSION" ].setValueDirect( version );
 }
 
 void WORLD::load_legacy_options( std::istream &fin )
@@ -1376,8 +1368,8 @@ void WORLD::load_legacy_options( std::istream &fin )
             const std::string value = opts.migrateOptionValue( sLine.substr( 0, ipos ), sLine.substr( ipos + 1,
                                       sLine.length() ) );
 
-            if( ipos != 0 && opts.get_option( name ).getPage() == "world_default" ) {
-                WORLD_OPTIONS[name].setValue( value );
+            if( ipos != 0 && opts.get_option( name ).metadata().getPage() == "world_default" ) {
+                WORLD_OPTIONS[name].setValueLegacy( value );
             }
         }
     }
@@ -1414,7 +1406,7 @@ void load_world_option( const JsonObject &jo )
         jo.throw_error( "no options specified", "options" );
     }
     for( const std::string &line : arr ) {
-        get_options().get_option( line ).setValue( "true" );
+        get_options().get_option( line ).setValueDirect( true );
     }
 }
 
@@ -1428,22 +1420,7 @@ void load_external_option( const JsonObject &jo )
         auto sinfo = jo.get_string( "info" );
         opts.add_external( name, "world_default", stype, sinfo, sinfo );
     }
-    options_manager::cOpt &opt = opts.get_option( name );
-    if( stype == "float" ) {
-        opt.setValue( static_cast<float>( jo.get_float( "value" ) ) );
-    } else if( stype == "int" ) {
-        opt.setValue( jo.get_int( "value" ) );
-    } else if( stype == "bool" ) {
-        if( jo.get_bool( "value" ) ) {
-            opt.setValue( "true" );
-        } else {
-            opt.setValue( "false" );
-        }
-    } else if( stype == "string" ) {
-        opt.setValue( jo.get_string( "value" ) );
-    } else {
-        jo.throw_error( "Unknown or unsupported stype for external option", "stype" );
-    }
+    opts.get_option( name ).deserializeValue( jo.get_member( "value" ) );
 }
 
 mod_manager &worldfactory::get_mod_manager()

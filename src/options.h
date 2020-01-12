@@ -8,26 +8,329 @@
 #include <utility>
 #include <vector>
 #include <tuple>
+#include <typeinfo>
+#include <memory>
 
 #include "translations.h"
 #include "optional.h"
+#include "debug.h"
 
 class JsonIn;
 class JsonOut;
+class JsonValue;
+
+enum copt_hide_t {
+    /** Don't hide this option */
+    COPT_NO_HIDE,
+    /** Hide this option in SDL build */
+    COPT_SDL_HIDE,
+    /** Show this option in SDL builds only */
+    COPT_CURSES_HIDE,
+    /** Hide this option in non-Windows Curses builds */
+    COPT_POSIX_CURSES_HIDE,
+    /** Hide this option in builds without sound support */
+    COPT_NO_SOUND_HIDE,
+    /** Hide this option always, it should not be changed by user directly through UI. **/
+    COPT_ALWAYS_HIDE
+};
+
+class id_and_option : public std::pair<std::string, translation>
+{
+    public:
+        id_and_option( const std::string &first, const std::string &second )
+            : std::pair<std::string, translation>( first, to_translation( second ) ) {
+        }
+        id_and_option( const std::string &first, const translation &second )
+            : std::pair<std::string, translation>( first, second ) {
+        }
+};
+
+/**
+ * The option system uses the following classes:
+ *
+ * `TypedOptionMetadata`: these stores UI related data (e.g. name, tooltip). It does not store
+ * the actual option value, but it has functions to interact with the option value (those usually
+ * get called from the UI).
+ * This is a class template, it must be used in combination with an option value of the matching type.
+ * (e.g. a `TypedOptionMetadata<int>` must be used with an `int` option value).
+ *
+ * `TypedOptionValue` is the combination of option value and option metadata. It is also a class template
+ * and the actual type of the option value must be given to it.
+ * This class is derived from `OptionValueBase` and provides the virtual functions declared in that base.
+ * References to `OptionValueBase` are given out to the world.
+ *
+ * This allows to have a type safe interaction between option value and metadata, but it also allows
+ * a type-agnostic view from the outside (the remaining game code).
+ *
+ */
+class OptionMetadataBase
+{
+    private:
+        std::string sName;
+        std::string sPage;
+        // The *untranslated* displayed option name ( short string ).
+        std::string sMenuText;
+        // The *untranslated* displayed option tool tip ( longer string ).
+        std::string sTooltip;
+        mutable std::string sPrerequisite;
+        mutable std::vector<std::string> sPrerequisiteAllowedValues;
+
+        copt_hide_t hide;
+        int iSortPos;
+
+    protected:
+        OptionMetadataBase( const std::string &sNameIn, const std::string &sPageIn,
+                            const std::string &sMenuTextIn, const std::string &sTooltipIn, copt_hide_t opt_hide );
+
+    public:
+        virtual ~OptionMetadataBase();
+
+        void setSortPos( const std::string &sPageIn );
+
+        int getSortPos() const;
+
+        /**
+         * Option should be hidden in current build.
+         * @return true if option should be hidden, false if not.
+         */
+        bool is_hidden() const;
+
+        std::string getName() const;
+        std::string getPage() const;
+        /// The translated displayed option name.
+        std::string getMenuText() const;
+        /// The translated displayed option tool tip.
+        std::string getTooltip() const;
+
+        void setPrerequisites( const std::string &sOption,
+                               const std::vector<std::string> &sAllowedValues ) const;
+        void setPrerequisite( const std::string &sOption, const std::string &sAllowedValue = "true" ) const;
+        std::string getPrerequisite() const;
+        bool hasPrerequisite() const;
+        bool checkPrerequisite() const;
+
+        virtual std::string getDefaultText() const = 0;
+        virtual std::string getDefaultTextUntranslated() const = 0;
+};
+
+template<typename T>
+class TypedOptionMetadata : public OptionMetadataBase
+{
+    public:
+        TypedOptionMetadata( const std::string &sNameIn, const std::string &sPageIn,
+                             const std::string &sMenuTextIn, const std::string &sTooltipIn, copt_hide_t opt_hide );
+
+        ~TypedOptionMetadata() override;
+
+        void setNext( T &value ) const;
+        void setPrev( T &value ) const;
+        void setInteractive( T &value ) const;
+
+        void setValueLegacy( T &value, const std::string &new_value ) const;
+        void serialize( JsonOut &json, const T &value ) const;
+        void deserializeValue( T &value, const JsonValue &new_value ) const;
+
+        /// The translated currently selected option value.
+        std::string getValueName( const T &value ) const;
+        // @TODO get rid of this
+        std::string getValue( const T &value ) const;
+};
+
+template<typename T>
+class TypedOptionMetadataWithDefault : public TypedOptionMetadata<T>
+{
+    private:
+        T default_value_;
+
+    public:
+        TypedOptionMetadataWithDefault( const std::string &sNameIn, const std::string &sPageIn,
+                                        const std::string &sMenuTextIn, const std::string &sTooltipIn, copt_hide_t opt_hide,
+                                        const T &defaultIn );
+
+        ~TypedOptionMetadataWithDefault() override;
+
+        std::string getDefaultText() const override;
+        std::string getDefaultTextUntranslated() const override;
+};
+
+class OptionValueBase
+{
+    protected:
+        OptionValueBase();
+
+    public:
+        virtual ~OptionValueBase();
+
+        /// @TODO: document
+        virtual const OptionMetadataBase &metadata() const = 0;
+
+        void setPrerequisites( const std::string &sOption,
+                               const std::vector<std::string> &sAllowedValues ) {
+            metadata().setPrerequisites( sOption, sAllowedValues );
+        }
+        void setPrerequisite( const std::string &sOption, const std::string &sAllowedValue = "true" ) {
+            metadata().setPrerequisite( sOption, sAllowedValue );
+        }
+        std::string getPrerequisite() const {
+            return metadata().getPrerequisite();
+        }
+        bool hasPrerequisite() const {
+            return metadata().hasPrerequisite();
+        }
+        bool checkPrerequisite() const {
+            return metadata().checkPrerequisite();
+        }
+        /**
+         * Set the value of this option to the next / previous / any available value.
+         * This functions is invoked from the UI. The definition of "next", "previous"
+         * and "any" are up to the option itself.
+         * Only recommendation is this:
+         * - The user should be able to cycle through all available option values with
+         *   the "prev" and "next" functions.
+         * - Switching to "next" and "previous" should be inverse operations.
+         * - "any" should either be equivalent to "next" (e.g. for boolean options),
+         *   or query the user directly.
+         */
+        ///@{
+        virtual void setNext() = 0;
+        virtual void setPrev() = 0;
+        virtual void setInteractive() = 0;
+        ///@}
+        /**
+         * @return The current value of this option, formatted to be displayed to the user.
+         * The returned string should already be translated (if necessary at all).
+         */
+        virtual std::string getValueName() const = 0;
+        // @TODO get rid of this
+        virtual std::string getValue() const = 0;
+        // @TODO document this
+        virtual std::string getDefaultText() const = 0;
+        // @TODO document this
+        virtual std::string getDefaultTextUntranslated() const = 0;
+        /**
+         * Legacy function, don't use in new code.
+         *
+         * This sets the value of this option to the value given as string.
+         * If necessary this must convert the value to the internal type.
+         *
+         * @throws std::exception If the new value is not valid for this option, of if
+         * it can not be converted.
+         */
+        virtual void setValueLegacy( const std::string &new_value ) = 0;
+        /**
+         * Assigns the value taken from the other option value.
+         * Precondition: the value @p new_value must be of the same type.
+         */
+        virtual void setValue( const OptionValueBase &new_value ) = 0;
+        /// Usual serialization function.
+        virtual void serialize( JsonOut &json ) const = 0;
+        /**
+         * Assign the value from JSON. Note that this is given only the *value* that was
+         * serialized, not the whole object that @ref serialize prints.
+         * (E.g. @p new_value points to a single int value in JSON.)
+         */
+        virtual void deserializeValue( const JsonValue &new_value ) = 0;
+        /**
+         * Compares the values of this and the the other instance.
+         * The function *ignores* the metadata. If the underlying values are of
+         * different types, it will return non-equal.
+         */
+        virtual bool operator==( const OptionValueBase &other ) const = 0;
+        bool operator!=( const OptionValueBase &other ) const {
+            return !operator==( other );
+        }
+
+        /// @TODO: document
+        virtual std::unique_ptr<OptionValueBase> clone() const = 0;
+
+        template<typename T>
+        void setValueDirect( const T &value );
+};
+/**
+ * This class is a intermediate class that allows type safe access to the value.
+ * One can cast a @ref OptionValueBase reference to an `TypedOptionValueBase<int>` to access the contained
+ * `int` value.
+ * Note that we can't use @ref TypedOptionValue for this directly as it has another template parameter
+ * that is part of the type, and we may not know this parameter when we only need to access the value.
+ */
+template<typename ValueType>
+class TypedOptionValueBase : public OptionValueBase
+{
+        static_assert( std::is_same<ValueType, typename std::decay<ValueType>::type>::value,
+                       "Template parameter must be an object type, no reference or similar" );
+    protected:
+        TypedOptionValueBase() = default;
+
+    public:
+        ~TypedOptionValueBase() override = default;
+
+        /// Accesses the value contained within this option.
+        virtual const ValueType &value() const = 0;
+        virtual ValueType &value() = 0;
+
+        bool operator==( const OptionValueBase &other ) const override {
+            const auto typed = dynamic_cast<const TypedOptionValueBase<ValueType>*>( &other );
+            return typed && value() == typed->value();
+        }
+
+        void setValue( const OptionValueBase &new_value ) override {
+            const auto typed = dynamic_cast<const TypedOptionValueBase<ValueType>*>( &new_value );
+            assert( typed );
+            value() = typed->value();
+        }
+};
+
+template<typename T>
+void OptionValueBase::setValueDirect( const T &value )
+{
+    const auto typed = dynamic_cast<TypedOptionValueBase<T>*>( this );;
+    assert( typed );
+    typed->value() = value;
+}
+
+class OptionValue
+{
+    private:
+        std::unique_ptr<OptionValueBase> pointer_;
+
+    public:
+        OptionValue();
+        OptionValue( std::unique_ptr<OptionValueBase> pointer );
+        OptionValue( const OptionValue &other );
+
+        ~OptionValue();
+
+        OptionValue &operator=( const OptionValue &other );
+
+        OptionValueBase &operator*() {
+            return *pointer_;
+        }
+        const OptionValueBase &operator*() const {
+            return *pointer_;
+        }
+        OptionValueBase *operator->() {
+            return pointer_.get();
+        }
+        const OptionValueBase *operator->() const {
+            return pointer_.get();
+        }
+
+        template<typename T>
+        void setValueDirect( const T &value ) {
+            pointer_->setValueDirect( value );
+        }
+        void setValueLegacy( const std::string &value ) {
+            pointer_->setValueLegacy( value );
+        }
+        void serialize( JsonOut &json ) const {
+            pointer_->serialize( json );
+        }
+};
+
+using options_container = std::unordered_map<std::string, OptionValue>;
 
 class options_manager
 {
-    public:
-        class id_and_option : public std::pair<std::string, translation>
-        {
-            public:
-                id_and_option( const std::string &first, const std::string &second )
-                    : std::pair<std::string, translation>( first, to_translation( second ) ) {
-                }
-                id_and_option( const std::string &first, const translation &second )
-                    : std::pair<std::string, translation>( first, second ) {
-                }
-        };
     private:
         static std::vector<id_and_option> build_tilesets_list();
         static std::vector<id_and_option> build_soundpacks_list();
@@ -50,147 +353,10 @@ class options_manager
         friend options_manager &get_options();
         options_manager();
 
+        template<typename T, typename ...Args>
+        void addOption( Args &&... args );
+
     public:
-        enum copt_hide_t {
-            /** Don't hide this option */
-            COPT_NO_HIDE,
-            /** Hide this option in SDL build */
-            COPT_SDL_HIDE,
-            /** Show this option in SDL builds only */
-            COPT_CURSES_HIDE,
-            /** Hide this option in non-Windows Curses builds */
-            COPT_POSIX_CURSES_HIDE,
-            /** Hide this option in builds without sound support */
-            COPT_NO_SOUND_HIDE,
-            /** Hide this option always, it should not be changed by user directly through UI. **/
-            COPT_ALWAYS_HIDE
-        };
-
-        class cOpt
-        {
-                friend class options_manager;
-            public:
-                cOpt();
-
-                void setSortPos( const std::string &sPageIn );
-
-                //helper functions
-                int getSortPos() const;
-
-                /**
-                 * Option should be hidden in current build.
-                 * @return true if option should be hidden, false if not.
-                 */
-                bool is_hidden() const;
-
-                std::string getName() const;
-                std::string getPage() const;
-                /// The translated displayed option name.
-                std::string getMenuText() const;
-                /// The translated displayed option tool tip.
-                std::string getTooltip() const;
-                std::string getType() const;
-
-                std::string getValue( bool classis_locale = false ) const;
-                /// The translated currently selected option value.
-                std::string getValueName() const;
-                std::string getDefaultText( bool bTranslated = true ) const;
-
-                int getItemPos( const std::string &sSearch ) const;
-                std::vector<id_and_option> getItems() const;
-
-                int getIntPos( int iSearch ) const;
-                cata::optional< std::tuple<int, std::string> > findInt( int iSearch ) const;
-
-                int getMaxLength() const;
-
-                //set to next item
-                void setNext();
-                //set to previous item
-                void setPrev();
-                //set value
-                void setValue( std::string sSetIn );
-                void setValue( float fSetIn );
-                void setValue( int iSetIn );
-
-                template<typename T>
-                T value_as() const;
-
-                bool operator==( const cOpt &rhs ) const;
-                bool operator!=( const cOpt &rhs ) const {
-                    return !operator==( rhs );
-                }
-
-                static std::vector<std::string> getPrerequisiteSupportedTypes() {
-                    return { "bool", "string", "string_select", "string_input" };
-                }
-
-                void setPrerequisites( const std::string &sOption, const std::vector<std::string> &sAllowedValues );
-                void setPrerequisite( const std::string &sOption, const std::string &sAllowedValue = "true" ) {
-                    setPrerequisites( sOption, { sAllowedValue } );
-                }
-                std::string getPrerequisite() const;
-                bool hasPrerequisite() const;
-                bool checkPrerequisite() const;
-
-                enum COPT_VALUE_TYPE {
-                    CVT_UNKNOWN = 0,
-                    CVT_BOOL = 1,
-                    CVT_STRING = 2,
-                    CVT_FLOAT = 3,
-                    CVT_INT = 4,
-                    CVT_VOID = 5
-                };
-
-            private:
-                std::string sName;
-                std::string sPage;
-                // The *untranslated* displayed option name ( short string ).
-                std::string sMenuText;
-                // The *untranslated* displayed option tool tip ( longer string ).
-                std::string sTooltip;
-                std::string sType;
-                bool verbose;
-
-                std::string format;
-
-                std::string sPrerequisite;
-                std::vector<std::string> sPrerequisiteAllowedValues;
-
-                copt_hide_t hide;
-                int iSortPos;
-
-                COPT_VALUE_TYPE eType;
-
-                //sType == "string"
-                std::string sSet;
-                // first is internal value, second is untranslated text
-                std::vector<id_and_option> vItems;
-                std::string sDefault;
-
-                int iMaxLength;
-
-                //sType == "bool"
-                bool bSet;
-                bool bDefault;
-
-                //sType == "int"
-                int iSet;
-                int iMin;
-                int iMax;
-                int iDefault;
-                std::vector< std::tuple<int, std::string> > mIntValues;
-
-                //sType == "float"
-                float fSet;
-                float fMin;
-                float fMax;
-                float fDefault;
-                float fStep;
-        };
-
-        using options_container = std::unordered_map<std::string, cOpt>;
-
         void init();
         void add_options_general();
         void add_options_interface();
@@ -222,7 +388,7 @@ class options_manager
         /** Check if an option exists? */
         bool has_option( const std::string &name ) const;
 
-        cOpt &get_option( const std::string &name );
+        OptionValueBase &get_option( const std::string &name );
 
         //add hidden external option with value
         void add_external( const std::string &sNameIn, const std::string &sPageIn, const std::string &sType,
@@ -295,7 +461,13 @@ options_manager &get_options();
 template<typename T>
 inline T get_option( const std::string &name )
 {
-    return get_options().get_option( name ).value_as<T>();
+    const OptionValueBase &opt = get_options().get_option( name );
+    const auto typed = dynamic_cast<const TypedOptionValueBase<T>*>( &opt );
+    if( !typed ) {
+        debugmsg( "Tried to get value of type %s from option %s!", typeid( T ).name(), name );
+        return T();
+    }
+    return typed->value();
 }
 
 #endif

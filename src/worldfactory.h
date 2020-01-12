@@ -56,7 +56,7 @@ struct WORLD {
         std::string folder_path() const;
 
         std::string world_name;
-        options_manager::options_container WORLD_OPTIONS;
+        options_container WORLD_OPTIONS;
         std::vector<save_t> world_saves;
         /**
          * A (possibly empty) list of (idents of) mods that
