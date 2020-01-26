@@ -2099,7 +2099,7 @@ void iexamine::harvest_plant( player &p, const tripoint &examp, bool from_activi
             if( from_activity ) {
                 i.set_var( "activity_var", p.name );
             }
-            g->m.add_item_or_charges( examp, i );
+            g->m.add_item_or_charges( p.pos(), i );
         }
         g->m.furn_set( examp, furn_str_id( g->m.furn( examp )->plant->transform ) );
         p.moves -= to_moves<int>( 10_seconds );
