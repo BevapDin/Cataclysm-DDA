@@ -2233,6 +2233,33 @@ void item::io( Archive &archive )
     // This removes the flag unconditionally. It is a temporary flag, which is removed during the game nearly immediately after setting.
     item_tags.erase( "ENCUMBRANCE_UPDATE" );
 
+    item_tags.erase( "activity_var" );
+
+    const auto tryToStack = [&]( const decltype( components )::iterator & it ) {
+        for( auto at = components.begin(); at != it; ++at ) {
+            if( at->merge_charges( *it ) ) {
+                return true;
+            }
+        }
+        return false;
+    };
+    for( auto it = components.begin(); it != components.end(); ) {
+        if( tryToStack( it ) ) {
+            it = components.erase( it );
+        } else {
+            ++it;
+        }
+    }
+    if(is_comestible()) {
+        for(item &c : components) {
+            c.active = false;
+            c.rot = 0_turns;
+            c.last_rot_check = calendar::start_of_cataclysm;
+            c.last_temp_check = calendar::start_of_cataclysm;
+            c.owner = owner.NULL_ID();
+        }
+    }
+
     if( note_read ) {
         snip_id = SNIPPET.migrate_hash_to_id( note );
     } else {
