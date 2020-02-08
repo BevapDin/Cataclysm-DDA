@@ -1,0 +1,48 @@
+[
+  { "event": { "input_method": "keyboard", "key": [ "I" ] }, "category": "DEFAULTMODE"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "ADVANCED_INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "ESC" ] }, "category": "ADVANCED_INVENTORY"
+  }
+]

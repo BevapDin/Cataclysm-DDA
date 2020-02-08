@@ -1,0 +1,12 @@
+[
+  { "event": { "input_method": "keyboard", "key": [ "5" ] }, "category": "UILIST"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RIGHT" ] }, "category": "INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "UP" ] }, "category": "INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "RETURN" ] }, "category": "INVENTORY"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "3" ] }, "category": "UILIST"
+  }
+]

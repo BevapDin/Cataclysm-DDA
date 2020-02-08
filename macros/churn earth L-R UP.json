@@ -1,0 +1,8 @@
+[
+  { "event": { "input_method": "keyboard", "key": [ "A" ] }, "category": "DEFAULTMODE"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "4" ] }, "category": "UILIST"
+  },
+  { "event": { "input_method": "keyboard", "key": [ "4" ] }, "category": "DEFAULTMODE"
+  },
+  { "event": { 

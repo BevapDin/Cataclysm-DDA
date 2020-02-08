@@ -1,0 +1,6 @@
+[
+  { "event": { "input_method": "keyboard", "key": [ "f" ] }, "category": "DEFAULTMODE" },
+  { "event": { "input_method": "keyboard", "key": [ "p" ] }, "category": "TARGET" },
+  { "event": { "input_method": "keyboard", "key": [ "p" ] }, "category": "TARGET" },
+  { "event": { "input_method": "keyboard", "key": [ "p" ] }, "category": "TARGET" }
+]
