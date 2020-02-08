@@ -1,0 +1,62 @@
+[
+  {
+    "type": "profession",
+    "ident": "alien",
+    "name": "Alien",
+    "description": "You're an alien.",
+    "points": 0,
+    "CBMs": [
+      "bio_ads", "bio_alarm", "bio_armor_arms", "bio_armor_eyes", "bio_armor_head", "bio_armor_legs", "bio_armor_torso", "bio_blade", "bio_blood_anal", "bio_blood_filter", "bio_carbon", "bio_claws", "bio_climate", "bio_cloak", "bio_ears", "bio_emp", "bio_emp_armgun", "bio_evap", "bio_eye_enhancer", "bio_eye_optic", "bio_faraday", "bio_fingerhack",
+      "bio_flashlight", "bio_geiger", "bio_gills", "bio_ground_sonar", "bio_heat_absorb", "bio_heatsink", "bio_hydraulics", "bio_infrared", "bio_laser", "bio_leukocyte", "bio_lighter",
+      "bio_lockpick", "bio_magnet", "bio_membrane", "bio_metabolics", "bio_meteorologist", "bio_nanobots", "bio_night", "bio_night_vision", "bio_painkiller", "bio_power_armor_interface_mkII",
+      "bio_probability_travel", "bio_purifier", "bio_railgun", "bio_radscrubber", "bio_recycler", "bio_remote", "bio_resonator", "bio_speed", "bio_sunglasses", "bio_targeting",
+      "bio_teleport", "bio_time_freeze", "bio_tools_extend", "bio_torsionratchet", "bio_uncanny_dodge", "bio_ups", "bio_watch", "bio_water_extractor", "bio_weight",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII",
+      "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII", "bio_power_storage_mkII"
+    ],
+    "skills": [
+      { "level": 20, "name": "computer" },
+      { "level": 12, "name": "electronics" },
+      { "level": 8, "name": "fabrication" },
+      { "level": 13, "name": "firstaid" },
+      { "level": 9, "name": "mechanics" },
+      { "level": 13, "name": "survival" },
+      { "level": 7, "name": "traps" },
+      { "level": 17, "name": "dodge" },
+      { "level": 15, "name": "archery" },
+      { "level": 15, "name": "cutting" },
+      { "level": 15, "name": "gun" },
+      { "level": 15, "name": "launcher" },
+      { "level": 15, "name": "pistol" },
+      { "level": 15, "name": "rifle" },
+      { "level": 15, "name": "shotgun" },
+      { "level": 15, "name": "smg" },
+      { "level": 6, "name": "cooking" }
+    ],
+    "items": {
+      "both": {
+        "items": [ "alien_suit",
+          "alien_sniper_rifle",
+            "alien_sniper_ammo_magazine_small", "alien_sniper_ammo_light", "alien_sniper_ammo_light",
+            "alien_sniper_ammo_magazine_large", "alien_sniper_ammo_heavy", "alien_sniper_ammo_heavy", "alien_sniper_ammo_heavy"
+        ]
+      }
+    }
+  }
+]

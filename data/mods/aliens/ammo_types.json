@@ -1,0 +1,80 @@
+[
+  {
+    "type": "ammunition_type",
+    "id": "alien_sniper_ammo",
+    "name": "Umrot",
+    "default": "alien_sniper_ammo_light"
+  },
+  {
+    "id": "alien_sniper_ammo_light",
+    "type": "GENERIC",
+    "category": "ammo",
+    "name": "Umrot kelb",
+    "description": "This is the standard ammunition used by civilian (e.g. hunters and the like).",
+    "weight": "1 g",
+    "volume": "1 ml",
+    "price": 0,
+    "material": [ "alien_plastic_like" ],
+    "symbol": "=",
+    "color": "yellow",
+    "ammo_data": {
+      "count": 200,
+      "stack_size": 200,
+      "ammo_type": "alien_sniper_ammo",
+      "range": 50,
+      "damage": 100,
+      "pierce": 10,
+      "dispersion": 1,
+      "recoil": 10,
+      "effects": [ "COOKOFF" ]
+    }
+  },
+  {
+    "type": "recipe",
+    "result": "alien_sniper_ammo_light",
+    "category": "CC_AMMO",
+    "subcategory": "CSC_AMMO_OTHER",
+    "skill_used": "fabrication",
+    "time": "1 s",
+    "autolearn": true,
+    "flags": [ "BLIND_EASY" ],
+    "tools": [ [ [ "mater_syntheser", -1 ] ] ],
+    "components": [ [ [ "chunk_of_alien_plastic_like", 10 ] ] ]
+  },
+  {
+    "id": "alien_sniper_ammo_heavy",
+    "type": "GENERIC",
+    "category": "ammo",
+    "name": "Umrot treb",
+    "description": "This is a heavier form of the Umrot kelb used by military forces.",
+    "weight": "4 g",
+    "volume": "1 ml",
+    "price": 0,
+    "material": [ "alien_steel_like" ],
+    "symbol": "=",
+    "color": "red",
+    "ammo_data": {
+      "count": 200,
+      "stack_size": 200,
+      "ammo_type": "alien_sniper_ammo",
+      "range": 200,
+      "damage": 400,
+      "pierce": 40,
+      "dispersion": 5,
+      "recoil": 100,
+      "effects": [ "COOKOFF" ]
+    }
+  },
+  {
+    "type": "recipe",
+    "result": "alien_sniper_ammo_heavy",
+    "category": "CC_AMMO",
+    "subcategory": "CSC_AMMO_OTHER",
+    "skill_used": "fabrication",
+    "time": "1 s",
+    "autolearn": true,
+    "flags": [ "BLIND_EASY" ],
+    "tools": [ [ [ "mater_syntheser", -1 ] ] ],
+    "components": [ [ [ "chunk_of_alien_steel_like", 10 ] ] ]
+  }
+]

@@ -1,0 +1,48 @@
+[
+  {
+    "type": "AMMO",
+    "id": "chunk_of_alien_plastic_like",
+    "category": "spare_parts",
+    "price": 0,
+    "name": "Chunk of Mutarinorit",
+    "symbol": "=",
+    "color": "light_gray",
+    "description": "A small piece of Mutarinorit. Only real usage for this is to craft things.",
+    "material": "alien_plastic_like",
+    "volume": "1 ml",
+    "weight": "1 g",
+    "ammo_type": "components",
+    "count": 1
+  },
+  {
+    "type": "recipe",
+    "result": "chunk_of_alien_plastic_like",
+    "category": "CC_AMMO",
+    "subcategory": "CSC_AMMO_OTHER",
+    "skill_used": "fabrication",
+    "time": "1 s",
+    "autolearn": true,
+    "flags": [ "BLIND_EASY" ],
+    "tools": [ [ [ "mater_syntheser", -1 ] ] ],
+    "components": [ [ [ "plastic_chunk", 1 ] ] ]
+  },
+  {
+    "type": "material",
+    "ident": "alien_plastic_like",
+    "name": "Mutarinorit",
+    "density": 1,
+    "specific_heat_liquid": 1,
+    "specific_heat_solid": 1,
+    "latent_heat": 1,
+    "edible": false,
+    "bash_resist": 100,
+    "cut_resist": 100,
+    "acid_resist": 100,
+    "fire_resist": 100,
+    "elec_resist": 100,
+    "chip_resist": 100,
+    "dmg_adj": [ "lightly damaged", "damaged", "very damaged", "thoroughly damaged" ],
+    "bash_dmg_verb": "damaged",
+    "cut_dmg_verb": "damaged"
+  }
+]
