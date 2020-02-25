@@ -9499,6 +9499,7 @@ void item::set_age( const time_duration &age )
 
 void item::legacy_fast_forward_time()
 {
+return;
     const time_duration tmp_bday = ( bday - calendar::turn_zero ) * 6;
     bday = calendar::turn_zero + tmp_bday;
 
