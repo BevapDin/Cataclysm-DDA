@@ -1050,11 +1050,6 @@
     "replace": "masterkey"
   },
   {
-    "id": "lead_glm",
-    "type": "MIGRATION",
-    "replace": "m320_mod"
-  },
-  {
     "id": "lead_stabilizer",
     "type": "MIGRATION",
     "replace": "stabilizer"
