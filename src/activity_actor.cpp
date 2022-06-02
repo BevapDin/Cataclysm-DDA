@@ -5751,10 +5751,9 @@ void forage_activity_actor::finish( player_activity &act, Character &who )
     ///\EFFECT_PER slightly increases forage success chance
     ///\EFFECT_SURVIVAL increases forage success chance
     if( veggy_chance < who.get_skill_level( skill_survival ) * 3 + who.per_cur - 2 ) {
-        const std::vector<item *> dropped =
-            here.put_items_from_loc( group_id, who.pos(), calendar::turn );
-        for( item *it : dropped ) {
-            add_msg( m_good, _( "You found: %s!" ), it->tname() );
+        auto items = item_group::items_from( group_id, calendar::turn, spawn_flags::use_spawn_rate );
+        for( item &it_ : items ) {
+            auto it = &it_;
             found_something = true;
             if( it->has_flag( flag_FORAGE_POISON ) && one_in( 10 ) ) {
                 it->set_flag( flag_HIDDEN_POISON );
@@ -5763,15 +5762,23 @@ void forage_activity_actor::finish( player_activity &act, Character &who )
             if( it->has_flag( flag_FORAGE_HALLU ) && !it->has_flag( flag_HIDDEN_POISON ) && one_in( 10 ) ) {
                 it->set_flag( flag_HIDDEN_HALLU );
             }
+            add_msg( m_good, _( "You found: %s!" ), it->tname() );
+            if( !who.try_add( it_, nullptr, nullptr, false ) ) {
+                here.spawn_items( who.pos(), {it_} );
+            }
         }
     }
     // 10% to drop a item/items from this group.
     if( one_in( 10 ) ) {
-        const std::vector<item *> dropped =
-            here.put_items_from_loc( Item_spawn_data_trash_forest, who.pos(), calendar::turn );
-        for( item * const &it : dropped ) {
+        auto items = item_group::items_from( Item_spawn_data_trash_forest, calendar::turn,
+                                             spawn_flags::use_spawn_rate );
+        for( item &it_ : items ) {
+            auto it = &it_;
             add_msg( m_good, _( "You found: %s!" ), it->tname() );
             found_something = true;
+            if( !who.try_add( it_, nullptr, nullptr, false ) ) {
+                here.spawn_items( who.pos(), {it_} );
+            }
         }
     }
 
