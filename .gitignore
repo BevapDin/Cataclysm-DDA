@@ -1,4 +1,5 @@
 !src/chkjson
+release-*
 *.7z
 *.a
 *.d
