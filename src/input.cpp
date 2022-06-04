@@ -480,7 +480,7 @@ void input_event::serialize( JsonOut &jsout ) const
     jsout.member( "key" );
     jsout.start_array();
     for( size_t i = 0; i < sequence.size(); i++ ) {
-        jsout.write( inp_mngr.get_keyname( sequence[i], type, true ) );
+        jsout.write( inp_mngr.get_keyname_portable( sequence[i], type ) );
     }
     jsout.end_array();
     jsout.end_object();
@@ -698,7 +698,7 @@ int input_manager::get_keycode( const input_event_t inp_type, const std::string 
     return 0;
 }
 
-std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool portable ) const
+std::string input_manager::get_keyname_portable( const int ch, const input_event_t inp_type ) const
 {
     const t_key_to_name_map *map = nullptr;
     switch( inp_type ) {
@@ -725,17 +725,9 @@ std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool por
                     if( IS_F_KEY( ch ) ) {
                         // special case it since F<num> key names are generated using loop
                         // and not marked individually for translation
-                        if( portable ) {
-                            return it->second;
-                        } else {
-                            return string_format( pgettext( "function key name", "F%d" ), F_KEY_NUM( ch ) );
-                        }
+                        return it->second;
                     } else if( IS_CTRL_CHAR( ch ) && !IS_NAMED_CTRL_CHAR( ch ) ) {
-                        if( portable ) {
-                            return it->second;
-                        } else {
-                            return string_format( pgettext( "control key name", "CTRL+%c" ), ch + 64 );
-                        }
+                        return it->second;
                     } else if( ch >= char_key_beg && ch <= char_key_end && ch != ' ' ) {
                         // character keys except space need no translation
                         return it->second;
@@ -750,14 +742,60 @@ std::string input_manager::get_keyname( int ch, input_event_t inp_type, bool por
                 default:
                     break;
             }
-            return portable ? it->second : pgettext( "key name", it->second.c_str() );
+            return it->second;
         }
     }
-    if( portable ) {
-        return std::string( "UNKNOWN_" ) + int_to_str( ch );
-    } else {
-        return string_format( _( "unknown key %ld" ), ch );
+    return std::string( "UNKNOWN_" ) + int_to_str( ch );
+}
+
+std::string input_manager::get_keyname( const int ch, const input_event_t inp_type ) const
+{
+    const t_key_to_name_map *map = nullptr;
+    switch( inp_type ) {
+        default:
+            break;
+        case input_event_t::keyboard_char:
+            map = &keyboard_char_keycode_to_keyname;
+            break;
+        case input_event_t::keyboard_code:
+            map = &keyboard_code_keycode_to_keyname;
+            break;
+        case input_event_t::gamepad:
+            map = &gamepad_keycode_to_keyname;
+            break;
+        case input_event_t::mouse:
+            map = &mouse_keycode_to_keyname;
+            break;
     }
+    if( map ) {
+        const auto it = map->find( ch );
+        if( it != map->end() ) {
+            switch( inp_type ) {
+                case input_event_t::keyboard_char:
+                    if( IS_F_KEY( ch ) ) {
+                        // special case it since F<num> key names are generated using loop
+                        // and not marked individually for translation
+                        return string_format( pgettext( "function key name", "F%d" ), F_KEY_NUM( ch ) );
+                    } else if( IS_CTRL_CHAR( ch ) && !IS_NAMED_CTRL_CHAR( ch ) ) {
+                        return string_format( pgettext( "control key name", "CTRL+%c" ), ch + 64 );
+                    } else if( ch >= char_key_beg && ch <= char_key_end && ch != ' ' ) {
+                        // character keys except space need no translation
+                        return it->second;
+                    }
+                    break;
+                case input_event_t::keyboard_code:
+                    if( ch >= char_key_beg && ch < char_key_end && ch != ' ' ) {
+                        // character keys except space need no translation
+                        return it->second;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return pgettext( "key name", it->second.c_str() );
+        }
+    }
+    return string_format( _( "unknown key %ld" ), ch );
 }
 
 const std::vector<input_event> &input_manager::get_input_for_action( const std::string
