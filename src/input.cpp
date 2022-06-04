@@ -1776,6 +1776,11 @@ bool gamepad_available()
 
 input_event input_manager::get_input_event( const keyboard_mode preferred_keyboard_mode )
 {
+    if( test_mode ) {
+        // input should be skipped in caller's code
+        throw std::runtime_error( "input_manager::get_input_event called in test mode" );
+    }
+
     return get_input_event_impl( preferred_keyboard_mode );
 }
 

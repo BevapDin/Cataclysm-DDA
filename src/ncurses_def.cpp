@@ -289,11 +289,6 @@ void input_manager::pump_events()
 // ignoring preferred keyboard mode
 input_event input_manager::get_input_event_impl( const keyboard_mode /*preferred_keyboard_mode*/ )
 {
-    if( test_mode ) {
-        // input should be skipped in caller's code
-        throw std::runtime_error( "input_manager::get_input_event_impl called in test mode" );
-    }
-
     int key = ERR;
     input_event rval;
     do {
