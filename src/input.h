@@ -383,6 +383,8 @@ class input_manager
         /**
          * curses getch() replacement.
          */
+        input_event get_input_event( const std::string &category,
+                                     keyboard_mode preferred_keyboard_mode = keyboard_mode::keycode );
         input_event get_input_event( keyboard_mode preferred_keyboard_mode = keyboard_mode::keycode );
         /**
          * Resize & refresh if necessary, process all pending window events, and ignore keypresses

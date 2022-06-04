@@ -1232,7 +1232,7 @@ const std::string &input_context::handle_input( const int timeout )
     next_action.type = input_event_t::error;
     const std::string *result = &CATA_ERROR;
     while( true ) {
-        next_action = inp_mngr.get_input_event( preferred_keyboard_mode );
+        next_action = inp_mngr.get_input_event( category, preferred_keyboard_mode );
         if( next_action.type == input_event_t::timeout ) {
             result = &TIMEOUT;
             break;
@@ -1739,7 +1739,7 @@ void input_manager::wait_for_any_key()
     input_context ctxt( "WAIT_FOR_ANY_KEY", keyboard_mode::keycode );
 #endif
     while( true ) {
-        const input_event evt = inp_mngr.get_input_event();
+        const input_event evt = inp_mngr.get_input_event( ":WAIT_FOR_ANY_KEY" );
         switch( evt.type ) {
             case input_event_t::keyboard_char:
                 if( !evt.sequence.empty() ) {
@@ -1775,6 +1775,12 @@ bool gamepad_available()
 }
 
 input_event input_manager::get_input_event( const keyboard_mode preferred_keyboard_mode )
+{
+    return get_input_event( ":NONE", preferred_keyboard_mode );
+}
+
+input_event input_manager::get_input_event( const std::string &/*category*/,
+        const keyboard_mode preferred_keyboard_mode )
 {
     if( test_mode ) {
         // input should be skipped in caller's code
