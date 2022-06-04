@@ -1767,6 +1767,109 @@ keyboard_mode input_manager::actual_keyboard_mode( const keyboard_mode preferred
     return keyboard_mode::keychar;
 }
 
+namespace
+{
+
+class macro_controller
+{
+    private:
+        class element
+        {
+            public:
+                input_event event_;
+                std::string category_;
+        };
+        class macro
+        {
+            public:
+                std::vector<element> events_;
+        };
+
+        enum class state_type {
+            NONE,
+            RECORDING,
+            PLAYING,
+        };
+
+        macro recording_;
+        macro playing_;
+        macro current_;
+        state_type state_ = state_type::NONE;
+
+    public:
+        void toogle_record() {
+            switch( state_ ) {
+                case state_type::NONE:
+                    state_ = state_type::RECORDING;
+                    break;
+                case state_type::RECORDING:
+                    state_ = state_type::NONE;
+                    current_ = recording_;
+                    recording_ = macro();
+                    break;
+                case state_type::PLAYING:
+                    // ignore recording-request during playback
+                    break;
+            }
+        }
+        void toogle_playing() {
+            switch( state_ ) {
+                case state_type::NONE:
+                    state_ = state_type::PLAYING;
+                    playing_ = current_;
+                    break;
+                case state_type::RECORDING:
+                    // ignore playing request during recording
+                    break;
+                case state_type::PLAYING:
+                    // ignore playing request during playing
+                    break;
+            }
+        }
+        bool on_input( const std::string &category, const input_event &event ) {
+            // @FIXME hardcoded keys that start/stop recording the macro -> make them configurable
+            if( event.type == input_event_t::keyboard_char && event.get_first_input() == KEY_F( 1 ) ) {
+                toogle_record();
+                return false;
+                // @FIXME hardcoded keys that start replaying the macro -> make them configurable
+            } else if( event.type == input_event_t::keyboard_char && event.get_first_input() == KEY_F( 2 ) ) {
+                toogle_playing();
+                return false;
+            } else {
+                if( state_ == state_type::RECORDING ) {
+                    recording_.events_.push_back( { event, category } );
+                }
+                return true;
+            }
+        }
+        bool is_playing( const std::string &category, input_event &event ) {
+            if( state_ != state_type::PLAYING ) {
+                return false;
+            }
+            if( playing_.events_.empty() ) {
+                state_ = state_type::NONE;
+                return false;
+            }
+            const auto &next = playing_.events_.front();
+            if( next.category_ != category ) {
+                state_ = state_type::NONE;
+                popup( _( "Category mismatch in macro: %s vs %s" ), category.c_str(), next.category_.c_str() );
+                return false;
+            }
+            event = next.event_;
+            playing_.events_.erase( playing_.events_.begin() );
+            return true;
+        }
+};
+
+macro_controller &get_macro_controller()
+{
+    static macro_controller instance;
+    return instance;
+}
+
+} // namespace
+
 #if !(defined(TILES) || defined(_WIN32))
 // Also specify that we don't have a gamepad plugged in.
 bool gamepad_available()
@@ -1779,7 +1882,7 @@ input_event input_manager::get_input_event( const keyboard_mode preferred_keyboa
     return get_input_event( ":NONE", preferred_keyboard_mode );
 }
 
-input_event input_manager::get_input_event( const std::string &/*category*/,
+input_event input_manager::get_input_event( const std::string &category,
         const keyboard_mode preferred_keyboard_mode )
 {
     if( test_mode ) {
@@ -1787,7 +1890,16 @@ input_event input_manager::get_input_event( const std::string &/*category*/,
         throw std::runtime_error( "input_manager::get_input_event called in test mode" );
     }
 
-    return get_input_event_impl( preferred_keyboard_mode );
+    input_event result;
+    while( true ) {
+        if( get_macro_controller().is_playing( category, result ) ) {
+            return result;
+        }
+        result = get_input_event_impl( preferred_keyboard_mode );
+        if( get_macro_controller().on_input( category, result ) ) {
+            return result;
+        }
+    }
 }
 
 cata::optional<tripoint> input_context::get_coordinates( const catacurses::window &capture_win )
