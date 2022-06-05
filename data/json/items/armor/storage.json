@@ -1901,110 +1901,21 @@
     "symbol": "[",
     "looks_like": "backpack",
     "color": "green",
+    "weight_capacity_modifier": 100000.0,
     "pocket_data": [
       {
+        "rigid": true,
         "pocket_type": "CONTAINER",
-        "max_contains_volume": "40 L",
-        "max_contains_weight": "60 kg",
-        "max_item_length": "55 cm",
-        "magazine_well": "8 L",
-        "moves": 300
-      },
-      {
-        "pocket_type": "CONTAINER",
-        "max_contains_volume": "5 L",
-        "max_contains_weight": "10 kg",
-        "max_item_length": "35 cm",
-        "magazine_well": "1 L",
-        "moves": 200
-      },
-      {
-        "pocket_type": "CONTAINER",
-        "max_contains_volume": "3 L",
-        "max_contains_weight": "3 kg",
-        "max_item_length": "30 cm",
-        "magazine_well": "800 ml",
-        "moves": 120
-      },
-      {
-        "pocket_type": "CONTAINER",
-        "max_contains_volume": "3 L",
-        "max_contains_weight": "3 kg",
-        "max_item_length": "30 cm",
-        "magazine_well": "800 ml",
-        "moves": 120
-      },
-      {
-        "//": "hydration pouch storage",
-        "pocket_type": "CONTAINER",
-        "max_contains_volume": "3001 ml",
-        "max_contains_weight": "4 kg",
-        "max_item_length": "30 cm",
-        "moves": 500,
-        "description": "Pouch sized for a hydration pack."
-      },
-      {
-        "//": "tucked against back",
-        "pocket_type": "CONTAINER",
-        "holster": true,
-        "max_contains_volume": "5 L",
-        "max_contains_weight": "4 kg",
-        "max_item_length": "150 cm",
-        "min_item_length": "60 cm",
-        "moves": 200,
-        "extra_encumbrance": 10,
-        "description": "Tucked between your back and the backpack.",
-        "ripoff": 3
-      },
-      {
-        "//": "carabiner pocket",
-        "pocket_type": "CONTAINER",
-        "holster": true,
-        "max_contains_volume": "5 L",
-        "max_contains_weight": "6 kg",
-        "max_item_length": "120 cm",
-        "min_item_length": "20 cm",
-        "moves": 150,
-        "extra_encumbrance": 3,
-        "ripoff": 2,
-        "description": "Attached with a carabiner or strap.",
-        "activity_noise": { "volume": 8, "chance": 10 }
-      },
-      {
-        "//": "carabiner pocket",
-        "pocket_type": "CONTAINER",
-        "holster": true,
-        "max_contains_volume": "5 L",
-        "max_contains_weight": "6 kg",
-        "max_item_length": "120 cm",
-        "min_item_length": "20 cm",
-        "moves": 150,
-        "extra_encumbrance": 3,
-        "ripoff": 2,
-        "description": "Attached with a carabiner or strap.",
-        "activity_noise": { "volume": 8, "chance": 10 }
-      },
-      {
-        "//": "carabiner pocket",
-        "pocket_type": "CONTAINER",
-        "holster": true,
-        "max_contains_volume": "5 L",
-        "max_contains_weight": "6 kg",
-        "max_item_length": "120 cm",
-        "min_item_length": "20 cm",
-        "moves": 150,
-        "extra_encumbrance": 3,
-        "ripoff": 2,
-        "description": "Attached with a carabiner or strap.",
-        "activity_noise": { "volume": 8, "chance": 10 }
+        "max_contains_volume": "250000 L",
+        "max_contains_weight": "300000 kg",
+        "max_item_length": "400000 cm",
+        "moves": 1
       }
     ],
     "warmth": 8,
     "material_thickness": 0.2,
-    "flags": [ "BELTED", "WATER_FRIENDLY" ],
-    "armor": [
-      { "encumbrance": [ 10, 50 ], "coverage": 80, "covers": [ "torso" ], "specifically_covers": [ "torso_hanging_back" ] }
-    ]
+    "flags": [ "BELTED", "WATER_FRIENDLY", "TARDIS" ],
+    "armor": [ { "encumbrance": [ 1, 5 ], "coverage": 80, "covers": [ "torso" ], "specifically_covers": [ "torso_hanging_back" ] } ]
   },
   {
     "id": "runner_bag",
