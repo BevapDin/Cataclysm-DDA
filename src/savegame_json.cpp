@@ -2926,6 +2926,8 @@ void item::io( Archive &archive )
         active = true;
     }
 
+    item_vars.erase( "activity_var" );
+
     if( charges != 0 && !type->can_have_charges() ) {
         // Types that are known to have charges, but should not have them.
         // We fix it here, but it's expected from bugged saves and does not require a message.
