@@ -166,21 +166,21 @@ endif
 
 # Enable astyle by default
 ifndef ASTYLE
-  ASTYLE = 1
+  ASTYLE = 0
 endif
 
 # Enable json format check by default
 ifndef LINTJSON
-  LINTJSON = 1
+  LINTJSON = 0
 endif
 
 # Enable running tests by default
 ifndef RUNTESTS
-  RUNTESTS = 1
+  RUNTESTS = 0
 endif
 
 ifndef PCH
-  PCH = 1
+  PCH = 0
 endif
 
 ifndef GOLD
