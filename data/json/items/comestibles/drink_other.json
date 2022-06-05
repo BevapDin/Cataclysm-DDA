@@ -217,6 +217,11 @@
     "name": { "str_sp": "animal cooking oil" },
     "copy-from": "cooking_oil",
     "description": "Thin yellow animal oil used for cooking.",
+    "conditional_names": [
+      { "type": "FLAG", "condition": "CANNIBALISM", "name": "human cooking oil" },
+      { "type": "FLAG", "condition": "STRICT_HUMANITARIANISM", "name": "other human cooking oil" },
+      { "type": "COMPONENT_ID", "condition": "mutant", "name": { "str_sp": "baleful %s" } }
+    ],
     "material": [ "flesh", "oil" ],
     "delete": { "flags": [ "NUTRIENT_OVERRIDE" ] }
   },
