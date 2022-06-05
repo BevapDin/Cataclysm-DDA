@@ -1540,7 +1540,7 @@ void veh_interact::calc_overview()
                         offset = 0;
                     }
                     right_print( w, y, offset, pt_ammo_cur->color,
-                                 string_format( fmtstring, specials, pt_ammo_cur->nname( 1 ),
+                                 string_format( fmtstring, specials, it.tname( 1 ),
                                                 round_up( units::to_liter( it.volume() ), 1 ) ) );
                 } else {
                     if( pt.is_leaking() ) {
