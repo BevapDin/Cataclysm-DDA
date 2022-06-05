@@ -7046,10 +7046,57 @@ std::list<item> vehicle::use_charges( const vpart_position &vp, const itype_id &
     };
 
     if( tool_vp ) { // handle vehicle tools
-        itype_id fuel_type = tool_wants_battery( type ) ? itype_battery : type;
-        item tmp( type, calendar::turn_zero ); // TODO: add a sane birthday arg
-        // TODO: Handle water poison when crafting starts respecting it
-        tmp.charges = tool_vp->vehicle().drain( fuel_type, quantity );
+        const itype_id fuel_type = tool_wants_battery( type ) ? itype_battery : type;
+
+
+
+
+
+
+        int amount = quantity;
+        cata::optional<item> lret;
+
+        if( fuel_type == fuel_type_battery ) {
+            // Batteries get special handling to take advantage of jumper
+            // cables -- discharge_battery knows how to recurse properly
+            // (including taking cable power loss into account).
+            int remnant = discharge_battery( amount, true );
+
+            // discharge_battery returns amount of charges that were not
+            // found anywhere in the power network, whereas we need
+            // amount of charges consumed; simple subtraction.
+            lret.emplace( type, calendar::turn_zero );
+            lret->charges = amount - remnant;
+        } else {
+            int drained = 0;
+            for( vehicle_part &p : parts ) {
+                if( amount <= 0 ) {
+                    break;
+                }
+                if( p.ammo_current() == fuel_type ) {
+                    if( !lret && p.is_tank() && !p.get_base().empty() ) {
+                        lret.emplace( p.get_base().legacy_front() );
+                    }
+                    int qty = p.ammo_consume( amount, global_part_pos3( p ) );
+                    drained += qty;
+                    amount -= qty;
+                }
+            }
+
+            invalidate_mass();
+            if( !lret ) {
+                lret.emplace( type, calendar::turn_zero );
+            }
+            lret->charges = drained;
+        }
+        item &tmp = *lret;
+
+
+
+
+
+
+
         quantity -= tmp.charges;
         ret.push_back( tmp );
 
