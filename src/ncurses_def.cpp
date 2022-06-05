@@ -17,6 +17,7 @@
 #else
 #include <curses.h>
 #endif
+#undef stdscr
 
 #include <cstdint>
 #include <cstring>
