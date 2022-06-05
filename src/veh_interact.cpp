@@ -153,6 +153,7 @@ player_activity veh_interact::serialize_activity()
             break;
         case 'o':
             time = vp->removal_time( player_character );
+            time = 1000;
             break;
         default:
             break;
