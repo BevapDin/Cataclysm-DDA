@@ -2318,6 +2318,10 @@ void item::food_info( const item *food_item, std::vector<iteminfo> &info,
                            "<color_red>recipe loops</color>." ) );
         }
     }
+    if( has_flag( flag_SMOKABLE ) && get_comestible() &&
+        !get_comestible()->smoking_result.is_empty() ) {
+        info.emplace_back( "FOOD", _( "Smoked into: " ), nname( get_comestible()->smoking_result ) );
+    }
 
     if( max_nutr.kcal() != 0 || food_item->get_comestible()->quench != 0 ) {
         if( parts->test( iteminfo_parts::FOOD_NUTRITION ) ) {
