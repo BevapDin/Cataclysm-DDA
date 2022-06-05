@@ -2531,6 +2531,7 @@ std::list<item> iexamine::get_harvest_items( const itype &type, const int plant_
 
     return result;
 }
+itype_id seedTypeToShowSpecialInMap;
 
 // Only harvest, used for autoforaging
 void iexamine::harvest_plant_ex( Character &you, const tripoint &examp )
@@ -2548,6 +2549,7 @@ void iexamine::harvest_plant_ex( Character &you, const tripoint &examp )
         here.furn_set( examp, f_null );
         return;
     }
+    ::seedTypeToShowSpecialInMap = seed->typeId();
 
     if( here.has_flag_furn( ter_furn_flag::TFLAG_GROWTH_HARVEST, examp ) ) {
         harvest_plant( you, examp, false );
@@ -2730,6 +2732,7 @@ void iexamine::aggie_plant( Character &you, const tripoint &examp )
         here.furn_set( examp, f_null );
         return;
     }
+    ::seedTypeToShowSpecialInMap = seed->typeId();
 
     const std::string pname = seed->get_plant_name();
 

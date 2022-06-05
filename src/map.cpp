@@ -6145,6 +6145,8 @@ bool map::dont_draw_lower_floor( const tripoint &p )
               has_flag( ter_furn_flag::TFLAG_Z_TRANSPARENT, p ) );
 }
 
+extern itype_id seedTypeToShowSpecialInMap;
+
 bool map::draw_maptile( const catacurses::window &w, const tripoint &p,
                         const maptile &curr_maptile, const drawsq_params &params ) const
 {
@@ -6175,6 +6177,18 @@ bool map::draw_maptile( const catacurses::window &w, const tripoint &p,
         if( !( player_character.get_grab_type() == object_type::FURNITURE
                && p == player_character.pos() + player_character.grab_point ) ) {
             memory_sym = sym;
+        }
+    }
+    if( curr_furn.has_flag( ter_furn_flag::TFLAG_PLANT ) ) {
+        map_stack items = const_cast<map &>( *this ).i_at( p );
+        const map_stack::iterator seed = std::find_if( items.begin(), items.end(), []( const item & it ) {
+            return it.is_seed();
+        } );
+        if( seed != items.end() ) {
+            if( seed->typeId() == ::seedTypeToShowSpecialInMap ) {
+                sym = '!';
+                tercol = c_red;
+            }
         }
     }
     if( curr_ter.has_flag( ter_furn_flag::TFLAG_SWIMMABLE ) &&
