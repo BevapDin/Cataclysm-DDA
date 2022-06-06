@@ -2927,6 +2927,18 @@ void item::io( Archive &archive )
     }
 
     item_vars.erase( "activity_var" );
+    for( item &c : components ) {
+        if( c.goes_bad() ) {
+            // 0.5 is in the middle of its lifetime, so there will be no suffix like "fresh" or "old".
+            c.set_relative_rot( 0.5 );
+        }
+        // Prevent even more flags
+        c.unset_flag( flag_HOT );
+        c.unset_flag( flag_COLD );
+        c.unset_flag( flag_FROZEN );
+        c.unset_flag( flag_MELTS );
+        c.unset_flag( flag_MUSHY );
+    }
 
     if( charges != 0 && !type->can_have_charges() ) {
         // Types that are known to have charges, but should not have them.
