@@ -9310,18 +9310,18 @@ cata::optional<int> iuse::wash_items( Character *p, bool soft_items, bool hard_i
         for( const auto &pair : locs ) {
             total_volume += pair.first->volume( false, true, pair.second );
         }
-        washing_requirements required = washing_requirements_for_volume( total_volume );
+        washing_requirements required = washing_requirements_for_volume( total_volume * 100 );
         auto to_string = []( int val ) -> std::string {
-            if( val == INT_MAX )
+            if( val == static_cast<int>( static_cast<unsigned int>( INT_MAX ) * 100u ) )
             {
                 return pgettext( "short for infinity", "inf" );
             }
-            return string_format( "%3d", val );
+            return string_format( "%.2f", val / 100.0 );
         };
         using stats = inventory_selector::stats;
         return stats{{
-                display_stat( _( "Water" ), required.water, available_water, to_string ),
-                display_stat( _( "Cleanser" ), required.cleanser, available_cleanser, to_string )
+                display_stat( _( "Water" ), required.water, static_cast<unsigned int>( available_water ) * 100u, to_string ),
+                display_stat( _( "Cleanser" ), required.cleanser, static_cast<unsigned int>( available_cleanser ) * 100u, to_string )
             }};
     };
     inventory_multiselector inv_s( *p, preset, _( "ITEMS TO CLEAN" ),
