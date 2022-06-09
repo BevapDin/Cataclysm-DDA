@@ -2382,6 +2382,7 @@ input_context get_default_mode_input_context()
     ctxt.register_action( "action_menu" );
     ctxt.register_action( "main_menu" );
     ctxt.register_action( "item_action_menu" );
+    ctxt.register_action( "deconstruct" );
     ctxt.register_action( "ANY_INPUT" );
     ctxt.register_action( "COORDINATE" );
     ctxt.register_action( "MOUSE_MOVE" );

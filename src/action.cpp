@@ -115,6 +115,8 @@ std::vector<input_event> keys_bound_to( const action_id act,
 std::string action_ident( action_id act )
 {
     switch( act ) {
+        case ACTION_DECONSTRUCT:
+            return "deconstruct";
         case ACTION_PAUSE:
             return "pause";
         case ACTION_TIMEOUT:

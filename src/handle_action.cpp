@@ -2340,6 +2340,7 @@ bool game::do_regular_action( action_id &act, avatar &player_character,
             }
             break;
 
+        case ACTION_DECONSTRUCT:
         case ACTION_CONSTRUCT:
             if( player_character.in_vehicle ) {
                 add_msg( m_info, _( "You can't construct while in a vehicle." ) );
@@ -2349,6 +2350,9 @@ bool game::do_regular_action( action_id &act, avatar &player_character,
                 add_msg( m_info, _( "You can't construct while you're riding." ) );
             } else if( u.has_effect( effect_incorporeal ) ) {
                 add_msg( m_info, _( "You lack the substance to affect anything." ) );
+            } else if( act == ACTION_DECONSTRUCT ) {
+                void deconstruct_now();
+                deconstruct_now();
             } else {
                 construction_menu( false );
             }

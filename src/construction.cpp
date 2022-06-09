@@ -2316,6 +2316,19 @@ construction_id construction_str_id::id() const
     }
 }
 
+void deconstruct_now();
+void deconstruct_now()
+{
+    const auto constr = construction_group_str_id( "deconstruct_furniture" );
+    avatar &player_character = get_avatar();
+    if( !player_can_see_to_build( player_character, constr ) ) {
+        add_msg( m_info, _( "It is too dark to construct right now." ) );
+        return;
+    }
+    place_construction( constr );
+}
+
+
 template <>
 const construction &construction_str_id::obj() const
 {
