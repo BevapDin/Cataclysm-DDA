@@ -582,6 +582,15 @@ class comestible_inventory_preset : public inventory_selector_preset
                 return good_bad_none( nutr.kcal() );
             }, _( "CALORIES" ) );
 
+            append_cell( [&you]( const item_location & loc ) {
+                const nutrients nutr = you.compute_effective_nutrients( *loc );
+                const auto iter = nutr.vitamins.find( vitamin_id( "mutant_toxin" ) );
+                if( iter == nutr.vitamins.end() || iter->second == 0 ) {
+                    return std::string( "<good>-</good>" );
+                }
+                return string_format( "<bad>%i%%</bad>", iter->second );
+            }, _( "TOXINS" ) );
+
             append_cell( []( const item_location & loc ) {
                 return good_bad_none( loc->is_comestible() ? loc->get_comestible()->quench : 0 );
             }, _( "QUENCH" ) );
