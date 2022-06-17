@@ -12220,13 +12220,29 @@ bool item::will_spill_if_unsealed() const
 
 std::string item::components_to_string() const
 {
+    const bool is_food = is_comestible();
+    const auto cname = []( const item & it ) {
+        const auto comps = it.components_to_string();
+        const auto name = it.display_name();
+        return comps.empty() ? name : string_format( "%s (%s)", name, comps );
+    };
     using t_count_map = std::map<std::string, int>;
     t_count_map counts;
     for( const item &elem : components ) {
-        if( !elem.has_flag( flag_BYPRODUCT ) ) {
-            const std::string name = elem.display_name();
-            counts[name]++;
+        if( is_food && elem.is_container() ) {
+            continue;
         }
+        if( is_food && elem.typeId() == itype_id( "water" ) ) {
+            continue;
+        }
+        if( is_food && elem.typeId() == itype_id( "water_clean" ) ) {
+            continue;
+        }
+        if( elem.has_flag( flag_BYPRODUCT ) ) {
+            continue;
+        }
+        const std::string name = cname( elem );
+        counts[name]++;
     }
     return enumerate_as_string( counts.begin(), counts.end(),
     []( const std::pair<std::string, int> &entry ) -> std::string {
