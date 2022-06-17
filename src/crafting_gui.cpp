@@ -275,14 +275,6 @@ static std::vector<std::string> recipe_info(
         oss << string_format( _( "Other skills: %s\n" ), recp.required_skills_string( guy ) );
     }
 
-    const std::string req_profs = recp.required_proficiencies_string( &guy );
-    if( !req_profs.empty() ) {
-        oss << string_format( _( "Proficiencies Required: %s\n" ), req_profs );
-    }
-    const std::string used_profs = recp.used_proficiencies_string( &guy );
-    if( !used_profs.empty() ) {
-        oss << string_format( _( "Proficiencies Used: %s\n" ), used_profs );
-    }
     const std::string missing_profs = recp.missing_proficiencies_string( &guy );
     if( !missing_profs.empty() ) {
         oss << string_format( _( "Proficiencies Missing: %s\n" ), missing_profs );
