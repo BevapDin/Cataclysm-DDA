@@ -2940,6 +2940,16 @@ void item::io( Archive &archive )
         c.unset_flag( flag_MUSHY );
     }
 
+    for( item_pocket *const pocket : get_all_contained_pockets() ) {
+        if( pocket->spoil_multiplier() == 0 ) {
+            for( item *const it : pocket->all_items_top() ) {
+                // If the container preserves its contents, its freshness is not important to the user.
+                // Setting it all to 0 makes stacking much easier.
+                it->set_relative_rot( 0 );
+            }
+        }
+    }
+
     if( charges != 0 && !type->can_have_charges() ) {
         // Types that are known to have charges, but should not have them.
         // We fix it here, but it's expected from bugged saves and does not require a message.
