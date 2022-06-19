@@ -25,7 +25,7 @@
       "menu_text": "Light rag",
       "type": "transform"
     },
-    "flags": [ "NPC_ACTIVATE", "NO_REPAIR" ],
+    "flags": [ "NPC_ACTIVATE" ],
     "ammo_type": "sling-ready_grenade",
     "damage": { "damage_type": "bash", "amount": 5 },
     "//": "Total range with staff sling 21 - 5 more than can be thrown by a player with 10 strength",

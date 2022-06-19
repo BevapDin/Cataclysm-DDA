@@ -139,7 +139,7 @@
     "ammo_type": [ "battery" ],
     "capacity": 50000,
     "//": "Approximate energy density 2.1 MJ/L / 0.73 MJ/Kg for lithium nickel manganese cobalt oxide (NMC) batteries",
-    "flags": [ "NO_SALVAGE", "NO_UNLOAD", "NO_RELOAD", "RECHARGE", "NO_REPAIR" ],
+    "flags": [ "NO_SALVAGE", "NO_UNLOAD", "NO_RELOAD", "RECHARGE" ],
     "pocket_data": [ { "pocket_type": "MAGAZINE", "rigid": true, "ammo_restriction": { "battery": 50000 } } ]
   }
 ]

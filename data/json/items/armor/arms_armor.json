@@ -93,7 +93,7 @@
     "material": [ "acidchitin" ],
     "proportional": { "weight": 1.125, "volume": 1.13, "price": 1.25, "encumbrance": 1.5, "warmth": 1.5 },
     "material_thickness": 4,
-    "extend": { "flags": [ "NO_REPAIR" ] }
+    "extend": { "flags": [] }
   },
   {
     "id": "xl_armguard_acidchitin",

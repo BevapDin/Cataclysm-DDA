@@ -38,7 +38,7 @@
     "volume": "150 L",
     "material_thickness": 4,
     "environmental_protection": 7,
-    "extend": { "flags": [ "NO_REPAIR" ] }
+    "extend": { "flags": [] }
   },
   {
     "type": "PET_ARMOR",

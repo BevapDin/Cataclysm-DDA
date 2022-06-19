@@ -65,7 +65,7 @@
     "reload": 0,
     "modes": [ [ "DEFAULT", "3 rd.", 3 ], [ "BURST", "5 rd.", 5 ], [ "AUTO", "high auto", 15 ] ],
     "ammo_effects": [ "LASER", "PLASMA_BUBBLE", "INCENDIARY" ],
-    "flags": [ "NO_UNLOAD", "NEVER_JAMS", "NO_UNWIELD", "NO_SALVAGE", "NO_REPAIR", "UNBREAKABLE_MELEE", "NON_FOULING" ]
+    "flags": [ "NO_UNLOAD", "NEVER_JAMS", "NO_UNWIELD", "NO_SALVAGE", "UNBREAKABLE_MELEE", "NON_FOULING" ]
   },
   {
     "id": "recon_mech_laser",
@@ -204,7 +204,7 @@
     "description": "This gatling-laser has been stripped from its CMES mech-suit and is far too heavy to use on its own.  You will need to deploy it or mount it to a vehicle, but it could be devastating if you have deep battery reserves.",
     "valid_mod_locations": [ [ "accessories", 4 ], [ "emitter", 1 ], [ "lens", 1 ], [ "sling", 1 ] ],
     "extend": { "flags": [ "MOUNTED_GUN" ] },
-    "delete": { "flags": [ "UNBREAKABLE_MELEE", "NO_REPAIR", "NO_SALVAGE", "NO_UNWIELD" ] }
+    "delete": { "flags": [ "UNBREAKABLE_MELEE", "NO_SALVAGE", "NO_UNWIELD" ] }
   },
   {
     "id": "recon_mech_laser_single",
@@ -215,6 +215,6 @@
     "description": "Formerly belonging to the RMES mech-suit, this powerful long-range laser rifle was never designed for human hands.  You might be able to make it work if you deployed it or mounted it to a vehicle, though, and its long range and potency could be pretty handy if you can keep it powered.",
     "valid_mod_locations": [ [ "accessories", 4 ], [ "emitter", 1 ], [ "lens", 1 ], [ "sling", 1 ] ],
     "extend": { "flags": [ "MOUNTED_GUN" ] },
-    "delete": { "flags": [ "UNBREAKABLE_MELEE", "NO_REPAIR", "NO_SALVAGE", "NO_UNWIELD" ] }
+    "delete": { "flags": [ "UNBREAKABLE_MELEE", "NO_SALVAGE", "NO_UNWIELD" ] }
   }
 ]

@@ -563,7 +563,7 @@
     "bashing": 16,
     "cutting": 4,
     "price": 3500,
-    "flags": [ "BELTED", "OVERSIZE", "NO_REPAIR" ],
+    "flags": [ "BELTED", "OVERSIZE" ],
     "armor": [ { "encumbrance": 20, "coverage": 80, "covers": [ "torso" ], "specifically_covers": [ "torso_hanging_back" ] } ]
   },
   {

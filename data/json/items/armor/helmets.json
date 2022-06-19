@@ -323,7 +323,7 @@
     "proportional": { "weight": 1.125, "volume": 1.13, "price": 1.25, "warmth": 1.5 },
     "relative": { "bashing": 1 },
     "material_thickness": 5,
-    "extend": { "flags": [ "NO_REPAIR" ] }
+    "extend": { "flags": [] }
   },
   {
     "id": "xl_helmet_acidchitin",

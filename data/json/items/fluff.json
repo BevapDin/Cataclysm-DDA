@@ -28,7 +28,6 @@
     "material": [ "cardboard" ],
     "symbol": ",",
     "color": "red",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -108,7 +107,6 @@
     "material": [ "wood" ],
     "symbol": "?",
     "color": "brown",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -124,7 +122,6 @@
     "material": [ "wood" ],
     "symbol": "?",
     "color": "brown",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -140,7 +137,6 @@
     "material": [ "paper" ],
     "symbol": "?",
     "color": "blue",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -156,7 +152,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "yellow",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -172,7 +167,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "red",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -188,7 +182,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "red",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -204,7 +197,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "yellow",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -220,7 +212,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "yellow",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -236,7 +227,6 @@
     "material": [ "wood" ],
     "symbol": "?",
     "color": "light_blue",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -252,7 +242,6 @@
     "material": [ "plastic" ],
     "symbol": "?",
     "color": "blue",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -268,7 +257,6 @@
     "material": [ "paper" ],
     "symbol": "?",
     "color": "blue",
-    "flags": [ "NO_REPAIR" ],
     "use_action": [ "PLAY_GAME" ]
   },
   {
@@ -298,7 +286,7 @@
     "material": [ "steel" ],
     "symbol": "-",
     "color": "yellow",
-    "flags": [ "NO_REPAIR" ]
+    "flags": []
   },
   {
     "id": "cigar_punch",
@@ -313,7 +301,7 @@
     "material": [ "aluminum" ],
     "symbol": "o",
     "color": "light_gray",
-    "flags": [ "NO_REPAIR" ]
+    "flags": []
   },
   {
     "id": "xedra_seismograph",

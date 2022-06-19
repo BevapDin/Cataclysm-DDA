@@ -1201,7 +1201,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1226,7 +1226,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1244,7 +1244,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1262,7 +1262,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1280,7 +1280,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1298,7 +1298,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1316,7 +1316,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1340,7 +1340,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1376,7 +1376,7 @@
     "bashing": 6,
     "cutting": 10,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1392,7 +1392,7 @@
     "material": [ "superalloy" ],
     "symbol": ";",
     "color": "light_green",
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1408,7 +1408,7 @@
     "material": [ "superalloy" ],
     "symbol": ";",
     "color": "light_green",
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1424,7 +1424,7 @@
     "material": [ "superalloy" ],
     "symbol": ";",
     "color": "light_green",
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1442,7 +1442,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "AMMO",
@@ -1496,7 +1496,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1514,7 +1514,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1532,7 +1532,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1550,7 +1550,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1568,7 +1568,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1586,7 +1586,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1604,7 +1604,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1622,7 +1622,7 @@
     "bashing": 6,
     "cutting": 6,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -1638,7 +1638,7 @@
     "weight": "52 kg",
     "volume": "50500 ml",
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3331,7 +3331,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3394,7 +3394,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3412,7 +3412,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3453,7 +3453,7 @@
     "material": [ "plastic" ],
     "symbol": ".",
     "color": "white",
-    "flags": [ "NO_REPAIR" ]
+    "flags": []
   },
   {
     "id": "salt_lick",
@@ -3469,7 +3469,7 @@
     "material": [ "stone" ],
     "symbol": ".",
     "color": "white",
-    "flags": [ "NO_REPAIR" ]
+    "flags": []
   },
   {
     "type": "GENERIC",
@@ -3813,7 +3813,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3831,7 +3831,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3849,7 +3849,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3867,7 +3867,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3885,7 +3885,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3903,7 +3903,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "GENERIC",
@@ -3921,7 +3921,7 @@
     "bashing": 4,
     "cutting": 4,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   },
   {
     "type": "TOOL",

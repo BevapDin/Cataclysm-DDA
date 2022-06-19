@@ -14,6 +14,6 @@
     "bashing": 20,
     "cutting": 15,
     "to_hit": -3,
-    "flags": [ "TRADER_AVOID", "NO_REPAIR" ]
+    "flags": [ "TRADER_AVOID" ]
   }
 ]

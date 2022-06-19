@@ -62,7 +62,7 @@
     "material": [ "acidchitin" ],
     "weight": "5362 g",
     "environmental_protection": 7,
-    "extend": { "flags": [ "NO_REPAIR" ] }
+    "extend": { "flags": [] }
   },
   {
     "type": "PET_ARMOR",

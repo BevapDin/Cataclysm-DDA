@@ -579,7 +579,6 @@
     "color": "light_gray",
     "broken_symbol": "*",
     "broken_color": "dark_gray",
-    "flags": [ "NO_REPAIR" ],
     "requirements": {
       "install": { "skills": [ [ "mechanics", 2 ] ], "qualities": [ { "id": "SCREW", "level": 3 }, { "id": "WRENCH", "level": 3 } ] },
       "removal": { "skills": [ [ "mechanics", 2 ] ], "using": [ [ "vehicle_screw", 1 ] ] }
