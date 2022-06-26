@@ -24,8 +24,7 @@ static constexpr int STATUS_WIDTH = 55;
 static constexpr int BLINK_SPEED = 300;
 static constexpr int EXPLOSION_MULTIPLIER = 7;
 
-// Really just a sanity check for functions not tested beyond this. in theory 4096 works (`InvletInvlet).
-static constexpr int MAX_ITEM_IN_SQUARE = 4096;
+static constexpr int MAX_ITEM_IN_SQUARE = 10000;
 // no reason to differ.
 static constexpr int MAX_ITEM_IN_VEHICLE_STORAGE = MAX_ITEM_IN_SQUARE;
 // only can wear a maximum of two of any type of clothing.
