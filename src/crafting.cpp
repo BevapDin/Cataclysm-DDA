@@ -1744,7 +1744,7 @@ comp_selection<item_comp> Character::select_item_component( const std::vector<it
                     break;
             }
 
-            if( is_food && ingredient.is_food() ) {
+            if( is_food || ingredient.is_food() ) {
                 text += kcal_values.first == kcal_values.second ? _( " %d kcal" ) : _( " %d-%d kcal" );
                 if( ingredient.has_flag( flag_RAW ) && remove_raw ) {
                     //Multiplier for RAW food digestion
