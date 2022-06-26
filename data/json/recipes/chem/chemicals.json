@@ -8,7 +8,7 @@
     "subcategory": "CSC_CHEM_CHEMICALS",
     "skill_used": "chemistry",
     "difficulty": 4,
-    "time": "4 h",
+    "time": "1 m",
     "batch_time_factors": [ 99, 2 ],
     "autolearn": true,
     "charges": 1,
