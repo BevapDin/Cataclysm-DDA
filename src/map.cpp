@@ -6163,7 +6163,7 @@ bool map::draw_maptile( const catacurses::window &w, const tripoint &p,
     bool draw_item_sym = false;
 
     if( curr_ter.has_flag( ter_furn_flag::TFLAG_AUTO_WALL_SYMBOL ) ) {
-        memory_sym = sym = determine_wall_corner( p );
+        memory_sym = sym = determine_wall_corner( p, curr_ter );
         tercol = curr_ter.color();
     } else {
         memory_sym = sym = curr_ter.symbol();
@@ -6172,7 +6172,11 @@ bool map::draw_maptile( const catacurses::window &w, const tripoint &p,
 
     avatar &player_character = get_avatar();
     if( curr_furn.id ) {
-        sym = curr_furn.symbol();
+        if( curr_furn.has_flag( ter_furn_flag::TFLAG_AUTO_WALL_SYMBOL ) ) {
+            memory_sym = sym = determine_wall_corner( p, curr_furn );
+        } else {
+            memory_sym = sym = curr_furn.symbol();
+        }
         tercol = curr_furn.color();
         if( !( player_character.get_grab_type() == object_type::FURNITURE
                && p == player_character.pos() + player_character.grab_point ) ) {
@@ -6406,7 +6410,7 @@ void map::draw_from_above( const catacurses::window &w, const tripoint &p,
     }
 
     if( sym == AUTO_WALL_PLACEHOLDER ) {
-        sym = determine_wall_corner( p );
+        sym = determine_wall_corner( p, curr_ter );
     }
 
     const std::bitset<NUM_VISION_MODES> &u_vision = get_player_character().get_vision_modes();
@@ -8050,10 +8054,8 @@ bool map::has_graffiti_at( const tripoint &p ) const
     return current_submap->has_graffiti( l );
 }
 
-int map::determine_wall_corner( const tripoint &p ) const
+static cata::optional<int> translate_wall_corner_to_curses( const uint8_t connections )
 {
-    int test_connect_group = ter( p ).obj().connect_group;
-    uint8_t connections = get_known_connections( p, test_connect_group );
     // The bits in connections are SEWN, whereas the characters in LINE_
     // constants are NESW, so we want values in 8 | 2 | 1 | 4 order.
     switch( connections ) {
@@ -8092,13 +8094,27 @@ int map::determine_wall_corner( const tripoint &p ) const
             return LINE_XOXO; // LINE_XOOO would be better
 
         case 0 | 0 | 0 | 0:
-            return ter( p ).obj().symbol(); // technically just a column
+            return cata::nullopt; // technically just a column
 
         default:
             // cata_assert( false );
             // this shall not happen
             return '?';
     }
+}
+
+int map::determine_wall_corner( const tripoint &p, const ter_t &t ) const
+{
+    const auto connections = get_known_connections( p, t.connect_group );
+    const auto result = translate_wall_corner_to_curses( connections );
+    return result ? *result : t.symbol();
+}
+
+int map::determine_wall_corner( const tripoint &p, const furn_t &f ) const
+{
+    const auto connections = get_known_connections_f( p, f.connect_group );
+    const auto result = translate_wall_corner_to_curses( connections );
+    return result ? *result : f.symbol();
 }
 
 void map::build_outside_cache( const int zlev )

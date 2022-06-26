@@ -1957,7 +1957,8 @@ class map
         void draw_from_above( const catacurses::window &w, const tripoint &p,
                               const maptile &tile, const drawsq_params &params ) const;
 
-        int determine_wall_corner( const tripoint &p ) const;
+        int determine_wall_corner( const tripoint &p, const ter_t &t ) const;
+        int determine_wall_corner( const tripoint &p, const furn_t &f ) const;
         // apply a circular light pattern immediately, however it's best to use...
         void apply_light_source( const tripoint &p, float luminance );
         // ...this, which will apply the light after at the end of generate_lightmap, and prevent redundant
