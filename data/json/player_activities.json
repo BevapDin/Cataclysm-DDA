@@ -370,7 +370,7 @@
   {
     "id": "ACT_PICKAXE",
     "type": "activity_type",
-    "activity_level": "EXTRA_EXERCISE",
+    "activity_level": "NO_EXERCISE",
     "verb": "mining",
     "based_on": "speed"
   },
