@@ -334,7 +334,7 @@
     "coverage": 50,
     "required_str": -1,
     "connects_to": "WOODFENCE",
-    "flags": [ "TRANSPARENT", "FLAMMABLE_ASH", "SHRUB", "PERMEABLE" ],
+    "flags": [ "TRANSPARENT", "FLAMMABLE_ASH", "SHRUB", "PERMEABLE", "AUTO_WALL_SYMBOL" ],
     "bash": {
       "str_min": 10,
       "str_max": 180,
