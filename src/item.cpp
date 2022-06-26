@@ -4968,7 +4968,7 @@ void item::melee_combat_info( std::vector<iteminfo> &info, const iteminfo_query 
         }
     }
 
-    if( dmg_bash || dmg_cut || dmg_stab ) {
+    if( ( dmg_bash || dmg_cut || dmg_stab ) && get_option<bool>( "ITEM_BASH_DESC" ) ) {
         int stam = 0;
         float stam_pct = 0.0f;
         std::map<std::string, double> dps_data;
@@ -5366,7 +5366,8 @@ void item::final_info( std::vector<iteminfo> &info, const iteminfo_query *parts,
         return ptr->can_holster( holster_item, *this );
     } );
 
-    if( !holsters.empty() && parts->test( iteminfo_parts::DESCRIPTION_HOLSTERS ) ) {
+    if( !holsters.empty() && parts->test( iteminfo_parts::DESCRIPTION_HOLSTERS ) &&
+        get_option<bool>( "ITEM_DESCRIPTION_HOLSTERS" ) ) {
         insert_separation_line( info );
         info.emplace_back( "DESCRIPTION", _( "<bold>Can be stored in</bold>: " ) +
                            enumerate_as_string( holsters.begin(), holsters.end(),

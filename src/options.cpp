@@ -1731,6 +1731,17 @@ void options_manager::add_options_interface()
          true
        );
 
+    add( "ITEM_DESCRIPTION_HOLSTERS", "interface", to_translation( "Show holsters to store item in" ),
+         to_translation( "If true, show a list of holsters an item can be stored in in the item info window." ),
+         false
+       );
+
+    add( "ITEM_BASH_DESC", "interface", to_translation( "Show bash stats" ),
+         to_translation( "If true, show bash stats in the item info window." ),
+         false
+       );
+
+    add_empty_line();
     add_empty_line();
 
     add( "ENABLE_JOYSTICK", "interface", to_translation( "Enable joystick" ),
