@@ -10,7 +10,7 @@
 
 // int version/generation that is incremented each time language is changed
 // used to invalidate translation cache
-static int current_language_version = INVALID_LANGUAGE_VERSION + 1;
+static int current_language_version = 1;
 
 int detail::get_current_language_version()
 {
@@ -90,9 +90,7 @@ void set_language( const std::string &lang )
     reset_sanity_check_genders();
 
     // increment version to invalidate translation cache
-    do {
-        current_language_version++;
-    } while( current_language_version == INVALID_LANGUAGE_VERSION );
+    current_language_version++;
 
 #else
     // Silence unused var warning

@@ -3,12 +3,13 @@
 #define CATA_SRC_TRANSLATION_CACHE_H
 
 #include <string>
+#include <optional>
 
 #if defined(LOCALIZE)
 #include "translation_manager.h"
 #endif
 
-constexpr int INVALID_LANGUAGE_VERSION = 0;
+#include "game_constants.h"
 
 namespace detail
 {
@@ -50,7 +51,7 @@ class local_translation_cache<std::string>
 {
     private:
 #ifndef CATA_IN_TOOL
-        int cached_lang_version = INVALID_LANGUAGE_VERSION;
+        std::optional<int> cached_lang_version;
 #endif
         std::string cached_arg;
         std::string cached_translation;
@@ -75,7 +76,7 @@ class local_translation_cache<const char *>
     private:
         std::string cached_arg;
 #ifndef CATA_IN_TOOL
-        int cached_lang_version = INVALID_LANGUAGE_VERSION;
+        std::optional<int> cached_lang_version;
         bool same_as_arg = false;
         const char *cached_translation = nullptr;
 #endif

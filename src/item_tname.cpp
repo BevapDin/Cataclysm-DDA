@@ -837,7 +837,7 @@ std::string print_segment( tname::segments segment, item const &it, unsigned int
 tname_set const &get_tname_set()
 {
     static tname_set tns;
-    static int lang_ver = INVALID_LANGUAGE_VERSION;
+    static std::optional<int> lang_ver;
     if( int const cur_lang_ver = detail::get_current_language_version(); lang_ver != cur_lang_ver ) {
         lang_ver = cur_lang_ver;
         tns.clear();

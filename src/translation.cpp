@@ -77,7 +77,7 @@ void translation::make_plural()
         raw_pl = cata::make_value<std::string>();
     }
     // reset the cache
-    cached_language_version = INVALID_LANGUAGE_VERSION;
+    cached_language_version = std::nullopt;
     cached_translation = nullptr;
 }
 
@@ -125,7 +125,7 @@ void translation::deserialize( const JsonValue &jsin )
 {
     if( jsin.test_string() ) {
         // reset the cache
-        cached_language_version = INVALID_LANGUAGE_VERSION;
+        cached_language_version = std::nullopt;
         cached_num = 0;
         cached_translation = nullptr;
 
@@ -179,7 +179,7 @@ void translation::deserialize( const JsonValue &jsin )
 void translation::deserialize( const JsonObject &jsobj )
 {
     // reset the cache
-    cached_language_version = INVALID_LANGUAGE_VERSION;
+    cached_language_version = std::nullopt;
     cached_num = 0;
     cached_translation = nullptr;
 
