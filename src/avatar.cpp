@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "action.h"
+#include "item_reload_option.h"
 #include "activity_actor_definitions.h"
 #include "avatar_action.h"
 #include "bodypart.h"
@@ -1365,11 +1366,11 @@ bool avatar::wield( item_location loc, bool remove_old )
     return Character::wield( loc, remove_old );
 }
 
-item::reload_option avatar::select_ammo( const item_location &base, bool prompt,
+item_reload_option avatar::select_ammo( const item_location &base, bool prompt,
         bool empty )
 {
     if( !base ) {
-        return item::reload_option();
+        return item_reload_option();
     }
 
     return game_menus::inv::select_ammo( *this, base, prompt, empty );

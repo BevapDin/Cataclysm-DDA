@@ -28,6 +28,7 @@
 #include "regional_settings.h"
 #include "rng.h"
 #include "type_id.h"
+#include "flexbuffer_json.h"
 
 static const oter_str_id oter_forest_water( "forest_water" );
 static const oter_str_id oter_river_c_not_ne( "river_c_not_ne" );

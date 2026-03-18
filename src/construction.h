@@ -13,9 +13,9 @@
 
 #include "coords_fwd.h"
 #include "game_constants.h"
-#include "item.h"
 #include "translation.h"
 #include "type_id.h"
+#include "requirements.h"
 
 class Character;
 class read_only_visitable;
@@ -28,12 +28,6 @@ class window;
 } // namespace catacurses
 class JsonObject;
 class nc_color;
-
-struct partial_con {
-    int counter = 0;
-    std::list<item> components;
-    construction_id id = construction_id( -1 );
-};
 
 template <>
 const construction &construction_id::obj() const;

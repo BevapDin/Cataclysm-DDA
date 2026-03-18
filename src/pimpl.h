@@ -63,8 +63,19 @@ class pimpl : private std::unique_ptr<T>
             return operator*() == *rhs;
         }
 
-        using std::unique_ptr<T>::operator->;
-        using std::unique_ptr<T>::operator*;
+        T &operator*() {
+            return std::unique_ptr<T>::operator*();
+        }
+        const T &operator*() const {
+            return std::unique_ptr<T>::operator*();
+        }
+
+        T *operator->() {
+            return std::unique_ptr<T>::operator->();
+        }
+        const T *operator->() const {
+            return std::unique_ptr<T>::operator->();
+        }
 
         /// Forwards the stream to `T::deserialize`.
         void deserialize( const JsonValue &stream ) {

@@ -543,7 +543,7 @@ int item::get_encumber( const Character &p, const bodypart_id &bodypart,
         // to reset `cached_relative_encumbrance` for individual items
         // (e.g. when dropping via AIM, see #42983)
         if( !cached_relative_encumbrance || p.get_check_encumbrance() ) {
-            cached_relative_encumbrance = contents.relative_encumbrance();
+            cached_relative_encumbrance = contents->relative_encumbrance();
         }
         relative_encumbrance = *cached_relative_encumbrance;
     }
@@ -563,7 +563,7 @@ int item::get_encumber( const Character &p, const bodypart_id &bodypart,
 
         // add the encumbrance values of any ablative plates and additional encumbrance pockets
         if( has_additional_encumbrance() ) {
-            for( const item_pocket *pocket : contents.get_container_pockets() ) {
+            for( const item_pocket *pocket : contents->get_container_pockets() ) {
                 if( pocket->get_pocket_data()->extra_encumbrance > 0 && !pocket->empty() ) {
                     encumber += pocket->get_pocket_data()->extra_encumbrance;
                 }
@@ -573,7 +573,7 @@ int item::get_encumber( const Character &p, const bodypart_id &bodypart,
 
     // even if we don't have data we might have ablative armor draped over it
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -666,7 +666,7 @@ std::vector<layer_level> item::get_layer( bodypart_id bp ) const
     }
 
     // if the item has additional pockets and is on the torso it should also be strapped
-    if( bp == body_part_torso && contents.has_additional_pockets() ) {
+    if( bp == body_part_torso && contents->has_additional_pockets() ) {
         layers.insert( layer_level::BELTED );
     }
 
@@ -685,7 +685,7 @@ std::vector<layer_level> item::get_layer( sub_bodypart_id sbp ) const
             if( sbp == bpid ) {
                 // if the item has additional pockets and is on the torso it should also be strapped
                 if( ( sbp == sub_body_part_torso_upper || sbp == sub_body_part_torso_lower ) &&
-                    contents.has_additional_pockets() ) {
+                    contents->has_additional_pockets() ) {
                     std::set<layer_level> with_belted = data.layers;
                     with_belted.insert( layer_level::BELTED );
                     return std::vector<layer_level>( with_belted.begin(), with_belted.end() );
@@ -749,20 +749,20 @@ layer_level item::get_highest_layer( const sub_bodypart_id &sbp ) const
     return highest_layer;
 }
 
-item::cover_type item::get_cover_type( const damage_type_id &type )
+item_cover_type item::get_cover_type( const damage_type_id &type )
 {
-    item::cover_type ctype = item::cover_type::COVER_DEFAULT;
+    item_cover_type ctype = item_cover_type::COVER_DEFAULT;
     if( type->physical ) {
         if( type->melee_only ) {
-            ctype = item::cover_type::COVER_MELEE;
+            ctype = item_cover_type::COVER_MELEE;
         } else {
-            ctype = item::cover_type::COVER_RANGED;
+            ctype = item_cover_type::COVER_RANGED;
         }
     }
     return ctype;
 }
 
-int item::get_avg_coverage( const cover_type &type ) const
+int item::get_avg_coverage( const item_cover_type &type ) const
 {
     const Character &viewer = get_player_character();
     body_part_set viewer_parts;
@@ -771,7 +771,7 @@ int item::get_avg_coverage( const cover_type &type ) const
 }
 
 int item::get_avg_coverage( const body_part_set &relevant_parts,
-                            const cover_type &type ) const
+                            const item_cover_type &type ) const
 {
     const islot_armor *t = find_armor_data();
     if( !t ) {
@@ -796,31 +796,31 @@ int item::get_avg_coverage( const body_part_set &relevant_parts,
     return avg_ctr > 0 ? avg_coverage / avg_ctr : 0;
 }
 
-int item::get_coverage( const bodypart_id &bodypart, const cover_type &type ) const
+int item::get_coverage( const bodypart_id &bodypart, const item_cover_type &type ) const
 {
     int coverage = 0;
     if( const armor_portion_data *portion_data = portion_for_bodypart( bodypart ) ) {
         switch( type ) {
-            case cover_type::COVER_DEFAULT: {
+            case item_cover_type::COVER_DEFAULT: {
                 coverage = portion_data->coverage;
                 break;
             }
-            case cover_type::COVER_MELEE: {
+            case item_cover_type::COVER_MELEE: {
                 coverage = portion_data->cover_melee;
                 break;
             }
-            case cover_type::COVER_RANGED: {
+            case item_cover_type::COVER_RANGED: {
                 coverage = portion_data->cover_ranged;
                 break;
             }
-            case cover_type::COVER_VITALS: {
+            case item_cover_type::COVER_VITALS: {
                 coverage = portion_data->cover_vitals;
                 break;
             }
         }
     }
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -834,31 +834,31 @@ int item::get_coverage( const bodypart_id &bodypart, const cover_type &type ) co
     return coverage;
 }
 
-int item::get_coverage( const sub_bodypart_id &bodypart, const cover_type &type ) const
+int item::get_coverage( const sub_bodypart_id &bodypart, const item_cover_type &type ) const
 {
     int coverage = 0;
     if( const armor_portion_data *portion_data = portion_for_bodypart( bodypart ) ) {
         switch( type ) {
-            case cover_type::COVER_DEFAULT: {
+            case item_cover_type::COVER_DEFAULT: {
                 coverage = portion_data->coverage;
                 break;
             }
-            case cover_type::COVER_MELEE: {
+            case item_cover_type::COVER_MELEE: {
                 coverage = portion_data->cover_melee;
                 break;
             }
-            case cover_type::COVER_RANGED: {
+            case item_cover_type::COVER_RANGED: {
                 coverage = portion_data->cover_ranged;
                 break;
             }
-            case cover_type::COVER_VITALS: {
+            case item_cover_type::COVER_VITALS: {
                 coverage = portion_data->cover_vitals;
                 break;
             }
         }
     }
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -946,7 +946,7 @@ float item::get_thickness( const bodypart_id &bp ) const
     if( is_ablative() ) {
         int ablatives = 0;
         float ablative_thickness = 0.0;
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1011,7 +1011,7 @@ int item::get_warmth( const bodypart_id &bp ) const
     int warmth = std::round( warmth_val * limb_coverage / 100.0f );
 
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1068,7 +1068,7 @@ int item::breathability( const bodypart_id &bp ) const
         //This body part might still be covered by attachments of this armor (for example face shield).
         //Check their breathability.
         if( is_ablative() ) {
-            for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+            for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
                 if( !pocket->empty() ) {
                     // get the contained plate
                     const item &ablative_armor = pocket->front();
@@ -1192,7 +1192,7 @@ std::vector<const part_material *> item::armor_made_of( const bodypart_id &bp ) 
         }
     }
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1237,7 +1237,7 @@ std::vector<const part_material *> item::armor_made_of( const sub_bodypart_id &b
         }
     }
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1346,7 +1346,7 @@ bool item::is_rigid() const
 
     // check if ablative pieces are rigid too
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1403,7 +1403,7 @@ bool item::is_bp_rigid( const T &bp ) const
 
     // check if ablative pieces are rigid too
     if( is_ablative() ) {
-        for( const item_pocket *pocket : contents.get_ablative_pockets() ) {
+        for( const item_pocket *pocket : contents->get_ablative_pockets() ) {
             if( !pocket->empty() ) {
                 // get the contained plate
                 const item &ablative_armor = pocket->front();
@@ -1518,10 +1518,10 @@ void item::update_clothing_mod_val()
 
 std::list<item *> item::all_ablative_armor()
 {
-    return contents.all_ablative_armor();
+    return contents->all_ablative_armor();
 }
 
 std::list<const item *> item::all_ablative_armor() const
 {
-    return contents.all_ablative_armor();
+    return contents->all_ablative_armor();
 }

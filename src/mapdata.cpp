@@ -13,6 +13,7 @@
 #include "character.h"
 #include "color.h"
 #include "debug.h"
+#include "iteminfo.h"
 #include "enum_conversions.h"
 #include "flexbuffer_json.h"
 #include "flag.h"

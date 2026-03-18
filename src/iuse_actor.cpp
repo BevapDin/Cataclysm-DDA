@@ -35,7 +35,9 @@
 #include "dialogue_helpers.h"
 #include "effect.h"
 #include "effect_on_condition.h"
+#include "iteminfo.h"
 #include "effect_source.h"
+#include "item_reload_option.h"
 #include "enum_conversions.h"
 #include "enums.h"
 #include "explosion.h"
@@ -2886,7 +2888,7 @@ std::optional<int> ammobelt_actor::use( Character *p, item &, map *, const tripo
     }
 
     item_location loc = p->i_add( mag );
-    item::reload_option opt = p->select_ammo( loc, true );
+    item_reload_option opt = p->select_ammo( loc, true );
     if( opt ) {
         p->assign_activity( reload_activity_actor( std::move( opt ) ) );
     } else {

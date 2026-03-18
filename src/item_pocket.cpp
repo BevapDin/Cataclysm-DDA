@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "ammo.h"
+#include "iteminfo.h"
 #include "body_part_set.h"
 #include "bodypart.h"
 #include "calendar.h"
@@ -1223,15 +1224,15 @@ void item_pocket::contents_info( std::vector<iteminfo> &info, int pocket_number,
             //~ (M)elee coverage
             info.emplace_back( arm_type_str, string_format( "%s%s%s", space, _( "(M):" ), space ), "",
                                iteminfo::no_newline,
-                               ablative_armor.get_avg_coverage( item::cover_type::COVER_MELEE ) );
+                               ablative_armor.get_avg_coverage( item_cover_type::COVER_MELEE ) );
             //~ (R)anged coverage
             info.emplace_back( arm_type_str, string_format( "%s%s%s", space, _( "(R):" ), space ), "",
                                iteminfo::no_newline,
-                               ablative_armor.get_avg_coverage( item::cover_type::COVER_RANGED ) );
+                               ablative_armor.get_avg_coverage( item_cover_type::COVER_RANGED ) );
             //~ (V)itals coverage
             info.emplace_back( arm_type_str, string_format( "%s%s%s", space, _( "(V):" ), space ), "",
                                iteminfo::no_flags,
-                               ablative_armor.get_avg_coverage( item::cover_type::COVER_VITALS ) );
+                               ablative_armor.get_avg_coverage( item_cover_type::COVER_VITALS ) );
 
             info.back().bNewLine = true;
 

@@ -4,7 +4,8 @@
 
 #include "math_parser_diag_value.h"
 
-#include "json.h"
+class JsonObject;
+class JsonOut;
 
 class global_variables
 {

@@ -20,7 +20,6 @@
 #include "coordinates.h"
 #include "enums.h"
 #include "game_constants.h"
-#include "item.h"
 #include "item_location.h"
 #include "magic_teleporter_list.h"
 #include "mdarray.h"
@@ -327,7 +326,7 @@ class avatar : public Character
         bool wield( item_location loc, bool remove_old = true );
 
 
-        item::reload_option select_ammo( const item_location &base, bool prompt = false,
+        item_reload_option select_ammo( const item_location &base, bool prompt = false,
                                          bool empty = true ) override;
 
         /** gets the inventory from the avatar that is interactible via advanced inventory management */

@@ -9,7 +9,6 @@
 #include "coordinates.h"
 #include "cursesdef.h"
 #include "input_context.h"
-#include "item.h"
 #include "memory_fast.h"
 #include "player_activity.h"
 #include "point.h"

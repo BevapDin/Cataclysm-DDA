@@ -558,4 +558,24 @@ struct enum_traits<surroundings_menu_tab_enum> {
     static constexpr surroundings_menu_tab_enum last = surroundings_menu_tab_enum::num_tabs;
 };
 
+enum class item_cover_type {
+    COVER_DEFAULT,
+    COVER_MELEE,
+    COVER_RANGED,
+    COVER_VITALS
+};
+
+/**
+ * Hint value used for item examination screen and filtering items by action.
+ * Represents whether an item permits given action (reload, wear, read, etc.).
+ */
+enum class hint_rating {
+    /** Item permits this action */
+    good,
+    /** Item permits this action, but circumstances don't */
+    iffy,
+    /** Item does not permit this action */
+    cant
+};
+
 #endif // CATA_SRC_ENUMS_H

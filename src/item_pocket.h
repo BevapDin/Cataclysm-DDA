@@ -15,6 +15,7 @@
 
 #include "coords_fwd.h"
 #include "enums.h"
+#include "item.h"
 #include "flat_set.h"
 #include "pocket_type.h"
 #include "ret_val.h"

@@ -19,6 +19,7 @@
 
 #include "activity_actor_definitions.h"
 #include "activity_type.h"
+#include "partial_con.h"
 #include "avatar.h"
 #include "butchery.h"
 #include "calendar.h"

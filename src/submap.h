@@ -20,7 +20,6 @@
 #include "colony.h"
 #include "compatibility.h"
 #include "computer.h"
-#include "construction.h"
 #include "coordinates.h"
 #include "field.h"
 #include "item.h"
@@ -33,6 +32,7 @@
 #include "type_id.h"
 #include "units.h"
 #include "vehicle.h"
+#include "partial_con.h"
 
 // IWYU pragma: no_forward_declare vehicle // behind unique_ptr
 // IWYU pragma: no_forward_declare basecamp // behind unique_ptr

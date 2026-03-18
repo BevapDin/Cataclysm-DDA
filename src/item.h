@@ -26,9 +26,8 @@
 #include "gun_mode.h"
 #include "io_tags.h"
 #include "item_components.h"
-#include "item_contents.h"
+#include "pimpl.h"
 #include "item_location.h"
-#include "item_pocket.h"
 #include "item_tname.h"
 #include "material.h"
 #include "math_parser_diag_value.h"
@@ -42,6 +41,9 @@
 #include "visitable.h"
 
 class Character;
+class item_pocket;
+class item_contents;
+struct iteminfo;
 class Creature;
 class JsonObject;
 class JsonOut;
@@ -92,92 +94,6 @@ struct light_emission {
     short direction;
 };
 extern light_emission nolight;
-
-/**
- *  Value and metadata for one property of an item
- *
- *  Contains the value of one property of an item, as well as various metadata items required to
- *  output that value.  This is used primarily for user output of information about an item, for
- *  example in the various inventory menus.  See @ref item::info() for the main example of how a
- *  class desiring to provide user output might obtain a class of this type.
- *
- *  As an example, if the item being queried was a piece of clothing, then several properties might
- *  be returned.  All would have sType "ARMOR".  There would be one for the coverage stat with
- *  sName "Coverage: ", another for the warmth stat with sName "Warmth: ", etc.
- */
-struct iteminfo {
-    public:
-        /** Category of item that owns this iteminfo.  See @ref item_category. */
-        std::string sType;
-
-        /** Main text of this property's name */
-        std::string sName;
-
-        /** Formatting text to be placed between the name and value of this item. */
-        std::string sFmt;
-
-        /** Numerical value of this property. Set to -999 if no compare value is present */
-        std::string sValue;
-
-        /** Internal double floating point version of value, for numerical comparisons */
-        double dValue;
-
-        /** Same as dValue, adjusted for the minimum unit (for numerical comparisons) */
-        double dUnitAdjustedVal;
-
-        /** Flag indicating type of sValue.  True if integer, false if single decimal */
-        bool is_int;
-
-        /** Flag indicating whether a newline should be printed after printing this item */
-        bool bNewLine;
-
-        /** Reverses behavior of red/green text coloring; smaller values are green if true */
-        bool bLowerIsBetter;
-
-        /** Whether to print sName.  If false, use for comparisons but don't print for user. */
-        bool bDrawName;
-
-        /** Whether to print a sign on positive values */
-        bool bShowPlus;
-
-        /** Flag indicating decimal with three points of precision.  */
-        bool three_decimal;
-
-        /** info is ASCII art (prefer monospaced font) */
-        bool bIsArt;
-
-        /** info is displayed as a table */
-        bool isTable;
-
-        enum flags {
-            no_flags = 0,
-            is_decimal = 1 << 0, ///< Print as decimal rather than integer
-            is_three_decimal = 1 << 1, ///< Print as decimal with three points of precision
-            no_newline = 1 << 2, ///< Do not follow with a newline
-            lower_is_better = 1 << 3, ///< Lower values are better for this stat
-            no_name = 1 << 4, ///< Do not print the name
-            show_plus = 1 << 5, ///< Use a + sign for positive values
-            is_art = 1 << 6, ///< is ascii art (prefer monospaced font)
-            is_table = 1 << 7, ///< is displayed as table
-        };
-
-        /**
-         *  @param Type The item type of the item this iteminfo belongs to.
-         *  @param Name The name of the property this iteminfo describes.
-         *  @param Fmt Formatting text desired between item name and value
-         *  @param Flags Additional flags to customize this entry
-         *  @param Value Numerical value of this property, -999 for none.
-         */
-        iteminfo( const std::string &Type, const std::string &Name, const std::string &Fmt = "",
-                  flags Flags = no_flags, double Value = -999, double UnitVal = 0 );
-        iteminfo( const std::string &Type, const std::string &Name, flags Flags );
-        iteminfo( const std::string &Type, const std::string &Name, double Value, double UnitVal = 0 );
-};
-
-template<>
-struct enum_traits<iteminfo::flags> {
-    static constexpr bool is_flag_enum = true;
-};
 
 iteminfo vol_to_info( const std::string &type, const std::string &left,
                       const units::volume &vol, int decimal_places = 2, bool lower_is_better = true );
@@ -589,36 +505,6 @@ class item : public visitable
         // "can of meat" would be food, instead of container.
         const item_category &get_category_of_contents( int depth = 0, int maxdepth = 2 ) const;
 
-        class reload_option
-        {
-            public:
-                reload_option() = default;
-
-                reload_option( const reload_option & );
-                reload_option &operator=( const reload_option & );
-
-                reload_option( const Character *who, const item_location &target, const item_location &ammo );
-
-                const Character *who = nullptr;
-                item_location target;
-                item_location ammo;
-                bool is_reload_one = false;
-
-                int qty() const {
-                    return qty_;
-                }
-                void qty( int val );
-
-                int moves() const;
-
-                explicit operator bool() const {
-                    return who && target && ammo && qty_ > 0;
-                }
-            private:
-                int qty_ = 0;
-                int max_qty = INT_MAX;
-        };
-
         /**
          * Reload item using ammo from location returning true if successful
          * @param u Player doing the reloading
@@ -964,27 +850,24 @@ class item : public visitable
         /**
          * Returns total capacity of pockets belonging to this item
          */
-        units::volume get_volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket
-                                           =
-                                               item_pocket::ok_default_containers ) const;
+        units::volume get_volume_capacity() const;
+        units::volume get_volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         units::volume get_volume_capacity_recursive( const std::function<bool( const item_pocket & )> &
                 include_pocket,
                 const std::function<bool( const item_pocket & )> &check_pocket_tree,
                 units::volume &out_volume_expansion ) const;
         units::mass get_total_weight_capacity( bool unrestricted_pockets_only = false ) const;
 
-        units::volume get_remaining_volume( const std::function<bool( const item_pocket & )> &include_pocket
-                                            =
-                                                item_pocket::ok_default_containers ) const;
+        units::volume get_remaining_volume() const;
+        units::volume get_remaining_volume( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         units::volume get_remaining_volume_recursive( const std::function<bool( const item_pocket & )> &
                 include_pocket,
                 const std::function<bool( const item_pocket & )> &check_pocket_tree,
                 units::volume &out_volume_expansion ) const;
         units::mass get_remaining_weight_capacity( bool unrestricted_pockets_only = false ) const;
 
-        units::volume get_contents_volume( const std::function<bool( const item_pocket & )> &include_pocket
-                                           =
-                                               item_pocket::ok_default_containers ) const;
+        units::volume get_contents_volume() const;
+        units::volume get_contents_volume( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         units::mass get_total_contained_weight( bool unrestricted_pockets_only = false ) const;
 
         /**
@@ -2339,31 +2222,25 @@ class item : public visitable
          */
         layer_level get_highest_layer( const sub_bodypart_id &sbp ) const;
 
-        enum class cover_type {
-            COVER_DEFAULT,
-            COVER_MELEE,
-            COVER_RANGED,
-            COVER_VITALS
-        };
-        static cover_type get_cover_type( const damage_type_id &type );
+        static item_cover_type get_cover_type( const damage_type_id &type );
 
         /*
          * Returns the average coverage of each piece of data this item
          */
-        int get_avg_coverage( const cover_type &type = cover_type::COVER_DEFAULT ) const;
+        int get_avg_coverage( const item_cover_type &type = item_cover_type::COVER_DEFAULT ) const;
         // Filtered overload: only counts body parts present in relevant_parts
         int get_avg_coverage( const body_part_set &relevant_parts,
-                              const cover_type &type = cover_type::COVER_DEFAULT ) const;
+                              const item_cover_type &type = item_cover_type::COVER_DEFAULT ) const;
         /**
          * Returns the highest coverage that any piece of data that this item has that covers the bodypart.
          * Values range from 0 (not covering anything) to 100 (covering the whole body part).
          * Items that cover more are more likely to absorb damage from attacks.
          */
         int get_coverage( const bodypart_id &bodypart,
-                          const cover_type &type = cover_type::COVER_DEFAULT ) const;
+                          const item_cover_type &type = item_cover_type::COVER_DEFAULT ) const;
 
         int get_coverage( const sub_bodypart_id &bodypart,
-                          const cover_type &type = cover_type::COVER_DEFAULT ) const;
+                          const item_cover_type &type = item_cover_type::COVER_DEFAULT ) const;
 
         enum class encumber_flags : int {
             none = 0,
@@ -3302,7 +3179,7 @@ class item : public visitable
         const mtype *get_corpse_mon() const;
 
     private:
-        item_contents contents;
+        pimpl<item_contents> contents;
         /**
          * `true` if item has any of the flags that require processing in item::process_internal.
          * This flag is reset to `true` if item tags are changed.
@@ -3393,11 +3270,11 @@ class item : public visitable
         bool encumbrance_update_ = false;
 
         item_contents &get_contents() {
-            return contents;
+            return *contents;
         };
 
         const item_contents &get_contents() const {
-            return contents;
+            return *contents;
         };
 
     private:
@@ -3469,19 +3346,6 @@ struct enum_traits<item::encumber_flags> {
 
 bool item_compare_by_charges( const item &left, const item &right );
 bool item_ptr_compare_by_charges( const item *left, const item *right );
-
-/**
- * Hint value used for item examination screen and filtering items by action.
- * Represents whether an item permits given action (reload, wear, read, etc.).
- */
-enum class hint_rating {
-    /** Item permits this action */
-    good,
-    /** Item permits this action, but circumstances don't */
-    iffy,
-    /** Item does not permit this action */
-    cant
-};
 
 // Weight per level of LIFT/JACK tool quality
 constexpr units::mass TOOL_LIFT_FACTOR = 500_kilogram;

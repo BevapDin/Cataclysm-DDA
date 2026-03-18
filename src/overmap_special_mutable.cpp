@@ -26,6 +26,8 @@
 #include "rng.h"
 #include "string_formatter.h"
 #include "weighted_list.h"
+#include "flexbuffer_json.h"
+#include "json.h"
 
 template<>
 struct enum_traits<join_type> {

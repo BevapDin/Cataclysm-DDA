@@ -569,7 +569,7 @@ static std::vector<const item *> get_eligible_containers_recursive( const item &
 
 void outfit::get_eligible_containers_for_crafting( std::vector<const item *> &conts ) const
 {
-    for( const item &it : worn ) {
+    for( const item &it : *worn ) {
         std::vector<const item *> eligible = get_eligible_containers_recursive( it, false );
         conts.insert( conts.begin(), eligible.begin(), eligible.end() );
     }

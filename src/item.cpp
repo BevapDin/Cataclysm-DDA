@@ -18,6 +18,7 @@
 #include "butchery.h"
 #include "calendar.h"
 #include "cata_assert.h"
+#include "item_contents.h"
 #include "cata_utility.h"
 #include "character.h"
 #include "character_id.h"
@@ -169,13 +170,13 @@ item::item() : bday( calendar::start_of_cataclysm )
 {
     type = nullitem();
     charges = 0;
-    contents = item_contents( type->pockets );
+    *contents = item_contents( type->pockets );
     select_itype_variant();
 }
 
 item::item( const itype *type, time_point turn, int qty ) : type( type ), bday( turn )
 {
-    contents = item_contents( type->pockets );
+    *contents = item_contents( type->pockets );
     if( type->countdown_interval > 0_seconds ) {
         countdown_point = calendar::turn + type->countdown_interval;
     }
@@ -211,7 +212,7 @@ item::item( const itype *type, time_point turn, int qty ) : type( type ), bday( 
     }
 
     if( has_flag( flag_COLLAPSE_CONTENTS ) ) {
-        for( item_pocket *pocket : contents.get_standard_pockets() ) {
+        for( item_pocket *pocket : contents->get_standard_pockets() ) {
             pocket->settings.set_collapse( true );
         }
     } else {
@@ -219,7 +220,7 @@ item::item( const itype *type, time_point turn, int qty ) : type( type ), bday( 
             return pck.is_type( pocket_type::MAGAZINE ) ||
                    pck.is_type( pocket_type::MAGAZINE_WELL );
         };
-        for( item_pocket *pocket : contents.get_pockets( mag_filter ) ) {
+        for( item_pocket *pocket : contents->get_pockets( mag_filter ) ) {
             pocket->settings.set_collapse( true );
         }
     }
@@ -421,15 +422,15 @@ item &item::convert( const itype_id &new_type, Character *carrier )
     set_relative_rot( rel_rot );
     requires_tags_processing = true; // new type may have "active" flags
     item temp( *this );
-    temp.contents = item_contents( type->pockets );
-    for( const item *it : contents.mods() ) {
+    *temp.contents = item_contents( type->pockets );
+    for( const item *it : contents->mods() ) {
         if( !temp.put_in( *it, pocket_type::MOD ).success() ) {
             debugmsg( "failed to insert mod" );
         }
     }
     temp.update_modified_pockets();
-    temp.contents.combine( contents, true );
-    contents = temp.contents;
+    temp.contents->combine( *contents, true );
+    *contents = *temp.contents;
     current_phase = new_type->phase;
     if( count_by_charges() != new_type->count_by_charges() ) {
         charges = new_type->charges_default();
@@ -555,7 +556,7 @@ bool item::display_stacked_with( const item &rhs, bool check_components ) const
 
 bool item::can_combine( const item &rhs ) const
 {
-    if( !contents.empty() || !rhs.contents.empty() ) {
+    if( !contents->empty() || !rhs.contents->empty() ) {
         return false;
     }
     if( !count_by_charges() ) {
@@ -606,7 +607,7 @@ bool item::same_for_rle( const item &rhs ) const
     if( charges != rhs.charges ) {
         return false;
     }
-    if( !contents.empty_with_no_mods() || !rhs.contents.empty_with_no_mods() ) {
+    if( !contents->empty_with_no_mods() || !rhs.contents->empty_with_no_mods() ) {
         return false;
     }
     if( has_itype_variant( false ) != rhs.has_itype_variant( false ) ||
@@ -922,7 +923,7 @@ stacking_info item::stacks_with( const item &rhs, bool check_components, bool co
 
     // only check contents if everything else matches
     bool const b_contents =
-        ( bits | tname::tname_contents ).all() && contents.stacks_with( rhs.contents, depth, maxdepth );
+        ( bits | tname::tname_contents ).all() && contents->stacks_with( *rhs.contents, depth, maxdepth );
     bits.set( tname::segments::CONTENTS, b_contents );
     bits.set( tname::segments::CONTENTS_FULL, b_contents );
     bits.set( tname::segments::CONTENTS_ABREV, b_contents );
@@ -1077,7 +1078,7 @@ std::string item::get_owner_name() const
 void item::set_owner( const faction_id &new_owner )
 {
     owner = new_owner;
-    for( item *e : contents.all_items_top() ) {
+    for( item *e : contents->all_items_top() ) {
         e->set_owner( new_owner );
     }
 }
@@ -1374,7 +1375,7 @@ void item::on_pickup( Character &p )
     if( get_player_character().getID().is_valid() ) {
         handle_pickup_ownership( p );
     }
-    contents.on_pickup( p, this );
+    contents->on_pickup( p, this );
 
     p.flag_encumbrance();
     p.on_item_acquire( *this );
@@ -1400,7 +1401,7 @@ void item::update_inherited_flags()
         }
     }
 
-    for( const item_pocket *pocket : contents.get_container_pockets() ) {
+    for( const item_pocket *pocket : contents->get_container_pockets() ) {
         if( pocket->inherits_flags() ) {
             for( const item *e : pocket->all_items_top() ) {
                 inehrit_flags( e->get_flags() );
@@ -1793,12 +1794,12 @@ units::mass item::weight( bool include_contents, bool integral ) const
     }
 
     // if it has additional pockets include the mass of those
-    if( contents.has_additional_pockets() ) {
-        ret += contents.get_additional_weight();
+    if( contents->has_additional_pockets() ) {
+        ret += contents->get_additional_weight();
     }
 
     if( include_contents ) {
-        ret += contents.item_weight_modifier();
+        ret += contents->item_weight_modifier();
     }
 
     // if this is an ammo belt add the weight of any implicitly contained linkages
@@ -1883,7 +1884,7 @@ units::length item::length() const
     }
 
     units::length max = is_soft() ? 0_mm : type->longest_side;
-    max = std::max( contents.item_length_modifier(), max );
+    max = std::max( contents->item_length_modifier(), max );
     return max;
 }
 
@@ -2028,12 +2029,12 @@ units::volume item::volume( bool integral, bool ignore_contents, int charges_in_
     }
 
     if( !ignore_contents ) {
-        ret += contents.item_size_modifier();
+        ret += contents->item_size_modifier();
     }
 
     // if it has additional pockets include the volume of those
-    if( contents.has_additional_pockets() ) {
-        ret += contents.get_additional_volume();
+    if( contents->has_additional_pockets() ) {
+        ret += contents->get_additional_volume();
     }
 
     // TODO: do a check if the item is collapsed or not
@@ -2192,7 +2193,7 @@ int item::get_quality_nonrecursive( const quality_id &id, const bool strict_boil
     /**
      * EXCEPTION: Items with quality BOIL only count as such if they are empty.
      */
-    if( strict_boiling && id == qual_BOIL && !contents.empty_container() ) {
+    if( strict_boiling && id == qual_BOIL && !contents->empty_container() ) {
         return INT_MIN;
     }
 
@@ -2224,7 +2225,7 @@ int item::get_quality( const quality_id &id, const bool strict_boiling ) const
     /**
      * EXCEPTION: Items with quality BOIL only count as such if they are empty.
      */
-    if( strict_boiling && id == qual_BOIL && !contents.empty_container() ) {
+    if( strict_boiling && id == qual_BOIL && !contents->empty_container() ) {
         return INT_MIN;
     }
 
@@ -2232,7 +2233,7 @@ int item::get_quality( const quality_id &id, const bool strict_boiling ) const
     int return_quality = get_quality_nonrecursive( id, false );
 
     // If any contained item has a better quality, use that instead
-    return_quality = std::max( return_quality, contents.best_quality( id ) );
+    return_quality = std::max( return_quality, contents->best_quality( id ) );
 
     return return_quality;
 }
@@ -2369,7 +2370,7 @@ bool item::is_cash_card() const
 
 bool item::is_estorage() const
 {
-    return contents.has_pocket_type( pocket_type::E_FILE_STORAGE );
+    return contents->has_pocket_type( pocket_type::E_FILE_STORAGE );
 }
 
 bool item::is_estorage_usable( const Character &who ) const
@@ -2446,7 +2447,7 @@ units::ememory item::occupied_ememory() const
 
 units::ememory item::total_ememory() const
 {
-    std::vector<const item_pocket *> pockets = contents.get_pockets( []( item_pocket const & pocket ) {
+    std::vector<const item_pocket *> pockets = contents->get_pockets( []( item_pocket const & pocket ) {
         return pocket.is_type( pocket_type::E_FILE_STORAGE );
     } );
     if( pockets.size() > 1 ) {
@@ -3260,22 +3261,22 @@ bool item::operator<( const item &other ) const
 
 std::vector<const item *> item::softwares() const
 {
-    return contents.softwares();
+    return contents->softwares();
 }
 
 std::vector<const item *> item::ebooks() const
 {
-    return contents.ebooks();
+    return contents->ebooks();
 }
 
 std::vector< item *> item::efiles()
 {
-    return contents.efiles();
+    return contents->efiles();
 }
 
 std::vector<const item *> item::efiles() const
 {
-    return contents.efiles();
+    return contents->efiles();
 }
 
 const use_function *item::get_use( const std::string &use_name ) const
@@ -4334,7 +4335,7 @@ bool item::process( map &here, Character *carrier, const tripoint_bub_ms &pos, f
 {
     process_relic( carrier, pos );
     if( recursive ) {
-        contents.process( here, carrier, pos, insulation, flag,
+        contents->process( here, carrier, pos, insulation, flag,
                           spoil_multiplier_parent, watertight_container );
     }
     return process_internal( here, carrier, pos, insulation, flag, spoil_multiplier_parent,
@@ -4546,7 +4547,7 @@ bool item::is_dangerous() const
 
     // Note: Item should be dangerous regardless of what type of a container is it
     // Visitable interface would skip some options
-    for( const item *it : contents.all_items_top() ) {
+    for( const item *it : contents->all_items_top() ) {
         if( it->is_dangerous() ) {
             return true;
         }
@@ -4877,7 +4878,7 @@ int item::get_recursive_disassemble_moves( const Character &guy ) const
 
 size_t item::num_item_stacks() const
 {
-    return contents.num_item_stacks();
+    return contents->num_item_stacks();
 }
 
 bool is_preferred_component( const item &component )

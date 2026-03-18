@@ -126,7 +126,7 @@ std::vector<advanced_inv_listitem> outfit::get_AIM_inventory( size_t &item_index
         const advanced_inventory_pane &pane, advanced_inv_area &square )
 {
     std::vector<advanced_inv_listitem> items;
-    for( item &worn_item : worn ) {
+    for( item &worn_item : *worn ) {
         if( worn_item.empty() || worn_item.has_flag( flag_NO_UNLOAD ) ) {
             continue;
         }
@@ -184,8 +184,8 @@ std::vector<advanced_inv_listitem> avatar::get_AIM_inventory( const advanced_inv
 void outfit::add_AIM_items_from_area( avatar &you, advanced_inv_area &square,
                                       advanced_inventory_pane &pane )
 {
-    auto iter = worn.begin();
-    for( size_t i = 0; i < worn.size(); ++i, ++iter ) {
+    auto iter = worn->begin();
+    for( size_t i = 0; i < worn->size(); ++i, ++iter ) {
         advanced_inv_listitem it( item_location( you, &*iter ), i + 1, 1, square.id, false );
         if( pane.is_filtered( *it.items.front() ) ) {
             continue;

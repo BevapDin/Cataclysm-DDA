@@ -41,6 +41,7 @@
 #include "basecamp.h"
 #include "bionics.h"
 #include "bodypart.h"
+#include "partial_con.h"
 #include "calendar.h"
 #include "cata_io.h"
 #include "cata_utility.h"
@@ -1057,9 +1058,9 @@ void Character::load( const JsonObject &data )
     }
 
     set_wielded_item( item() );
-    data.read( "weapon", weapon );
-    if( !weapon.is_null() && weapon.relic_data && weapon.type->relic_data ) {
-        weapon.relic_data = weapon.type->relic_data;
+    data.read( "weapon", *weapon );
+    if( !weapon->is_null() && weapon->relic_data && weapon->type->relic_data ) {
+        weapon->relic_data = weapon->type->relic_data;
     }
     data.read( "move_mode", move_mode );
 
@@ -1367,8 +1368,8 @@ void Character::store( JsonOut &json ) const
 {
     Creature::store( json );
 
-    if( !weapon.is_null() ) {
-        json.member( "weapon", weapon ); // also saves contents
+    if( !weapon->is_null() ) {
+        json.member( "weapon", *weapon ); // also saves contents
     }
 
     // stat
@@ -2443,7 +2444,7 @@ void inventory::json_load_invcache( const JsonValue &jsin )
 void inventory::json_save_items( JsonOut &json ) const
 {
     json.start_array();
-    for( const auto &elem : items ) {
+    for( const auto &elem : *items ) {
         for( const item &elem_stack_iter : elem ) {
             elem_stack_iter.serialize( json );
         }
@@ -3188,8 +3189,8 @@ void item::migrate_content_item( const item &contained )
     } else if( typeId() == itype_usb_drive ) {
         // as of this migration, only usb_drive has any software in it.
         put_in( contained, pocket_type::E_FILE_STORAGE );
-    } else if( contents.insert_item( contained, pocket_type::MAGAZINE ).success() ||
-               contents.insert_item( contained, pocket_type::MAGAZINE_WELL ).success() ) {
+    } else if( contents->insert_item( contained, pocket_type::MAGAZINE ).success() ||
+               contents->insert_item( contained, pocket_type::MAGAZINE_WELL ).success() ) {
         // left intentionally blank
     } else if( is_corpse() ) {
         put_in( contained, pocket_type::CORPSE );
@@ -3215,9 +3216,9 @@ void item::deserialize( const JsonObject &data )
     if( data.has_object( "contents" ) ) {
         item_contents read_contents;
         data.read( "contents", read_contents );
-        contents.read_mods( read_contents );
+        contents->read_mods( read_contents );
         update_modified_pockets();
-        contents.combine( read_contents, false, true, false, true );
+        contents->combine( read_contents, false, true, false, true );
 
         //migrate SOFTWARE pocket
         auto pockets_e_legacy = []( item_pocket const & pocket ) {
@@ -3226,10 +3227,10 @@ void item::deserialize( const JsonObject &data )
         auto pockets_new_efile = []( item_pocket const & pocket ) {
             return pocket.is_type( pocket_type::E_FILE_STORAGE );
         };
-        std::vector<item_pocket *> pockets = contents.get_pockets( pockets_new_efile );
+        std::vector<item_pocket *> pockets = contents->get_pockets( pockets_new_efile );
         item_pocket *new_efile_storage = !pockets.empty() ? pockets.front() : nullptr;
 
-        for( item_pocket *pocket : contents.get_pockets( pockets_e_legacy ) ) {
+        for( item_pocket *pocket : contents->get_pockets( pockets_e_legacy ) ) {
             for( const item *it : pocket->all_items_top() ) {
                 if( new_efile_storage == nullptr ) {
                     debugmsg( "efile storage pocket needed for item: %s", tname() );
@@ -3242,8 +3243,8 @@ void item::deserialize( const JsonObject &data )
             }
         }
         // contents may not be empty if other migration happened in item::io
-    } else if( contents.empty() ) { // empty contents was not serialized, recreate pockets from the type
-        contents = item_contents( type->pockets );
+    } else if( contents->empty() ) { // empty contents was not serialized, recreate pockets from the type
+        *contents = item_contents( type->pockets );
     }
 
     std::set<itype_id> migrated_edevice_itypes = { itype_camera, itype_camera_pro,
@@ -3288,8 +3289,8 @@ void item::serialize( JsonOut &json ) const
 
     io::JsonObjectOutputArchive archive( json );
     const_cast<item *>( this )->io( archive );
-    if( !contents.empty_with_no_mods() || contents.has_additional_pockets() ) {
-        json.member( "contents", contents );
+    if( !contents->empty_with_no_mods() || contents->has_additional_pockets() ) {
+        json.member( "contents", *contents );
     }
 }
 

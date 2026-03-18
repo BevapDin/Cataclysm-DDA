@@ -275,13 +275,13 @@ std::vector<std::string> clothing_properties(
     int coverage = worn_item.get_coverage( used_bp );
     add_folded_name_and_value( props, _( "Coverage:" ), string_format( "%3d", coverage ),
                                width );
-    coverage = worn_item.get_coverage( used_bp, item::cover_type::COVER_MELEE );
+    coverage = worn_item.get_coverage( used_bp, item_cover_type::COVER_MELEE );
     add_folded_name_and_value( props, _( "Coverage (Melee):" ), string_format( "%3d",
                                coverage ), width );
-    coverage = worn_item.get_coverage( used_bp, item::cover_type::COVER_RANGED );
+    coverage = worn_item.get_coverage( used_bp, item_cover_type::COVER_RANGED );
     add_folded_name_and_value( props, _( "Coverage (Ranged):" ), string_format( "%3d",
                                coverage ), width );
-    coverage = worn_item.get_coverage( used_bp, item::cover_type::COVER_VITALS );
+    coverage = worn_item.get_coverage( used_bp, item_cover_type::COVER_VITALS );
     add_folded_name_and_value( props, _( "Coverage (Vitals):" ), string_format( "%3d",
                                coverage ), width );
 
@@ -471,7 +471,7 @@ item_penalties outfit::get_item_penalties( std::list<item>::const_iterator worn_
         if( bp->sub_parts.empty() ) {
             std::vector<layer_level> layer = worn_item_it->get_layer( bp );
             bool first_integrated = true;
-            const int num_items = std::count_if( worn.begin(), worn.end(),
+            const int num_items = std::count_if( worn->begin(), worn->end(),
             [layer, bp, &first_integrated]( const item & i ) {
                 if( i.has_layer( layer, bp ) && i.covers( bp ) && !i.has_flag( flag_SEMITANGIBLE ) ) {
                     if( i.has_flag( flag_INTEGRATED ) ) {
@@ -488,7 +488,7 @@ item_penalties outfit::get_item_penalties( std::list<item>::const_iterator worn_
             if( num_items > 1 ) {
                 body_parts_with_stacking_penalty.push_back( bp );
             }
-            for( auto it = worn.begin(); it != worn_item_it; ++it ) {
+            for( auto it = worn->begin(); it != worn_item_it; ++it ) {
                 if( it->get_layer( bp ) > layer && it->covers( bp ) ) {
                     bad_items_within.insert( it->type_name() );
                 }
@@ -500,7 +500,7 @@ item_penalties outfit::get_item_penalties( std::list<item>::const_iterator worn_
                 }
                 std::vector<layer_level> layer = worn_item_it->get_layer( sbp );
                 bool first_integrated = true;
-                const int num_items = std::count_if( worn.begin(), worn.end(),
+                const int num_items = std::count_if( worn->begin(), worn->end(),
                 [layer, bp, sbp, &first_integrated]( const item & i ) {
                     if( i.has_layer( layer, sbp ) && i.covers( bp ) && !i.has_flag( flag_SEMITANGIBLE ) &&
                         i.covers( sbp ) ) {
@@ -518,7 +518,7 @@ item_penalties outfit::get_item_penalties( std::list<item>::const_iterator worn_
                 if( num_items > 1 ) {
                     body_parts_with_stacking_penalty.push_back( bp );
                 }
-                for( auto it = worn.begin(); it != worn_item_it; ++it ) {
+                for( auto it = worn->begin(); it != worn_item_it; ++it ) {
                     if( it->covers( sbp ) ) {
                         if( it->get_highest_layer( sbp ) > worn_item_it->get_highest_layer( sbp ) ) {
                             bad_items_within.insert( it->type_name() );
@@ -560,7 +560,7 @@ item_penalties outfit::get_item_penalties( std::list<item>::const_iterator worn_
 std::vector<layering_item_info> outfit::items_cover_bp( const Character &c, const bodypart_id &bp )
 {
     std::vector<layering_item_info> s;
-    for( auto elem_it = worn.begin(); elem_it != worn.end(); ++elem_it ) {
+    for( auto elem_it = worn->begin(); elem_it != worn->end(); ++elem_it ) {
         if( elem_it->covers( bp ) ) {
             s.push_back( { get_item_penalties( elem_it, c, bp ),
                            elem_it->get_encumber( c, bp ),
@@ -709,12 +709,12 @@ void outfit::sort_armor( Character &guy )
         const bodypart_id &bp = armor_cat[ tabindex ];
         if( bp == bodypart_str_id::NULL_ID() ) {
             // All
-            for( auto it = worn.begin(); it != worn.end(); ++it ) {
+            for( auto it = worn->begin(); it != worn->end(); ++it ) {
                 tmp_worn.push_back( it );
             }
         } else {
             // bp_*
-            for( auto it = worn.begin(); it != worn.end(); ++it ) {
+            for( auto it = worn->begin(); it != worn->end(); ++it ) {
                 if( it->covers( bp ) ) {
                     tmp_worn.push_back( it );
                 }
@@ -957,7 +957,7 @@ void outfit::sort_armor( Character &guy )
                 if( leftListIndex > selected ) {
                     ++to;
                 }
-                worn.splice( to, worn, tmp_worn[selected] );
+                worn->splice( to, *worn, tmp_worn[selected] );
                 selected = leftListIndex;
                 guy.calc_encumbrance();
             }
@@ -1046,7 +1046,7 @@ void outfit::sort_armor( Character &guy )
             }
         } else if( action == "SORT_ARMOR" ) {
             mid_pane.offset = 0;
-            worn.sort(
+            worn->sort(
             []( const item & l, const item & r ) {
                 if( l.has_flag( flag_INTEGRATED ) == r.has_flag( flag_INTEGRATED ) ) {
                     return l.get_layer() < r.get_layer();
@@ -1077,7 +1077,7 @@ void outfit::sort_armor( Character &guy )
                             // state through other activities, but that's a thing
                             // that would be nice to do.
                             leftListIndex =
-                                std::count_if( worn.begin(), *new_equip_it,
+                                std::count_if( worn->begin(), *new_equip_it,
                             [&]( const item & i ) {
                                 return tabindex == num_of_parts || i.covers( bp );
                             } );
@@ -1112,7 +1112,7 @@ void outfit::sort_armor( Character &guy )
                             popup( _( "Can't put this on under your integrated armor!" ) );
                         } else {
                             // reorder `worn` vector to place new item at cursor
-                            worn.splice( cursor_it, worn, *new_equip_it );
+                            worn->splice( cursor_it, *worn, *new_equip_it );
                         }
                     } else if( guy.is_npc() && !tmp_worn.empty() ) {
                         // TODO: Pass the reason here
@@ -1143,8 +1143,8 @@ void outfit::sort_armor( Character &guy )
             if( query_yn( _( "Reassign inventory letters for armor?" ) ) ) {
                 // Start with last armor (the most unimportant one?)
                 auto iiter = inv_chars.rbegin();
-                auto witer = worn.rbegin();
-                while( witer != worn.rend() && iiter != inv_chars.rend() ) {
+                auto witer = worn->rbegin();
+                while( witer != worn->rend() && iiter != inv_chars.rend() ) {
                     const char invlet = *iiter;
                     item &w = *witer;
                     if( invlet == w.invlet ) {
@@ -1181,7 +1181,7 @@ void outfit::sort_armor( Character &guy )
                                ctxt.get_desc( "MOVE_ARMOR" ) ),
                 string_format( _( "[<color_yellow>%s</color>] to assign special inventory letters to clothing.\n" ),
                                ctxt.get_desc( "ASSIGN_INVLETS" ) ),
-                string_format( _( "[<color_yellow>%s</color>] to change the side on which item is worn.\n" ),
+                string_format( _( "[<color_yellow>%s</color>] to change the side on which item is worn->\n" ),
                                ctxt.get_desc( "CHANGE_SIDE" ) ),
                 string_format( _( "[<color_yellow>%s</color>] to toggle item visibility on character sprite.\n" ),
                                ctxt.get_desc( "TOGGLE_CLOTH" ) ),

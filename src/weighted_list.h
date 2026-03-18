@@ -2,8 +2,6 @@
 #ifndef CATA_SRC_WEIGHTED_LIST_H
 #define CATA_SRC_WEIGHTED_LIST_H
 
-#include "flexbuffer_json.h"
-#include "json.h"
 #include "rng.h"
 
 #include <algorithm>
@@ -12,6 +10,8 @@
 #include <functional>
 #include <sstream>
 #include <vector>
+
+class JsonValue;
 
 template <typename T, typename W> struct weighted_list {
         weighted_list() : total_weight( 0 ) {}
@@ -234,11 +234,12 @@ template <typename T, typename W> struct weighted_list {
             return !( l == r );
         }
 
-        void deserialize( const JsonValue &jv ) {
+        template<typename J>
+        std::enable_if_t<std::is_same_v<J, JsonValue>> deserialize( const J &jv ) {
             // this function does things in a way that makes clang-tidy unhappy
             // CATA_DO_NOT_CHECK_SERIALIZE
             if( jv.test_array() ) {
-                for( const JsonValue entry : jv.get_array() ) {
+                for( const auto entry : jv.get_array() ) {
                     if( entry.test_array() ) {
                         std::pair<T, W> p;
                         entry.read( p, true );

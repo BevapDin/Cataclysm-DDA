@@ -206,7 +206,7 @@ item_location Character::used_weapon()
 
 bool Character::is_armed() const
 {
-    return !weapon.is_null();
+    return !weapon->is_null();
 }
 
 bool Character::unarmed_attack() const
@@ -1053,7 +1053,7 @@ void Character::reach_attack( const tripoint_bub_ms &p, int forced_movecost )
     static const matec_id no_technique_id( "" );
     matec_id force_technique = no_technique_id;
     /** @EFFECT_MELEE >5 allows WHIP_DISARM technique */
-    if( weapon.has_flag( flag_WHIP ) && ( get_skill_level( skill_melee ) > 5 ) && one_in( 3 ) ) {
+    if( weapon->has_flag( flag_WHIP ) && ( get_skill_level( skill_melee ) > 5 ) && one_in( 3 ) ) {
         force_technique = WHIP_DISARM;
     }
 
@@ -1072,7 +1072,7 @@ void Character::reach_attack( const tripoint_bub_ms &p, int forced_movecost )
     // Weariness handling
     // 1 / mult because mult is the percent penalty, in the form 1.0 == 100%
     const float weary_mult = 1.0f / exertion_adjusted_move_multiplier( EXTRA_EXERCISE );
-    int move_cost = attack_speed( weapon ) * weary_mult;
+    int move_cost = attack_speed( *weapon ) * weary_mult;
     float skill = std::min( 10.0f, get_skill_level( skill_melee ) );
     int t = 0;
     map &here = get_map();
@@ -1099,10 +1099,10 @@ void Character::reach_attack( const tripoint_bub_ms &p, int forced_movecost )
             break;
         } else if( here.impassable( path_point ) &&
                    // Fences etc. Spears can stab through those
-                   !( weapon.has_flag( flag_SPEAR ) &&
+                   !( weapon->has_flag( flag_SPEAR ) &&
                       here.has_flag( ter_furn_flag::TFLAG_THIN_OBSTACLE, path_point ) ) ) {
             /** @ARM_STR increases bash effects when reach attacking past something */
-            here.bash( path_point, get_arm_str() + weapon.damage_melee( damage_bash ) );
+            here.bash( path_point, get_arm_str() + weapon->damage_melee( damage_bash ) );
             handle_melee_wear( get_wielded_item() );
             mod_moves( forced_movecost >= 0 ? -forced_movecost : -move_cost );
             return;
@@ -2015,7 +2015,7 @@ int melee::blocking_ability( const item &shield )
 item_location Character::best_shield()
 {
     // Note: wielded weapon, not one used for attacks
-    int best_value = melee::blocking_ability( weapon );
+    int best_value = melee::blocking_ability( *weapon );
     // "BLOCK_WHILE_WORN" without a blocking tech need to be worn for the bonus
     best_value = best_value == 2 ? 0 : best_value;
     item_location best = best_value > 0 ? get_wielded_item() : item_location();
@@ -2088,7 +2088,7 @@ bool Character::block_hit( Creature *source, bodypart_id &bp_hit, damage_instanc
     bool unarmed = !is_armed();
     bool force_unarmed = martial_arts_data->is_force_unarmed();
     bool allow_weapon_blocking = martial_arts_data->can_weapon_block();
-    bool armed_body_block = weapon.has_flag( flag_ALLOWS_BODY_BLOCK );
+    bool armed_body_block = weapon->has_flag( flag_ALLOWS_BODY_BLOCK );
 
     // boolean check if blocking is being done with unarmed or not
     const bool item_blocking = allow_weapon_blocking && has_shield && !unarmed && !armed_body_block;
@@ -2266,10 +2266,10 @@ bool Character::block_hit( Creature *source, bodypart_id &bp_hit, damage_instanc
     matec_id tec = std::get<0>( pick_technique( *source, shield, false, false, true ) );
 
     if( tec != tec_none && !is_dead_state() ) {
-        int twenty_percent = std::round( ( 20 * weapon.type->mat_portion_total ) / 100.0f );
+        int twenty_percent = std::round( ( 20 * weapon->type->mat_portion_total ) / 100.0f );
         if( get_stamina() < get_stamina_max() / 3 ) {
             add_msg( m_bad, _( "You try to counterattack, but you are too exhausted!" ) );
-        } else if( weapon.made_of( material_glass ) > twenty_percent ) {
+        } else if( weapon->made_of( material_glass ) > twenty_percent ) {
             add_msg( m_bad, _( "The item you are wielding is too fragile to counterattack with!" ) );
         } else {
             melee_attack( *source, false, tec );
@@ -2318,7 +2318,7 @@ std::string Character::melee_special_effects( Creature &t, damage_instance &d, i
     std::string target = t.disp_name();
 
     if( has_active_bionic( bio_shock ) && get_power_level() >= bio_shock->power_trigger &&
-        ( weap.is_null() || weap.conductive() || weapon.conductive() ) ) {
+        ( weap.is_null() || weap.conductive() || weapon->conductive() ) ) {
         mod_power_level( -bio_shock->power_trigger );
         d.add_damage( damage_electric, rng( 2, 10 ) );
 
@@ -2847,7 +2847,7 @@ double Character::melee_value( const item &weap ) const
         my_value *= 1.0f + 0.5f * ( std::sqrt( reach ) - 1.0f );
     }
     // value polearms less to account for the trickiness of keeping the right range
-    if( weapon.has_flag( flag_POLEARM ) ) {
+    if( weapon->has_flag( flag_POLEARM ) ) {
         my_value *= 0.8;
     }
 

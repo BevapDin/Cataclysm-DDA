@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "bionics.h"
+#include "iteminfo.h"
 #include "bodypart.h"
 #include "calendar.h"
 #include "cata_imgui.h"

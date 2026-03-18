@@ -226,7 +226,7 @@ void Character::armor_use_power_when_hit( damage_unit &du, item &armor ) const
 bool Character::armor_absorb( damage_unit &du, item &armor, const bodypart_id &bp,
                               const sub_bodypart_id &sbp, int roll ) const
 {
-    item::cover_type ctype = item::get_cover_type( du.type );
+    item_cover_type ctype = item::get_cover_type( du.type );
 
     // If you're shapeshifted and your gear is part of your form, it can't protect you
     if( armor.has_flag( json_flag_INTANGIBLE_ARMOR ) ) {
@@ -264,7 +264,7 @@ bool Character::armor_absorb( damage_unit &du, item &armor, const bodypart_id &b
 
 bool Character::armor_absorb( damage_unit &du, item &armor, const bodypart_id &bp, int roll ) const
 {
-    item::cover_type ctype = item::get_cover_type( du.type );
+    item_cover_type ctype = item::get_cover_type( du.type );
 
     // If you're shapeshifted and your gear is part of your form, it can't protect you
     if( armor.has_flag( json_flag_INTANGIBLE_ARMOR ) ) {
@@ -304,7 +304,7 @@ bool Character::ablative_armor_absorb( damage_unit &du, item &armor, const sub_b
 {
     const map &here = get_map();
 
-    item::cover_type ctype = item::get_cover_type( du.type );
+    item_cover_type ctype = item::get_cover_type( du.type );
 
     for( item_pocket *const pocket : armor.get_ablative_pockets() ) {
         // if the pocket is ablative and not empty we should use its values

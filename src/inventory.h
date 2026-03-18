@@ -19,13 +19,14 @@
 #include <vector>
 
 #include "cata_utility.h"
+#include "pimpl.h"
 #include "coords_fwd.h"
-#include "item.h"
 #include "proficiency.h"
 #include "type_id.h"
 #include "units_fwd.h"
 #include "visitable.h"
 
+class item;
 class Character;
 class JsonArray;
 class JsonOut;
@@ -282,7 +283,7 @@ class inventory : public visitable
         invlet_favorites invlet_cache;
         char find_usable_cached_invlet( const itype_id &item_type );
 
-        invstack items;
+        pimpl<invstack> items;
 
         std::map<itype_id, int> max_empty_liq_cont;
 

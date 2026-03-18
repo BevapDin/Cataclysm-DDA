@@ -12,14 +12,16 @@
 #include <vector>
 
 #include "coords_fwd.h"
-#include "enums.h"
 #include "item_pocket.h"
+#include "enums.h"
 #include "pocket_type.h"
 #include "ret_val.h"
 #include "type_id.h"
 #include "units.h"
 #include "visitable.h"
 
+class pocket_data;
+class item_pocket;
 class Character;
 class JsonObject;
 class JsonOut;
@@ -201,8 +203,8 @@ class item_contents
         units::mass total_container_weight_capacity( bool unrestricted_pockets_only = false ) const;
 
         /** Get the total volume capacity of pockets belonging to this item. */
-        units::volume volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket =
-                                           item_pocket::ok_default_containers ) const;
+        units::volume volume_capacity() const;
+        units::volume volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         /** Get the total remaining volume of pockets belonging to or nested inside this item which pass the 'include' predicate.
         * Accounts for limits applied by this item's pockets, but not pockets this item is stored in.
         * @param include_pocket if a pocket is checked, whether to include its volume
@@ -215,12 +217,12 @@ class item_contents
                 const std::function<bool( const item_pocket & )> &check_pocket_tree,
                 units::volume &out_volume_expansion ) const;
         /** Get the sum of volumes of items in pockets belonging to this item. */
-        units::volume contents_volume( const std::function<bool( const item_pocket & )> &include_pocket =
-                                           item_pocket::ok_default_containers ) const;
+        units::volume contents_volume() const;
+        units::volume contents_volume( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         /** Get the remaining volume of pockets belonging to this item. This does not account for the
             that possibility the pockets cannot actually be expanded that much due to a parent pocket.*/
-        units::volume remaining_volume( const std::function<bool( const item_pocket & )> &include_pocket =
-                                            item_pocket::ok_default_containers ) const;
+        units::volume remaining_volume() const;
+        units::volume remaining_volume( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         /** Get the total remaining volume of pockets belonging to or nested inside this item which pass the 'include' predicate.
         * Accounts for limits applied by this item's pockets, but not pockets this item is stored in.
         * @param include_pocket if a pocket is checked, whether to include its volume

@@ -40,6 +40,7 @@
 #include "input.h"
 #include "item.h"
 #include "item_contents.h"
+#include "iteminfo.h"
 #include "item_group.h"
 #include "item_pocket.h"
 #include "item_transformation.h"

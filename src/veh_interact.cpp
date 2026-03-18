@@ -126,7 +126,7 @@ static void act_vehicle_unload_fuel( map &here, vehicle *veh );
 namespace io
 {
 template<>
-std::string enum_to_string<vehicle_action>( vehicle_action stage )
+std::string enum_to_string( vehicle_action stage )
 {
     switch( stage ) {
         case VEHICLE_INSTALL:

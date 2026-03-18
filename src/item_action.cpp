@@ -92,7 +92,7 @@ bool item::item_has_uses_recursive( bool contents_only ) const
         return true;
     }
 
-    return contents.item_has_uses_recursive();
+    return contents->item_has_uses_recursive();
 }
 
 bool item_contents::item_has_uses_recursive() const

@@ -19,7 +19,9 @@
 #include "activity_actor_definitions.h"
 #include "avatar.h"
 #include "bionics.h"
+#include "item_reload_option.h"
 #include "bodypart.h"
+#include "iteminfo.h"
 #include "calendar.h"
 #include "cata_utility.h"
 #include "character.h"
@@ -3080,7 +3082,7 @@ class select_ammo_inventory_preset : public inventory_selector_preset
             }, _( "AMOUNT" ) );
 
             append_cell( [&you, &target]( const item_location & loc ) {
-                item::reload_option opt( &you, target, loc );
+                item_reload_option opt( &you, target, loc );
                 // propagate entry.chosen_count here somehow?
                 return std::to_string( opt.moves() );
             }, _( "MOVES" ) );
@@ -3171,7 +3173,7 @@ class select_ammo_inventory_preset : public inventory_selector_preset
         bool empty;
 };
 
-item::reload_option game_menus::inv::select_ammo( Character &you, const item_location &loc,
+item_reload_option game_menus::inv::select_ammo( Character &you, const item_location &loc,
         bool prompt, bool empty )
 {
     const select_ammo_inventory_preset preset( you, loc, empty );
@@ -3190,7 +3192,7 @@ item::reload_option game_menus::inv::select_ammo( Character &you, const item_loc
 
     if( inv_s.empty() ) {
         popup( _( "You have nothing to reload." ), PF_GET_KEY );
-        return item::reload_option();
+        return item_reload_option();
     }
 
     drop_location selected;
@@ -3201,7 +3203,7 @@ item::reload_option game_menus::inv::select_ammo( Character &you, const item_loc
     }
 
     if( !selected.first ) {
-        return item::reload_option();
+        return item_reload_option();
     }
 
     item_location target_loc;
@@ -3212,7 +3214,7 @@ item::reload_option game_menus::inv::select_ammo( Character &you, const item_loc
         }
     }
 
-    item::reload_option opt( &you, target_loc, selected.first );
+    item_reload_option opt( &you, target_loc, selected.first );
     opt.qty( selected.second );
 
     return opt;

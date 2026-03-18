@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "cata_utility.h"
+#include "item_reload_option.h"
 #include "character.h"
 #include "enums.h"
 #include "flag.h"
@@ -81,7 +82,7 @@ bool Character::can_reload( const item &it, const item *ammo ) const
     return true;
 }
 
-bool Character::list_ammo( const item_location &base, std::vector<item::reload_option> &ammo_list,
+bool Character::list_ammo( const item_location &base, std::vector<item_reload_option> &ammo_list,
                            bool empty ) const
 {
     // Associate the destination with "parent"

@@ -4,14 +4,15 @@
 
 #include "coords_fwd.h"
 #include "effect.h"
-#include "item.h"
 #include "math_parser_diag_value.h"
 #include "messages.h"
 #include "type_id.h"
 #include "units.h"
+#include "damage.h"
 #include "units_fwd.h"
 #include <list>
 
+class item;
 class computer;
 class faction;
 class item_location;
@@ -821,23 +822,15 @@ class talker: virtual public const_talker
             set_value( key, diag_value{ std::forward<Args>( args )... } );
         }
         virtual void remove_value( const std::string & ) {}
-        virtual std::list<item> use_charges( const itype_id &, int ) {
-            return {};
-        }
+        virtual std::list<item> use_charges( const itype_id &, int );
         // bool = match tool containing charges of itype_id
-        virtual std::list<item> use_charges( const itype_id &, int, bool ) {
-            return {};
-        }
-        virtual std::list<item> use_amount( const itype_id &, int ) {
-            return {};
-        }
+        virtual std::list<item> use_charges( const itype_id &, int, bool );
+        virtual std::list<item> use_amount( const itype_id &, int );
         virtual void add_debt( int ) {}
         virtual void i_add( const item & ) {}
         virtual void i_add_or_drop( item &, bool = false ) {}
         virtual void remove_items_with( const std::function<bool( const item & )> & ) {}
-        virtual std::string give_item_to( bool ) {
-            return _( "Nope." );
-        }
+        virtual std::string give_item_to( bool );
         virtual bool buy_from( int ) {
             return false;
         }

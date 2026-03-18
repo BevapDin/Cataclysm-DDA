@@ -14,7 +14,6 @@
 
 #include "enums.h"
 #include "global_vars.h"
-#include "item.h"
 #include "relic.h"
 #include "type_id.h"
 #include "value_ptr.h"

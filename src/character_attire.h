@@ -15,9 +15,9 @@
 #include <vector>
 
 #include "body_part_set.h"
+#include "pimpl.h"
 #include "bodypart.h"
 #include "color.h"
-#include "item.h"
 #include "item_location.h"
 #include "item_pocket.h"
 #include "ret_val.h"
@@ -81,10 +81,10 @@ class outfit
 {
         friend class Character;
     private:
-        std::list<item> worn;
+        pimpl<std::list<item>> worn;
     public:
-        outfit() = default;
-        explicit outfit( const std::list<item> &items ) : worn( items ) {}
+        outfit();
+        explicit outfit( const std::list<item> &items );
         bool is_worn( const item &clothing ) const;
         bool is_worn( const itype_id &clothing ) const;
         bool is_worn_module( const item &thing ) const;
@@ -162,7 +162,7 @@ class outfit
         // sums the coverage of items that do not have the listed flags
         int coverage_with_flags_exclude( const bodypart_id &bp, const std::vector<flag_id> &flags ) const;
         int get_coverage( bodypart_id bp,
-                          item::cover_type cover_type = item::cover_type::COVER_DEFAULT ) const;
+                          item_cover_type item_cover_type = item_cover_type::COVER_DEFAULT ) const;
         void bodypart_exposure( std::map<bodypart_id, float> &bp_exposure,
                                 const std::vector<bodypart_id> &all_body_parts ) const;
         void prepare_bodymap_info( bodygraph_info &info, const bodypart_id &bp,

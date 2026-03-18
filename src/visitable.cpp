@@ -161,7 +161,7 @@ bool inventory::has_quality( const quality_id &qual, int level, int qty ) const
 
     if( qualities_cache.find( query ) == qualities_cache.end() ) {
         int res = 0;
-        for( const auto &stack : this->items ) {
+        for( const auto &stack : *items ) {
             res += stack.size() * has_quality_internal( stack.front(), qual, level, qty );
             if( res >= qty ) {
                 qualities_cache[query] = true;
@@ -398,7 +398,7 @@ static VisitResponse visit_internal( const std::function<VisitResponse( item *, 
 VisitResponse item::visit_contents( const std::function<VisitResponse( item *, item * )>
                                     &func, item *parent )
 {
-    return contents.visit_contents( func, parent );
+    return contents->visit_contents( func, parent );
 }
 
 VisitResponse item_contents::visit_contents( const std::function<VisitResponse( item *, item * )>
@@ -444,7 +444,7 @@ VisitResponse item::visit_items(
 VisitResponse inventory::visit_items(
     const std::function<VisitResponse( item *, item * )> &func ) const
 {
-    for( const auto &stack : items ) {
+    for( const auto &stack : *items ) {
         for( const item &it : stack ) {
             if( visit_internal( func, &it ) == VisitResponse::ABORT ) {
                 return VisitResponse::ABORT;
@@ -469,7 +469,7 @@ VisitResponse temp_crafting_inventory::visit_items(
 VisitResponse outfit::visit_items( const std::function<VisitResponse( item *, item * )> &func )
 const
 {
-    for( const item &e : worn ) {
+    for( const item &e : *worn ) {
         if( visit_internal( func, &e ) == VisitResponse::ABORT ) {
             return VisitResponse::ABORT;
         }
@@ -481,8 +481,8 @@ const
 VisitResponse Character::visit_items( const std::function<VisitResponse( item *, item * )> &func )
 const
 {
-    if( !weapon.is_null() &&
-        visit_internal( func, &weapon ) == VisitResponse::ABORT ) {
+    if( !weapon->is_null() &&
+        visit_internal( func, &*weapon ) == VisitResponse::ABORT ) {
         return VisitResponse::ABORT;
     }
 
@@ -611,7 +611,7 @@ std::list<item> item::remove_items_with( const std::function<bool( const item &e
         return res;
     }
 
-    contents.remove_internal( filter, count, res );
+    contents->remove_internal( filter, count, res );
 
     // updating pockets is only necessary when removing mods,
     // but no way to determine where something got removed here
@@ -635,7 +635,7 @@ std::list<item> inventory::remove_items_with( const
         return res;
     }
 
-    for( auto stack = items.begin(); stack != items.end() && count > 0; ) {
+    for( auto stack = items->begin(); stack != items->end() && count > 0; ) {
         std::list<item> &istack = *stack;
         const char original_invlet = istack.front().invlet;
 
@@ -658,7 +658,7 @@ std::list<item> inventory::remove_items_with( const
         }
 
         if( istack.empty() ) {
-            stack = items.erase( stack );
+            stack = items->erase( stack );
         } else {
             ++stack;
         }
@@ -674,10 +674,10 @@ std::list<item> outfit::remove_items_with( Character &guy,
         const std::function<bool( const item & )> &filter, int &count )
 {
     std::list<item> res;
-    for( auto iter = worn.begin(); iter != worn.end(); ) {
+    for( auto iter = worn->begin(); iter != worn->end(); ) {
         if( filter( *iter ) ) {
             iter->on_takeoff( guy );
-            res.splice( res.end(), worn, iter++ );
+            res.splice( res.end(), *worn, iter++ );
             if( --count == 0 ) {
                 return res;
             }
@@ -718,11 +718,11 @@ std::list<item> Character::remove_items_with( const
 
     if( count > 0 ) {
         // finally try the currently wielded item (if any)
-        if( filter( weapon ) ) {
+        if( filter( *weapon ) ) {
             res.push_back( remove_weapon() );
             count--;
         } else {
-            weapon.remove_internal( filter, count, res );
+            weapon->remove_internal( filter, count, res );
         }
     }
 

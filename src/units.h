@@ -16,12 +16,12 @@
 #include <type_traits>
 #include <utility>
 
-#include "flexbuffer_json.h"
-#include "json.h"
 #include "math_defines.h"
 #include "units_fwd.h" // IWYU pragma: export
 
 class time_duration;
+class JsonOut;
+class JsonValue;
 
 namespace units
 {
@@ -1356,8 +1356,8 @@ T read_from_json_string_common( const std::string_view s,
 
 } // namespace detail
 
-template<typename T, size_t N>
-T read_from_json_string( const JsonValue &jv,
+template<typename T, size_t N, typename J>
+T read_from_json_string( const J &jv,
                          const std::array<std::pair<std::string_view, T>, N> &units )
 {
     const auto error = [&]( const char *const msg, size_t offset ) {
@@ -1369,8 +1369,8 @@ T read_from_json_string( const JsonValue &jv,
     return detail::read_from_json_string_common<T>( s, units, error );
 }
 
-template<typename T, size_t N>
-void dump_to_json_string( T t, JsonOut &jsout,
+template<typename T, size_t N, typename J>
+void dump_to_json_string( T t, J &jsout,
                           const std::array<std::pair<std::string_view, T>, N> &units )
 {
     // deduplicate unit strings and choose the shortest representations

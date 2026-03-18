@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "cached_options.h"
+#include "demangle.h"
 #include "cata_assert.h"
 #include "cata_scope_helpers.h"
 #include "cata_utility.h"

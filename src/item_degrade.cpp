@@ -491,7 +491,7 @@ void item::randomize_rot()
         }
     }
 
-    for( item_pocket *pocket : contents.get_container_pockets() ) {
+    for( item_pocket *pocket : contents->get_container_pockets() ) {
         if( pocket->spoil_multiplier() > 0.0f ) {
             for( item *subitem : pocket->all_items_top() ) {
                 subitem->randomize_rot();
@@ -1185,7 +1185,7 @@ bool item::burn( fire_data &frd )
         heat_up();
     }
 
-    contents.heat_up();
+    contents->heat_up();
 
     burnt += roll_remainder( burn_added );
 

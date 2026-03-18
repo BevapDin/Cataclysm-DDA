@@ -8,11 +8,12 @@
 #include "calendar.h"
 #include "coordinates.h"
 #include "explosion.h"
+#include "value_ptr.h"
 #include "point.h"
-#include "submap.h"
 
 class JsonArray;
 class JsonOut;
+class submap;
 
 enum class timed_event_type : int {
     NONE,
@@ -57,13 +58,13 @@ struct timed_event {
     /** specifically for EXPLOSION event */
     explosion_data expl_data;
 
-    submap revert;
+    cata::value_ptr<submap> revert;
     timed_event( timed_event_type e_t, const time_point &w, int f_id, tripoint_abs_ms p, int s,
                  std::string key );
     timed_event( timed_event_type e_t, const time_point &w, int f_id, tripoint_abs_ms p, int s,
                  std::string s_id, std::string key );
     timed_event( timed_event_type e_t, const time_point &w, int f_id, tripoint_abs_ms p, int s,
-                 std::string s_id, submap sr, std::string key );
+                 std::string s_id, cata::value_ptr<submap> sr, std::string key );
     // i have little experience with code, but something tell me
     // that storing data in header and templates
     // is horrible if you need to expand it
@@ -98,7 +99,7 @@ class timed_event_manager
                   const tripoint_abs_ms &where, int strength, const std::string &string_id,
                   const std::string &key = "" );
         void add( timed_event_type type, const time_point &when, int faction_id,
-                  const tripoint_abs_ms &where, int strength, const std::string &string_id, submap sr,
+                  const tripoint_abs_ms &where, int strength, const std::string &string_id, cata::value_ptr<submap> sr,
                   const std::string &key = "" );
         void add( timed_event_type type, const time_point &when, const tripoint_abs_ms &where,
                   explosion_data expl_data );

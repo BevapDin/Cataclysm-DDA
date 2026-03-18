@@ -32,6 +32,7 @@
 #include "coordinates.h"
 #include "coords_fwd.h"
 #include "creature.h"
+#include "partial_con.h"
 #include "creature_tracker.h"
 #include "cuboid_rectangle.h"
 #include "cursesdef.h"

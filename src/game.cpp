@@ -46,10 +46,14 @@
 #include "auto_note.h"
 #include "auto_pickup.h"
 #include "avatar.h"
+#include "item_reload_option.h"
 #include "avatar_action.h"
 #include "basecamp.h"
 #include "bionics.h"
 #include "body_part_set.h"
+#include "submap.h"
+#include "item_info_data.h"
+#include "iteminfo.h"
 #include "bodygraph.h"
 #include "bodypart.h"
 #include "butchery_requirements.h"
@@ -6903,13 +6907,13 @@ void game::butcher( const std::optional<tripoint_bub_ms> &p )
     }
 }
 
-static item::reload_option favorite_ammo_or_select( avatar &u, item_location &loc, bool empty,
+static item_reload_option favorite_ammo_or_select( avatar &u, item_location &loc, bool empty,
         bool prompt )
 {
     if( u.ammo_location ) {
-        std::vector<item::reload_option> ammo_list;
+        std::vector<item_reload_option> ammo_list;
         if( u.list_ammo( loc, ammo_list, false ) ) {
-            const auto is_favorite_and_compatible = [&loc, &u]( const item::reload_option & opt ) {
+            const auto is_favorite_and_compatible = [&loc, &u]( const item_reload_option & opt ) {
                 return opt.ammo == u.ammo_location && loc.can_reload_with( u.ammo_location, false );
             };
             auto it = std::find_if( ammo_list.begin(), ammo_list.end(), is_favorite_and_compatible );
@@ -6927,7 +6931,7 @@ void game::reload( item_location &loc, bool prompt, bool empty )
 {
     // bows etc. do not need to reload. select favorite ammo for them instead
     if( loc->has_flag( flag_RELOAD_AND_SHOOT ) ) {
-        item::reload_option opt = u.select_ammo( loc, prompt );
+        item_reload_option opt = u.select_ammo( loc, prompt );
         if( !opt ) {
             return;
         } else if( u.ammo_location && opt.ammo == u.ammo_location ) {
@@ -6988,7 +6992,7 @@ void game::reload( item_location &loc, bool prompt, bool empty )
         loc = item_location( loc, &loc->only_item() );
     }
 
-    item::reload_option opt = favorite_ammo_or_select( u, loc, empty, prompt );
+    item_reload_option opt = favorite_ammo_or_select( u, loc, empty, prompt );
 
     if( opt.ammo.get_item() == nullptr || ( opt.ammo.get_item()->is_frozen_liquid() &&
                                             !u.crush_frozen_liquid( opt.ammo ) ) ) {
@@ -7090,7 +7094,7 @@ void game::reload_weapon( bool try_everything )
         if( !candidate->is_magazine() && !candidate->is_gun() ) {
             continue;
         }
-        std::vector<item::reload_option> ammo_list;
+        std::vector<item_reload_option> ammo_list;
         u.list_ammo( candidate, ammo_list, false );
         if( !ammo_list.empty() ) {
             reload( candidate, false, false );
@@ -7106,7 +7110,7 @@ void game::reload_weapon( bool try_everything )
     if( ovp ) {
         const turret_data turret = ovp->vehicle().turret_query( ovp->pos_abs( ) );
         if( turret.can_reload() ) {
-            item::reload_option opt = u.select_ammo( turret.base(), true );
+            item_reload_option opt = u.select_ammo( turret.base(), true );
             if( opt ) {
                 u.assign_activity( reload_activity_actor( std::move( opt ) ) );
             }

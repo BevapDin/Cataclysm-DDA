@@ -60,6 +60,7 @@
 #include "map_iterator.h"
 #include "map_scale_constants.h"
 #include "map_selector.h"
+#include "item_reload_option.h"
 #include "mapdata.h"
 #include "memory_fast.h"
 #include "messages.h"
@@ -72,8 +73,11 @@
 #include "output.h"
 #include "overmap.h"
 #include "overmapbuffer.h"
+#include "item_info_data.h"
+#include "partial_con.h"
 #include "pimpl.h"
 #include "player_activity.h"
+#include "submap.h"
 #include "point.h"
 #include "recipe.h"
 #include "requirements.h"
@@ -4881,7 +4885,7 @@ static void reload_furniture( Character &you, const tripoint_bub_ms &examp, bool
 
     // used to only allow one type of ammo, changed with move to inventory_selector
     // todo: use furniture name instead of pseudo item name
-    item::reload_option opt = game_menus::inv::select_ammo( you, pseudo_loc );
+    item_reload_option opt = game_menus::inv::select_ammo( you, pseudo_loc );
 
     if( !opt ) {
         return;

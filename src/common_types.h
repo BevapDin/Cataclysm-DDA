@@ -5,7 +5,7 @@
 #include <limits>
 #include <type_traits>
 
-#include "json.h"
+class JsonValue;
 
 /**
  * An interval of numeric values between @ref min and @ref max (including both).
@@ -36,8 +36,9 @@ struct numeric_interval {
 
     // TODO: break deserialize out into its own thing so that
     // common_types.h isn't dragging json.h into things unnecessarily
-    void deserialize( const JsonValue &jsin ) {
-        JsonArray ja = jsin.get_array();
+    template<typename J>
+    std::enable_if_t<std::is_same_v<J, JsonValue>> deserialize( const J &jsin ) {
+        auto ja = jsin.get_array();
         if( ja.size() != 2 ) {
             ja.throw_error( "Intervals should be in format [min, max]." );
         }
@@ -45,7 +46,7 @@ struct numeric_interval {
         ja.read_next( max );
         if( max < min ) {
             if( max >= 0 ) {
-                ja.throw_error( "Intervals should be in format [min, max]." );
+                ja.throw_error( "Second value of interval should be larger than first value." );
             }
             max = std::numeric_limits<T>::max();
         }

@@ -40,6 +40,7 @@
 #include "string_input_popup.h"
 #include "uilist.h"
 #include "ui_manager.h"
+#include "item_info_data.h"
 #include "unicode.h"
 #include "units_utility.h"
 #include "wcwidth.h"

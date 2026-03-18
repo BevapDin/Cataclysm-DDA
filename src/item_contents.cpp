@@ -13,6 +13,7 @@
 #include <type_traits>
 
 #include "avatar.h"
+#include "iteminfo.h"
 #include "cata_imgui.h"
 #include "character.h"
 #include "color.h"
@@ -2436,6 +2437,10 @@ units::mass item_contents::get_total_holster_weight() const
     return holster_weight;
 }
 
+units::volume item_contents::volume_capacity() const {
+    return volume_capacity( item_pocket::ok_default_containers );
+}
+
 units::volume item_contents::volume_capacity( const std::function<bool( const item_pocket & )> &
         include_pocket ) const
 {
@@ -2492,6 +2497,11 @@ units::volume item_contents::biggest_pocket_capacity() const
     return max_vol;
 }
 
+units::volume item_contents::remaining_volume() const
+{
+    return remaining_volume( item_pocket::ok_default_containers );
+}
+
 units::volume item_contents::remaining_volume( const std::function<bool( const item_pocket & )> &
         include_pocket ) const
 {
@@ -2530,6 +2540,11 @@ units::volume item_contents::remaining_volume_recursive( const
         }
     }
     return ret;
+}
+
+units::volume item_contents::contents_volume() const
+{
+    return contents_volume( item_pocket::ok_default_containers );
 }
 
 units::volume item_contents::contents_volume( const std::function<bool( const item_pocket & )>

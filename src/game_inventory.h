@@ -14,11 +14,12 @@
 #include "coordinates.h"
 #include "input_context.h"
 #include "inventory_ui.h"
-#include "item.h"
 #include "item_location.h"
 #include "type_id.h"
 #include "units_fwd.h"
 
+struct iteminfo;
+class item_reload_option;
 class Character;
 class repair_item_actor;
 class salvage_actor;
@@ -198,7 +199,7 @@ item_location sterilize_cbm( Character &you );
 item_location change_sprite( Character &you );
 /** Unload item menu **/
 std::pair<item_location, bool> unload( Character &you );
-item::reload_option select_ammo( Character &you, const item_location &loc, bool prompt = false,
+item_reload_option select_ammo( Character &you, const item_location &loc, bool prompt = false,
                                  bool empty = true );
 /*@}*/
 

@@ -36,6 +36,7 @@
 #include "debug_menu.h"
 #include "diary.h"
 #include "distraction_manager.h"
+#include "item_reload_option.h"
 #include "do_turn.h"
 #include "event.h"
 #include "event_bus.h"
@@ -2765,7 +2766,7 @@ bool game::do_regular_action( action_id &act, avatar &player_character,
             if( weapon && weapon->is_gun() && !weapon->is_gunmod() ) {
                 if( weapon->has_flag( flag_RELOAD_ONE ) ||
                     weapon->has_flag( flag_RELOAD_AND_SHOOT ) ) {
-                    item::reload_option opt = player_character.select_ammo( weapon, false );
+                    item_reload_option opt = player_character.select_ammo( weapon, false );
                     if( !opt ) {
                         break;
                     } else if( player_character.ammo_location && opt.ammo == player_character.ammo_location ) {

@@ -456,7 +456,7 @@ int talker_character_const::get_spell_level( const spell_id &spell_name ) const
 int talker_character_const::get_highest_spell_level() const
 {
     int spell_level = -1;
-    for( const spell *sp : me_chr_const->magic->get_spells() ) {
+    for( const spell *sp : const_cast<known_magic&>(*me_chr_const->magic).get_spells() ) {
         spell_level = std::max( sp->get_effective_level(), spell_level );
     }
     return spell_level;
@@ -482,7 +482,7 @@ int talker_character_const::get_spell_difficulty( const spell_id &spell_name,
 int talker_character_const::get_spell_count( const trait_id &school ) const
 {
     int count = 0;
-    for( const spell *sp : me_chr_const->magic->get_spells() ) {
+    for( const spell *sp : const_cast<known_magic&>(*me_chr_const->magic).get_spells() ) {
         if( school.is_null() || sp->spell_class() == school ) {
             count++;
         }
@@ -494,7 +494,7 @@ int talker_character_const::get_spell_sum( const trait_id &school, int min_level
 {
     int count = 0;
 
-    for( const spell *sp : me_chr_const->magic->get_spells() ) {
+    for( const spell *sp : const_cast<known_magic&>(*me_chr_const->magic).get_spells() ) {
         if( school.is_null() || ( sp->spell_class() == school &&
                                   sp->get_effective_level() >= min_level ) ) {
             count = count + sp->get_effective_level() ;
@@ -1461,4 +1461,8 @@ int talker_character_const::climate_control_str_heat() const
 int talker_character_const::climate_control_str_chill() const
 {
     return me_chr_const->climate_control_strength().second;
+}
+
+std::string talker::give_item_to( bool ) {
+    return _( "Nope." );
 }

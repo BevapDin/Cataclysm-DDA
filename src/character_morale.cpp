@@ -59,8 +59,8 @@ void Character::hoarder_morale_penalty()
     int empty_holsters = 0;
     units::volume penalty_volume = 0_ml;
 
-    std::vector<item_pocket *> top_pockets = weapon.get_container_pockets();
-    for( item &it : worn.worn ) {
+    std::vector<item_pocket *> top_pockets = weapon->get_container_pockets();
+    for( item &it : *worn.worn ) {
         std::vector<item_pocket *> worn_pockets = it.get_container_pockets();
         top_pockets.insert( top_pockets.end(), worn_pockets.begin(), worn_pockets.end() );
     }
@@ -201,7 +201,7 @@ bool Character::has_morale_to_read() const
 
 void outfit::check_and_recover_morale( player_morale &test_morale ) const
 {
-    for( const item &wit : worn ) {
+    for( const item &wit : *worn ) {
         test_morale.on_item_wear( wit );
     }
 }

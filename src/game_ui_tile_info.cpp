@@ -32,6 +32,8 @@
 #include "item.h"
 #include "iteminfo_query.h"
 #include "lightmap.h"
+#include "iteminfo.h"
+#include "partial_con.h"
 #include "magic_enchantment.h"
 #include "map.h"
 #include "map_scale_constants.h"

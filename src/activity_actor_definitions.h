@@ -19,7 +19,6 @@
 #include "contents_change_handler.h"
 #include "game.h"
 #include "handle_liquid.h"
-#include "item.h"
 #include "itype.h"
 #include "item_location.h"
 #include "memory_fast.h"
@@ -2156,7 +2155,7 @@ class plant_seed_activity_actor : public activity_actor
 class reload_activity_actor : public activity_actor
 {
     public:
-        explicit reload_activity_actor( item::reload_option &&opt, int extra_moves = 0 );
+        explicit reload_activity_actor( item_reload_option &&opt, int extra_moves = 0 );
 
         const activity_id &get_type() const override {
             static const activity_id ACT_RELOAD( "ACT_RELOAD" );

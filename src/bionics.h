@@ -15,14 +15,15 @@
 #include "calendar.h"
 #include "damage.h"
 #include "enums.h"
+#include "pimpl.h"
 #include "flat_set.h"
-#include "item.h"
 #include "magic.h"
 #include "translation.h"
 #include "type_id.h"
 #include "units.h"
 #include "value_ptr.h"
 
+class item;
 class Character;
 class JsonObject;
 class JsonOut;
@@ -252,7 +253,7 @@ struct bionic {
         // generic bionic specific flags
         cata::flat_set<std::string> bionic_tags;
         float safe_fuel_threshold = 1.0f;
-        item weapon;
+        pimpl<item> weapon;
         std::vector<item> toggled_pseudo_items; // NOLINT(cata-serialize)
         std::vector<item> passive_pseudo_items; // NOLINT(cata-serialize)
         bionic_uid uid;

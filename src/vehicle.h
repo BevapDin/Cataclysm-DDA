@@ -32,7 +32,6 @@
 #include "effect.h"
 #include "enums.h"
 #include "global_vars.h"
-#include "item.h"
 #include "item_group.h"
 #include "item_location.h"
 #include "item_stack.h"

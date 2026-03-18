@@ -10,11 +10,11 @@
 #include <vector>
 
 #include "calendar.h"
-#include "requirements.h"
 #include "translation.h"
 #include "type_id.h"
 #include "value_ptr.h"
 
+struct requirement_data;
 class JsonObject;
 class JsonOut;
 

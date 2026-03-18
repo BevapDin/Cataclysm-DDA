@@ -26,6 +26,7 @@
 #include "game_inventory.h"
 #include "gates.h"
 #include "handle_liquid.h"
+#include "item_reload_option.h"
 #include "iexamine.h"
 #include "inventory.h"
 #include "item.h"
@@ -2235,7 +2236,7 @@ void vehicle::build_interact_menu( veh_menu &menu, map *here, const tripoint_bub
         .skip_locked_check()
         .on_submit( [this, vppos, here] {
             item_location loc = turret_query( here, vppos ).base();
-            item::reload_option opt = get_player_character().select_ammo( loc, true );
+            item_reload_option opt = get_player_character().select_ammo( loc, true );
             if( opt )
             {
                 reload_activity_actor reload_act( std::move( opt ) );

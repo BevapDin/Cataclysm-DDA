@@ -6,7 +6,8 @@
 #include <type_traits>
 
 #include "enum_traits.h"
-#include "json.h"
+
+class JsonOut;
 
 template<typename E>
 class enum_bitset
@@ -85,7 +86,8 @@ class enum_bitset
             return get_pos( enum_traits<E>::last );
         }
 
-        void serialize( JsonOut &json ) const {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonOut>> serialize( T &json ) const {
             json.start_array();
 
             for( size_t i = 0; i < size(); i++ ) {

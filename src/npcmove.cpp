@@ -30,6 +30,7 @@
 #include "calendar.h"
 #include "cata_algo.h"
 #include "character.h"
+#include "item_reload_option.h"
 #include "character_attire.h"
 #include "character_id.h"
 #include "clzones.h"
@@ -2286,22 +2287,22 @@ item_location npc::find_usable_ammo( const item_location &weap ) const
     return const_cast<npc *>( this )->find_usable_ammo( weap );
 }
 
-item::reload_option npc::select_ammo( const item_location &base, bool, bool empty )
+item_reload_option npc::select_ammo( const item_location &base, bool, bool empty )
 {
     if( !base ) {
-        return item::reload_option();
+        return item_reload_option();
     }
 
-    std::vector<item::reload_option> ammo_list;
+    std::vector<item_reload_option> ammo_list;
     list_ammo( base, ammo_list, empty );
 
     if( ammo_list.empty() ) {
-        return item::reload_option();
+        return item_reload_option();
     }
 
     // sort in order of move cost (ascending), then remaining ammo (descending) with empty magazines always last
-    std::stable_sort( ammo_list.begin(), ammo_list.end(), []( const item::reload_option & lhs,
-    const item::reload_option & rhs ) {
+    std::stable_sort( ammo_list.begin(), ammo_list.end(), []( const item_reload_option & lhs,
+    const item_reload_option & rhs ) {
         if( lhs.ammo->ammo_remaining( ) == 0 || rhs.ammo->ammo_remaining( ) == 0 ) {
             return ( lhs.ammo->ammo_remaining( ) != 0 ) > ( rhs.ammo->ammo_remaining( ) != 0 );
         }
@@ -2316,7 +2317,7 @@ item::reload_option npc::select_ammo( const item_location &base, bool, bool empt
     if( ammo_list[0].ammo.get_item()->ammo_remaining( ) > 0 ) {
         return ammo_list[0];
     } else {
-        return item::reload_option();
+        return item_reload_option();
     }
 }
 
@@ -2434,7 +2435,7 @@ bool npc::recharge_cbm()
 
 void outfit::activate_combat_items( npc &guy )
 {
-    for( item &candidate : worn ) {
+    for( item &candidate : *worn ) {
         if( candidate.has_flag( flag_COMBAT_TOGGLEABLE ) && candidate.is_transformable() &&
             !candidate.active ) {
 
@@ -2462,7 +2463,7 @@ void npc::activate_combat_items()
 
 void outfit::deactivate_combat_items( npc &guy )
 {
-    for( item &candidate : worn ) {
+    for( item &candidate : *worn ) {
         if( candidate.has_flag( flag_COMBAT_TOGGLEABLE ) && candidate.is_transformable() &&
             candidate.active ) {
             const iuse_transform *transform = dynamic_cast<const iuse_transform *>
@@ -5460,7 +5461,7 @@ void npc::do_reload( const item_location &it )
         return;
     }
 
-    item::reload_option reload_opt = select_ammo( it );
+    item_reload_option reload_opt = select_ammo( it );
 
     if( !reload_opt ) {
         debugmsg( "do_reload failed: no usable ammo for %s", it->tname() );
@@ -5525,7 +5526,7 @@ bool outfit::adjust_worn( npc &guy )
         return false;
     };
 
-    for( item &elem : worn ) {
+    for( item &elem : *worn ) {
         if( !elem.has_flag( flag_SPLINT ) ) {
             continue;
         }

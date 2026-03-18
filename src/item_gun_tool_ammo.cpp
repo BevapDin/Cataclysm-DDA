@@ -23,6 +23,7 @@
 #include "avatar.h"
 #include "ammo.h"
 #include "bodypart.h"
+#include "item_reload_option.h"
 #include "calendar.h"
 #include "character.h"
 #include "character_id.h"
@@ -272,11 +273,11 @@ item &item::ammo_unset()
         if( is_money() ) { // charges are set wrong on cash cards.
             charges = 0;
         }
-        contents.clear_magazines();
+        contents->clear_magazines();
     } else if( magazine_integral() ) {
         charges = 0;
         if( is_gun() ) {
-            contents.clear_magazines();
+            contents->clear_magazines();
         }
     } else if( magazine_current() ) {
         magazine_current()->ammo_unset();
@@ -481,7 +482,7 @@ int item::get_free_mod_locations( const gunmod_location &location ) const
         return 0;
     }
     int result = loc->second;
-    for( const item *elem : contents.all_items_top( pocket_type::MOD ) ) {
+    for( const item *elem : contents->all_items_top( pocket_type::MOD ) ) {
         const cata::value_ptr<islot_gunmod> &mod = elem->type->gunmod;
         if( mod && mod->location == location ) {
             result--;
@@ -776,7 +777,7 @@ std::vector<item *> item::toolmods()
 {
     std::vector<item *> res;
     if( is_tool() ) {
-        for( item *e : contents.all_items_top( pocket_type::MOD ) ) {
+        for( item *e : contents->all_items_top( pocket_type::MOD ) ) {
             if( e->is_toolmod() ) {
                 res.push_back( e );
             }
@@ -789,7 +790,7 @@ std::vector<const item *> item::toolmods() const
 {
     std::vector<const item *> res;
     if( is_tool() ) {
-        for( const item *e : contents.all_items_top( pocket_type::MOD ) ) {
+        for( const item *e : contents->all_items_top( pocket_type::MOD ) ) {
             if( e->is_toolmod() ) {
                 res.push_back( e );
             }
@@ -864,7 +865,7 @@ bool item::is_gunmod() const
 
 bool item::is_magazine() const
 {
-    return !!type->magazine || contents.has_pocket_type( pocket_type::MAGAZINE );
+    return !!type->magazine || contents->has_pocket_type( pocket_type::MAGAZINE );
 }
 
 bool item::is_battery() const
@@ -894,7 +895,7 @@ bool item::is_medical_tool() const
 
 bool item::is_ammo_container() const
 {
-    return contents.has_any_with(
+    return contents->has_any_with(
     []( const item & it ) {
         return it.is_ammo();
     }, pocket_type::CONTAINER );
@@ -956,12 +957,12 @@ struct fuel_explosion_data item::get_explosion_data() const {
 
 bool item::is_magazine_full() const
 {
-    return contents.is_magazine_full();
+    return contents->is_magazine_full();
 }
 
 bool item::allows_speedloader( const itype_id &speedloader_id ) const
 {
-    return contents.allows_speedloader( speedloader_id );
+    return contents->allows_speedloader( speedloader_id );
 }
 
 bool item::can_reload_with( const item &ammo, bool now ) const
@@ -973,18 +974,18 @@ bool item::can_reload_with( const item &ammo, bool now ) const
     if( now && ammo.is_magazine() && !ammo.empty() ) {
         if( is_tool() ) {
             // Dirty hack because "ammo" on tools is actually completely separate thing from "ammo" on guns and "ammo_types()" works only for guns
-            if( !type->tool->ammo_id.count( ammo.contents.first_ammo().ammo_type() ) ) {
+            if( !type->tool->ammo_id.count( ammo.contents->first_ammo().ammo_type() ) ) {
                 return false;
             }
         } else {
-            if( !ammo_types().count( ammo.contents.first_ammo().ammo_type() ) ) {
+            if( !ammo_types().count( ammo.contents->first_ammo().ammo_type() ) ) {
                 return false;
             }
         }
     }
 
     // Check if the item is in general compatible with any reloadable pocket.
-    return contents.can_reload_with( ammo, now );
+    return contents->can_reload_with( ammo, now );
 }
 
 bool item::is_tool() const
@@ -1320,7 +1321,7 @@ int item::ammo_remaining( const map &here, const std::set<ammotype> &ammo, const
 
     // Magazines and integral magazines on their own
     if( is_magazine() ) {
-        for( const item *e : contents.all_items_top( pocket_type::MAGAZINE ) ) {
+        for( const item *e : contents->all_items_top( pocket_type::MAGAZINE ) ) {
             if( e->is_ammo() ) {
                 ret += e->charges;
             }
@@ -1329,7 +1330,7 @@ int item::ammo_remaining( const map &here, const std::set<ammotype> &ammo, const
 
     // Handle non-magazines with ammo_restriction in a CONTAINER type pocket (like quivers)
     if( !( mag || is_magazine() || ammo.empty() ) ) {
-        for( const item *e : contents.all_items_top( pocket_type::CONTAINER ) ) {
+        for( const item *e : contents->all_items_top( pocket_type::CONTAINER ) ) {
             if( e->is_ammo() && ammo.find( e->ammo_type() ) != ammo.end() ) {
                 ret += e->charges;
             }
@@ -1437,7 +1438,7 @@ units::energy item::energy_remaining( const Character *carrier, bool ignoreExter
     // Battery(ammo) contained within
     if( is_magazine() ) {
         ret += energy;
-        for( const item *e : contents.all_items_top( pocket_type::MAGAZINE ) ) {
+        for( const item *e : contents->all_items_top( pocket_type::MAGAZINE ) ) {
             if( e->ammo_type() == ammo_battery ) {
                 ret += units::from_kilojoule( static_cast<std::int64_t>( e->charges ) );
             }
@@ -1474,8 +1475,8 @@ int item::ammo_capacity( const ammotype &ammo, bool include_linked ) const
         return units::to_kilojoule( get_player_character().get_max_power_level() );
     }
 
-    if( contents.has_pocket_type( pocket_type::MAGAZINE ) ) {
-        return contents.ammo_capacity( ammo );
+    if( contents->has_pocket_type( pocket_type::MAGAZINE ) ) {
+        return contents->ammo_capacity( ammo );
     }
     if( is_magazine() ) {
         return type->magazine->capacity;
@@ -1504,12 +1505,12 @@ int item::ammo_required() const
 
 item &item::first_ammo()
 {
-    return contents.first_ammo();
+    return contents->first_ammo();
 }
 
 const item &item::first_ammo() const
 {
-    return contents.first_ammo();
+    return contents->first_ammo();
 }
 
 bool item::ammo_sufficient( const Character *carrier, int qty ) const
@@ -1581,7 +1582,7 @@ int item::ammo_consume( int qty, map &here, const tripoint_bub_ms &pos, Characte
 
     // Consume charges loaded in the item or its magazines
     if( is_magazine() || uses_magazine() ) {
-        qty -= contents.ammo_consume( qty, &here, pos );
+        qty -= contents->ammo_consume( qty, &here, pos );
         if( ammo_capacity( ammo_battery ) == 0 && carrier != nullptr ) {
             carrier->invalidate_weight_carried_cache();
         }
@@ -1645,7 +1646,7 @@ units::energy item::energy_consume( units::energy qty, map *here, const tripoint
 
     // Consume battery(ammo) and other fuel (if allowed)
     if( is_battery() || fuel_efficiency >= 0 ) {
-        int consumed_kj = contents.ammo_consume( units::to_kilojoule( qty ), here, pos, fuel_efficiency );
+        int consumed_kj = contents->ammo_consume( units::to_kilojoule( qty ), here, pos, fuel_efficiency );
         qty -= units::from_kilojoule( static_cast<std::int64_t>( consumed_kj ) );
         // Either we're out of juice or truncating the value above means we didn't drain quite enough.
         // In the latter case at least this will bump up energy enough to satisfy the remainder,
@@ -1655,7 +1656,7 @@ units::energy item::energy_consume( units::energy qty, map *here, const tripoint
         // which potentially allows it to burn less fuel next time.
         // Do we want an implicit 1kJ battery in the generator to smooth things out?
         if( qty > energy ) {
-            int64_t residual_drain = contents.ammo_consume( 1, here, pos, fuel_efficiency );
+            int64_t residual_drain = contents->ammo_consume( 1, here, pos, fuel_efficiency );
             energy += units::from_kilojoule( residual_drain );
         }
         if( qty > energy ) {
@@ -1704,7 +1705,7 @@ bool item::has_ammo() const
     }
 
     if( is_magazine() ) {
-        return !contents.empty() && contents.first_ammo().has_ammo();
+        return !contents->empty() && contents->first_ammo().has_ammo();
     }
 
     auto mods = is_gun() ? gunmods() : toolmods();
@@ -1729,7 +1730,7 @@ bool item::has_ammo_data() const
     }
 
     if( is_magazine() ) {
-        return !contents.empty() && contents.first_ammo().has_ammo_data();
+        return !contents->empty() && contents->first_ammo().has_ammo_data();
     }
 
     auto mods = is_gun() ? gunmods() : toolmods();
@@ -1754,7 +1755,7 @@ const itype *item::ammo_data() const
     }
 
     if( is_magazine() ) {
-        return !contents.empty() ? contents.first_ammo().ammo_data() : nullptr;
+        return !contents->empty() ? contents->first_ammo().ammo_data() : nullptr;
     }
 
     auto mods = is_gun() ? gunmods() : toolmods();
@@ -1789,7 +1790,7 @@ const item &item::loaded_ammo() const
     }
 
     if( is_magazine() ) {
-        return !contents.empty() ? contents.first_ammo() : null_item_reference();
+        return !contents->empty() ? contents->first_ammo() : null_item_reference();
     }
 
     auto mods = is_gun() ? gunmods() : toolmods();
@@ -1801,7 +1802,7 @@ const item &item::loaded_ammo() const
     }
 
     if( is_gun() && ammo_remaining( ) != 0 ) {
-        return contents.first_ammo();
+        return contents->first_ammo();
     }
     return null_item_reference();
 }
@@ -1825,7 +1826,7 @@ std::set<ammotype> item::ammo_types( bool conversion ) const
         return type->tool->ammo_id;
     }
 
-    return contents.ammo_types();
+    return contents->ammo_types();
 }
 
 ammotype item::ammo_type() const
@@ -1940,12 +1941,12 @@ std::string item::ammo_sort_name() const
 
 bool item::magazine_integral() const
 {
-    return contents.has_pocket_type( pocket_type::MAGAZINE );
+    return contents->has_pocket_type( pocket_type::MAGAZINE );
 }
 
 bool item::uses_magazine() const
 {
-    return contents.has_pocket_type( pocket_type::MAGAZINE_WELL );
+    return contents->has_pocket_type( pocket_type::MAGAZINE_WELL );
 }
 
 itype_id item::magazine_default( bool conversion ) const
@@ -1953,7 +1954,7 @@ itype_id item::magazine_default( bool conversion ) const
     // consider modded ammo types
     itype_id ammo;
     if( conversion && ( ammo = ammo_default(), !ammo.is_null() ) ) {
-        for( const itype_id &mag : contents.magazine_compatible() ) {
+        for( const itype_id &mag : contents->magazine_compatible() ) {
             auto mag_types = mag->magazine->type;
             if( mag_types.find( ammo->ammo->type ) != mag_types.end() ) {
                 return mag;
@@ -1962,17 +1963,17 @@ itype_id item::magazine_default( bool conversion ) const
     }
 
     // otherwise return the default
-    return contents.magazine_default();
+    return contents->magazine_default();
 }
 
 std::set<itype_id> item::magazine_compatible() const
 {
-    return contents.magazine_compatible();
+    return contents->magazine_compatible();
 }
 
 item *item::magazine_current()
 {
-    return contents.magazine_current();
+    return contents->magazine_current();
 }
 
 const item *item::magazine_current() const
@@ -1982,22 +1983,22 @@ const item *item::magazine_current() const
 
 std::vector<item *> item::gunmods()
 {
-    return contents.gunmods();
+    return contents->gunmods();
 }
 
 std::vector<const item *> item::gunmods() const
 {
-    return contents.gunmods();
+    return contents->gunmods();
 }
 
 std::vector<const item *> item::mods() const
 {
-    return contents.mods();
+    return contents->mods();
 }
 
 std::vector<const item *> item::cables() const
 {
-    return contents.cables();
+    return contents->cables();
 }
 
 item *item::gunmod_find( const itype_id &mod )
@@ -2216,11 +2217,11 @@ void item::gun_cycle_mode()
     gun_set_mode( modes.begin()->first );
 }
 
-item::reload_option::reload_option( const reload_option & ) = default;
+item_reload_option::item_reload_option( const item_reload_option & ) = default;
 
-item::reload_option &item::reload_option::operator=( const reload_option & ) = default;
+item_reload_option &item_reload_option::operator=( const item_reload_option & ) = default;
 
-item::reload_option::reload_option( const Character *who, const item_location &target,
+item_reload_option::item_reload_option( const Character *who, const item_location &target,
                                     const item_location &ammo ) :
     who( who ), target( target ), ammo( ammo )
 {
@@ -2230,7 +2231,7 @@ item::reload_option::reload_option( const Character *who, const item_location &t
     qty( max_qty );
 }
 
-int item::reload_option::moves() const
+int item_reload_option::moves() const
 {
     int mv = ammo.obtain_cost( *who, qty() ) + who->item_reload_cost( *target, *ammo, qty() );
     if( target.has_parent() ) {
@@ -2244,13 +2245,13 @@ int item::reload_option::moves() const
     return mv;
 }
 
-void item::reload_option::qty( int val )
+void item_reload_option::qty( int val )
 {
     bool ammo_in_container = ammo->is_ammo_container();
     bool ammo_in_liquid_container = ammo->is_watertight_container();
     item &ammo_obj = ( ammo_in_container || ammo_in_liquid_container ) ?
                      // this is probably not the right way to do this. there is no guarantee whatsoever that ammo_obj will be an ammo
-                     *ammo->contents.all_items_top( pocket_type::CONTAINER ).front() : *ammo;
+                     *ammo->get_contents().all_items_top( pocket_type::CONTAINER ).front() : *ammo;
 
     if( ( ammo_in_container && !ammo_obj.is_ammo() ) ||
         ( ammo_in_liquid_container && !ammo_obj.made_of( phase_id::LIQUID ) ) ) {
@@ -2303,7 +2304,7 @@ void item::casings_handle( const std::function<bool( item & )> &func )
     if( !is_gun() && !is_tool() ) {
         return;
     }
-    contents.casings_handle( func );
+    contents->casings_handle( func );
 }
 
 bool item::reload( Character &u, item_location ammo, int qty )
@@ -3245,7 +3246,7 @@ bool item::is_reloadable() const
         return false;
     }
 
-    for( const item_pocket *pocket : contents.get_all_reloadable_pockets() ) {
+    for( const item_pocket *pocket : contents->get_all_reloadable_pockets() ) {
         if( pocket->is_type( pocket_type::MAGAZINE_WELL ) ) {
             if( pocket->empty() || !pocket->front().is_magazine_full() ) {
                 return true;

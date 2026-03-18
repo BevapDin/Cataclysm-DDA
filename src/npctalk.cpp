@@ -4927,7 +4927,7 @@ talk_effect_fun_t::func f_revert_location( const JsonObject &jo, std::string_vie
                 submap *sm = MAPBUFFER.lookup_submap( revert_sm );
                 get_timed_events().add( timed_event_type::REVERT_SUBMAP, tif, -1,
                                         project_to<coords::ms>( revert_sm ), 0, "",
-                                        sm->get_revert_submap(), key.evaluate( d ) );
+                                        cata::value_ptr( new submap( sm->get_revert_submap() ) ), key.evaluate( d ) );
             }
         }
 
@@ -4970,7 +4970,7 @@ talk_effect_fun_t::func f_copy_location( const JsonObject &jo, std::string_view 
                 submap *sm = MAPBUFFER.lookup_submap( revert_sm );
                 get_timed_events().add( timed_event_type::REVERT_SUBMAP, tif, -1,
                                         project_to<coords::ms>( new_sm ), 0, "",
-                                        sm->get_revert_submap(), key.evaluate( d ) );
+                                        cata::value_ptr( new submap( sm->get_revert_submap() ) ), key.evaluate( d ) );
             }
         }
         // We need to copy the translocator to target omt pos if it exists

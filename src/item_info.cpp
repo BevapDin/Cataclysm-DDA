@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "ammo.h"
+#include "iteminfo.h"
 #include "ascii_art.h"
 #include "avatar.h"
 #include "bionics.h"
@@ -1058,7 +1059,7 @@ std::string item::print_compatible_mags_or_flags() const
     }
 
     // check flags
-    const std::set<flag_id> flag_restrictions = contents.magazine_flag_restrictions();
+    const std::set<flag_id> flag_restrictions = contents->magazine_flag_restrictions();
     if( !flag_restrictions.empty() ) {
         const std::string flag_names = enumerate_as_string( flag_restrictions,
         []( const flag_id & e ) {
@@ -1121,7 +1122,7 @@ void item::gun_info( const item *mod, std::vector<iteminfo> &info, const iteminf
             tmp.ammo_set( default_ammo );
         } else if( !tmp.magazine_default().is_null() ) {
             // clear out empty magazines so put_in below doesn't error
-            for( item *i : tmp.contents.all_items_top() ) {
+            for( item *i : tmp.contents->all_items_top() ) {
                 if( i->is_magazine() ) {
                     tmp.remove_item( *i );
                     tmp.on_contents_changed();
@@ -1707,13 +1708,13 @@ bool item::armor_full_protection_info( std::vector<iteminfo> &info,
                            iteminfo::no_flags, get_coverage( body_part_torso.id() ) );
         //~ Melee coverage
         info.emplace_back( "ARMOR", space + _( "Melee:" ) + space, "",
-                           iteminfo::no_flags, get_coverage( body_part_torso.id(), cover_type::COVER_MELEE ) );
+                           iteminfo::no_flags, get_coverage( body_part_torso.id(), item_cover_type::COVER_MELEE ) );
         //~ Ranged coverage
         info.emplace_back( "ARMOR", space + _( "Ranged:" ) + space, "",
-                           iteminfo::no_flags, get_coverage( body_part_torso.id(), cover_type::COVER_RANGED ) );
+                           iteminfo::no_flags, get_coverage( body_part_torso.id(), item_cover_type::COVER_RANGED ) );
         //~ Vitals coverage
         info.emplace_back( "ARMOR", space + _( "Vitals:" ) + space, "",
-                           iteminfo::no_flags, get_coverage( body_part_torso.id(), cover_type::COVER_VITALS ) );
+                           iteminfo::no_flags, get_coverage( body_part_torso.id(), item_cover_type::COVER_VITALS ) );
     }
 
     return ret;
@@ -1778,22 +1779,22 @@ void item::armor_protection_info( std::vector<iteminfo> &info, const iteminfo_qu
         //~ Regular/Default coverage
         coverage_table += string_format( "%s;<color_c_yellow>%d</color>\n", _( "Default" ),
                                          get_coverage( sbp ) );
-        if( get_coverage( sbp ) != get_coverage( sbp, item::cover_type::COVER_MELEE ) ) {
+        if( get_coverage( sbp ) != get_coverage( sbp, item_cover_type::COVER_MELEE ) ) {
             //~ Melee coverage
             coverage_table += string_format( "%s;<color_c_yellow>%d</color>\n", _( "Melee" ), get_coverage( sbp,
-                                             item::cover_type::COVER_MELEE ) );
+                                             item_cover_type::COVER_MELEE ) );
         }
-        if( get_coverage( sbp ) != get_coverage( sbp, item::cover_type::COVER_RANGED ) ) {
+        if( get_coverage( sbp ) != get_coverage( sbp, item_cover_type::COVER_RANGED ) ) {
             //~ Ranged coverage
             coverage_table += string_format( "%s;<color_c_yellow>%d</color>\n", _( "Ranged" ),
                                              get_coverage( sbp,
-                                                     item::cover_type::COVER_RANGED ) );
+                                                     item_cover_type::COVER_RANGED ) );
         }
-        if( get_coverage( sbp, item::cover_type::COVER_VITALS ) > 0 ) {
+        if( get_coverage( sbp, item_cover_type::COVER_VITALS ) > 0 ) {
             //~ Vitals coverage
             coverage_table += string_format( "%s;<color_c_yellow>%d</color>\n", _( "Vitals" ),
                                              get_coverage( sbp,
-                                                     item::cover_type::COVER_VITALS ) );
+                                                     item_cover_type::COVER_VITALS ) );
         }
 
         info.emplace_back( bp_cat, coverage_table, iteminfo::is_table );
@@ -3294,13 +3295,13 @@ void item::qualities_info( std::vector<iteminfo> &info, const iteminfo_query *pa
 
     // Accumulate and list all qualities of items contained within this item
     if( parts->test( iteminfo_parts::QUALITIES_CONTAINED ) &&
-    contents.has_any_with( []( const item & e ) {
+    contents->has_any_with( []( const item & e ) {
     return !e.type->qualities.empty();
     }, pocket_type::CONTAINER ) ) {
 
         info.emplace_back( "QUALITIES", "", _( "Contains items with qualities:" ) );
         std::map<quality_id, int, quality_id::LexCmp> most_quality;
-        for( const item *e : contents.all_items_top() ) {
+        for( const item *e : contents->all_items_top() ) {
             for( const std::pair<const quality_id, int> &q : e->type->qualities ) {
                 auto emplace_result = most_quality.emplace( q );
                 if( !emplace_result.second &&
@@ -3626,7 +3627,7 @@ std::vector<std::pair<const item *, int>> get_item_duplicate_counts(
 void item::contents_info( std::vector<iteminfo> &info, const iteminfo_query *parts, int batch,
                           bool /*debug*/ ) const
 {
-    if( ( toolmods().empty() && gunmods().empty() && contents.empty() ) ||
+    if( ( toolmods().empty() && gunmods().empty() && contents->empty() ) ||
         !parts->test( iteminfo_parts::DESCRIPTION_CONTENTS ) ) {
         return;
     }
@@ -3649,7 +3650,7 @@ void item::contents_info( std::vector<iteminfo> &info, const iteminfo_query *par
         info.emplace_back( "DESCRIPTION", mod->type->description.translated() );
     }
 
-    const std::list<const item *> all_contents = contents.all_items_top();
+    const std::list<const item *> all_contents = contents->all_items_top();
     const std::vector<std::pair<item const *, int>> counted_contents = get_item_duplicate_counts(
                 all_contents );
     bool contents_header = false;
@@ -4299,7 +4300,7 @@ std::vector<iteminfo> item::get_info( const iteminfo_query *parts, int batch ) c
                 info.emplace_back( "CONTAINER", _( "Spare space: " ), _( "<num>." ), iteminfo::no_flags,
                                    vacancies );
             }
-            contents.info( info, parts );
+            contents->info( info, parts );
             contents_info( info, parts, batch, debug );
 
         } else if( blockname == "footer" ) {

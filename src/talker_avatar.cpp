@@ -109,3 +109,7 @@ bool talker_avatar::buy_monster( talker &seller, const mtype_id &mtype, int cost
     }
     return true;
 }
+
+std::list<item> talker::use_charges( const itype_id &, int ) { return {}; }
+std::list<item> talker::use_charges( const itype_id &, int, bool ) { return {}; }
+std::list<item> talker::use_amount( const itype_id &, int ) { return {}; }

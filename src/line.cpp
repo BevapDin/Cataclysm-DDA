@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "enums.h"
 #include "math_defines.h"
+#include "enum_conversions.h"
 #include "output.h"
 #include "string_formatter.h"
 #include "translations.h"

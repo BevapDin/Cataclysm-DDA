@@ -8,7 +8,6 @@
 #include "character.h"
 #include "coordinates.h"
 #include "game.h"
-#include "item.h"
 #include "map.h"
 #include "requirements.h"
 #include "type_id.h"

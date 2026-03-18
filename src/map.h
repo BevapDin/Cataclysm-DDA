@@ -30,7 +30,6 @@
 #include "creature.h"
 #include "enums.h"
 #include "game_constants.h"
-#include "item.h"
 #include "item_stack.h"
 #include "level_cache.h"
 #include "lightmap.h"

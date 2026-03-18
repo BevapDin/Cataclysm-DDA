@@ -26,6 +26,7 @@
 #include "input.h"
 #include "json.h"
 #include "json_loader.h"
+#include "submap.h"
 #include "kill_tracker.h"
 #include "map.h"
 #include "messages.h"
@@ -1827,7 +1828,7 @@ void timed_event_manager::unserialize_all( const JsonArray &ja )
         tripoint_abs_sm map_point;
         std::string string_id;
         std::string key;
-        submap revert;
+        cata::value_ptr<submap> revert;
         jo.read( "faction", faction_id );
         jo.read( "map_point", map_point );
         jo.read( "map_square", map_square, false );
@@ -1838,19 +1839,19 @@ void timed_event_manager::unserialize_all( const JsonArray &ja )
         jo.read( "key", key );
         point_sm_ms pt;
         if( jo.has_string( "revert" ) ) {
-            revert.set_all_ter( ter_id( jo.get_string( "revert" ) ), true );
-        } else {
+            revert->set_all_ter( ter_id( jo.get_string( "revert" ) ), true );
+        } else if( jo.has_array( "revert" ) ) {
             for( JsonObject jp : jo.get_array( "revert" ) ) {
                 if( jp.has_member( "point" ) ) {
                     jp.get_member( "point" ).read( pt, false );
                 }
-                revert.set_furn( pt, furn_id( jp.get_string( "furn" ) ) );
-                revert.set_ter( pt, ter_id( jp.get_string( "ter" ) ) );
-                revert.set_trap( pt, trap_id( jp.get_string( "trap" ) ) );
+                revert->set_furn( pt, furn_id( jp.get_string( "furn" ) ) );
+                revert->set_ter( pt, ter_id( jp.get_string( "ter" ) ) );
+                revert->set_trap( pt, trap_id( jp.get_string( "trap" ) ) );
                 if( jp.has_member( "items" ) ) {
                     cata::colony<item> itm;
                     jp.get_member( "items" ).read( itm, false );
-                    revert.get_items( pt ) = std::move( itm );
+                    revert->get_items( pt ) = std::move( itm );
                 }
                 // We didn't always save the point, this is the original logic, it doesn't work right but for older saves at least they won't crash
                 if( !jp.has_member( "point" ) ) {
@@ -1949,9 +1950,9 @@ void timed_event_manager::serialize_all( JsonOut &jsout )
         jsout.member( "type", elem.type );
         jsout.member( "when", elem.when );
         jsout.member( "key", elem.key );
-        if( elem.revert.is_uniform() ) {
-            jsout.member( "revert", elem.revert.get_ter( point_sm_ms::zero ) );
-        } else {
+        if( elem.revert && elem.revert->is_uniform() ) {
+            jsout.member( "revert", elem.revert->get_ter( point_sm_ms::zero ) );
+        } else if( elem.revert ) {
             jsout.member( "revert" );
             jsout.start_array();
             for( int y = 0; y < SEEY; y++ ) {
@@ -1959,10 +1960,10 @@ void timed_event_manager::serialize_all( JsonOut &jsout )
                     jsout.start_object();
                     point_sm_ms pt( x, y );
                     jsout.member( "point", pt );
-                    jsout.member( "furn", elem.revert.get_furn( pt ) );
-                    jsout.member( "ter", elem.revert.get_ter( pt ) );
-                    jsout.member( "trap", elem.revert.get_trap( pt ) );
-                    jsout.member( "items", elem.revert.get_items( pt ) );
+                    jsout.member( "furn", elem.revert->get_furn( pt ) );
+                    jsout.member( "ter", elem.revert->get_ter( pt ) );
+                    jsout.member( "trap", elem.revert->get_trap( pt ) );
+                    jsout.member( "items", elem.revert->get_items( pt ) );
                     jsout.end_object();
                 }
             }

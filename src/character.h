@@ -39,7 +39,6 @@
 #include "game_constants.h"
 #include "global_vars.h"
 #include "inventory.h"
-#include "item.h"
 #include "item_location.h"
 #include "item_pocket.h"
 #include "memory_fast.h"
@@ -59,6 +58,7 @@
 #include "visitable.h"
 #include "weakpoint.h"
 #include "weighted_list.h"
+#include "pimpl.h"
 
 class JsonObject;
 class JsonOut;
@@ -85,6 +85,7 @@ class spell;
 class ui_adaptor;
 class vehicle;
 class vpart_reference;
+class item_reload_option;
 
 namespace catacurses
 {
@@ -379,10 +380,7 @@ struct consumption_event {
     uint64_t component_hash;
 
     consumption_event() = default;
-    explicit consumption_event( const item &food ) : time( calendar::turn ) {
-        type_id = food.typeId();
-        component_hash = food.make_component_hash();
-    }
+    explicit consumption_event( const item &food );
     void serialize( JsonOut &json ) const;
     void deserialize( const JsonObject &jo );
 };
@@ -1910,7 +1908,7 @@ class Character : public Creature, public visitable
          */
         void mend_item( item_location &&obj, bool interactive = true );
 
-        bool list_ammo( const item_location &base, std::vector<item::reload_option> &ammo_list,
+        bool list_ammo( const item_location &base, std::vector<item_reload_option> &ammo_list,
                         bool empty = true ) const;
         /**
          * Select suitable ammo with which to reload the item
@@ -1918,7 +1916,7 @@ class Character : public Creature, public visitable
          * @param prompt force display of the menu even if only one choice
          * @param empty allow selection of empty magazines
          */
-        virtual item::reload_option select_ammo( const item_location &base, bool prompt = false,
+        virtual item_reload_option select_ammo( const item_location &base, bool prompt = false,
                 bool empty = true ) = 0;
 
         void process_items( map *here );
@@ -1955,11 +1953,7 @@ class Character : public Creature, public visitable
 
         struct has_mission_item_filter {
             int mission_id;
-            bool operator()( const item &it ) const {
-                return it.mission_id == mission_id || it.has_any_with( [&]( const item & it ) {
-                    return it.mission_id == mission_id;
-                }, pocket_type::E_FILE_STORAGE );
-            }
+            bool operator()( const item &it ) const;
         };
 
         // -2 position is 0 worn index, -3 position is 1 worn index, etc
@@ -2406,7 +2400,8 @@ class Character : public Creature, public visitable
          * @param it Item we are checking
          * @param context optionally override effective item when checking contextual skills
          */
-        bool can_use( const item &it, const item &context = item() ) const;
+        bool can_use( const item &it, const item &context ) const;
+        bool can_use( const item &it) const;
         /**
          * Check character capable of wearing an item.
          * @param it Thing to be worn
@@ -2532,15 +2527,18 @@ class Character : public Creature, public visitable
         void mod_knowledge_level( const skill_id &ident, int delta );
         /** Checks whether the character's skills meet the required */
         bool meets_skill_requirements( const std::map<skill_id, int> &req,
-                                       const item &context = item() ) const;
+                                       const item &context ) const;
+        bool meets_skill_requirements( const std::map<skill_id, int> &req ) const;
         /** Checks whether the character's skills meet the required */
         bool meets_skill_requirements( const construction &con ) const;
         /** Checks whether the character's stats meets the stats required by the item */
         bool meets_stat_requirements( const item &it ) const;
         /** Checks whether the character meets overall requirements to be able to use the item */
-        bool meets_requirements( const item &it, const item &context = item() ) const;
+        bool meets_requirements( const item &it, const item &context ) const;
+        bool meets_requirements( const item &it ) const;
         /** Returns a string of missed requirements (both stats and skills) */
-        std::string enumerate_unmet_requirements( const item &it, const item &context = item() ) const;
+        std::string enumerate_unmet_requirements( const item &it, const item &context ) const;
+        std::string enumerate_unmet_requirements( const item &it ) const;
 
         // Mental skills and stats
         /** Returns the player's reading speed as a percentage*/
@@ -2839,7 +2837,7 @@ class Character : public Creature, public visitable
         pimpl<inventory> inv;
         itype_id last_item;
     private:
-        item weapon;
+        pimpl<item> weapon;
     public:
         item_location get_wielded_item() const;
         item_location get_wielded_item();
@@ -4291,7 +4289,7 @@ class Character : public Creature, public visitable
     private:
         /* cached recipes, which are invalidated if the turn changes */
         mutable time_point cached_recipe_turn;
-        pimpl<recipe_subset> cached_recipe_subset;
+        mutable pimpl<recipe_subset> cached_recipe_subset;
 };
 
 Character &get_player_character();

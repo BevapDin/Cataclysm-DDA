@@ -7,6 +7,7 @@
 #include "input_context.h"
 #include "output.h"
 #include "point.h"
+#include "item_info_data.h"
 
 class iteminfo_window : public cataimgui::window
 {

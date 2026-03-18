@@ -27,6 +27,8 @@
 #include "avatar_action.h"
 #include "bionics.h"
 #include "bodypart.h"
+#include "item_info_data.h"
+#include "iteminfo.h"
 #include "cached_options.h"
 #include "calendar.h"
 #include "cata_assert.h"

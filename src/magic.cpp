@@ -2505,6 +2505,11 @@ bool known_magic::can_learn_spell( const Character &guy, const spell_id &sp,
     return !guy.has_opposite_trait( sp_t.spell_class );
 }
 
+const spell &known_magic::get_spell( const spell_id &sp ) const
+{
+    return const_cast<known_magic*>(this)->get_spell(sp);
+}
+
 spell &known_magic::get_spell( const spell_id &sp )
 {
     if( !knows_spell( sp ) ) {

@@ -30,6 +30,7 @@
 #include "creature.h"
 #include "creature_tracker.h"
 #include "cursesdef.h"
+#include "item_reload_option.h"
 #include "damage.h"
 #include "debug.h"
 #include "dialogue.h"
@@ -2337,7 +2338,7 @@ int RAS_time( const Character &p, const item_location &loc )
         const item_location gun = p.get_wielded_item();
         int sta_percent = ( 100 * p.get_stamina() ) / p.get_stamina_max();
         time += ( sta_percent < 25 ) ? ( ( 25 - sta_percent ) * 2 ) : 0;
-        item::reload_option opt = item::reload_option( &p, gun, loc );
+        item_reload_option opt = item_reload_option( &p, gun, loc );
         time += opt.moves();
     }
     return time;
@@ -3776,7 +3777,7 @@ bool target_ui::action_switch_ammo()
         }
     } else if( mode == TargetMode::Fire && relevant->has_flag( flag_RELOAD_AND_SHOOT ) ) {
         item_location gun = you->get_wielded_item();
-        item::reload_option opt = you->select_ammo( gun );
+        item_reload_option opt = you->select_ammo( gun );
         if( opt ) {
             activity->reload_loc = opt.ammo;
             update_ammo_range_from_gun_mode();

@@ -237,7 +237,7 @@ weather_type_id weather_generator::get_weather_conditions( const w_point &w ) co
     // but the dialogue condition system which drives that logic has no way for us to provide them
     // directly; it can only reference the current game state. Until it's overhauled, we'll just hack
     // the current game state while checking the conditions.
-    const weather_manager &game_weather = get_weather_const();
+    weather_manager &game_weather = const_cast<weather_manager&>(get_weather_const());
     w_point original_weather_precise = *game_weather.weather_precise;
     *game_weather.weather_precise = w;
     weather_type_id current_conditions = WEATHER_CLEAR;

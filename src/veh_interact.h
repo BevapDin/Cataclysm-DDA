@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "color.h"
+#include "enum_conversions.h"
 #include "coordinates.h"
 #include "cursesdef.h"
 #include "input_context.h"

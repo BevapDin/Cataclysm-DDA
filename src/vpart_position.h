@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "coords_fwd.h"
-#include "item.h"
 #include "type_id.h"
 
+class item;
 class Character;
 class inventory;
 class map;

@@ -257,11 +257,11 @@ void item::add_rain_to_container( int charges )
     item ret( itype_water, calendar::turn );
     const int capa = get_remaining_capacity_for_liquid( ret, true );
     ret.charges = std::min( charges, capa );
-    if( contents.can_contain( ret ).success() ) {
+    if( contents->can_contain( ret ).success() ) {
         // This is easy. Just add 1 charge of the rain liquid to the container.
         put_in( ret, pocket_type::CONTAINER );
     } else {
-        item *found_liq = contents.get_item_with( [&]( const item & liquid ) {
+        item *found_liq = contents->get_item_with( [&]( const item & liquid ) {
             return liquid.typeId() == itype_water;
         } );
         if( found_liq == nullptr ) {

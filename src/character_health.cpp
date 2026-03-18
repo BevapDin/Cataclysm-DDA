@@ -2590,12 +2590,12 @@ void Character::apply_damage( Creature *source, bodypart_id hurt, int dam,
                 part_to_damage.id(), pain );
     }
 
-    if( !weapon.is_null() && !can_wield( weapon ).success() &&
-        can_drop( weapon ).success() ) {
+    if( !weapon->is_null() && !can_wield( *weapon ).success() &&
+        can_drop( *weapon ).success() ) {
         add_msg_if_player( _( "You are no longer able to wield your %s and drop it!" ),
-                           weapon.display_name() );
-        put_into_vehicle_or_drop( *this, item_drop_reason::tumbling, { weapon } );
-        i_rem( &weapon );
+                           weapon->display_name() );
+        put_into_vehicle_or_drop( *this, item_drop_reason::tumbling, { *weapon } );
+        i_rem( &*weapon );
     }
     if( has_effect( effect_mending, part_to_damage.id() ) && ( source == nullptr ||
             !source->is_hallucination() ) ) {
@@ -2718,7 +2718,7 @@ dealt_damage_instance Character::deal_damage( Creature *source, bodypart_id bp,
     }
 
     // TODO: Scale with damage in a way that makes sense for power armors, plate armor and naked skin.
-    recoil += recoil_mul * weapon.volume() / 250_ml;
+    recoil += recoil_mul * weapon->volume() / 250_ml;
     recoil = std::min( MAX_RECOIL, recoil );
 
     int sum_cover = 0;

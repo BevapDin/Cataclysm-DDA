@@ -239,9 +239,9 @@ void bionic::update_weapon_flags()
 {
     if( has_weapon() ) {
         if( id->has_flag( flag_USES_BIONIC_POWER ) ) {
-            weapon.set_flag( flag_USES_BIONIC_POWER );
+            weapon->set_flag( flag_USES_BIONIC_POWER );
         }
-        weapon.set_flag( flag_NO_UNWIELD );
+        weapon->set_flag( flag_NO_UNWIELD );
     }
 }
 
@@ -845,7 +845,7 @@ bool Character::activate_bionic( bionic &bio, bool eff_only, bool *close_bionics
             return false;
         }
 
-        if( weapon.has_flag( flag_NO_UNWIELD ) ) {
+        if( weapon->has_flag( flag_NO_UNWIELD ) ) {
             if( get_weapon_bionic_uid() ) {
                 if( std::optional<bionic *> bio_opt = find_bionic_by_uid( get_weapon_bionic_uid() ) ) {
                     if( deactivate_bionic( **bio_opt, eff_only ) ) {
@@ -865,15 +865,15 @@ bool Character::activate_bionic( bionic &bio, bool eff_only, bool *close_bionics
                 }
             }
 
-            add_msg_if_player( m_info, _( "Deactivate your %s first!" ), weapon.tname() );
+            add_msg_if_player( m_info, _( "Deactivate your %s first!" ), weapon->tname() );
             refund_power();
             bio.powered = false;
             return false;
         }
 
-        if( !weapon.is_null() ) {
-            const std::string query = string_format( _( "Stop wielding %s?" ), weapon.tname() );
-            if( !dispose_item( item_location( *this, &weapon ), query ) ) {
+        if( !weapon->is_null() ) {
+            const std::string query = string_format( _( "Stop wielding %s?" ), weapon->tname() );
+            if( !dispose_item( item_location( *this, &*weapon ), query ) ) {
                 refund_power();
                 bio.powered = false;
                 return false;
@@ -1268,12 +1268,12 @@ bool Character::deactivate_bionic( bionic &bio, bool eff_only )
     if( bio.info().has_flag( json_flag_BIONIC_WEAPON ) ) {
         if( bio.get_uid() == get_weapon_bionic_uid() ) {
             bio.set_weapon( *get_wielded_item() );
-            add_msg_if_player( _( "You withdraw your %s." ), weapon.tname() );
+            add_msg_if_player( _( "You withdraw your %s." ), weapon->tname() );
             if( get_player_view().sees( here, pos_bub( here ) ) ) {
                 if( male ) {
-                    add_msg_if_npc( m_info, _( "<npcname> withdraws his %s." ), weapon.tname() );
+                    add_msg_if_npc( m_info, _( "<npcname> withdraws his %s." ), weapon->tname() );
                 } else {
-                    add_msg_if_npc( m_info, _( "<npcname> withdraws her %s." ), weapon.tname() );
+                    add_msg_if_npc( m_info, _( "<npcname> withdraws her %s." ), weapon->tname() );
                 }
             }
             set_wielded_item( item() );
@@ -1610,8 +1610,8 @@ void Character::process_bionic( bionic &bio )
     }
 
     if( bio.get_uid() == get_weapon_bionic_uid() ) {
-        const bool wrong_weapon_wielded = weapon.typeId() != bio.get_weapon().typeId() ||
-                                          !weapon.has_flag( flag_NO_UNWIELD );
+        const bool wrong_weapon_wielded = weapon->typeId() != bio.get_weapon().typeId() ||
+                                          !weapon->has_flag( flag_NO_UNWIELD );
 
         if( wrong_weapon_wielded ) {
             // Wielded weapon replaced in an unexpected way
@@ -1619,7 +1619,7 @@ void Character::process_bionic( bionic &bio )
             weapon_bionic_uid = 0;
         }
 
-        if( weapon.is_null() || wrong_weapon_wielded ) {
+        if( weapon->is_null() || wrong_weapon_wielded ) {
             // Force deactivation because the weapon is gone
             force_bionic_deactivation( bio );
             return;
@@ -2823,9 +2823,9 @@ bionic_uid Character::add_bionic( const bionic_id &b, bionic_uid parent_uid,
 
 std::optional<bionic *> Character::find_bionic_by_type( const bionic_id &b ) const
 {
-    for( bionic &bio : *my_bionics ) {
+    for( const bionic &bio : *my_bionics ) {
         if( bio.id == b ) {
-            return &bio;
+            return const_cast<bionic*>(&bio);
         }
     }
     return std::nullopt;
@@ -2837,9 +2837,9 @@ std::optional<bionic *> Character::find_bionic_by_uid( bionic_uid bio_uid ) cons
         return std::nullopt;
     }
 
-    for( bionic &bio : *my_bionics ) {
+    for( const bionic &bio : *my_bionics ) {
         if( bio.get_uid() == bio_uid ) {
-            return &bio;
+            return const_cast<bionic*>(&bio);
         }
     }
     return std::nullopt;
@@ -2945,16 +2945,16 @@ bool bionic::has_flag( const std::string &flag ) const
 
 int bionic::get_quality( const quality_id &quality ) const
 {
-    if( weapon.typeId().is_empty() ) {
+    if( weapon->typeId().is_empty() ) {
         return INT_MIN;
     }
 
-    return weapon.get_quality( quality );
+    return weapon->get_quality( quality );
 }
 
 bool bionic::has_weapon() const
 {
-    return !weapon.typeId().is_empty() && !weapon.typeId().is_null();
+    return !weapon->typeId().is_empty() && !weapon->typeId().is_null();
 }
 
 bool bionic::can_install_weapon() const
@@ -2970,12 +2970,12 @@ bool bionic::can_install_weapon( const item &new_weapon ) const
 
 item bionic::get_weapon() const
 {
-    return weapon;
+    return *weapon;
 }
 
 void bionic::set_weapon( const item &new_weapon )
 {
-    weapon = new_weapon;
+    *weapon = new_weapon;
     update_weapon_flags();
 }
 
@@ -3020,7 +3020,7 @@ std::optional<item> bionic::uninstall_weapon()
         return std::nullopt;
     }
     std::optional<item> old_item = get_weapon();
-    weapon = item();
+    *weapon = item();
 
     if( old_item && !old_item->is_null() ) {
         old_item->unset_flag( flag_USES_BIONIC_POWER );
@@ -3044,7 +3044,7 @@ std::vector<const item *> bionic::get_available_pseudo_items( bool include_weapo
         }
 
         if( include_weapon && has_weapon() ) {
-            ret.push_back( &weapon );
+            ret.push_back( &*weapon );
         }
     }
 
@@ -3385,9 +3385,9 @@ std::vector<item *> Character::get_cable_ups()
         }
     }
 
-    if( n > 0 && weapon.has_flag( flag_IS_UPS ) && weapon.get_var( "cable" ) == "plugged_in" &&
-        weapon.ammo_remaining( ) ) {
-        stored_fuels.emplace_back( &weapon.first_ammo() );
+    if( n > 0 && weapon->has_flag( flag_IS_UPS ) && weapon->get_var( "cable" ) == "plugged_in" &&
+        weapon->ammo_remaining( ) ) {
+        stored_fuels.emplace_back( &weapon->first_ammo() );
     }
 
     return stored_fuels;
@@ -3416,8 +3416,8 @@ std::vector<item *> Character::get_cable_solar()
         }
     }
 
-    if( n > 0 && weapon.has_flag( flag_SOLARPACK_ON ) && weapon.get_var( "cable" ) == "plugged_in" ) {
-        solar_sources.emplace_back( &weapon );
+    if( n > 0 && weapon->has_flag( flag_SOLARPACK_ON ) && weapon->get_var( "cable" ) == "plugged_in" ) {
+        solar_sources.emplace_back( &*weapon );
     }
 
     return solar_sources;
@@ -3524,7 +3524,7 @@ bionic_uid Character::generate_bionic_uid() const
 void Character::update_last_bionic_uid() const
 {
     next_bionic_uid = 0;
-    for( bionic &bio : *my_bionics ) {
+    for( const bionic &bio : *my_bionics ) {
         if( bio.get_uid() > next_bionic_uid ) {
             next_bionic_uid = bio.get_uid();
         }

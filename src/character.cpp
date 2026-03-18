@@ -50,6 +50,7 @@
 #include "input_context.h"
 #include "input_enums.h"
 #include "inventory.h"
+#include "item.h"
 #include "item_location.h"
 #include "item_pocket.h"
 #include "item_stack.h"
@@ -388,6 +389,10 @@ int character_max_dex = 20;
 int character_max_per = 20;
 int character_max_int = 20;
 
+consumption_event::consumption_event( const item &food ) : time( calendar::turn ) {
+    type_id = food.typeId();
+    component_hash = food.make_component_hash();
+}
 
 queued_eocs::queued_eocs() = default;
 
@@ -1445,7 +1450,7 @@ int Character::swim_speed() const
 
 bool Character::is_on_ground() const
 {
-    return ( !enough_working_legs() && !weapon.has_flag( flag_CRUTCHES ) ) ||
+    return ( !enough_working_legs() && !weapon->has_flag( flag_CRUTCHES ) ) ||
            has_effect( effect_downed ) || is_prone();
 }
 
@@ -1689,7 +1694,7 @@ void Character::forced_dismount()
         auto *mon = mounted_creature.get();
         if( mon->has_flag( mon_flag_RIDEABLE_MECH ) && !mon->type->mech_weapon.is_empty() ) {
             mech = true;
-            remove_item( weapon );
+            remove_item( *weapon );
         }
         mon->mounted_player_id = character_id();
         mon->remove_effect( effect_ridden );
@@ -1804,8 +1809,8 @@ void Character::dismount()
         monster *critter = mounted_creature.get();
         critter->mounted_player_id = character_id();
         if( critter->has_flag( mon_flag_RIDEABLE_MECH ) && !critter->type->mech_weapon.is_empty() &&
-            weapon.typeId() == critter->type->mech_weapon ) {
-            remove_item( weapon );
+            weapon->typeId() == critter->type->mech_weapon ) {
+            remove_item( *weapon );
         }
         avatar &player_character = get_avatar();
         if( is_avatar() && player_character.get_grab_type() != object_type::NONE ) {
@@ -1868,8 +1873,8 @@ void Character::on_dodge( Creature *source, float difficulty, float training_lev
     }
 
     // dodging throws of our aim unless we are either skilled at dodging or using a small weapon
-    if( is_armed() && weapon.is_gun() ) {
-        recoil += std::max( weapon.volume() / 250_ml - get_skill_level( skill_dodge ), 0.0f ) * rng( 0,
+    if( is_armed() && weapon->is_gun() ) {
+        recoil += std::max( weapon->volume() / 250_ml - get_skill_level( skill_dodge ), 0.0f ) * rng( 0,
                   100 );
         recoil = std::min( MAX_RECOIL, recoil );
     }
@@ -2837,6 +2842,10 @@ units::mass Character::max_pickup_capacity() const
     return weight_capacity() * 4;
 }
 
+bool Character::can_use( const item &it ) const {
+    return can_use(it, item());
+}
+
 bool Character::can_use( const item &it, const item &context ) const
 {
     if( has_effect( effect_incorporeal ) ) {
@@ -2914,8 +2923,8 @@ std::vector<std::pair<std::string, std::string>> Character::get_overlay_ids() co
     // last weapon
     // TODO: might there be clothing that covers the weapon?
     if( is_armed() ) {
-        const std::string variant = weapon.has_itype_variant() ? weapon.itype_variant().id : "";
-        rval.emplace_back( "wielded_" + weapon.typeId().str(), variant );
+        const std::string variant = weapon->has_itype_variant() ? weapon->itype_variant().id : "";
+        rval.emplace_back( "wielded_" + weapon->typeId().str(), variant );
     }
 
     if( !is_walking() && show_creature_overlay_icons ) {
@@ -2967,12 +2976,30 @@ std::string Character::enumerate_unmet_requirements( const item &it, const item 
     return enumerate_as_string( unmet_reqs );
 }
 
+bool Character::has_mission_item_filter::operator()( const item &it ) const {
+    return it.mission_id == mission_id || it.has_any_with( [&]( const item & it ) {
+        return it.mission_id == mission_id;
+    }, pocket_type::E_FILE_STORAGE );
+}
+
 bool Character::meets_stat_requirements( const item &it ) const
 {
     return get_str() >= it.get_min_str() &&
            get_dex() >= it.type->min_dex &&
            get_int() >= it.type->min_int &&
            get_per() >= it.type->min_per;
+}
+
+bool Character::meets_skill_requirements( const std::map<skill_id, int> &req ) const {
+    return meets_skill_requirements( req, item() );
+}
+
+std::string Character::enumerate_unmet_requirements( const item &it ) const {
+    return enumerate_unmet_requirements( it, item() );
+}
+
+bool Character::meets_requirements( const item &it ) const {
+    return meets_requirements( it, item() );
 }
 
 bool Character::meets_requirements( const item &it, const item &context ) const
@@ -2987,7 +3014,7 @@ void Character::normalize()
 
     activity_history.weary_clear();
     martial_arts_data->reset_style();
-    weapon = item( itype_id::NULL_ID(), calendar::turn_zero );
+    *weapon = item( itype_id::NULL_ID(), calendar::turn_zero );
 
     set_body();
     recalc_hp();
@@ -3104,7 +3131,7 @@ units::mass Character::get_weight() const
     ret += bodyweight();       // The base weight of the player's body
     ret += inv->weight();           // Weight of the stored inventory
     ret += wornWeight;             // Weight of worn items
-    ret += weapon.weight();        // Weight of wielded item
+    ret += weapon->weight();        // Weight of wielded item
     ret += bionics_weight();       // Weight of installed bionics
     return enchantment_cache->modify_value( enchant_vals::mod::TOTAL_WEIGHT, ret );
 }
@@ -3890,10 +3917,10 @@ std::vector<std::string> Character::extended_description() const
 
     tmp.emplace_back( "--" );
     std::string wielding;
-    if( weapon.is_null() ) {
+    if( weapon->is_null() ) {
         wielding = _( "Nothing" );
     } else {
-        wielding = weapon.tname();
+        wielding = weapon->tname();
     }
 
     tmp.emplace_back( string_format( _( "Wielding: %s" ), colorize( wielding, c_red ) ) );
@@ -5492,7 +5519,7 @@ std::list<item> Character::use_amount( const itype_id &it, int quantity,
             tmp.erase( tmp.begin() + imenu.ret );
         }
     }
-    if( quantity > 0 && weapon.use_amount( it, quantity, ret ) ) {
+    if( quantity > 0 && weapon->use_amount( it, quantity, ret ) ) {
         remove_weapon();
     }
     ret = worn.use_amount( it, quantity, ret, filter, *this );
@@ -5917,16 +5944,16 @@ float Character::power_rating() const
     int dmg = 0;
     for( const damage_type &dt : damage_type::get_all() ) {
         if( dt.melee_only ) {
-            int tdmg = weapon.damage_melee( dt.id );
+            int tdmg = weapon->damage_melee( dt.id );
             dmg = dmg < tdmg ? tdmg : dmg;
         }
     }
 
     int ret = 2;
     // Small guns can be easily hidden from view
-    if( weapon.volume() <= 250_ml ) {
+    if( weapon->volume() <= 250_ml ) {
         ret = 2;
-    } else if( weapon.is_gun() ) {
+    } else if( weapon->is_gun() ) {
         ret = 4;
     } else if( dmg > 12 ) {
         ret = 3; // Melee weapon or weapon-y tool
@@ -6263,7 +6290,7 @@ std::vector<Creature *> Character::get_targetable_creatures( const int range, bo
                     critter.pos_bub( here ) );
             for( const tripoint_bub_ms &point : path ) {
                 if( here.impassable( point ) &&
-                    !( weapon.has_flag( flag_SPEAR ) && // Fences etc. Spears can stab through those
+                    !( weapon->has_flag( flag_SPEAR ) && // Fences etc. Spears can stab through those
                        here.has_flag( ter_furn_flag::TFLAG_THIN_OBSTACLE,
                                       point ) ) ) { //this mirrors melee.cpp function reach_attack
                     can_see = false;
@@ -6457,7 +6484,7 @@ std::vector<std::string> Character::short_description_parts() const
     std::vector<std::string> result;
 
     if( is_armed() ) {
-        result.push_back( _( "Wielding: " ) + weapon.tname() );
+        result.push_back( _( "Wielding: " ) + weapon->tname() );
     }
     const std::list<item_location> visible_worn_items = get_visible_worn_items();
     const std::string worn_str = enumerate_as_string( visible_worn_items.begin(),
@@ -7196,11 +7223,11 @@ int Character::intimidation() const
 {
     /** @EFFECT_STR increases intimidation factor */
     int ret = get_str() * 2;
-    if( weapon.is_gun() ) {
+    if( weapon->is_gun() ) {
         ret += 10;
     }
     for( const damage_type &dt : damage_type::get_all() ) {
-        if( dt.melee_only && weapon.damage_melee( dt.id ) >= 12 ) {
+        if( dt.melee_only && weapon->damage_melee( dt.id ) >= 12 ) {
             ret += 5;
             break;
         }
@@ -7734,8 +7761,8 @@ int Character::impact( const int force, const tripoint_bub_ms &p )
     }
     //for wielded items
     if( !here.has_flag( ter_furn_flag::TFLAG_SWIMMABLE, p ) &&
-        weapon.affects_fall() ) {
-        effective_force = std::max( 0, effective_force - weapon.fall_damage_reduction() );
+        weapon->affects_fall() ) {
+        effective_force = std::max( 0, effective_force - weapon->fall_damage_reduction() );
 
     }
     // Rescale for huge force

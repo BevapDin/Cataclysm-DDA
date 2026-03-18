@@ -31,8 +31,6 @@
 #include "enum_bitset.h"
 #include "enum_conversions.h"
 #include "flat_set.h"
-#include "flexbuffer_json.h"
-#include "json.h"
 #include "mapgen_parameter.h"
 #include "memory_fast.h"
 #include "overmap_location.h"
@@ -58,6 +56,11 @@ enum class om_vision_level : int8_t;
 struct map_data_summary;
 struct mapgen_arguments;
 struct oter_t;
+
+class JsonOut;
+class JsonArray;
+class JsonOut;
+class JsonValue;
 
 inline const overmap_land_use_code_id land_use_code_forest( "forest" );
 inline const overmap_land_use_code_id land_use_code_wetland( "wetland" );
@@ -98,25 +101,6 @@ pos_dir<Tripoint> pos_dir<Tripoint>::opposite() const
             break;
     }
     cata_fatal( "Invalid cube_direction" );
-}
-
-template<typename Tripoint>
-void pos_dir<Tripoint>::serialize( JsonOut &jsout ) const
-{
-    jsout.start_array();
-    jsout.write( p );
-    jsout.write( dir );
-    jsout.end_array();
-}
-
-template<typename Tripoint>
-void pos_dir<Tripoint>::deserialize( const JsonArray &ja )
-{
-    if( ja.size() != 2 ) {
-        ja.throw_error( "Expected array of size 2" );
-    }
-    ja.read( 0, p );
-    ja.read( 1, dir );
 }
 
 template<typename Tripoint>
@@ -255,7 +239,8 @@ struct overmap_spawns {
         }
 
     protected:
-        void load( const JsonObject &jo ) {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonObject>> load( const T &jo ) {
             jo.read( "group", group );
             jo.read( "population", population );
         }
@@ -268,8 +253,9 @@ struct overmap_static_spawns : public overmap_spawns {
         return overmap_spawns::operator==( rhs ) && chance == rhs.chance;
     }
 
-    void deserialize( const JsonValue &jsin ) {
-        JsonObject jo = jsin.get_object();
+    template<typename T>
+    std::enable_if_t<std::is_same_v<T, JsonValue>> deserialize( const T &jsin ) {
+        auto jo = jsin.get_object();
         overmap_spawns::load( jo );
         jo.read( "chance", chance );
     }
@@ -690,9 +676,9 @@ struct overmap_special_spawns : public overmap_spawns {
     bool operator==( const overmap_special_spawns &rhs ) const {
         return overmap_spawns::operator==( rhs ) && radius == rhs.radius;
     }
-
-    void deserialize( const JsonValue &jsin ) {
-        JsonObject jo = jsin.get_object();
+    template<typename T>
+    std::enable_if_t<std::is_same_v<T, JsonValue>> deserialize( const T &jsin ) {
+        auto jo = jsin.get_object();
         overmap_spawns::load( jo );
         jo.read( "radius", radius );
     }
@@ -964,11 +950,12 @@ struct mutable_overmap_join {
     unsigned priority; // NOLINT(cata-serialize)
     const mutable_overmap_join *opposite = nullptr; // NOLINT(cata-serialize)
 
-    void deserialize( const JsonValue &jin ) {
+    template<typename T>
+    std::enable_if_t<std::is_same_v<T, JsonValue>> deserialize( const T &jin ) {
         if( jin.test_string() ) {
             id = jin.get_string();
         } else {
-            JsonObject jo = jin.get_object();
+            auto jo = jin.get_object();
             jo.read( "id", id, true );
             jo.read( "into_locations", into_locations, true );
             jo.read( "opposite", opposite_id, true );
@@ -988,10 +975,18 @@ struct mutable_overmap_terrain_join {
     void deserialize( const JsonValue &jin );
 };
 
+template<typename T>
+struct type_identity {
+    using type = T;
+};
+template<typename T>
+using type_identity_t = typename type_identity<T>::type;
+
 struct mutable_special_connection {
     string_id<overmap_connection> connection;
 
-    void deserialize( const JsonObject &jo ) {
+    template<typename T = JsonObject>
+    void deserialize( const type_identity_t<T> &jo ) {
         jo.read( "connection", connection );
     }
 
@@ -1019,7 +1014,8 @@ struct mutable_overmap_placement_rule_piece {
     tripoint_rel_omt pos;
     om_direction::type rot = om_direction::type::north;
 
-    void deserialize( const JsonObject &jo ) {
+    template<typename T = JsonObject>
+    void deserialize( const type_identity_t<T> &jo ) {
         jo.read( "overmap", overmap_id, true );
         jo.read( "pos", pos, true );
         jo.read( "rot", rot, true );
@@ -1305,7 +1301,8 @@ struct mutable_overmap_phase {
         return { realised_rules };
     }
 
-    void deserialize( const JsonValue &jin ) {
+    template<typename T>
+    std::enable_if_t<std::is_same_v<T, JsonValue>> deserialize( const T &jin ) {
         jin.read( rules, true );
     }
 };

@@ -23,6 +23,7 @@
 #include "type_id.h"
 #include "units.h"
 
+struct iteminfo;
 class Character;
 class JsonObject;
 class item;

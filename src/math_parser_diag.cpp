@@ -987,11 +987,11 @@ void school_level_adjustment_ass( double val, dialogue &d, char scope,
     const Character *ch = d.actor( is_beta( scope ) )->get_character();
     if( ch ) {
         const trait_id school( params[0].str( d ) );
-        auto it = ch->magic->caster_level_adjustment_by_school.find( school );
+        auto it = const_cast<known_magic&>(*ch->magic).caster_level_adjustment_by_school.find( school );
         if( it != ch->magic->caster_level_adjustment_by_school.end() ) {
             it->second = val;
         } else {
-            ch->magic->caster_level_adjustment_by_school.insert( { school, val } );
+            const_cast<known_magic&>(*ch->magic).caster_level_adjustment_by_school.insert( { school, val } );
         }
     }
 }
@@ -1146,7 +1146,7 @@ double spell_level_adjustment_eval( const_dialogue const &d, char scope,
             return ch->magic->caster_level_adjustment;
         } else {
             std::map<spell_id, double>::iterator it =
-                ch->magic->caster_level_adjustment_by_spell.find( spell );
+                const_cast<known_magic&>(*ch->magic).caster_level_adjustment_by_spell.find( spell );
             if( it != ch->magic->caster_level_adjustment_by_spell.end() ) {
                 return it->second;
             }
@@ -1163,14 +1163,14 @@ void spell_level_adjustment_ass( double val, dialogue &d, char scope,
     if( ch ) {
         const spell_id spell( params[0].str( d ) );
         if( spell == spell_id::NULL_ID() ) {
-            ch->magic->caster_level_adjustment = val;
+            const_cast<known_magic&>(*ch->magic).caster_level_adjustment = val;
         } else {
             std::map<spell_id, double>::iterator it =
-                ch->magic->caster_level_adjustment_by_spell.find( spell );
+                const_cast<known_magic&>(*ch->magic).caster_level_adjustment_by_spell.find( spell );
             if( it != ch->magic->caster_level_adjustment_by_spell.end() ) {
                 it->second = val;
             } else {
-                ch->magic->caster_level_adjustment_by_spell.insert( { spell, val } );
+                const_cast<known_magic&>(*ch->magic).caster_level_adjustment_by_spell.insert( { spell, val } );
             }
         }
     }

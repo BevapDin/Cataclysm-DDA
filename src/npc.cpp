@@ -1546,7 +1546,7 @@ static void choose_best_MA_style( npc *you )
     double best_wpn_value = you->evaluate_weapon( weapon );
 
     // And then see if switching style will improve our evaluation
-    const pimpl<character_martial_arts> &MA_data = you->martial_arts_data;
+    pimpl<character_martial_arts> &MA_data = you->martial_arts_data;
     const matype_id starting_style = MA_data->selected_style();
     matype_id best_style = starting_style;
     for( const matype_id &style : MA_data->get_known_styles( false ) ) {

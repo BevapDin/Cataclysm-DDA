@@ -18,6 +18,7 @@
 #include "string_id.h"
 #include "translations.h"
 #include "uilist.h"
+#include "flexbuffer_json.h"
 
 namespace om_debug
 {

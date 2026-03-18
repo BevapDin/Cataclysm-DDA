@@ -17,6 +17,7 @@
 #include "explosion.h"
 #include "game.h"
 #include "magic.h"
+#include "submap.h"
 #include "map.h"
 #include "map_extras.h"
 #include "map_iterator.h"
@@ -86,7 +87,7 @@ timed_event::timed_event( timed_event_type e_t, const time_point &w, int f_id, t
 }
 
 timed_event::timed_event( timed_event_type e_t, const time_point &w, int f_id, tripoint_abs_ms p,
-                          int s, std::string s_id, submap sr, std::string key )
+                          int s, std::string s_id, cata::value_ptr<submap> sr, std::string key )
     : type( e_t )
     , when( w )
     , faction_id( f_id )
@@ -334,8 +335,9 @@ void timed_event::actualize()
             break;
 
         case timed_event_type::REVERT_SUBMAP: {
+            assert(revert);
             submap *sm = MAPBUFFER.lookup_submap( map_point );
-            sm->revert_submap( revert );
+            sm->revert_submap( *revert );
             reality_bubble().invalidate_map_cache( map_point.z() );
             break;
         }
@@ -441,7 +443,7 @@ void timed_event_manager::add( timed_event_type type, const time_point &when,
 void timed_event_manager::add( timed_event_type type, const time_point &when,
                                const int faction_id,
                                const tripoint_abs_ms &where,
-                               int strength, const std::string &string_id, submap sr,
+                               int strength, const std::string &string_id, cata::value_ptr<submap> sr,
                                const std::string &key )
 {
     events.emplace_back( type, when, faction_id, where, strength, string_id, std::move( sr ), key );

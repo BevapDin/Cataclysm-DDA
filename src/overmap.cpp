@@ -93,8 +93,34 @@ static const oter_type_str_id oter_type_sub_station( "sub_station" );
 using oter_type_id = int_id<oter_type_t>;
 using oter_type_str_id = string_id<oter_type_t>;
 
+template<typename Tripoint>
+void pos_dir<Tripoint>::serialize( JsonOut &jsout ) const
+{
+    jsout.start_array();
+    jsout.write( p );
+    jsout.write( dir );
+    jsout.end_array();
+}
+
+template void pos_dir<om_pos_dir>::serialize( JsonOut &jsout ) const;
+template void pos_dir<rel_pos_dir>::serialize( JsonOut &jsout ) const;
+
+template<typename Tripoint>
+void pos_dir<Tripoint>::deserialize( const JsonArray &ja )
+{
+    if( ja.size() != 2 ) {
+        ja.throw_error( "Expected array of size 2" );
+    }
+    ja.read( 0, p );
+    ja.read( 1, dir );
+}
+
+
 template struct pos_dir<tripoint_om_omt>;
 template struct pos_dir<tripoint_rel_omt>;
+
+// template void pos_dir<om_pos_dir>::deserialize( const JsonArray &ja );
+// template void pos_dir<rel_pos_dir>::deserialize( const JsonArray &ja );
 
 ////////////////
 static oter_id ot_null;

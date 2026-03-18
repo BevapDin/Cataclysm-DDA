@@ -12,13 +12,14 @@
 #include "enums.h"
 #include "flat_set.h"
 #include "item_location.h"
-#include "json.h"
 #include "omdata.h"
 #include "type_id.h"
 
 constexpr int DEFAULT_TILESET_ZOOM = 16;
 
 class item;
+class JsonOut;
+class JsonObject;
 
 struct advanced_inv_pane_save_state {
     public:
@@ -31,7 +32,8 @@ struct advanced_inv_pane_save_state {
         item_location container;
         int container_base_loc;
 
-        void serialize( JsonOut &json, const std::string &prefix ) const {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonOut>> serialize( T &json, const std::string &prefix ) const {
             json.member( prefix + "sort_idx", sort_idx );
             json.member( prefix + "filter", filter );
             json.member( prefix + "area_idx", area_idx );
@@ -41,7 +43,8 @@ struct advanced_inv_pane_save_state {
             json.member( prefix + "container_base_loc", container_base_loc );
         }
 
-        void deserialize( const JsonObject &jo, const std::string &prefix ) {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonObject>> deserialize( const T &jo, const std::string &prefix ) {
             jo.read( prefix + "sort_idx", sort_idx );
             jo.read( prefix + "filter", filter );
             jo.read( prefix + "area_idx", area_idx );
@@ -66,7 +69,8 @@ struct advanced_inv_save_state {
         advanced_inv_pane_save_state pane;
         advanced_inv_pane_save_state pane_right;
 
-        void serialize( JsonOut &json, const std::string &prefix ) const {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonOut>> serialize( T &json, const std::string &prefix ) const {
             json.member( prefix + "exit_code", exit_code );
             json.member( prefix + "re_enter_move_all", re_enter_move_all );
             json.member( prefix + "aim_all_location", aim_all_location );
@@ -80,7 +84,8 @@ struct advanced_inv_save_state {
             pane_right.serialize( json, prefix + "pane_right_" );
         }
 
-        void deserialize( const JsonObject &jo, const std::string &prefix ) {
+        template<typename T>
+        std::enable_if_t<std::is_same_v<T, JsonObject>> deserialize( const T &jo, const std::string &prefix ) {
             jo.read( prefix + "exit_code", exit_code );
             jo.read( prefix + "re_enter_move_all", re_enter_move_all );
             jo.read( prefix + "aim_all_location", aim_all_location );
@@ -305,8 +310,8 @@ class uistatedata
         std::optional<std::function<void()>> open_menu; // NOLINT(cata-serialize)
 
         // nice little convenience function for serializing an array, regardless of amount. :^)
-        template<typename T>
-        void serialize_array( JsonOut &json, const std::string_view name, T &data ) const {
+        template<typename T, typename J>
+        std::enable_if_t<std::is_same_v<J, JsonObject>> serialize_array( J &json, const std::string_view name, T &data ) const {
             json.member( name );
             json.start_array();
             for( const auto &d : data ) {

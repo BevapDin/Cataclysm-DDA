@@ -41,6 +41,7 @@
 #include "debug.h"
 #include "do_turn.h"
 #include "event.h"
+#include "flexbuffer_json.h"
 #include "event_bus.h"
 #include "filesystem.h"
 #include "game.h"
