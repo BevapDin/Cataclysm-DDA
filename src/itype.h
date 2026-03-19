@@ -26,7 +26,6 @@
 #include "flexbuffer_json.h"
 #include "game_constants.h"
 #include "global_vars.h"
-#include "item.h"
 #include "item_pocket.h"
 #include "item_transformation.h"
 #include "iuse.h" // use_function

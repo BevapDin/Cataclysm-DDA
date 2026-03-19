@@ -35,6 +35,7 @@
 #include "character_id.h"
 #include "clzones.h"
 #include "coordinates.h"
+#include "map_stack.h"
 #include "creature.h"
 #include "creature_tracker.h"
 #include "debug.h"

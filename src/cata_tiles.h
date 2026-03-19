@@ -23,7 +23,7 @@
 #include "animation.h"
 #include "calendar.h"
 #include "coordinates.h"
-#include "creature.h"
+#include "creature_attitude.h"
 #include "cuboid_rectangle.h"
 #include "mapdata.h"
 #include "options.h"
@@ -37,6 +37,7 @@
 #include "weighted_list.h"
 
 class Character;
+class Creature;
 class JsonObject;
 class cata_path;
 class memorized_tile;
@@ -707,7 +708,7 @@ class cata_tiles
         void void_vpart_override();
 
         void init_draw_monster_override( const tripoint_bub_ms &p, const mtype_id &id, int count,
-                                         bool more, Creature::Attitude att );
+                                         bool more, creature_attitude att );
         void void_monster_override();
 
         bool has_draw_override( const tripoint_bub_ms &p ) const;
@@ -878,7 +879,7 @@ class cata_tiles
         std::map<tripoint_bub_ms, std::tuple<vpart_id, int, units::angle, bool, point_rel_ms>>
                 vpart_override;
         // int represents spawn count
-        std::map<tripoint_bub_ms, std::tuple<mtype_id, int, bool, Creature::Attitude>> monster_override;
+        std::map<tripoint_bub_ms, std::tuple<mtype_id, int, bool, creature_attitude>> monster_override;
 
     private:
         /**

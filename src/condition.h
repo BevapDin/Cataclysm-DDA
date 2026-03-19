@@ -9,9 +9,7 @@
 
 #include "calendar.h"
 #include "coords_fwd.h"
-#include "dialogue.h"
 #include "dialogue_helpers.h"
-#include "translation.h"
 
 class JsonObject;
 class JsonValue;

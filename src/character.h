@@ -38,13 +38,10 @@
 #include "flat_set.h"
 #include "game_constants.h"
 #include "global_vars.h"
-#include "inventory.h"
 #include "item_location.h"
-#include "item_pocket.h"
 #include "memory_fast.h"
-#include "monster.h"
-#include "pimpl.h"
 #include "player_activity.h"
+#include "queued_eocs.h"
 #include "pocket_type.h"
 #include "point.h"
 #include "ranged.h"
@@ -57,9 +54,11 @@
 #include "units.h"
 #include "visitable.h"
 #include "weakpoint.h"
-#include "weighted_list.h"
 #include "pimpl.h"
 
+class item_pocket;
+class monster;
+class inventory;
 class JsonObject;
 class JsonOut;
 class SkillLevel;
@@ -298,45 +297,6 @@ enum crush_tool_type {
     CRUSH_HAMMER,
     CRUSH_DRILL_OR_HAMMER_AND_SCREW,
     CRUSH_NO_TOOL
-};
-
-struct queued_eoc {
-    public:
-        effect_on_condition_id eoc;
-        time_point time;
-        global_variables::impl_t context;
-};
-
-struct eoc_compare {
-    bool operator()( const queued_eoc &lhs, const queued_eoc &rhs ) const {
-        return lhs.time > rhs.time;
-    }
-};
-
-struct queued_eocs {
-    using storage_iter = std::list<queued_eoc>::iterator;
-
-    struct eoc_compare : ::eoc_compare {
-        bool operator()( const storage_iter &lhs, const storage_iter &rhs ) const {
-            return ::eoc_compare::operator()( *lhs, *rhs );
-        }
-    };
-    std::priority_queue<storage_iter, std::vector<storage_iter>, eoc_compare> queue;
-    std::list<queued_eoc> list;
-
-    queued_eocs();
-
-    queued_eocs( const queued_eocs &rhs );
-    queued_eocs( queued_eocs &&rhs ) noexcept;
-
-    queued_eocs &operator=( const queued_eocs &rhs );
-    queued_eocs &operator=( queued_eocs &&rhs ) noexcept;
-
-    /* std::priority_queue compatibility layer */
-    bool empty() const;
-    const queued_eoc &top() const;
-    void push( const queued_eoc &eoc );
-    void pop();
 };
 
 struct aim_type {
@@ -2319,8 +2279,8 @@ class Character : public Creature, public visitable
         units::mass max_pickup_capacity() const;
         // total capacity of pockets in the player's top level of inventory.
         // bags-of-holding aside, this is the max volume the character can carry without changing what they're wearing/wielding.
-        units::volume volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket =
-                                           item_pocket::ok_default_containers ) const;
+        units::volume volume_capacity() const;
+        units::volume volume_capacity( const std::function<bool( const item_pocket & )> &include_pocket ) const;
         // version of volume_capacity that considers nested pockets even if their parents are not included
         units::volume volume_capacity_recursive( const std::function<bool( const item_pocket & )>
                 &include_pocket,
@@ -2332,14 +2292,8 @@ class Character : public Creature, public visitable
         * @param include_pocket pockets which pass this criteria have their space included (unless they fail check_pocket_tree).
         * @param check_pocket_tree pockets which fail this criteria are excluded, along with all nested pockets.
         * */
-        units::volume free_space( const std::function<bool( const item_pocket & )> &include_pocket = [](
-        const item_pocket &pocket ) {
-            return !pocket.is_restricted()
-                   && item_pocket::ok_for_solids( pocket );
-        },
-        const std::function<bool( const item_pocket & )> &check_pocket_tree =
-            item_pocket::ok_default_containers )
-        const;
+        units::volume free_space() const;
+        units::volume free_space( const std::function<bool( const item_pocket & )> &include_pocket, const std::function<bool( const item_pocket & )> &check_pocket_tree ) const;
         units::mass free_weight_capacity() const;
 
 

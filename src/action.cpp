@@ -25,6 +25,7 @@
 #include "inventory.h"
 #include "item.h"
 #include "item_location.h"
+#include "map_stack.h"
 #include "map.h"
 #include "map_iterator.h"
 #include "map_scale_constants.h"

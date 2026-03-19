@@ -35,6 +35,7 @@
 #include "debug.h"
 #include "debug_menu.h"
 #include "diary.h"
+#include "map_stack.h"
 #include "distraction_manager.h"
 #include "item_reload_option.h"
 #include "do_turn.h"
@@ -3151,7 +3152,7 @@ bool game::do_regular_action( action_id &act, avatar &player_character,
             break;
 
         case ACTION_ITEMACTION:
-            item_action_menu();
+            item_action_menu( item_location() );
             break;
 
         case ACTION_AUTOATTACK:

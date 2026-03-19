@@ -19,15 +19,13 @@
 #include <vector>
 
 #include "calendar.h"
-#include "character.h"
 #include "character_id.h"
 #include "color.h"
 #include "coordinates.h"
-#include "creature.h"
 #include "cursesdef.h"
 #include "enums.h"
 #include "global_vars.h"
-#include "item_location.h"
+#include "creature_attitude.h"
 #include "map_scale_constants.h"
 #include "memory_fast.h"
 #include "overmap_ui.h"
@@ -35,9 +33,12 @@
 #include "type_id.h"
 #include "units_fwd.h"
 #include "weather.h"
+#include "queued_eocs.h"
 
 // The reference to the one and only game instance.
 class game;
+class item_location;
+class Creature;
 
 extern std::unique_ptr<game> g;
 
@@ -878,7 +879,7 @@ class game
         void draw_vpart_override( const tripoint_bub_ms &p, const vpart_id &id, int part_mod,
                                   const units::angle &veh_dir, bool hilite, const point_rel_ms &mount );
         void draw_monster_override( const tripoint_bub_ms &p, const mtype_id &id, int count,
-                                    bool more, Creature::Attitude att );
+                                    bool more, creature_attitude att );
 
         bool is_in_viewport( const tripoint_bub_ms &p, int margin = 0 ) const;
         /**
@@ -984,7 +985,7 @@ class game
         void reload_wielded( bool prompt = false );
         void reload_weapon( bool try_everything = true ); // Reload a wielded gun/tool  'r'
         void insert_item(); // Insert items to container  'v'
-        void insert_item( drop_locations &targets );
+        void insert_item( std::list<std::pair<item_location, int>> &targets );
         // Places the player at the specified point; hurts feet, lists items etc.
         point_rel_sm place_player( const tripoint_bub_ms &dest, bool quick = false );
         void place_player_overmap( const tripoint_abs_omt &om_dest, bool move_player = true );
@@ -1063,7 +1064,7 @@ class game
         bool try_get_right_click_action( action_id &act, const tripoint_bub_ms &mouse_target );
         bool try_get_left_click_action( action_id &act, const tripoint_bub_ms &mouse_target );
         // If loc is empty then use all the items in character inventory including bionics.
-        void item_action_menu( item_location loc = item_location() ); // Displays item action menu
+        void item_action_menu( item_location loc ); // Displays item action menu
 
         bool is_game_over();     // Returns true if the player quit or died
         void bury_screen() const;// Bury a dead character (record their last words)

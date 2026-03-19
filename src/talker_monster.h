@@ -7,9 +7,10 @@
 
 #include "bodypart.h"
 #include "coords_fwd.h"
-#include "monster.h"
 #include "talker.h"
 #include "type_id.h"
+
+class monster;
 
 /*
  * Talker wrapper class for monster.
@@ -28,9 +29,7 @@ class talker_monster_const: public const_talker_cloner<talker_monster_const>
         monster const *get_const_monster() const override {
             return me_mon_const;
         }
-        Creature const *get_const_creature() const override {
-            return me_mon_const;
-        }
+        Creature const *get_const_creature() const override;
 
         // identity and location
         std::string disp_name() const override;
@@ -94,9 +93,7 @@ class talker_monster: public talker_monster_const, public talker_cloner<talker_m
         monster *get_monster() override {
             return me_mon;
         }
-        Creature *get_creature() override {
-            return me_mon;
-        }
+        Creature *get_creature() override;
 
         // effects and values
         void add_effect( const efftype_id &new_effect, const time_duration &dur,

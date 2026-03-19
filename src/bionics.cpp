@@ -24,6 +24,7 @@
 #include "bodypart.h"
 #include "calendar.h"
 #include "cata_utility.h"
+#include "map_stack.h"
 #include "character.h"
 #include "character_attire.h"
 #include "character_martial_arts.h"

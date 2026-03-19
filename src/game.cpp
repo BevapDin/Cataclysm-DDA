@@ -41,6 +41,7 @@
 #include "action.h"
 #include "activity_actor_definitions.h"
 #include "activity_handlers.h"
+#include "map_stack.h"
 #include "activity_type.h"
 #include "ascii_art.h"
 #include "auto_note.h"
@@ -6461,7 +6462,7 @@ void game::list_surroundings()
     reenter_fullscreen();
 }
 
-void game::insert_item( drop_locations &targets )
+void game::insert_item( std::list<std::pair<item_location, int>> &targets )
 {
     if( targets.empty() || !targets.front().first ) {
         return;

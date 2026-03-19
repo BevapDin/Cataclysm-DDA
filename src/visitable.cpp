@@ -16,6 +16,7 @@
 #include "colony.h"
 #include "coordinates.h"
 #include "debug.h"
+#include "map_stack.h"
 #include "flag.h"
 #include "inventory.h"
 #include "item.h"

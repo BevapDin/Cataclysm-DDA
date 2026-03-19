@@ -14,6 +14,7 @@
 #include "options.h"
 #include "rng.h"
 #include "units.h"
+#include "monster.h"
 
 //  Frequency: If you don't use the whole 1000 points of frequency for each of
 //     the monsters, the remaining points will go to the defaultMonster.
@@ -69,6 +70,23 @@ std::string enum_to_string<mongroup::horde_behaviour>( mongroup::horde_behaviour
 }
 
 } // namespace io
+
+mongroup::mongroup( const mongroup_id &ptype, const tripoint_abs_sm &ppos,
+            unsigned int ppop )
+    : type( ptype )
+    , abs_pos( ppos )
+    , population( ppop )
+    , target( abs_pos.xy() ) {
+}
+
+mongroup::mongroup( const std::string &ptype, const tripoint_abs_sm &ppos,
+            unsigned int ppop, point_abs_sm ptarget, int pint, bool pdie, bool phorde ) :
+    type( ptype ), abs_pos( ppos ), population( ppop ), target( ptarget ),
+    interest( pint ), dying( pdie ), horde( phorde ) { }
+
+mongroup::mongroup() = default;
+
+mongroup::~mongroup() = default;
 
 bool mongroup::is_safe() const
 {

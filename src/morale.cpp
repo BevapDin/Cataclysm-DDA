@@ -22,7 +22,6 @@
 #include "localized_comparator.h"
 #include "morale_types.h"
 #include "output.h"
-#include "point.h"
 #include "string_formatter.h"
 #include "translations.h"
 #include "ui_manager.h"

@@ -6,11 +6,11 @@
 
 #include "calendar.h"
 #include "item_location.h"
-#include "map.h"
 #include "type_id.h"
+#include "colony.h"
+#include "item.h"
 
 class Character;
-class item;
 class player_activity;
 
 enum class butcher_type : int {
@@ -60,5 +60,5 @@ void butchery_quarter( item *corpse_item, const Character &you );
 
 void destroy_the_carcass( const butchery_data &bd, Character &you );
 
-std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterator> &corpses,
+std::optional<butcher_type> butcher_submenu( const std::vector<cata::colony<item>::iterator> &corpses,
         int index = -1 );

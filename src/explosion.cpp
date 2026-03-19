@@ -35,6 +35,7 @@
 #include "generic_factory.h"
 #include "item.h"
 #include "item_factory.h"
+#include "map_stack.h"
 #include "item_location.h"
 #include "itype.h"
 #include "line.h"

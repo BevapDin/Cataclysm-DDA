@@ -35,6 +35,7 @@
 #include "cata_utility.h"
 #include "catacharset.h"
 #include "character.h"
+#include "map_stack.h"
 #include "character_id.h"
 #include "character_martial_arts.h"
 #include "city.h"

@@ -61,6 +61,7 @@
 #include "options.h"
 #include "overmapbuffer.h"
 #include "pathfinding.h"
+#include "map_stack.h"
 #include "pickup.h"
 #include "player_activity.h"
 #include "pocket_type.h"

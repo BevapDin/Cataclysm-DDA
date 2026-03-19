@@ -25,6 +25,7 @@
 #include "flag.h"
 #include "game.h"
 #include "game_constants.h"
+#include "map_stack.h"
 #include "handle_liquid.h"
 #include "harvest.h"
 #include "inventory.h"
@@ -1177,7 +1178,7 @@ void destroy_the_carcass( const butchery_data &bd, Character &you )
 }
 
 // Butchery sub-menu and time calculation
-std::optional<butcher_type> butcher_submenu( const std::vector<map_stack::iterator> &corpses,
+std::optional<butcher_type> butcher_submenu( const std::vector<cata::colony<item>::iterator> &corpses,
         int index )
 {
     avatar &player_character = get_avatar();

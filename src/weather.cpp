@@ -35,6 +35,7 @@
 #include "omdata.h"
 #include "options.h"
 #include "overmap.h"
+#include "map_stack.h"
 #include "overmap_ui.h"
 #include "overmapbuffer.h"
 #include "pocket_type.h"

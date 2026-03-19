@@ -7,6 +7,7 @@
 #include "item.h"
 #include "map.h"
 #include "map_iterator.h"
+#include "map_stack.h"
 #include "mapdata.h"
 #include "material.h"
 #include "monster.h"

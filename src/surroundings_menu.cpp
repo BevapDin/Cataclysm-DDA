@@ -35,6 +35,7 @@
 #include "messages.h"
 #include "monster.h"
 #include "npc.h"
+#include "map_stack.h"
 #include "options.h"
 #include "output.h"
 #include "panels.h"

@@ -14,6 +14,7 @@
 #include "debug.h"
 #include "enums.h"
 #include "field_type.h"
+#include "map_stack.h"
 #include "game.h"
 #include "item.h"
 #include "map.h"

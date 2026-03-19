@@ -35,6 +35,7 @@
 #include "character.h"
 #include "character_id.h"
 #include "city.h"
+#include "map_stack.h"
 #include "clzones.h"
 #include "color.h"
 #include "condition.h"

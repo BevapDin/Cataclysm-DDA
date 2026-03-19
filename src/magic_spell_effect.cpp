@@ -35,6 +35,7 @@
 #include "game_inventory.h"
 #include "field.h"
 #include "field_type.h"
+#include "map_stack.h"
 #include "fungal_effects.h"
 #include "game.h"
 #include "item.h"

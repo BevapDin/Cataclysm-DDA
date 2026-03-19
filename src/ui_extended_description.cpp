@@ -8,7 +8,6 @@
 #include "creature_tracker.h"
 #include "map.h"
 #include "mapdata.h"
-#include "point.h"
 #include "string_formatter.h"
 #include "text.h"
 #include "translations.h"

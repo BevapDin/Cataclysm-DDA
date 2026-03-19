@@ -14,10 +14,8 @@
 #include "activity_type.h"
 #include "butchery.h"
 #include "calendar.h"
-#include "character.h"
 #include "clone_ptr.h"
 #include "contents_change_handler.h"
-#include "game.h"
 #include "handle_liquid.h"
 #include "itype.h"
 #include "item_location.h"
@@ -42,9 +40,12 @@ class avatar;
 class npc;
 class SkillLevel;
 class player_activity;
+class item_reload_option;
 
 struct islot_book;
 struct pulp_data;
+
+using bionic_uid = unsigned int;
 
 enum zone_activity_stage : int {
     UNINIT = -1,

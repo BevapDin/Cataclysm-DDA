@@ -11,6 +11,7 @@
 #include "calendar.h"
 #include "cata_utility.h"
 #include "catacharset.h"
+#include "character.h"
 #include "color.h"
 #include "cursesdef.h"
 #include "cursesport.h" // IWYU pragma: keep

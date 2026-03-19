@@ -27,16 +27,13 @@
 #include "cata_utility.h"
 #include "colony.h"
 #include "coords_fwd.h"
-#include "creature.h"
+#include "effect_source.h"
 #include "enums.h"
 #include "game_constants.h"
-#include "item_stack.h"
 #include "level_cache.h"
 #include "lightmap.h"
 #include "line.h"
 #include "lru_cache.h"
-#include "map_iterator.h"
-#include "map_selector.h"
 #include "mapdata.h"
 #include "maptile_fwd.h"
 #include "point.h"
@@ -44,7 +41,6 @@
 #include "type_id.h"
 #include "units.h"
 #include "value_ptr.h"
-#include "vpart_position.h"
 
 #if defined(TILES)
 #include "cata_tiles.h"
@@ -59,17 +55,22 @@ class window;
 class Character;
 class Creature;
 class basecamp;
+class optional_vpart_position;
 class character_id;
 class computer;
 class field;
 class field_entry;
 class item_location;
+class item_stack;
 class mapgendata;
+struct field_effect;
 class monster;
 class relic_procgen_data;
 class submap;
 class vehicle;
+struct vehicle_part;
 class zone_data;
+class map_cursor;
 struct fragment_cloud;
 struct partial_con;
 struct spawn_data;
@@ -105,23 +106,7 @@ struct weighted_int_list;
 struct field_proc_data;
 
 class PathfindingFlags;
-
-class map_stack : public item_stack
-{
-    private:
-        tripoint_bub_ms location;
-        map *myorigin;
-    public:
-        map_stack( cata::colony<item> *newstack, tripoint_bub_ms newloc, map *neworigin ) :
-            item_stack( newstack ), location( newloc ), myorigin( neworigin ) {}
-        void insert( map &, const item &newitem ) override;
-        void insert( const item &newitem );
-        iterator erase( const_iterator it ) override;
-        int count_limit() const override {
-            return MAX_ITEM_IN_SQUARE;
-        }
-        units::volume max_volume() const override;
-};
+class map_stack;
 
 struct visibility_variables {
     // Is this struct initialized for current z-level
@@ -371,8 +356,7 @@ class map
 {
         friend class teleport;
         friend class editmap_ui;
-        friend std::list<item> map_cursor::remove_items_with( const std::function<bool( const item & )> &,
-                int );
+        friend class map_cursor;
 
         //FIXME some field processor use private methods
         friend void field_processor_fd_fire( const tripoint_bub_ms &, field_entry &, field_proc_data & );
@@ -1272,9 +1256,7 @@ class map
         void check_submap_active_item_consistency();
         // Accessor that returns a wrapped reference to an item stack for safe modification.
         map_stack i_at( const tripoint_bub_ms &p );
-        map_stack i_at( const point_bub_ms &p ) {
-            return i_at( tripoint_bub_ms( p, abs_sub.z() ) );
-        }
+        map_stack i_at( const point_bub_ms &p );
         item liquid_from( const tripoint_bub_ms &p ) const;
         void i_clear( const tripoint_bub_ms &p );
         void i_clear( const point_bub_ms &p ) {
@@ -1282,7 +1264,7 @@ class map
         }
         // i_rem() methods that return values act like container::erase(),
         // returning an iterator to the next item after removal.
-        map_stack::iterator i_rem( const tripoint_bub_ms &p, const map_stack::const_iterator &it );
+        cata::colony<item>::iterator i_rem( const tripoint_bub_ms &p, const cata::colony<item>::iterator &it );
         void i_rem( const tripoint_bub_ms &p, item *it );
         void spawn_artifact( const tripoint_bub_ms &p, const relic_procgen_id &id, int max_attributes = 5,
                              int power_level = 1000, int max_negative_power = -2000, bool is_resonant = false );
@@ -2442,9 +2424,7 @@ class tinymap : private map
         // rectangular prism
         tripoint_range<tripoint_omt_ms> points_in_radius(
             const tripoint_omt_ms &center, size_t radius, size_t radiusz = 0 ) const;
-        map_stack i_at( const tripoint_omt_ms &p ) {
-            return map::i_at( rebase_bub( p ) );
-        }
+        map_stack i_at( const tripoint_omt_ms &p );
         void spawn_item( const tripoint_omt_ms &p, const itype_id &type_id,
                          unsigned quantity = 1, int charges = 0,
                          const time_point &birthday = calendar::start_of_cataclysm, int damlevel = 0,
@@ -2515,9 +2495,7 @@ class tinymap : private map
         VehicleList get_vehicles() {
             return map::get_vehicles();
         }
-        optional_vpart_position veh_at( const tripoint_omt_ms &p ) const {
-            return map::veh_at( rebase_bub( p ) );
-        }
+        optional_vpart_position veh_at( const tripoint_omt_ms &p ) const;
         vehicle *add_vehicle( const vproto_id &type, const tripoint_omt_ms &p, const units::angle &dir,
                               int init_veh_fuel = -1, int init_veh_status = -1, bool merge_wrecks = true,
                               bool force_status = false ) {

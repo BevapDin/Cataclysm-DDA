@@ -17,6 +17,7 @@
 
 #include "activity_actor_definitions.h"
 #include "activity_handlers.h"
+#include "map_stack.h"
 #include "avatar.h"
 #include "calendar.h"
 #include "cata_assert.h"

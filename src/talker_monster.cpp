@@ -260,3 +260,11 @@ bool talker_monster_const::will_talk_to_u( const Character &you, bool ) const
 {
     return !you.is_dead_state();
 }
+
+Creature const *talker_monster_const::get_const_creature() const {
+    return me_mon_const;
+}
+
+Creature *talker_monster::get_creature() {
+    return me_mon;
+}

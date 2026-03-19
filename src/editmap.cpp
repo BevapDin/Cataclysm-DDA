@@ -26,6 +26,7 @@
 #include "cuboid_rectangle.h"
 #include "debug.h"
 #include "debug_menu.h"
+#include "map_stack.h"
 #include "demangle.h"
 #include "field.h"
 #include "field_type.h"

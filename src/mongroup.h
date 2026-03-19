@@ -12,12 +12,12 @@
 #include "enums.h"
 #include "io_tags.h"
 #include "mapgen_primitives.h"
-#include "monster.h"
 #include "point.h"
 #include "type_id.h"
 
 class JsonObject;
 class JsonOut;
+class monster;
 // from overmap.h
 class overmap;
 struct MonsterGroupEntry;
@@ -160,17 +160,11 @@ struct mongroup {
     horde_behaviour behaviour = horde_behaviour::none;
 
     mongroup( const mongroup_id &ptype, const tripoint_abs_sm &ppos,
-              unsigned int ppop )
-        : type( ptype )
-        , abs_pos( ppos )
-        , population( ppop )
-        , target( abs_pos.xy() ) {
-    }
+              unsigned int ppop );
     mongroup( const std::string &ptype, const tripoint_abs_sm &ppos,
-              unsigned int ppop, point_abs_sm ptarget, int pint, bool pdie, bool phorde ) :
-        type( ptype ), abs_pos( ppos ), population( ppop ), target( ptarget ),
-        interest( pint ), dying( pdie ), horde( phorde ) { }
-    mongroup() = default;
+              unsigned int ppop, point_abs_sm ptarget, int pint, bool pdie, bool phorde );
+    mongroup();
+    ~mongroup();
     bool is_safe() const;
     bool empty() const;
     void clear();

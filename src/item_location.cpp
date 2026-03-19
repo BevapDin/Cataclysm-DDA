@@ -35,6 +35,7 @@
 #include "string_formatter.h"
 #include "talker.h"
 #include "talker_item.h"
+#include "map_stack.h"
 #include "translations.h"
 #include "type_id.h"
 #include "units.h"

@@ -25,7 +25,6 @@
 #include "cursesdef.h"
 #include "debug.h"
 #include "input_context.h"
-#include "item.h"
 #include "item_location.h"
 #include "item_pocket.h"
 #include "memory_fast.h"
@@ -38,6 +37,7 @@
 class Character;
 class JsonObject;
 class JsonOut;
+class item;
 class basecamp;
 class inventory_selector_preset;
 class item_category;

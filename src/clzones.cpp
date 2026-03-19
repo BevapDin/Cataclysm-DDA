@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "field_type.h"
 #include "flexbuffer_json.h"
+#include "map_stack.h"
 #include "generic_factory.h"
 #include "iexamine.h"
 #include "input_popup.h"

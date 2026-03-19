@@ -35,6 +35,7 @@
 #include "faction.h"
 #include "fault.h"
 #include "field_type.h"
+#include "map_stack.h"
 #include "flag.h"
 #include "flat_set.h"
 #include "game.h"

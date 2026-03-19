@@ -19,6 +19,7 @@
 #include "creature.h"
 #include "creature_tracker.h"
 #include "debug.h"
+#include "map_stack.h"
 #include "dialogue.h"
 #include "effect_on_condition.h"
 #include "enums.h"

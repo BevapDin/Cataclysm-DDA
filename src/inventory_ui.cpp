@@ -35,6 +35,7 @@
 #include "item_tname.h"
 #include "itype.h"
 #include "json.h"
+#include "map_stack.h"
 #include "line.h"
 #include "localized_comparator.h"
 #include "map.h"

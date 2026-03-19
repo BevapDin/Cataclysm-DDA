@@ -19,6 +19,7 @@
 #include "avatar.h"
 #include "basecamp.h"
 #include "bodypart.h"
+#include "map_stack.h"
 #include "cached_options.h"
 #include "calendar.h"
 #include "cata_assert.h"
@@ -34,6 +35,7 @@
 #include "creature.h"
 #include "partial_con.h"
 #include "creature_tracker.h"
+#include "iexamine.h"
 #include "cuboid_rectangle.h"
 #include "cursesdef.h"
 #include "current_map.h"
@@ -5388,6 +5390,11 @@ void map::set_temperature_mod( const tripoint_bub_ms &p,
 }
 // Items: 3D
 
+map_stack map::i_at( const point_bub_ms &p )
+{
+    return i_at( tripoint_bub_ms( p, abs_sub.z() ) );
+}
+
 map_stack map::i_at( const tripoint_bub_ms &p )
 {
     if( !inbounds( p ) ) {
@@ -5406,7 +5413,7 @@ map_stack map::i_at( const tripoint_bub_ms &p )
     return map_stack{ &current_submap->get_items( l ), p, this};
 }
 
-map_stack::iterator map::i_rem( const tripoint_bub_ms &p, const map_stack::const_iterator &it )
+cata::colony<item>::iterator map::i_rem( const tripoint_bub_ms &p, const cata::colony<item>::iterator &it )
 {
     point_sm_ms l;
     submap *const current_submap = get_submap_at( p, l );
@@ -11458,4 +11465,12 @@ const ter_str_id &drawsq_params::terrain_override() const
 const furn_str_id &drawsq_params::furniture_override() const
 {
     return furn_override;
+}
+
+optional_vpart_position tinymap::veh_at( const tripoint_omt_ms &p ) const {
+    return map::veh_at( rebase_bub( p ) );
+}
+
+map_stack tinymap::i_at( const tripoint_omt_ms &p ) {
+    return map::i_at( rebase_bub( p ) );
 }

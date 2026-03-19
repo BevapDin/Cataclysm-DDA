@@ -36,6 +36,7 @@
 #include "partial_con.h"
 #include "magic_enchantment.h"
 #include "map.h"
+#include "map_stack.h"
 #include "map_scale_constants.h"
 #include "mapdata.h"
 #include "npc.h"

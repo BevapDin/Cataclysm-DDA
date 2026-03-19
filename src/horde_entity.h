@@ -7,8 +7,8 @@
 #include "calendar.h"
 #include "coordinates.h"
 #include "type_id.h"
-#include "monster.h"
 
+class monster;
 struct mtype;
 
 // This represents a single entity that moves around at overmap scale.

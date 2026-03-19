@@ -15,12 +15,12 @@
 #include <vector>
 
 #include "generic_factory.h"
-#include "item.h"
 #include "itype.h"
 #include "iuse.h"
 #include "type_id.h"
 #include "units_fwd.h"
 
+class item;
 class Item_group;
 class Item_spawn_data;
 class relic;
@@ -38,7 +38,6 @@ template <typename T> class value_ptr;
 bool item_is_blacklisted( const itype_id &id );
 
 using item_action_id = std::string;
-using Item_list = std::vector<item>;
 
 class Item_factory;
 class JsonArray;

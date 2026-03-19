@@ -22,7 +22,6 @@
 #include "inventory.h"
 #include "item_components.h"
 #include "item_location.h"
-#include "map.h"
 #include "mapgendata.h"
 #include "memory_fast.h"
 #include "mission_companion.h"
@@ -41,6 +40,7 @@ class character_id;
 class faction;
 class inventory_filter_preset;
 class item;
+class tinymap;
 class npc;
 class recipe;
 enum class farm_ops;

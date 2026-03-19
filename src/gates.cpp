@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "enums.h"
 #include "flexbuffer_json.h"
+#include "map_iterator.h"
 #include "game.h" // TODO: This is a circular dependency
 #include "generic_factory.h"
 #include "iexamine.h"
@@ -28,6 +29,7 @@
 #include "map.h"
 #include "mapdata.h"
 #include "messages.h"
+#include "coordinates.h"
 #include "monster.h"
 #include "player_activity.h"
 #include "point.h"
@@ -36,6 +38,7 @@
 #include "translation.h"
 #include "translations.h"
 #include "units.h"
+#include "map_stack.h"
 #include "vehicle.h"
 #include "viewer.h"
 #include "vpart_position.h"

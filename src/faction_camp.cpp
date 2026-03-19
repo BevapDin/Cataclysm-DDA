@@ -35,6 +35,7 @@
 #include "crafting.h"
 #include "crafting_gui.h"
 #include "current_map.h"
+#include "map_stack.h"
 #include "cursesdef.h"
 #include "debug.h"
 #include "enums.h"

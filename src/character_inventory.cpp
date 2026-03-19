@@ -24,6 +24,7 @@
 #include "cached_options.h"
 #include "calendar.h"
 #include "catacharset.h"
+#include "map_stack.h"
 #include "character.h"
 #include "character_attire.h"
 #include "character_martial_arts.h"
@@ -1683,6 +1684,11 @@ bool Character::is_waterproof( const body_part_set &parts ) const
     return covered_with_flag( flag_WATERPROOF, parts );
 }
 
+units::volume Character::free_space() const
+{
+    return free_space( []( const item_pocket &pocket ) { return !pocket.is_restricted() && item_pocket::ok_for_solids( pocket ); }, item_pocket::ok_default_containers );
+}
+
 units::volume Character::free_space( const std::function<bool( const item_pocket & )>
                                      &include_pocket,
                                      const std::function<bool( const item_pocket & )> &check_pocket_tree ) const
@@ -1699,6 +1705,11 @@ units::mass Character::free_weight_capacity() const
     weight_capacity += weapon->get_remaining_weight_capacity();
     weight_capacity += worn.free_weight_capacity();
     return weight_capacity;
+}
+
+units::volume Character::volume_capacity() const
+{
+    return volume_capacity( item_pocket::ok_default_containers );
 }
 
 units::volume Character::volume_capacity( const std::function<bool( const item_pocket & )>

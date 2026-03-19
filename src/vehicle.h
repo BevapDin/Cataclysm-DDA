@@ -36,14 +36,10 @@
 #include "item_location.h"
 #include "item_stack.h"
 #include "line.h"
-#include "magic_enchantment.h"
-#include "map.h"
 #include "math_parser_diag_value.h"
-#include "npc.h"
 #include "point.h"
 #include "ret_val.h"
 #include "safe_reference.h"
-#include "talker.h"
 #include "tileray.h"
 #include "type_id.h"
 #include "units.h"
@@ -52,12 +48,15 @@
 
 // IWYU pragma: no_forward_declare npc // behind unique_ptr
 class Character;
+class npc;
 class Creature;
 class effect_source;
 class JsonArray;
 class JsonObject;
 class JsonOut;
 class monster;
+class talker;
+class map;
 class veh_menu;
 class vehicle;
 class vpart_info;
@@ -2565,28 +2564,16 @@ class DefaultRemovePartHandler : public RemovePartHandler
     public:
         ~DefaultRemovePartHandler() override = default;
 
-        void unboard( map *here, const tripoint_bub_ms &loc ) override {
-            here->unboard_vehicle( loc );
-        }
+        void unboard( map *here, const tripoint_bub_ms &loc ) override;
         void add_item_or_charges( map *here, const tripoint_bub_ms &loc, item it,
-                                  bool /*permit_oob*/ ) override {
-            here->add_item_or_charges( loc, std::move( it ) );
-        }
-        void set_transparency_cache_dirty( const int z ) override {
-            map &here = get_map();
-            here.set_transparency_cache_dirty( z );
-            here.set_seen_cache_dirty( tripoint_bub_ms::zero );
-        }
-        void set_floor_cache_dirty( const int z ) override {
-            get_map().set_floor_cache_dirty( z );
-        }
+                                  bool /*permit_oob*/ ) override;
+        void set_transparency_cache_dirty( const int z ) override;
+        void set_floor_cache_dirty( const int z ) override;
         void removed( map *here, vehicle &veh, int part ) override;
         void spawn_animal_from_part( item &base, map * /*here*/, const tripoint_bub_ms &loc ) override {
             base.release_monster( loc, 1 );
         }
-        map &get_map_ref() override {
-            return get_map();
-        }
+        map &get_map_ref() override;
 };
 
 class MapgenRemovePartHandler : public RemovePartHandler
@@ -2612,10 +2599,7 @@ class MapgenRemovePartHandler : public RemovePartHandler
         void set_floor_cache_dirty( const int /*z*/ ) override {
             // Ignored for now. We don't initialize the floor cache in mapgen anyway.
         }
-        void removed( map *here, vehicle &veh, const int /*part*/ ) override {
-            // TODO: check if this is necessary, it probably isn't during mapgen
-            here->dirty_vehicle_list.insert( &veh );
-        }
+        void removed( map *here, vehicle &veh, const int /*part*/ ) override;
         void spawn_animal_from_part( item &/*base*/, map */*here*/,
                                      const tripoint_bub_ms &/*loc*/ ) override {
             debugmsg( "Tried to spawn animal from vehicle part during mapgen!" );

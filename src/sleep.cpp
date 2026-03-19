@@ -12,6 +12,7 @@
 #include "item.h"
 #include "item_stack.h"
 #include "map.h"
+#include "map_stack.h"
 #include "mapdata.h"
 #include "translations.h"
 #include "trap.h"

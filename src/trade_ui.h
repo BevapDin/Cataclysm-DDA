@@ -10,10 +10,8 @@
 #include <utility>
 #include <vector>
 
-#include "character.h"
 #include "color.h"
 #include "coordinates.h"
-#include "creature.h"
 #include "cursesdef.h"
 #include "input_context.h"
 #include "inventory_ui.h"
@@ -25,6 +23,7 @@
 #include "units.h"
 
 class npc;
+class character;
 class trade_ui;
 
 class trade_selector : public inventory_drop_selector

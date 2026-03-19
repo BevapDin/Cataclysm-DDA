@@ -35,6 +35,7 @@
 #include "output.h"
 #include "point.h"
 #include "ranged.h"
+#include "map_stack.h"
 #include "ret_val.h"
 #include "rng.h"
 #include "sounds.h"

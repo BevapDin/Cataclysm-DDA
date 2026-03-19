@@ -35,6 +35,7 @@
 #include "creature_tracker.h"
 #include "cube_direction.h"
 #include "cuboid_rectangle.h"
+#include "map_stack.h"
 #include "debug.h"
 #include "dialogue.h"
 #include "drawing_primitives.h"
@@ -7027,7 +7028,7 @@ std::vector<item *> map::place_items(
                     if( item_cat_spawn_rate > 1.0f ) {
                         // ...then create a list with items from the same item group and remove all items with differing category from that list
                         // so if the original item was e.g. from 'guns' category, the list will contain only items from the 'guns' category...
-                        Item_list extra_spawn = item_group::items_from( group_id, turn, spawn_flags::use_spawn_rate );
+                        std::vector<item> extra_spawn = item_group::items_from( group_id, turn, spawn_flags::use_spawn_rate );
                         extra_spawn.erase( std::remove_if( extra_spawn.begin(), extra_spawn.end(), [&itm]( item & it ) {
                             return it.get_category_of_contents() != itm.get_category_of_contents();
                         } ), extra_spawn.end() );

@@ -35,6 +35,7 @@
 #include "fungal_effects.h"
 #include "game.h"
 #include "item.h"
+#include "map_stack.h"
 #include "itype.h"
 #include "level_cache.h"
 #include "map.h"

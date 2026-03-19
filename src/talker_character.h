@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "bodypart.h"
-#include "character.h"
 #include "coords_fwd.h"
 #include "enums.h"
 #include "talker.h"
 #include "type_id.h"
 #include "units_fwd.h"
+
+class Character;
 
 /*
  * Talker wrapper class for const Character access.

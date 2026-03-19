@@ -8993,3 +8993,30 @@ std::unique_ptr<talker> get_talker_for( vehicle *me )
 {
     return std::make_unique<talker_vehicle>( me );
 }
+
+void DefaultRemovePartHandler::unboard( map *here, const tripoint_bub_ms &loc ) {
+    here->unboard_vehicle( loc );
+}
+
+void DefaultRemovePartHandler::add_item_or_charges( map *here, const tripoint_bub_ms &loc, item it, bool /*permit_oob*/ ) {
+    here->add_item_or_charges( loc, std::move( it ) );
+}
+
+void DefaultRemovePartHandler::set_transparency_cache_dirty( const int z ) {
+    map &here = get_map();
+    here.set_transparency_cache_dirty( z );
+    here.set_seen_cache_dirty( tripoint_bub_ms::zero );
+}
+
+void DefaultRemovePartHandler::set_floor_cache_dirty( const int z ) {
+    get_map().set_floor_cache_dirty( z );
+}
+
+map &DefaultRemovePartHandler::get_map_ref() {
+    return get_map();
+}
+
+void MapgenRemovePartHandler::removed( map *here, vehicle &veh, const int /*part*/ ) {
+    // TODO: check if this is necessary, it probably isn't during mapgen
+    here->dirty_vehicle_list.insert( &veh );
+}

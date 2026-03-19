@@ -15,6 +15,7 @@
 #include "item_location.h"
 #include "loading_ui.h"
 #include "map.h"
+#include "map_stack.h"
 #include "map_iterator.h"
 #include "omdata.h"
 #include "output.h"

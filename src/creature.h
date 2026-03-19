@@ -18,6 +18,7 @@
 
 #include "bodypart.h"
 #include "calendar.h"
+#include "creature_attitude.h"
 #include "character_id.h"
 #include "compatibility.h"
 #include "coordinates.h"
@@ -356,19 +357,8 @@ class Creature : public viewer
         virtual float stability_roll() const = 0;
         virtual bool can_attack_high() const = 0;
 
-        /**
-         * Simplified attitude towards any creature:
-         * hostile - hate, want to kill, etc.
-         * neutral - anything between.
-         * friendly - avoid harming it, maybe even help.
-         * any - any of the above, used in safemode_ui
-         */
-        enum class Attitude : int {
-            HOSTILE,
-            NEUTRAL,
-            FRIENDLY,
-            ANY
-        };
+        // @TODO replace Creature::Attitude with creature_attitude and remove this typedef.
+        using Attitude = creature_attitude;
 
         /**
          * Simplified attitude string for unlocalized needs.

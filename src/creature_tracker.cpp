@@ -458,3 +458,31 @@ template const Creature *creature_tracker::creature_at<Creature>( const tripoint
         bool ) const;
 template Creature *creature_tracker::creature_at<Creature>( const tripoint_bub_ms &, bool );
 template Creature *creature_tracker::creature_at<Creature>( const tripoint_abs_ms &, bool );
+
+Creature *creature_tracker::find_reachable( const Creature &origin, const std::function<bool(const mfaction_id&)> &faction_fn,
+        const std::function<bool(Creature*)> &creature_fn )
+{
+    flood_fill_zone( origin );
+
+    const auto map_iter = creatures_by_zone_and_faction_.find( origin.get_reachable_zone() );
+    if( map_iter != creatures_by_zone_and_faction_.end() ) {
+        for( auto& [faction, creatures] : map_iter->second ) {
+            if( !faction_fn( faction ) ) {
+                continue;
+            }
+            for( std::size_t i = 0; i < creatures.size(); ) {
+                if( Creature *other = creatures[i].get(); is_present( other ) ) {
+                    if( creature_fn( other ) ) {
+                        return other;
+                    }
+                    ++i;
+                } else {
+                    using std::swap;
+                    swap( creatures[i], creatures.back() );
+                    creatures.pop_back();
+                }
+            }
+        }
+    }
+    return nullptr;
+}

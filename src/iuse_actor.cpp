@@ -35,6 +35,7 @@
 #include "dialogue_helpers.h"
 #include "effect.h"
 #include "effect_on_condition.h"
+#include "map_stack.h"
 #include "iteminfo.h"
 #include "effect_source.h"
 #include "item_reload_option.h"

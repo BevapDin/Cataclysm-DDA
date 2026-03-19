@@ -18,6 +18,7 @@
 #include "messages.h"
 #include "npc.h"
 #include "pocket_type.h"
+#include "map.h"
 #include "projectile.h"
 #include "ranged.h"
 #include "string_formatter.h"

@@ -35,6 +35,7 @@
 #include "mtype.h"
 #include "npc.h"
 #include "point.h"
+#include "map_stack.h"
 #include "string_formatter.h"
 #include "submap.h"
 #include "tileray.h"

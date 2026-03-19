@@ -4,12 +4,9 @@
 
 #include <map>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "cuboid_rectangle.h"
-#include "point.h"
-#include "translation.h"
 
 class JsonObject;
 struct input_event;

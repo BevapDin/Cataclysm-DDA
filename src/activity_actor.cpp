@@ -45,6 +45,7 @@
 #include "construction.h"
 #include "contents_change_handler.h"
 #include "coordinates.h"
+#include "map_stack.h"
 #include "craft_command.h"
 #include "crafting.h"
 #include "creature.h"

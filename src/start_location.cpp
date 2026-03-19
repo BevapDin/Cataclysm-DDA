@@ -10,6 +10,7 @@
 #include "calendar.h"
 #include "cata_variant.h"
 #include "character.h"
+#include "map_stack.h"
 #include "city.h"
 #include "clzones.h"
 #include "coordinates.h"

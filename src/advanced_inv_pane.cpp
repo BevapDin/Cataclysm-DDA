@@ -16,6 +16,7 @@
 #include "flag.h"
 #include "item.h"
 #include "item_search.h"
+#include "map_stack.h"
 #include "map.h"
 #include "map_selector.h"
 #include "options.h"

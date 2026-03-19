@@ -18,6 +18,7 @@
 #include "item.h"
 #include "map.h"
 #include "mapdata.h"
+#include "map_stack.h"
 #include "mdarray.h"
 #include "pimpl.h"
 #include "translations.h"

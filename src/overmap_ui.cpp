@@ -25,6 +25,7 @@
 #include "cata_imgui.h"
 #include "cata_scope_helpers.h"
 #include "cata_utility.h"
+#include "monster.h"
 #include "cata_variant.h"
 #include "catacharset.h"
 #include "character.h"

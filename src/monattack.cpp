@@ -35,6 +35,7 @@
 #include "effect.h"
 #include "effect_source.h"
 #include "enums.h"
+#include "map_stack.h"
 #include "explosion.h"
 #include "field_type.h"
 #include "flag.h"

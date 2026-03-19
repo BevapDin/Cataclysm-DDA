@@ -11,12 +11,12 @@
 #include <vector>
 
 #include "coordinates.h"
-#include "creature.h"
 #include "memory_fast.h"
 #include "type_id.h"
 
 class JsonArray;
 class JsonOut;
+class Creature;
 class game;
 class monster;
 class npc;
@@ -44,14 +44,11 @@ class creature_tracker
 
         /**
          * Returns the reachable creature matching the given predicates.
-         *  - FactionPredicateFn: bool(const mfaction_id&)
-         *  - CreaturePredicateFn: bool(Creature*)
          * If there is no creature, it returns a `nullptr`.
          * Dead monsters are ignored and not returned.
          */
-        template <typename FactionPredicateFn, typename CreaturePredicateFn>
-        Creature *find_reachable( const Creature &origin, FactionPredicateFn &&faction_fn,
-                                  CreaturePredicateFn &&creature_fn );
+        Creature *find_reachable( const Creature &origin, const std::function<bool(const mfaction_id&)> &faction_fn,
+                                  const std::function<bool(Creature*)> &creature_fn );
         /**
          * Visits all reachable creatures using the given functor.
          *  - VisitFn: void(Creature*)
@@ -179,34 +176,6 @@ Creature *creature_tracker::find_reachable( const Creature &origin, PredicateFn 
     }, std::forward<PredicateFn>( predicate_fn ) );
 }
 
-template <typename FactionPredicateFn, typename CreaturePredicateFn>
-Creature *creature_tracker::find_reachable( const Creature &origin, FactionPredicateFn &&faction_fn,
-        CreaturePredicateFn &&creature_fn )
-{
-    flood_fill_zone( origin );
-
-    const auto map_iter = creatures_by_zone_and_faction_.find( origin.get_reachable_zone() );
-    if( map_iter != creatures_by_zone_and_faction_.end() ) {
-        for( auto& [faction, creatures] : map_iter->second ) {
-            if( !faction_fn( faction ) ) {
-                continue;
-            }
-            for( std::size_t i = 0; i < creatures.size(); ) {
-                if( Creature *other = creatures[i].get(); is_present( other ) ) {
-                    if( creature_fn( other ) ) {
-                        return other;
-                    }
-                    ++i;
-                } else {
-                    using std::swap;
-                    swap( creatures[i], creatures.back() );
-                    creatures.pop_back();
-                }
-            }
-        }
-    }
-    return nullptr;
-}
 
 template <typename VisitFn>
 void creature_tracker::for_each_reachable( const Creature &origin, VisitFn &&visit_fn )

@@ -35,6 +35,7 @@
 #include "enums.h"
 #include "faction.h"
 #include "faction_camp.h"
+#include "map_stack.h"
 #include "flexbuffer_json.h"
 #include "game.h"
 #include "horde_entity.h"

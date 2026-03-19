@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "mapdata.h"
 #include "tileray.h"
+#include "map.h"
 #include "trap.h"
 #include "units.h"
 #include "vehicle.h"

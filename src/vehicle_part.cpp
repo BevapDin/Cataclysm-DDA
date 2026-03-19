@@ -14,6 +14,7 @@
 #include "game.h"
 #include "item.h"
 #include "itype.h"
+#include "map.h"
 #include "mapdata.h"
 #include "messages.h"
 #include "npc.h"

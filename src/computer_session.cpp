@@ -24,6 +24,7 @@
 #include "event.h"
 #include "event_bus.h"
 #include "explosion.h"
+#include "map_stack.h"
 #include "field_type.h"
 #include "flag.h"
 #include "flood_fill.h"

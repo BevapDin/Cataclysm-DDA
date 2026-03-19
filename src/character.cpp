@@ -25,6 +25,7 @@
 #include "cata_utility.h"
 #include "catacharset.h"
 #include "character_attire.h"
+#include "map_stack.h"
 #include "character_martial_arts.h"
 #include "city.h"
 #include "color.h"
