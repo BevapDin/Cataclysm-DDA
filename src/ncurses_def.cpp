@@ -21,6 +21,15 @@
 #include <curses.h>
 #endif
 
+// stdscr = 9;
+
+// #define ORIGINAL_STDSCR2(x) x
+// #define ORIGINAL_STDSCR ORIGINAL_STDSCR2(stdscr)
+#define ORIGINAL_STDSCR NCURSES_PUBLIC_VAR(stdscr())
+#define ORIGINAL_NEWSCR NCURSES_PUBLIC_VAR(newscr())
+#undef stdscr
+#undef newscr
+
 #include <cstdint>
 #include <cstring>
 #include <iosfwd>
@@ -343,7 +352,7 @@ void catacurses::init_interface()
         throw std::runtime_error( "initscr failed" );
     }
 #if !defined(USE_PDCURSES)
-    newscr = window( std::shared_ptr<void>( ::newscr, []( void *const ) { } ) );
+    newscr = window( std::shared_ptr<void>( ORIGINAL_NEWSCR, []( void *const ) { } ) );
     if( !newscr ) {
         throw std::runtime_error( "null newscr" );
     }
@@ -430,7 +439,7 @@ input_event input_manager::get_input_event( const keyboard_mode /*preferred_keyb
             const int prev_timeout = input_timeout;
             set_timeout( 0 );
             do {
-                newch = wgetch( stdscr );
+                newch = wgetch( ORIGINAL_STDSCR );
             } while( newch != ERR && newch == key );
             set_timeout( prev_timeout );
             // If we read a different character than the one we're going to act on, re-queue it.

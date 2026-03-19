@@ -102,8 +102,6 @@
 RELEASE_FLAGS =
 WARNINGS = \
   -Werror -Wall -Wextra \
-  -Wformat-signedness \
-  -Wlogical-op \
   -Wmissing-declarations \
   -Wmissing-noreturn \
   -Wpedantic \
@@ -114,7 +112,6 @@ CXX_WARNINGS = \
   -Woverloaded-virtual \
   -Wsuggest-override \
   -Wzero-as-null-pointer-constant \
-  -Wno-dangling-reference \
   -Wno-c++20-compat
 ifeq ($(NATIVE), emscripten)
   # The EM_ASM macro triggers this warning.
@@ -387,8 +384,6 @@ ifneq ($(CLANG), 0)
     LD  = $(CROSS)$(CLANGCMD)
     CC  = $(CROSS)$(subst ++,,$(CLANGCMD))
   endif
-  CXX_WARNINGS += -Wno-unknown-warning-option
-  WARNINGS += -Wno-unknown-warning-option
 else
   # Compiler version & target machine - used later for MXE ICE workaround
   ifdef CROSS
@@ -412,8 +407,6 @@ else
     CXX = $(CROSS)$(OS_COMPILER)
     LD  = $(CROSS)$(OS_LINKER)
   endif
-  CXX_WARNINGS += -Wno-unknown-warning
-  WARNINGS += -Wno-unknown-warning
 endif
 
 STRIP = $(CROSS)strip
@@ -421,6 +414,8 @@ RC  = $(CROSS)windres
 AR  = $(CROSS)ar
 
 LDFLAGS += $(PROFILE)
+LDFLAGS += -fPIE
+CXXFLAGS += -fPIE
 
 ifneq ($(SANITIZE),)
   SANITIZE_FLAGS := -fsanitize=$(SANITIZE) -fno-sanitize-recover=all -fno-omit-frame-pointer
@@ -524,6 +519,7 @@ else
   CXX_STD = -std=c++17
   C_STD = -std=c17
 endif
+  C_STD =
 
 ifeq ($(CYGWIN),1)
 WARNINGS += -Wimplicit-fallthrough=0
@@ -1169,7 +1165,7 @@ $(ODIR)/third-party/%.o: $(SRC_DIR)/third-party/%.cc
 	$(COMPILE.cc) $(OUTPUT_OPTION) -w -MMD -MP $<
 
 $(ODIR)/third-party/%.o: $(SRC_DIR)/third-party/%.c
-	$(COMPILE.c) $(OUTPUT_OPTION) -x c $(CFLAGS) -w -MMD -MP $<
+	$(COMPILE.c) $(OUTPUT_OPTION) -x c $(CFLAGS) -w -MMD -MP -fPIE $<
 
 $(ODIR)/%.o: $(SRC_DIR)/%.cpp $(PCH_P)
 	$(COMPILE.cc) $(OUTPUT_OPTION) $(PCHFLAGS) -MMD -MP $<
