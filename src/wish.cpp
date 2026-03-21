@@ -280,7 +280,6 @@ void debug_menu::wishmutate( Character *you )
         }
         c++;
     }
-    wmenu.desired_bounds = { -1.0, -1.0, 1.0, 1.0 };
     wmenu.selected = uistate.wishmutate_selected;
     wish_mutate_callback cb;
     cb.you = you;
@@ -756,7 +755,6 @@ class wish_monster_callback: public uilist_callback
 
 static void setup_wishmonster( uilist &pick_a_monster, std::vector<const mtype *> &mtypes )
 {
-    pick_a_monster.desired_bounds = { -1.0, -1.0, 1.0, 1.0 };
     pick_a_monster.selected = uistate.wishmonster_selected;
     int i = 0;
     for( const mtype &montype : MonsterGenerator::generator().get_all_mtypes() ) {
@@ -912,19 +910,18 @@ class wish_item_callback: public uilist_callback
         std::string flags;
         std::string itype_flags;
         std::pair<int, std::string> chosen_snippet_id;
-        const std::vector<const itype *> &standard_itype_ids;
-        const std::vector<const itype_variant_data *> &itype_variants;
+        const std::vector<std::tuple<std::string, const itype *, const itype_variant_data *>> &opts;
         std::string &last_snippet_id;
 
         int entnum = -1;
+        int lastentnum = -1;
         std::string header;
         std::vector<iteminfo> info;
         item tmp;
 
-        explicit wish_item_callback( const std::vector<const itype *> &ids,
-                                     const std::vector<const itype_variant_data *> &variants, std::string &snippet_ids ) :
+        explicit wish_item_callback( std::vector<std::tuple<std::string, const itype *, const itype_variant_data *>> &opts, std::string &snippet_ids ) :
             incontainer( false ), spawn_everything( false ),
-            standard_itype_ids( ids ), itype_variants( variants ),
+            opts( opts ),
             last_snippet_id( snippet_ids ) {
         }
 
@@ -935,7 +932,7 @@ class wish_item_callback: public uilist_callback
             examine_pos = 0;
             chosen_snippet_id = { -1, "" };
             renew_snippet = true;
-            const itype &selected_itype = *standard_itype_ids[menu->selected];
+            const itype &selected_itype = *std::get<1>(opts[menu->selected]);
             // Make liquids "contained" by default (toggled with CONTAINER action)
             incontainer = selected_itype.phase == phase_id::LIQUID;
             // Clear instance flags when switching items
@@ -984,7 +981,7 @@ class wish_item_callback: public uilist_callback
                     return true;
                 }
                 const int entnum = menu->selected;
-                const itype &selected_itype = *standard_itype_ids[entnum];
+                const itype &selected_itype = *std::get<1>(opts[entnum]);
                 if( !selected_itype.snippet_category.empty() ) {
                     const std::string cat = selected_itype.snippet_category;
                     if( SNIPPET.has_category( cat ) ) {
@@ -1034,10 +1031,11 @@ class wish_item_callback: public uilist_callback
 
         void refresh( uilist *menu ) override {
             const int entnum = menu->previewing;
-            if( entnum >= 0 && static_cast<size_t>( entnum ) < standard_itype_ids.size() ) {
-                tmp = wishitem_produce( *standard_itype_ids[entnum], flags, false );
+            if( entnum >= 0 && static_cast<size_t>( entnum ) < opts.size() && entnum != lastentnum ) {
+                lastentnum = entnum;
+                tmp = wishitem_produce( *std::get<1>(opts[entnum]), flags, false );
 
-                const itype_variant_data *variant = itype_variants[entnum];
+                const itype_variant_data *variant = std::get<2>(opts[entnum]);
                 if( variant != nullptr && tmp.has_itype_variant( false ) ) {
                     // Set the variant type as shown in the selected list item.
                     std::string variant_id = variant->id;
@@ -1060,7 +1058,7 @@ class wish_item_callback: public uilist_callback
                 }
 
                 header = string_format( "#%d: %s%s%s", entnum,
-                                        standard_itype_ids[entnum]->get_id().c_str(),
+                                        std::get<1>(opts[entnum])->get_id().c_str(),
                                         incontainer ? _( " (contained)" ) : "",
                                         flags.empty() ? "" : _( " (flagged)" ) );
                 info = tmp.get_info( true );
@@ -1109,8 +1107,6 @@ void debug_menu::wishitem( Character *you, const tripoint_bub_ms &pos )
     }
     std::vector<std::tuple<std::string, const itype *, const itype_variant_data *>> opts;
     for( const itype *i : item_controller->all() ) {
-        item option( i, calendar::turn_zero );
-
         if( i->variant_kind == itype_variant_kind::gun || i->variant_kind == itype_variant_kind::generic ) {
             for( const itype_variant_data &variant : i->variants ) {
                 const std::string gun_variant_name = variant.alt_name.translated();
@@ -1118,21 +1114,11 @@ void debug_menu::wishitem( Character *you, const tripoint_bub_ms &pos )
                 opts.emplace_back( gun_variant_name, i, ivd );
             }
         }
-        option.clear_itype_variant();
-        opts.emplace_back( option.tname( 1, false ), i, nullptr );
+        opts.emplace_back( i->nname( 1 ), i, nullptr );
+        // opts.emplace_back( "abc", i, nullptr );
+        // opts.emplace_back( i->get_id().c_str(), i, nullptr );
     }
     std::sort( opts.begin(), opts.end(), localized_compare );
-    std::vector<const itype *> itypes;
-    std::vector<const itype_variant_data *> ivariants;
-    std::transform( opts.begin(), opts.end(), std::back_inserter( itypes ),
-    []( const auto & pair ) {
-        return std::get<1>( pair );
-    } );
-
-    std::transform( opts.begin(), opts.end(), std::back_inserter( ivariants ),
-    []( const auto & pair ) {
-        return std::get<2>( pair );
-    } );
 
     int prev_amount = 1;
     int amount = 1;
@@ -1147,13 +1133,13 @@ void debug_menu::wishitem( Character *you, const tripoint_bub_ms &pos )
         { "SCROLL_DESC_UP", translation() },
         { "SCROLL_DESC_DOWN", translation() },
     };
-    wmenu.desired_bounds = { -0.9, -0.9, 0.9, 0.9 };
     wmenu.selected = uistate.wishitem_selected;
-    wish_item_callback cb( itypes, ivariants, snipped_id_str );
+    wish_item_callback cb( opts, snipped_id_str );
     wmenu.callback = &cb;
 
     for( size_t i = 0; i < opts.size(); i++ ) {
         item ity( std::get<1>( opts[i] ), calendar::turn_zero );
+        // std::string i_name = trim_by_length( std::get<0>( opts[i] ), 30 );
         std::string i_name = std::get<0>( opts[i] );
         if( std::get<2>( opts[i] ) != nullptr ) {
             i_name += "<color_dark_gray>(V)</color>";

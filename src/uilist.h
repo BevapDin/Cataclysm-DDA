@@ -444,6 +444,17 @@ class uilist // NOLINT(cata-xy)
 
         uilist_callback *callback;
 
+        /**
+         * Position and size of the window containing the list of entries. This includes the space need
+         * for borders / frames / padding, and the additional space required by the @ref uilist_callback.
+         *
+         * @ref cataimgui::bounds::w is interpreted as this:
+         * - value <= 0 means automatically chosen,
+         * - value > 0 and value <= 1 means relative to the viewport size (e.g. 0.25 means a quarter of the available width / height),
+         * - value > 1 is taken as absolute value.
+         *
+         * @ref cataimgui::bounds::x and @ref cataimgui::bounds::y have the usual meaning as if used by @ref cataimgui::window::get_bounds.
+         */
         std::optional<cataimgui::bounds> desired_bounds;
         bool desc_enabled = false;
 

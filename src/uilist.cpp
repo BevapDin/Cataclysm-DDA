@@ -729,31 +729,52 @@ void uilist::calc_data()
         extra_space_right = callback->desired_extra_space_right( ) + s.FramePadding.x;
     }
 
-    float longest_line_width = std::max( { title_size.x, text_size.x,
-                                           calculated_menu_size.x, desc_size.x } );
-    calculated_bounds.w = extra_space_left + extra_space_right + longest_line_width
-                          + 2 * ( s.WindowPadding.x + s.WindowBorderSize );
     calculated_bounds.h = calculated_menu_size.y + additional_height;
+
+    // const float viewport_height = 0.9 * ImGui::GetMainViewport()->Size.y;
+    const float viewport_width = 0.9 * ImGui::GetMainViewport()->Size.x;
+
+    const float horizontal_padding = 2 * ( s.WindowPadding.x + s.WindowBorderSize );
+    // const float vertical_padding = s.FramePadding.y * 2.0;
+
+    // The width of the menu window consists of the width of
+    // - the list of entries itself (determined by the longest line there),
+    // - extra space used by the callback (left and/or right of the list),
+    // - padding.
+    // Padding and extra space left/right must always be there. Only the width of the list can be varied.
+    // The total width of the menu window is restricted by the viewport dimensions (can't be larger than the screen),
+    // and by desired_bounds (if set by the user).
+    // If the calculated width conflicts with that restriction, the restriction wins.
+    // In that case we adjust *only* calculated_label_width so that the calculated width matches the restriction.
+
+    const float non_negotiable_width = extra_space_left + extra_space_right + horizontal_padding;
+
+    const float longest_line_width = std::max( { title_size.x, text_size.x, calculated_menu_size.x, desc_size.x } );
+
+    calculated_bounds.w = longest_line_width + non_negotiable_width;
+    calculated_bounds.w = std::min( calculated_bounds.w, viewport_width );
+    if( desired_bounds ) {
+        if(desired_bounds->w > 1) {
+            calculated_bounds.w = desired_bounds->w;
+        } else if( desired_bounds->w > 0 && desired_bounds->w <= 1 ) {
+            calculated_bounds.w = desired_bounds->w * viewport_width;
+        }
+    }
+    // If restrictions have not changed calculated_bounds.w, then calculated_menu_size.x will be unchanged as well.
+    calculated_menu_size.x = calculated_bounds.w - non_negotiable_width;
+    // See above for initialization of calculated_menu_size.x - it must always fit that relation.
+    calculated_label_width = calculated_menu_size.x - calculated_hotkey_width - padding - calculated_secondary_width - padding - padding;
+
+    // @TODO respect desired_bounds->h
 
     if( desired_bounds.has_value() ) {
         cataimgui::bounds b = desired_bounds.value();
-        bool h_neg = b.h < 0.0f;
-        bool w_neg = b.w < 0.0f;
-        bool both_neg = h_neg && w_neg;
-        if( !both_neg ) {
-            if( h_neg ) {
-                desired_bounds->h = calculated_bounds.h;
-            }
-            if( w_neg ) {
-                desired_bounds->w = calculated_bounds.w;
-            }
+        if( b.h <= 1.0f ) {
+            desired_bounds->h = calculated_bounds.h;
         }
-    }
-
-    if( longest_line_width > calculated_menu_size.x ) {
-        calculated_menu_size.x = longest_line_width;
-        calculated_label_width = calculated_menu_size.x - calculated_hotkey_width - padding -
-                                 calculated_secondary_width - padding - padding;
+        if( b.w <= 1.0f ) {
+            desired_bounds->w = calculated_bounds.w;
+        }
     }
 }
 
